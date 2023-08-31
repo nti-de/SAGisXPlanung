@@ -1,0 +1,518 @@
+
+#region BP_Bebauung
+
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_1.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 1
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_2.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 2
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_3.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 3
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_4.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 4
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_5.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 5
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_6.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 6
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_7.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 7
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_8.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 8
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_9.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 9
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_10.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 10
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_11.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 11
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_12.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 12
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_13.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 13
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_14.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 14
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_15.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 15
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_16.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 16
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_17.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 17
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_18.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 18
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_19.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 19
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_20.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 20
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_21.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 21
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_22.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 22
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_23.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 23
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_24.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 24
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_25.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 25
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_26.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 26
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_27.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 27
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_28.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 28
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_29.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 29
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_30.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 30
+
+Dorfgebiet.svg:
+  category: BP_Bebauung
+  name: Dorfgebiet
+Gewerbegebiet.svg:
+  category: BP_Bebauung
+  name: Gewerbegebiet
+GewerblicheBauflaeche.svg:
+  category: BP_Bebauung
+  name: Gewerbliche Baufläche
+Kerngebiet.svg:
+  category: BP_Bebauung
+  name: Kerngebiet
+Mischgebiet.svg:
+  category: BP_Bebauung
+  name: Mischgebiet
+Sondergebiet_Camping.svg:
+  category: BP_Bebauung
+  name: Sondergebiet Camping
+Sondergebiet_Ferienhaus.svg:
+  category: BP_Bebauung
+  name: Sondergebiet Ferienhäuser
+Sondergebiet_Woch.svg:
+  category: BP_Bebauung
+  name: Sondergebiet Wochenendhäuser
+
+Mass_der_baulichen_Nutzung_Baumasse_SW_Text.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Baumasse
+Mass_der_baulichen_Nutzung_Baumassenzahl_SW_Text.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Baumassenzahl
+Mass_der_baulichen_Nutzung_Geschossflaechenzahl_SW_Text.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Geschossflächenzahl
+Mass_der_baulichen_Nutzung_Grundflaeche_SW_Text.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Grundfläche
+Mass_der_baulichen_Nutzung_Grundflaechenzahl_SW_Text.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Grundflächenzahl
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Firsthoehe_SW.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Firsthöhe
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Firsthoehe_zwingend_Kreis_SW.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Firsthöhe (zwingend)
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Oberkante_SW.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Oberkante
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Oberkante_zwingend_Kreis_SW_1.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Oberkante (zwingend)
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Traufhoehe_SW.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Traufhöhe
+Hoehe_baulicher_Anlagen_als_Hoechstmass_Traufhoehe_zwingend_Kreis_SW.svg:
+  category: BP_Bebauung
+  name: Bezeichnung Traufhöhe (zwingend)
+
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_1.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 1
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_2.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 2
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_3.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 3
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_4.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 4
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_5.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 5
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_6.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 6
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_7.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 7
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_8.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 8
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_9.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 9
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_SW_10.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 10
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_1.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 1 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_2.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 2 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_3.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 3 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_4.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 4 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_5.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 5 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_6.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 6 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_7.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 7 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_8.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 8 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_9.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 9 (zwingend)
+Mass_der_baulichen_Nutzung_Zahl_der_Vollgeschosse_zwingend_SW_10.svg:
+  category: BP_Bebauung
+  name: Zahl der Vollgeschosse 10 (zwingend)
+
+Geschossflaechenzahl_Kreis_SW_0.1.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.1
+Geschossflaechenzahl_Kreis_SW_0.2.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.2
+Geschossflaechenzahl_Kreis_SW_0.3.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.3
+Geschossflaechenzahl_Kreis_SW_0.4.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.4
+Geschossflaechenzahl_Kreis_SW_0.5.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.5
+Geschossflaechenzahl_Kreis_SW_0.6.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.6
+Geschossflaechenzahl_Kreis_SW_0.7.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.7
+Geschossflaechenzahl_Kreis_SW_0.8.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.8
+Geschossflaechenzahl_Kreis_SW_0.9.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 0.9
+Geschossflaechenzahl_Kreis_SW_1.0.svg:
+  category: BP_Bebauung
+  name: Geschossflächenzahl 1.0
+
+Bauweise_Geschlossene_Bauweise.svg:
+  category: BP_Bebauung
+  name: Geschlossene Bauweise
+Bauweise_Offene_Bauweise.svg:
+  category: BP_Bebauung
+  name: Offene Bauweise
+Bauweise_Nur_Doppelhaeuser_zulaessig.svg:
+  category: BP_Bebauung
+  name: Bauweise, nur Doppelhäuser
+Bauweise_Nur_Einzel-_und_Doppelhaeuser_zulaessig.svg:
+  category: BP_Bebauung
+  name: Bauweise, Einzel- und Doppelhäuser
+Bauweise_Nur_Einzelhaeuser_zulaessig.svg:
+  category: BP_Bebauung
+  name: Bauweise, nur Einzelhäuser
+Bauweise_Nur_Hausgruppen_zulaessig.svg:
+  category: BP_Bebauung
+  name: Bauweise, nur Hausgruppen
+# endregion
+
+# region BP_Gemeinbedarf_Spiel_und_Sportanlagen
+
+Allgemeinbildende_Schule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Allgemeinbildende Schule
+Alteneinrichtung.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Alteneinrichtung
+Anlage_Spielanlage.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Spielanlage
+Anlage_Sportanlage.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Sportanlage
+Berufsbildende_Schule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Berufsbildende Schule
+Bildung_Forschung.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Bildung und Forschung
+Einrichtung_Kultur.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kulturelle Einrichtung
+Einrichtung_Soziales.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Soziale Einrichtung
+Feuerwehr.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Feuerwehr
+Gemeindebehoerde.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Gemeindebehörde
+Gericht.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Gericht
+Hallenbad.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Hallenbad
+Hochschule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Hochschule
+Jugendfreizeitheim.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Jugendfreizeitheim
+Jugendheim.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Jugendheim
+Justizvollzug.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Justizvollzug
+Kindergarten.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kindergarten
+Kirche.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kirche
+Kirchliche_Einrichtung.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kirchliche Einrichtung
+Krankenhaus.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Krankenhaus
+Kreisbehoerde.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kreisbehoerde
+Landesbehoerde.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Landesbehoerde
+Museum.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Museum
+Oeffentliche_Verwaltung.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Öffentliche Verwaltung
+Parkplatz.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Parkplatz
+Polizei.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Polizei
+Post.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Post
+Schule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Schule
+Schutzbauwerk.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Museum
+Theater.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Theater
+
+# endregion
+
+# region BP_Landwirtschaft_Wald_und_Gruenflaechen
+Badeplatz.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Badeplatz
+Dauerkleingärten.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Dauerkleingärten
+Erholungswald_Kreis_SW.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Erholungswald
+Parkanlage.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Parkanlage
+Friedhof.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Friedhof
+Spielplatz.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Spielplatz
+Sportplatz.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Sportplatz
+Zeltplatz.svg:
+  category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Zeltplatz
+# endregion
+
+# region BP_Naturschutz_Landschaftsbild_Naturhaushalt
+Anpflanzen_Baum.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Bäume
+Anpflanzen_Baum_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Bäume (SW)
+Anpflanzen_Sonstiges.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sonstiges
+Anpflanzen_Sonstiges_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sonstiges (SW)
+Anpflanzen_Straeucher.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sträucher
+Anpflanzen_Straeucher_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sträucher (SW)
+Erhaltung_Baum.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Bäume
+Erhaltung_Baum_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Bäume (SW)
+Erhaltung_Sonstiges.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sonstiges
+Erhaltung_Sonstiges_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sonstiges (SW)
+Erhaltung_Straeucher.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sträucher
+Erhaltung_Straeucher_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sträucher (SW)
+Schutzgebiet_Geschuetzter_Landschaftsbestandteil_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Geschützter Landschaftsbestandteil
+Schutzgebiet_Landschaftsschutzgebiet_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Landschaftsschutzgebiet
+Schutzgebiet_Nationalpark_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Nationalpark
+Schutzgebiet_Naturdenkmal_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Naturdenkmal
+Schutzgebiet_Naturpark_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Naturpark
+Schutzgebiet_Naturschutzgebiet_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Naturschutzgebiet
+# endregion
+
+# region BP_Ver_und_Entsorgung
+Abfall.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Abfallentsorgung
+Ablagerung.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Ablagerung
+Abwasser.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Abwasser
+Elektrizitaet.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Elektrizität
+Erneuerbare_Energien.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Erneuerbare Energien
+Fernwaerme.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Fernwärme
+Gas.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Gas
+Kraft_Waerme_Kopplung.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Fläche/Anlage für Kraft-Wärme Kopplung
+Wasser.svg:
+  category: BP_Ver_und_Entsorgung
+  name: Wasser
+# endregion
+
+# region BP_Verkehr
+Fussgaengerbereich.svg:
+  category: BP_Verkehr
+  name: Fußgängerbereich
+Parkierungsflaeche.svg:
+  category: BP_Verkehr
+  name: Fläche zum Parken von Fahrzeugen
+VerkehrsberuhigterBereich.svg:
+  category: BP_Verkehr
+  name: Verkehrsberuhigte Zone
+# endregion
+
+# region BP_Wasser
+Hafen.svg:
+  category: BP_Wasser
+  name: Hafen
+Hochwasserrueckhaltebecken.svg:
+  category: BP_Wasser
+  name: Hochwasser-Rückhaltebecken
+Schutzgebiet_fuer_Grund-_und_Quellwassergewinnung.svg:
+  category: BP_Wasser
+  name: Schutzgebiet Grund- oder Quellwasser
+Schutzgebiet_fuer_Oberflaechenwasser.svg:
+  category: BP_Wasser
+  name: Schutzgebiet Oberflächenwasser
+Ueberschwaemmungsgebiet.svg:
+  category: BP_Wasser
+  name: Überschwemmungsgefährdetes Gebiet
+# endregion
+
+# region SO_SonstigeGebiete
+Einzelanlagen_die_dem_Denkmalschutz_unterliegen_SW.svg:
+  category: SO_SonstigeGebiete
+  name: Denkmalschutz Einzelanlage
+# endregion
+
+# region Sonstiges
+Kennzeichnung_derLage_ohne_Flaechendarstellung.svg:
+  category: Sonstiges
+  name: Lage ohne Flächendarstellung
+Hoehenlage_SW.svg:
+  category: Sonstiges
+  name: Höhenlage bei Festsetzungen
+# endregion

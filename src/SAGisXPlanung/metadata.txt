@@ -1,0 +1,49 @@
+# This file contains metadata for your plugin.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=SAGis XPlanung
+qgisMinimumVersion=3.22
+description=Plugin zur XPlanung-konformen Erfassung und Verwaltung von Bauleitplänen
+version=2.2.0
+author=NTI Deutschland GmbH
+email=qgis-de@nti.biz
+
+about=DE: SAGis XPlanung ermöglicht die digitale Erfassung von Planwerken der Bauleitplanung unter Verwendung des Standards XPlanung.
+
+      EN: The plugin supports creation of datasets for German land use planning standard XPlanung.
+
+tracker=https://github.com/nti-de/SAGisXPlanung/issues
+repository=https://github.com/nti-de/SAGisXPlanung/
+# End of mandatory metadata
+
+# Recommended items:
+
+hasProcessingProvider=yes
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=xplanung, bplan, fnp, bebauungsplan
+
+homepage=https://www.nti.biz/de/
+category=Plugins
+icon=gui/resources/sagis_icon.png
+# experimental flag
+experimental=False
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
+# Since QGIS 3.8, a comma separated list of plugins to be installed
+# (or upgraded) can be specified.
+# Check the documentation for more information.
+# plugin_dependencies=
+
+Category of the plugin: Raster, Vector, Database or Web
+# category=
+
+# If the plugin can run on QGIS Server.
+server=False
+

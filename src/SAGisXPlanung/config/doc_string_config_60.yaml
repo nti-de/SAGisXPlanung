@@ -1,0 +1,4068 @@
+BP_AbgrabungsFlaeche:
+  attributes:
+    abbaugut:
+      doc: Bezeichnung des Abbauguts.
+  doc: 'Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen
+    (§9, Abs. 1, Nr. 17 BauGB)). Hier: Flächen für Abgrabungen und die Gewinnung von
+    Bodenschätzen.'
+BP_AbstandsFlaeche:
+  attributes:
+    tiefe:
+      doc: Absolute Angabe der Tiefe.
+  doc: "Festsetzung eines vom Bauordnungsrecht abweichenden Maßes der Tiefe der Abstandsfläche\
+    \ gemäß § 9 Abs 1. Nr. 2a BauGB\r\n"
+BP_AbstandsMass:
+  attributes:
+    endWinkel:
+      doc: Endwinkel für die Planarstellung des Abstandsmaßes (nur relevant für Maßkreise).
+        Die Winkelwerte beziehen sich auf den Rechtswert (Ost-Richtung)
+    startWinkel:
+      doc: Startwinkel für die Plandarstellung des Abstandsmaßes (nur relevant für
+        Maßkreise). Die Winkelwerte beziehen sich auf den Rechtswert (Ost-Richtung)
+    typ:
+      doc: Typ der Massangabe (Maßpfeil oder Maßkreis).
+    wert:
+      doc: Wertangabe des Abstandsmaßes. Bei Maßpfeilen (typ == 1000) enthält das
+        Attribut die Länge des Maßpfeilen (uom = "m"), bei Maßkreisen den von startWinkel
+        und endWinkel eingeschlossenen Winkel (uom = "grad").
+  doc: "Darstellung von Maßpfeilen oder Maßkreisen in BPlänen, um eine eindeutige\
+    \ Vermassung einzelner Festsetzungen zu erreichen.\r\n"
+BP_AbweichungVonBaugrenze:
+  attributes: {}
+  doc: Linienhafte Festlegung des Umfangs der Abweichung von der Baugrenze (§23 Abs.
+    3 Satz 3 BauNVO).
+BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche:
+  attributes: {}
+  doc: Flächenhafte Festlegung des Umfangs der Abweichung von der überbaubaren Grundstücksfläche
+    (§23 Abs. 3 Satz 3 BauNVO).
+BP_AnpflanzungBindungErhaltung:
+  attributes:
+    anzahl:
+      doc: Anzahl der anzupflanzenden Objekte
+    gegenstand:
+      doc: Gegenstand der Maßnahme.
+    istAusgleich:
+      doc: Gibt an, ob die Fläche oder Maßnahme zum Ausgleich von Eingriffen genutzt
+        wird.
+    kronendurchmesser:
+      doc: Durchmesser der Baumkrone bei zu erhaltenden Bäumen.
+    massnahme:
+      doc: "Art der Maßnahme\r\n"
+    mindesthoehe:
+      doc: Mindesthöhe des Gegenstands der Festsetzung
+    pflanzenArt:
+      doc: Textliche Spezifikation einer Pflanzenart.
+    pflanztiefe:
+      doc: Pflanztiefe
+  doc: "Festsetzung des Anpflanzens von Bäumen, Sträuchern und sonstigen Bepflanzungen;\r\
+    \n"
+BP_AufschuettungsFlaeche:
+  attributes:
+    aufschuettungsmaterial:
+      doc: Bezeichnung des aufgeschütteten Materials
+  doc: 'Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen
+    (§ 9 Abs. 1 Nr. 17 und Abs. 6 BauGB). Hier: Flächen für Aufschüttungen'
+BP_AusgleichsFlaeche:
+  attributes:
+    massnahme:
+      doc: "Auf der Fläche durchzuführende Maßnahmen.\r\n"
+    refLandschaftsplan:
+      doc: Referenz auf den Landschaftsplan.
+    refMassnahmenText:
+      doc: Referenz auf ein Dokument, das die durchzuführenden Maßnahmen beschreibt.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Attribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der Ausgleichsmaßnahme
+  doc: Festsetzung einer Fläche zum Ausgleich im Sinne des § 1a Abs.3 und §9 Abs.
+    1a BauGB.
+BP_AusgleichsMassnahme:
+  attributes:
+    massnahme:
+      doc: Durchzuführende Ausgleichsmaßnahme.
+    refLandschaftsplan:
+      doc: Referenz auf den Landschaftsplan.
+    refMassnahmenText:
+      doc: Referenz auf ein Dokument, das die durchzuführenden Maßnahmen beschreibt.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Attribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der Ausgleichsmaßnahme
+  doc: Festsetzung einer Einzelmaßnahme zum Ausgleich im Sinne des § 1a Abs.3 und
+    §9 Abs. 1a BauGB.
+BP_BauGrenze:
+  attributes:
+    bautiefe:
+      doc: Angabe einer Bautiefe.
+    geschossMax:
+      doc: Gibt bei geschossweiser Festsetzung die Nummer des Geschosses an, bis zu
+        der die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse ab einschl. "geschossMin".
+    geschossMin:
+      doc: Gibt bei geschossweiser Festsetzung die Nummer des Geschosses an, ab den
+        die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse bis einschl. "geschossMax".
+  doc: 'Festsetzung einer Baugrenze (§9 Abs. 1 Nr. 2 BauGB, §22 und 23 BauNVO). Über
+    die Attribute '
+BP_BauLinie:
+  attributes:
+    bautiefe:
+      doc: Angabe einer Bautiefe.
+    geschossMax:
+      doc: Gibt bei geschossweiser Feststzung die Nummer des Geschosses an, bis zu
+        der die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse ab einschl. "geschossMin".
+    geschossMin:
+      doc: Gibt bei geschossweiser Festsetzung die Nummer des Geschosses an, ab den
+        die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse bis einschl. "geschossMax".
+  doc: 'Festsetzung einer Baulinie (§9 Abs. 1 Nr. 2 BauGB, §22 und 23 BauNVO). Über
+    die Attribute '
+BP_BaugebietsTeilFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    FR:
+      doc: Vorgeschriebene Firstrichtung
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFAntGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan\
+        \ bestimmter Anteil der zulässigen \r\nGeschossfläche für gewerbliche Nutzungen\
+        \ zu verwenden ist."
+    GFAntWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan bestimmter\
+        \ Anteil der zulässigen \r\nGeschossfläche für Wohnungen zu verwenden ist."
+    GFGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan\
+        \ bestimmte Größe der Geschossfläche für gewerbliche Nutzungen zu verwenden\
+        \ ist."
+    GFWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan bestimmte\
+        \ Größe der Geschossfläche für Wohnungen zu verwenden ist."
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    VF:
+      doc: Festsetzung der maximal zulässigen Verkaufsfläche in einem Sondergebiet
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    ZWohn:
+      doc: 'Festsetzung nach §4a Abs. (4) Nr. 1 bzw. nach  §6a Abs. (4) Nr. 2 BauNVO:
+        Für besondere Wohngebiete und  urbane Gebiete oder Teile solcher Gebiete kann
+        festgesetzt werden, dass in Gebäuden oberhalb eines im Bebauungsplan bestimmten
+        Geschosses nur Wohnungen zulässig sind.'
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    abweichendeBauweise:
+      doc: Nähere Bezeichnung einer "Abweichenden Bauweise" ("bauweise" == 3000).
+    abweichungBauNVO:
+      doc: Art der zulässigen Abweichung von der BauNVO.
+    abweichungText:
+      doc: Textliche Beschreibung der abweichenden Bauweise
+    allgArtDerBaulNutzung:
+      doc: Spezifikation der allgemeinen Art der baulichen Nutzung.
+    bauweise:
+      doc: Festsetzung der Bauweise  (§9, Abs. 1, Nr. 2 BauGB).
+    bauweiseText:
+      doc: Textuelle Präzisierung oder Ergänzung der durch bauweise spezifizierten
+        Bauweise.
+    bebauungRueckwaertigeGrenze:
+      doc: Festsetzung der Bebauung der rückwärtigen Grundstücksgrenze (§9, Abs. 1,
+        Nr. 2 BauGB).
+    bebauungSeitlicheGrenze:
+      doc: Festsetzung der Bebauung der seitlichen Grundstücksgrenze (§9, Abs. 1,
+        Nr. 2 BauGB).
+    bebauungVordereGrenze:
+      doc: Festsetzung der Bebauung der vorderen Grundstücksgrenze (§9, Abs. 1, Nr.
+        2 BauGB).
+    bebauungsArt:
+      doc: Detaillierte Festsetzung der Bauweise (§9, Abs. 1, Nr. 2 BauGB).
+    besondereArtDerBaulNutzung:
+      doc: Festsetzung der Art der baulichen Nutzung (§9, Abs. 1, Nr. 1 BauGB).
+    dachgestaltung:
+      doc: Parameter zur Einschränkung der zulässigen Dachformen.
+    detaillierteArtDerBaulNutzung:
+      doc: Über eine Codeliste definierte detailliertere Nutzungsart, mit der die
+        allgemeine und/oder besondere Art der baulichen Nutzung weiter detailliert
+        werden können.
+    refGebaeudequerschnitt:
+      doc: "Referenz auf ein Dokument mit vorgeschriebenen Gebäudequerschnitten.\r\
+        \n"
+    sondernutzung:
+      doc: Differenziert Sondernutzungen nach §10 und §11 der BauNVO von 1977 und
+        1990. Das Attribut wird nur benutzt, wenn besondereArtDerBaulNutzung unbelegt
+        ist oder einen der Werte 2000 bzw. 2100 hat.
+    vertikaleDifferenzierung:
+      doc: Gibt an, ob eine vertikale Differenzierung der Gebäude vorgeschrieben ist.
+    wohnnutzungEGStrasse:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 1 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass in Gebäuden \r\nim Erdgeschoss\
+        \ an der Straßenseite eine Wohnnutzung nicht oder nur ausnahmsweise zulässig\
+        \ ist."
+    zugunstenVon:
+      doc: Angabe des Begünstigten einer Ausweisung.
+  doc: 'Teil eines Baugebiets mit einheitlicher Art der baulichen Nutzung. Das Maß
+    der baulichen Nutzung sowie Festsetzungen zur Bauweise oder Grenzbebauung können
+    innerhalb einer '
+BP_Bereich:
+  attributes:
+    gehoertZuPlan:
+      doc: Referenz eines Bereichs eines Bebauungsplans auf das zugehörige Plan-Objekt.
+    verfahren:
+      doc: Verfahrensart der BPlan-Aufstellung oder -Änderung.
+  doc: Diese Klasse modelliert einen Bereich eines Bebauungsplans, z.B. einen räumlichen
+    oder sachlichen Teilbereich.
+BP_BereichOhneEinAusfahrtLinie:
+  attributes:
+    typ:
+      doc: Typ des Bereiches ohne Ein- und Ausfahrt
+  doc: "Bereich ohne Ein- und Ausfahrt (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB).\r\n"
+BP_BesondererNutzungszweckFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    FR:
+      doc: Vorgeschriebene Firstrichtung
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    abweichendeBauweise:
+      doc: Nähere Bezeichnung einer "Abweichenden Bauweise" ("bauweise" == 3000).
+    bauweise:
+      doc: Festsetzung der Bauweise  (§9, Abs. 1, Nr. 2 BauGB).
+    bauweiseText:
+      doc: Textuelle Präzisierung oder Ergänzung der durch bauweise spezifizierten
+        Bauweise.
+    bebauungsArt:
+      doc: Detaillierte Festsetzung der Bauweise (§9, Abs. 1, Nr. 2 BauGB).
+    dachgestaltung:
+      doc: Parameter zur Einschränkung der zulässigen Dachformen.
+    zweckbestimmung:
+      doc: Angabe des besonderen Nutzungszwecks.
+  doc: 'Festsetzung einer Fläche mit besonderem Nutzungszweck, der durch besondere
+    städtebauliche Gründe erfordert wird (§9 Abs. 1 Nr. 9 BauGB.). '
+BP_Dachgestaltung:
+  attributes:
+    DN:
+      doc: Maximal zulässige Dachneigung
+    DNmax:
+      doc: Maximale Dachneigung bei  einer Bereichsangabe. Das Attribut DNmin muss
+        ebenfalls belegt sein.
+    DNmin:
+      doc: Minimale Dachneigung bei  einer Bereichsangabe. Das Attribut DNmax muss
+        ebenfalls belegt sein.
+    DNzwingend:
+      doc: Zwingend vorgeschriebene Dachneigung
+    dachform:
+      doc: Erlaubte Dachform
+    detaillierteDachform:
+      doc: 'Über eine Codeliste definierte detailliertere Dachform. '
+    hoehenangabe:
+      doc: Beschränkung der Gebäudehöhe für die spezifizierte Dachform. Der hier spezifizierte
+        Wert hat Priorität gegenüber einem über das Attribut hoehenangabe von XP_Objekt
+        spezifizierten Wert.
+  doc: Zusammenfassung von Parametern zur Festlegung der zulässigen Dachformen.
+BP_EinfahrtPunkt:
+  attributes:
+    typ:
+      doc: Typ der Einfahrt
+  doc: Punktförmig abgebildete Einfahrt (§9 Abs. 1 Nr. 11 und Abs. 6 BauGB).
+BP_EinfahrtsbereichLinie:
+  attributes:
+    typ:
+      doc: Typ der Einfahrt
+  doc: "Linienhaft modellierter Einfahrtsbereich (§9 Abs. 1 Nr. 11 und Abs. 6 BauGB).\r\
+    \n"
+BP_EingriffsBereich:
+  attributes: {}
+  doc: "Bestimmt einen Bereich, in dem ein Eingriff nach dem Naturschutzrecht zugelassen\
+    \ wird, der durch geeignete Flächen oder Maßnahmen ausgeglichen werden muss.\r\
+    \n"
+BP_EmissionskontingentLaerm:
+  attributes:
+    berechnungsgrundlage:
+      doc: Technische Grundlage für die Berechnung der Schallleistungspegel
+    berechnungsgrundlageDatum:
+      doc: Datum, an dem die zur Berechnung benutzte Vorschrift (Attribut berechnungsgrundlage)
+        herausgegeben oder aktualisiert wurde.
+    ekwertNacht:
+      doc: Emissionskontingent/Schallleistungspegel Nacht in db.
+    ekwertTag:
+      doc: Emissionskontingent/Schallleistungspegel Tag in db
+    erlaeuterung:
+      doc: Nähere Erläuterung der Berechnungsmethode.
+    pegelTyp:
+      doc: Typ der durch ekwertTag und ekwertNacht festgesetzten Schallleistungspegel
+  doc: Lärmemissionskontingent eines Teilgebietes
+BP_EmissionskontingentLaermGebiet:
+  attributes:
+    gebietsbezeichnung:
+      doc: Bezeichnung des Immissionsgebietes
+  doc: Lärmemissionskontingent eines Teilgebietes, das einem bestimmten Immissionsgebiet
+    außerhalb des Geltungsbereiches des BPlans zugeordnet ist (Anhang A4 von DIN 45691).
+BP_FestsetzungNachLandesrecht:
+  attributes:
+    kurzbeschreibung:
+      doc: Kurzbeschreibung der Festsetzung
+  doc: Festsetzung nach § 9 Nr. (4) BauGB.
+BP_FlaecheOhneFestsetzung:
+  attributes: {}
+  doc: Fläche, für die keine geplante Nutzung angegeben werden kann
+BP_Flaechenobjekt:
+  attributes:
+    flaechenschluss:
+      doc: 'Zeigt an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt
+        gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen,
+        sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte
+        der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte
+        überdeckt den Geltungsbereich des Bebauungsplans vollständig. '
+    position:
+      doc: 'Flächenhafter Raumbezug des Objektes (Eine Einzelfläche oder eine Menge
+        von Flächen, die sich nicht überlappen dürfen). '
+  doc: "Basisklasse für alle Objekte eines Bebauungsplans mit flächenhaftem Raumbezug.\
+    \ Die von BP_Flaechenobjekt abgeleiteten Fachobjekte können sowohl als Flächenschlussobjekte\
+    \ als auch als Überlagerungsobjekte auftreten.\r\n"
+BP_Flaechenschlussobjekt:
+  attributes: {}
+  doc: "Basisklasse für alle Objekte eines Bebauungsplans mit flächenhaftem Raumbezug,\
+    \ die auf Ebene 0 immer Flächenschlussobjekte sind.\r\n"
+BP_FoerderungsFlaeche:
+  attributes: {}
+  doc: "Fläche, auf der ganz oder teilweise nur Wohngebäude, die mit Mitteln der sozialen\
+    \ Wohnraumförderung gefördert werden könnten, errichtet werden dürfen (§9, Abs.\
+    \ 1, Nr. 7 BauGB).\r\n"
+BP_FreiFlaeche:
+  attributes:
+    nutzung:
+      doc: Festgesetzte Nutzung der Freifläche.
+  doc: "Umgrenzung der Flächen, die von der Bebauung freizuhalten sind, und ihre Nutzung\
+    \ (§ 9 Abs. 1 Nr. 10 BauGB).\r\n"
+BP_GebaeudeFlaeche:
+  attributes: {}
+  doc: "Grundrissfläche eines existierenden Gebäudes\r\n"
+BP_GebaeudeStellung:
+  attributes:
+    typ:
+      doc: Angabe, auf welche Art und Weise die Stellung des Gebäudes spezifiziert
+        wird.
+  doc: Gestaltungs-Festsetzung der Firstrichtung, oder Dach-Ausrichtung, beruhend
+    auf Landesrecht, gemäß §9 Abs. 4 BauGB.
+BP_GemeinbedarfsFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    FR:
+      doc: Vorgeschriebene Firstrichtung
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    abweichendeBauweise:
+      doc: Nähere Bezeichnung einer "Abweichenden Bauweise" ("bauweise" == 3000).
+    bauweise:
+      doc: Festsetzung der Bauweise  (§9, Abs. 1, Nr. 2 BauGB).
+    bauweiseText:
+      doc: Textuelle Präzisierung oder Ergänzung der durch bauweise spezifizierten
+        Bauweise.
+    bebauungsArt:
+      doc: Detaillierte Festsetzung der Bauweise (§9, Abs. 1, Nr. 2 BauGB).
+    dachgestaltung:
+      doc: Parameter zur Einschränkung der zulässigen Dachformen.
+    traeger:
+      doc: 'Trägerschaft einer Gemeinbedarfs-Fläche '
+    zugunstenVon:
+      doc: Angabe des Begünstigten der Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der festgesetzten Fläche
+  doc: 'Einrichtungen und Anlagen zur Versorgung mit Gütern und Dienstleistungen des
+    öffentlichen und privaten Bereichs, hier Flächen für den Gemeindebedarf (§9, Abs.
+    1, Nr.5 und Abs. 6 BauGB). '
+BP_GemeinschaftsanlagenFlaeche:
+  attributes:
+    Zmax:
+      doc: Maximale Anzahl von Garagen-Geschossen
+    eigentuemer:
+      doc: Relation auf die Baugebietsfläche, zu der die Gemeinschaftsanlagen-Fläche
+        gehört.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Fläche
+  doc: Fläche für Gemeinschaftsanlagen für bestimmte räumliche Bereiche wie Kinderspielplätze,
+    Freizeiteinrichtungen, Stellplätze und Garagen (§ 9 Abs. 1 Nr. 22 BauGB)
+BP_GemeinschaftsanlagenZuordnung:
+  attributes:
+    zuordnung:
+      doc: Relation auf die zugeordneten Gemeinschaftsanlagen-Flächen, die außerhalb
+        des Baugebiets liegen.
+  doc: "Zuordnung von Gemeinschaftsanlagen zu Grundstücken.\r\n"
+BP_GenerischesObjekt:
+  attributes:
+    zweckbestimmung:
+      doc: Über eine CodeList definierte Zweckbestimmung des Objektes.
+  doc: Klasse zur Modellierung aller Inhalte des Bebauungsplans,die durch keine andere
+    spezifische XPlanung Klasse repräsentiert werden können.
+BP_Geometrieobjekt:
+  attributes:
+    flaechenschluss:
+      doc: "Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt\
+        \ oder Überlagerungsobjekt gebildet werden soll.\r\nFlächenschlussobjekte\
+        \ dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren,\
+        \ wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen.\
+        \ Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich\
+        \ des Bebauungsplans vollständig. "
+    flussrichtung:
+      doc: "Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften\
+        \ Raumbezug hat. Ist es mit dem Wert true belegt, wird damit ausgedrückt,\
+        \ dass der Linie eine Flussrichtung  in Digitalisierungsrichtung, bei Attributwert\
+        \ \"false\" gegen die Digitalisierungsrichtung zugeordnet ist. In diesem Fall\
+        \ darf bei Im- und Export die Digitalisierungsreihenfolge der Stützpunkte\
+        \ nicht geändert werden. Wie eine definierte Flussrichtung  zu interpretieren\
+        \ oder bei einer Plandarstellung zu visualisieren ist, bleibt der Implementierung\
+        \ überlassen.\r\nIst der Attributwert false oder das Attribut nicht belegt,\
+        \ ist die Digitalisierungsreihenfolge der Stützpunkte irrelevant."
+    nordwinkel:
+      doc: Orientierung des Objektes bei punktförmigem Raumbezug als Winkel gegen
+        die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach
+        Süd und West).
+    position:
+      doc: Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte
+        Geometrie ist nicht zugelassen.
+  doc: Basisklasse für alle Objekte eines Bebauungsplans mit variablem Raumbezug.
+    Das bedeutet, die abgeleiteten Objekte können kontextabhängig mit Punkt-, Linien-
+    oder Flächengeometrie gebildet. Die Aggregation von Punkten, Linien oder Flächen
+    ist zulässig, nicht aber die Mischung von Punkt-, Linien- und Flächengeometrie.
+BP_GruenFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    nutzungsform:
+      doc: Nutzungsform der festgesetzten Fläche.
+    zugunstenVon:
+      doc: Angabe des Begünstigten einer Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Grünfläche
+  doc: 'Festsetzungen von öffentlichen und privaten Grünflächen (§ 9, Abs. 1, Nr.
+    15 BauGB). '
+BP_HoehenMass:
+  attributes: {}
+  doc: 'Festsetzungen nach §9 Abs. 1 Nr. 1 BauGB für übereinanderliegende Geschosse
+    und Ebenen und sonstige Teile baulicher Anlagen (§9 Abs.3 BauGB), sowie Hinweise
+    auf Geländehöhen. Die Höhenwerte werden über das Attribut '
+BP_Immissionsschutz:
+  attributes:
+    detaillierteTechnVorkehrung:
+      doc: Detaillierte Klassifizierung der auf der Fläche zu treffenden baulichen
+        oder sonstigen technischen Vorkehrungen
+    laermpegelbereich:
+      doc: Festlegung der erforderlichen Luftschalldämmung von Außenbauteilen nach
+        DIN-4109:2016-1.
+    massgeblAussenLaermpegelNacht:
+      doc: 'Maßgeblicher Außenlärmpegel (in db) nach DIN 4109-1: 2018-01 für die Nacht.'
+    massgeblAussenLaermpegelTag:
+      doc: 'Maßgeblicher Außenlärmpegel (in db) nach DIN 4109-1: 2018-01 für den Tag.'
+    nutzung:
+      doc: Festgesetzte Nutzung einer Schutzfläche
+    sonstLaermpegelbereich:
+      doc: Spezifikation eines nicht in der DIN-4109:2016-1 spezifizierten Lärmpegelbereiches
+        über eine Codeliste. Dies Attribut darf nur verwendet werden, wenn laermpegelbereich
+        den Wert 1700 hat oder unbelegt ist.
+    technVorkehrung:
+      doc: Klassifizierung der auf der Fläche zu treffenden baulichen oder sonstigen
+        technischen Vorkehrungen
+    typ:
+      doc: Differenzierung der Immissionsschutz-Fläche
+  doc: "Festsetzung einer von der Bebauung freizuhaltenden Schutzfläche und ihre Nutzung,\
+    \ sowie einer Fläche für besondere Anlagen und Vorkehrungen zum Schutz vor schädlichen\
+    \ Umwelteinwirkungen und sonstigen Gefahren im Sinne des Bundes-Immissionsschutzgesetzes\
+    \ sowie die zum Schutz vor solchen Einwirkungen oder zur Vermeidung oder Minderung\
+    \ solcher Einwirkungen zu treffenden baulichen und sonstigen technischen Vorkehrungen\
+    \ (§9, Abs. 1, Nr. 24 BauGB).\r\n"
+BP_KennzeichnungsFlaeche:
+  attributes:
+    istVerdachtsflaeche:
+      doc: Legt fest, ob eine Altlast-Verdachtsfläche vorliegt
+    nummer:
+      doc: Nummer im Altlastkataster
+    zweckbestimmung:
+      doc: Zweckbestimmung der Kennzeichnungs-Fläche.
+  doc: Flächen für Kennzeichnungen gemäß §9 Abs. 5 BauGB.
+BP_KleintierhaltungFlaeche:
+  attributes: {}
+  doc: Fläche für die Errichtung von Anlagen für die Kleintierhaltung wie Ausstellungs-
+    und Zuchtanlagen, Zwinger, Koppeln und dergleichen (§ 9 Abs. 1 Nr. 19 BauGB).
+BP_KomplexeSondernutzung:
+  attributes:
+    allgemein:
+      doc: Allgemeine Festlegung der Sondernutzung
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Sondernutzung, die die allgemeine Sondernutzung
+        näher detailliert.
+    nutzungText:
+      doc: Textliche Spezifikation der Sondernutzung.
+  doc: Spezifikation einer Sondernutzung
+BP_KomplexeZweckbestGemeinbedarf:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung der Fläche
+BP_KomplexeZweckbestGemeinschaftsanlagen:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: 'Über eine Codelist definierte detailliertere Festlegung der Zweckbestimmung. '
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Gemeinschaftsanlage
+BP_KomplexeZweckbestGruen:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Grünfläche
+BP_KomplexeZweckbestLandwirtschaft:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Fläche für die Landwirtschaft.
+BP_KomplexeZweckbestNebenanlagen:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: 'Über eine Codeliste definierte detailliertere Festlegung der Zweckbestimmung. '
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Nebenanlage.
+BP_KomplexeZweckbestSpielSportanlage:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Spiel- und Sportanlage.
+BP_KomplexeZweckbestVerEntsorgung:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Fläche für Ver- oder Entsorgung
+BP_KomplexeZweckbestWald:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Waldfläche.
+BP_LandwirtschaftsFlaeche:
+  attributes:
+    zweckbestimmung:
+      doc: Zweckbestimmungen der Ausweisung.
+  doc: Festsetzungen für die Landwirtschaft  (§ 9, Abs. 1, Nr. 18a BauGB)
+BP_Linienobjekt:
+  attributes:
+    position:
+      doc: Linienförmiger Raumbezug (Einzelne zusammenhängende Kurve, die aus Linienstücken
+        und Kreisbögen aufgebaut ist, oder eine Menge derartiger Kurven),
+  doc: Basisklasse für alle Objekte eines Bebauungsplans mit linienförmigem Raumbezug
+    (Eine einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen zusammengesetzt
+    sein kann, oder eine Menge derartiger Kurven).
+BP_NebenanlagenAusschlussFlaeche:
+  attributes:
+    abweichungText:
+      doc: Textliche Beschreibung der Einschränkung oder des Ausschlusses.
+    typ:
+      doc: Art des Ausschlusses.
+  doc: Festsetzung einer Fläche für die Einschränkung oder den Ausschluss von Nebenanlagen
+    nach §14 Absatz 1 Satz 3 BauNVO.
+BP_NebenanlagenFlaeche:
+  attributes:
+    Zmax:
+      doc: Maximale Anzahl der Garagengeschosse.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Nebenanlagen-Fläche
+  doc: Fläche für Nebenanlagen, die auf Grund anderer Vorschriften für die Nutzung
+    von Grundstücken erforderlich sind, wie Spiel-, Freizeit- und Erholungsflächen
+    sowie die Fläche für Stellplätze und Garagen mit ihren Einfahrten (§9 Abs. 1 Nr.
+    4 BauGB)
+BP_NichtUeberbaubareGrundstuecksflaeche:
+  attributes:
+    nutzung:
+      doc: Zulässige Nutzung der Fläche
+  doc: Festlegung der nicht-überbaubaren Grundstücksfläche
+BP_NutzungsartenGrenze:
+  attributes:
+    detailTyp:
+      doc: Detaillierter Typ der Abgrenzung, wenn das Attribut typ den Wert 9999 (Sonstige
+        Abgrenzung) hat.
+    typ:
+      doc: Typ der Abgrenzung. Wenn das Attribut nicht belegt ist, ist die Abgrenzung
+        eine Nutzungsarten-Grenze (Schlüsselnummer 1000).
+  doc: Abgrenzung unterschiedlicher Nutzung, z.B. von Baugebieten wenn diese nach
+    PlanzVO in der gleichen Farbe dargestellt werden, oder Abgrenzung unterschiedlicher
+    Nutzungsmaße innerhalb eines Baugebiets ("Knödellinie", § 1 Abs. 4, § 16 Abs.
+    5 BauNVO).
+BP_Objekt:
+  attributes:
+    laermkontingent:
+      doc: Festsetzung eines Lärmemissionskontingent nach DIN 45691
+    laermkontingentGebiet:
+      doc: Festsetzung von Lärmemissionskontingenten nach DIN 45691, die einzelnen
+        Immissionsgebieten zugeordnet sind
+    richtungssektorGrenze:
+      doc: Zuordnung einer Richtungssektor-Grenze für die Festlegung zusätzlicher
+        Lärmkontingente
+    wirdAusgeglichenDurchABE:
+      doc: Referenz auf eine Anpflanzungs-, Bindungs- oder Erhaltungsmaßnahme, durch
+        die ein Eingriff ausgeglichen wird.
+    wirdAusgeglichenDurchFlaeche:
+      doc: Referenz auf Ausgleichsfläche, die den Eingriff ausgleicht.
+    wirdAusgeglichenDurchMassnahme:
+      doc: Verweis auf eine  Ausgleichsmaßnahme, die einen vorgenommenen Eingriff
+        ausgleicht.
+    wirdAusgeglichenDurchSPEFlaeche:
+      doc: Referenz auf eine Schutz-, Pflege- oder Entwicklungs-Fläche, die den Eingriff
+        ausgleicht.
+    wirdAusgeglichenDurchSPEMassnahme:
+      doc: Referenz auf eine Schutz-, Pflege- oder Entwicklungsmaßnahme, durch die
+        ein Eingriff ausgeglichen wird.
+    zusatzkontingent:
+      doc: Festsetzung von Zusatzkontingenten für die Lärmemission, die einzelnen
+        Richtungssektoren zugeordnet sind. Die einzelnen Richtungssektoren werden
+        parametrisch definiert.
+    zusatzkontingentFlaeche:
+      doc: Festsetzung von Zusatzkontingenten für die Lärmemission, die einzelnen
+        Richtungssektoren zugeordnet sind. Die einzelnen Richtungssektoren werden
+        durch explizite Flächen definiert.
+  doc: Basisklasse für alle raumbezogenen Festsetzungen,  Hinweise, Vermerke und Kennzeichnungen
+    eines Bebauungsplans.
+BP_PersGruppenBestimmteFlaeche:
+  attributes: {}
+  doc: "Fläche, auf denen ganz oder teilweise nur Wohngebäude errichtet werden dürfen,\
+    \ die für Personengruppen mit besonderem Wohnbedarf bestimmt sind (§9, Abs. 1,\
+    \ Nr. 8 BauGB)\r\n"
+BP_Plan:
+  attributes:
+    aenderungenBisDatum:
+      doc: Datum der berücksichtigten Plan-Änderungen.
+    aufstellungsbeschlussDatum:
+      doc: Datum des Aufstellungsbeschlusses.
+    ausfertigungsDatum:
+      doc: Datum der Ausfertigung.
+    auslegungsEndDatum:
+      doc: End-Datum des Auslegungs-Zeitraums. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    auslegungsStartDatum:
+      doc: Start-Datum des Auslegungs-Zeitraums. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    bereich:
+      doc: Referenz eines Bebauungsplans auf einen Bereich
+    durchfuehrungsVertrag:
+      doc: Gibt an, ob für das Planungsgebiet einen Durchführungsvertrag (Kombination
+        aus Städtebaulichen Vertrag und Erschließungsvertrag) gibt.
+    erschliessungsVertrag:
+      doc: Gibt an, ob es für den Plan einen Erschließungsvertrag gibt.
+    gemeinde:
+      doc: Die für den Plan zuständige Gemeinde.
+    gruenordnungsplan:
+      doc: Gibt an, ob für den Plan ein zugehöriger Grünordnungsplan existiert.
+    inkrafttretensDatum:
+      doc: Datum des Inkrafttretens.
+    planArt:
+      doc: Typ des vorliegenden Bebauungsplans.
+    planaufstellendeGemeinde:
+      doc: Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese
+        nicht unter dem Attribut gemeinde aufgeführt ist. Dies kann z.B. nach Gemeindefusionen
+        der Fall sein.
+    plangeber:
+      doc: Für den Plan verantwortliche Stelle.
+    rechtsstand:
+      doc: Aktueller Rechtsstand des Plans.
+    rechtsverordnungsDatum:
+      doc: Datum der Rechtsverordnung.
+    satzungsbeschlussDatum:
+      doc: Datum des Satzungsbeschlusses.
+    sonstPlanArt:
+      doc: Über eine Codeliste spezifizierte  "Sonstige Planart", wenn das Attribut
+        "planArt" den Wert 9999 (Sonstiges) hat.
+    staedtebaulicherVertrag:
+      doc: Gibt an, ob es zum Plan einen städtebaulichen Vertrag gibt.
+    status:
+      doc: Über eine Codeliste definierter aktueller Status des Plans.
+    traegerbeteiligungsEndDatum:
+      doc: End-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können
+        mehrere Datumsangaben spezifiziert werden.
+    traegerbeteiligungsStartDatum:
+      doc: Start-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können
+        mehrere Datumsangaben spezifiziert werden.
+    veraenderungssperre:
+      doc: Spezifiziert die Daten einer Veränderungssperre, die für den gesamten Geltungsbereich
+        des Plans gilt.
+    versionBauGB:
+      doc: Spezifikation der dem Gesamtplan zugrunde liegenden Version des BauGB
+    versionBauNVO:
+      doc: Spezifikation der dem Gesamtplan zugrunde liegenden Version der BauNVO
+    versionSonstRechtsgrundlage:
+      doc: Spezifikation sonstiger Rechtsgrundlagen des gesamten Plans
+  doc: Die Klasse modelliert einen Bebauungsplan
+BP_Punktobjekt:
+  attributes:
+    nordwinkel:
+      doc: Orientierung des Punktobjektes als Winkel gegen die Nordrichtung. Zählweise
+        im geographischen Sinn (von Nord über Ost nach Süd und West).
+    position:
+      doc: Punktförmiger Raumbezug (Einzelpunkt oder Punktmenge).
+  doc: Basisklasse für alle Objekte eines Bebauungsplans mit punktförmigem Raumbezug
+    (Einzelpunkt oder Punktmenge).
+BP_RegelungVergnuegungsstaetten:
+  attributes:
+    zulaessigkeit:
+      doc: "Zulässigkeit von Vergnügungsstätten.\r\n"
+  doc: Festsetzung nach §9 Abs. 2b BauGB (Zulässigkeit von Vergnügungsstätten).
+BP_Richtungssektor:
+  attributes:
+    winkelAnfang:
+      doc: Startwinkel des Emissionssektors
+    winkelEnde:
+      doc: Endwinkel des Emissionssektors
+    zkWertNacht:
+      doc: Zusatzkontingent Nacht
+    zkWertTag:
+      doc: Zusatzkontingent Tag
+  doc: Spezifikation von Zusatzkontingenten Tag/Nacht der Lärmemission für einen Richtungssektor
+BP_RichtungssektorGrenze:
+  attributes:
+    winkel:
+      doc: Richtungswinkel der Sektorengrenze
+  doc: Linienhafte Repräsentation einer Richtungssektor-Grenze
+BP_SchutzPflegeEntwicklungsFlaeche:
+  attributes:
+    istAusgleich:
+      doc: Gibt an, ob die Fläche zum Ausgleich von Eingriffen genutzt wird.
+    massnahme:
+      doc: Durchzuführende Maßnahme.
+    refLandschaftsplan:
+      doc: Referenz auf den Landschaftsplan
+    refMassnahmenText:
+      doc: Referenz auf ein Dokument zur Beschreibung der durchzuführenden Maßnahmen.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Attribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der auf der Fläche durchzuführenden Maßnahmen.
+  doc: Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung
+    von Natur und Landschaft (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB)
+BP_SchutzPflegeEntwicklungsMassnahme:
+  attributes:
+    istAusgleich:
+      doc: Gibt an, ob die Maßnahme zum Ausgleich von Eingriffen genutzt wird.
+    massnahme:
+      doc: Durchzuführende Maßnahme.
+    refLandschaftsplan:
+      doc: Referenz auf den Landschaftsplan.
+    refMassnahmenText:
+      doc: Referenz auf ein Dokument, das die durchzuführenden Maßnahmen beschreibt.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Aztribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der Maßnahme
+  doc: Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
+    (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB).
+BP_SpezielleBauweise:
+  attributes:
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken.
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    sonstTyp:
+      doc: Über eine Codeliste definierter Typ der speziellen Bauweise, wenn typ den
+        Wert 9999 (Sonstiges) hat.
+    typ:
+      doc: Typ der speziellen Bauweise.
+    wegerecht:
+      doc: Relation auf Angaben zu Wegerechten.
+  doc: Festsetzung der speziellen Bauweise / baulichen Besonderheit eines Gebäudes
+    oder Bauwerks.
+BP_SpielSportanlagenFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    zugunstenVon:
+      doc: Angabe des Begünstigten einer Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der festgesetzten Fläche.
+  doc: 'Einrichtungen und Anlagen zur Versorgung mit Gütern und Dienstleistungen des
+    öffentlichen und privaten Bereichs, hier Flächen für Sport- und Spielanlagen (§9,
+    Abs. 1, Nr. 5 und Abs. 6 BauGB). '
+BP_StrassenbegrenzungsLinie:
+  attributes:
+    bautiefe:
+      doc: Minimaler Abstand der Bebauung von der Straßenbegrenzungslinie.
+  doc: "Straßenbegrenzungslinie (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB) .\r\n"
+BP_Strassenkoerper:
+  attributes:
+    typ:
+      doc: Notwendige Maßnahme zur Herstellung des Straßenkörpers.
+  doc: "Flächen für Aufschüttungen, Abgrabungen und Stützmauern, soweit sie zur Herstellung\
+    \ des Straßenkörpers erforderlich sind (§9, Abs. 1, Nr. 26 BauGB).\r\n"
+BP_TechnischeMassnahmenFlaeche:
+  attributes:
+    technischeMassnahme:
+      doc: Beschreibung der Maßnahme
+    zweckbestimmung:
+      doc: Klassifikation der durchzuführenden Maßnahmen nach §9, Abs. 1, Nr. 23 BauGB.
+  doc: Fläche für technische oder bauliche Maßnahmen nach § 9, Abs. 1, Nr. 23 BauGB.
+BP_TextAbschnittFlaeche:
+  attributes: {}
+  doc: Bereich, in dem bestimmte Textliche Festsetzungen gültig sind, die über die
+    Relation "
+BP_UeberbaubareGrundstuecksFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    FR:
+      doc: Vorgeschriebene Firstrichtung
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFAntGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan\
+        \ bestimmter Anteil der zulässigen \r\nGeschossfläche für gewerbliche Nutzungen\
+        \ zu verwenden ist."
+    GFAntWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan bestimmter\
+        \ Anteil der zulässigen \r\nGeschossfläche für Wohnungen zu verwenden ist."
+    GFGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan\
+        \ bestimmte Größe der Geschossfläche für gewerbliche Nutzungen zu verwenden\
+        \ ist."
+    GFWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan bestimmte\
+        \ Größe der Geschossfläche für Wohnungen zu verwenden ist."
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    VF:
+      doc: Festsetzung der maximal zulässigen Verkaufsfläche in einem Sondergebiet
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    ZWohn:
+      doc: 'Festsetzung nach §4a Abs. (4) Nr. 1 bzw. nach  §6a Abs. (4) Nr. 2 BauNVO:
+        Für besondere Wohngebiete und  urbane Gebiete oder Teile solcher Gebiete kann
+        festgesetzt werden, dass in Gebäuden oberhalb eines im Bebauungsplan bestimmten
+        Geschosses nur Wohnungen zulässig sind.'
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    abweichendeBauweise:
+      doc: "Nähere Bezeichnung einer \"Abweichenden Bauweise\" (\"bauweise == 3000\"\
+        ).\r\nDieser Wert hat Priorität gegenüber einer im umschließenden Baugebiet\
+        \ (BP_BaugebietsTeilFlaeche) getroffenen Festsetzung"
+    baugrenze:
+      doc: Referenz auf eine Baugrenze, die auf der Randkurve der Fläche verläuft.
+    baulinie:
+      doc: Referenz auf eine Baulinie, die auf der Randkurve der Fläche verläuft.
+    bauweise:
+      doc: "Festsetzung der Bauweise  (§9, Abs. 1, Nr. 2 BauGB).\r\nDieser Wert hat\
+        \ Priorität gegenüber einer im umschließenden Baugebiet (BP_BaugebietsTeilFlaeche)\
+        \ getroffenen Festsetzung"
+    bauweiseText:
+      doc: Textuelle Präzisierung oder Ergänzung der durch bauweise spezifizierten
+        Bauweise.
+    bebauungRueckwaertigeGrenze:
+      doc: "Festsetzung der Bebauung der rückwärtigen Grundstücksgrenze (§9, Abs.\
+        \ 1, Nr. 2 BauGB).\r\nDieser Wert hat Priorität gegenüber einer im umschließenden\
+        \ Baugebiet (BP_BaugebietsTeilFlaeche) getroffenen Festsetzung."
+    bebauungSeitlicheGrenze:
+      doc: "Festsetzung der Bebauung der seitlichen Grundstücksgrenze (§9, Abs. 1,\
+        \ Nr. 2 BauGB).\r\nDieser Wert hat Priorität gegenüber einer im umschließenden\
+        \ Baugebiet (BP_BaugebietsTeilFlaeche) getroffenen Festsetzung."
+    bebauungVordereGrenze:
+      doc: "Festsetzung der Bebauung der vorderen Grundstücksgrenze (§9, Abs. 1, Nr.\
+        \ 2 BauGB).\r\nDieser Wert hat Priorität gegenüber einer im umschließenden\
+        \ Baugebiet (BP_BaugebietsTeilFlaeche) getroffenen Festsetzung."
+    bebauungsArt:
+      doc: "Detaillierte Festsetzung der Bauweise (§9, Abs. 1, Nr. 2 BauGB).\r\nDieser\
+        \ Wert hat Priorität gegenüber einer im umschließenden Baugebiet (BP_BaugebietsTeilFlaeche)\
+        \ getroffenen Festsetzung."
+    dachgestaltung:
+      doc: Parameter zur Einschränkung der zulässigen Dachformen.
+    geschossMax:
+      doc: Gibt bei geschossweiser Festsetzung die Nummer des Geschosses an, bis zu
+        der die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse ab einschl. "geschossMin".
+    geschossMin:
+      doc: Gibt bei geschossweiser Festsetzung die Nummer des Geschosses an, ab den
+        die Festsetzung gilt. Wenn das Attribut nicht belegt ist, gilt die Festsetzung
+        für alle Geschosse bis einschl. "geschossMax".
+    refGebaeudequerschnitt:
+      doc: "Referenz auf ein Dokument mit vorgeschriebenen Gebäudequerschnitten.\r\
+        \nDieser Wert hat Priorität gegenüber einer im umschließenden Baugebiet (BP_BaugebietsTeilFlaeche)\
+        \ getroffenen Festsetzung."
+    vertikaleDifferenzierung:
+      doc: "Gibt an, ob eine vertikale Differenzierung der Gebäude vorgeschrieben\
+        \ ist.\r\nDieser Wert hat Priorität gegenüber einer im umschließenden Baugebiet\
+        \ (BP_BaugebietsTeilFlaeche) getroffenen Festsetzung."
+    wohnnutzungEGStrasse:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 1 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass in Gebäuden \r\nim Erdgeschoss\
+        \ an der Straßenseite eine Wohnnutzung nicht oder nur ausnahmsweise zulässig\
+        \ ist."
+  doc: 'Festsetzung der überbaubaren Grundstücksfläche (§9, Abs. 1, Nr. 2 BauGB).
+    Über die Attribute '
+BP_Ueberlagerungsobjekt:
+  attributes: {}
+  doc: Basisklasse für alle Objekte eines Bebauungsplans mit flächenhaftem Raumbezug,
+    die immer Überlagerungsobjekte sind.
+BP_UnverbindlicheVormerkung:
+  attributes:
+    vormerkung:
+      doc: Text der Vormerkung.
+  doc: "Unverbindliche Vormerkung späterer Planungsabsichten.\r\n"
+BP_VerEntsorgung:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    zugunstenVon:
+      doc: Angabe des Begünstigten der Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Festsetzung..
+  doc: 'Flächen und Leitungen für Versorgungsanlagen, für die Abfallentsorgung und
+    Abwasserbeseitigung sowie für Ablagerungen (§9 Abs. 1, Nr. 12, 14 und Abs. 6 BauGB). '
+BP_Veraenderungssperre:
+  attributes:
+    daten:
+      doc: Daten der Veränderungssperre
+  doc: 'Ausweisung einer Veränderungssperre, die nicht den gesamten Geltungsbereich
+    des Plans umfasst. '
+BP_VeraenderungssperreDaten:
+  attributes:
+    beschlussDatum:
+      doc: 'Beschlussdatum der Veränderungssperre '
+    endDatum:
+      doc: Enddatum der Veränderungssperre
+    refBeschluss:
+      doc: Referenz auf das Dokument des Veränderungssperre-Beschlusses.
+    startDatum:
+      doc: Datum, ab dem die Veränderungssperre gilt
+    verlaengerung:
+      doc: Gibt an, ob die Veränderungssperre bereits ein- oder zweimal verlängert
+        wurde
+  doc: Spezifikation der Daten für eine Veränderungssperre
+BP_WaldFlaeche:
+  attributes:
+    betreten:
+      doc: Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die
+        in dem Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz.
+    eigentumsart:
+      doc: Festlegung der Eigentumsart des Waldes
+    zweckbestimmung:
+      doc: Funktion der Waldfläche
+  doc: Festsetzung von Waldflächen  (§ 9, Abs. 1, Nr. 18b BauGB).
+BP_Wegerecht:
+  attributes:
+    breite:
+      doc: Breite des Wegerechts bei linienförmiger Ausweisung der Geometrie.
+    istSchmal:
+      doc: Gibt an, ob es sich um eine "schmale Fläche" handelt  gem. Planzeichen
+        15.5 der PlanZV handelt.
+    thema:
+      doc: Beschreibung des Rechtes.
+    typ:
+      doc: Typ des Wegerechts
+    zugunstenVon:
+      doc: Inhaber der Rechte.
+  doc: Festsetzung von Flächen, die mit Geh-, Fahr-, und Leitungsrechten zugunsten
+    der Allgemeinheit, eines Erschließungsträgers, oder eines beschränkten Personenkreises
+    belastet sind  (§ 9 Abs. 1 Nr. 21 und Abs. 6 BauGB).
+BP_WohngebaeudeFlaeche:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    FR:
+      doc: Vorgeschriebene Firstrichtung
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFAntGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan\
+        \ bestimmter Anteil der zulässigen \r\nGeschossfläche für gewerbliche Nutzungen\
+        \ zu verwenden ist."
+    GFAntWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden ein im Bebauungsplan bestimmter\
+        \ Anteil der zulässigen \r\nGeschossfläche für Wohnungen zu verwenden ist."
+    GFGewerbe:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 4 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan\
+        \ bestimmte Größe der Geschossfläche für gewerbliche Nutzungen zu verwenden\
+        \ ist."
+    GFWohnen:
+      doc: "Festsetzung nach §4a Abs. (4) Nr. 2 bzw. §6a Abs. (4) Nr. 3 BauNVO: Für\
+        \ besondere Wohngebiete und urbane Gebiete oder Teile solcher Gebiete kann\
+        \ festgesetzt werden, dass \r\nin Gebäuden eine im Bebauungsplan bestimmte\
+        \ Größe der Geschossfläche für Wohnungen zu verwenden ist."
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    VF:
+      doc: Festsetzung der maximal zulässigen Verkaufsfläche in einem Sondergebiet
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    ZWohn:
+      doc: 'Festsetzung nach §4a Abs. (4) Nr. 1 bzw. nach  §6a Abs. (4) Nr. 2 BauNVO:
+        Für besondere Wohngebiete und  urbane Gebiete oder Teile solcher Gebiete kann
+        festgesetzt werden, dass in Gebäuden oberhalb eines im Bebauungsplan bestimmten
+        Geschosses nur Wohnungen zulässig sind.'
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    abweichendeBauweise:
+      doc: Nähere Bezeichnung einer "Abweichenden Bauweise" ("bauweise" == 3000).
+    abweichungBauNVO:
+      doc: Art der zulässigen Abweichung von der BauNVO.
+    abweichungText:
+      doc: Texliche Beschreibung der abweichenden Bauweise.
+    bauweise:
+      doc: Festsetzung der Bauweise  ( §9 Absatz 2d  BauGB).
+    bauweiseText:
+      doc: Textuelle Präzisierung oder Ergänzung der durch bauweise spezifizierten
+        Bauweise.
+    bebauungRueckwaertigeGrenze:
+      doc: Festsetzung der Bebauung der rückwärtigen Grundstücksgrenze (§9, Abs. 1,
+        Nr. 2d BauGB).
+    bebauungSeitlicheGrenze:
+      doc: Festsetzung der Bebauung der seitlichen Grundstücksgrenze (§9, Abs. 1,
+        Nr. 2d BauGB).
+    bebauungVordereGrenze:
+      doc: Festsetzung der Bebauung der vorderen Grundstücksgrenze (§9, Abs. 1, Nr.
+        2d BauGB).
+    bebauungsArt:
+      doc: Detaillierte Festsetzung der Bauweise (§9, Abs. 1, Nr. 2d BauGB).
+    dachgestaltung:
+      doc: Parameter zur Einschränkung der zulässigen Dachformen.
+    refGebaeudequerschnitt:
+      doc: "Referenz auf ein Dokument mit vorgeschriebenen Gebäudequerschnitten.\r\
+        \n"
+    typ:
+      doc: Festlegung der zu errichtenden Gebäude gemäß  §9 Absatz 2d Nr. 1 - 3 BauGB
+    vertikaleDifferenzierung:
+      doc: Gibt an, ob eine vertikale Differenzierung der Gebäude vorgeschrieben ist.
+    wohnnutzungEGStrasse:
+      doc: "Festsetzung nach §6a Abs. (4) Nr. 1 BauNVO: Für urbane Gebiete oder Teile\
+        \ solcher Gebiete kann festgesetzt werden, dass in Gebäuden \r\nim Erdgeschoss\
+        \ an der Straßenseite eine Wohnnutzung nicht oder nur ausnahmsweise zulässig\
+        \ ist."
+    zugunstenVon:
+      doc: Angabe des Begünstigten einer Ausweisung.
+  doc: 'Fläche für die Errichtung von Wohngebäuden in einem Bebauungsplan zur Wohnraumversorgung
+    gemäß §9 Absatz 2d BauGB. Das Maß der baulichen Nutzung sowie Festsetzungen zur
+    Bauweise oder Grenzbebauung können innerhalb einer '
+BP_ZentralerVersorgungsbereich:
+  attributes: {}
+  doc: 'Zentraler Versorgungsbereich gem. § 9 Abs. 2a BauGB '
+BP_ZusatzkontingentLaerm:
+  attributes:
+    bezeichnung:
+      doc: Bezeichnung des Kontingentes
+    richtungssektor:
+      doc: Spezifikation der Richtungssektoren
+  doc: Parametrische Spezifikation von zusätzlichen Lärmemissionskontingenten für
+    einzelne Richtungssektoren (DIN 45691, Anhang 2).
+BP_ZusatzkontingentLaermFlaeche:
+  attributes:
+    bezeichnung:
+      doc: Bezeichnung des Kontingentes
+    richtungssektor:
+      doc: Spezifikation des zugehörigen Richtungssektors
+  doc: Flächenhafte Spezifikation von zusätzlichen Lärmemissionskontingenten für einzelne
+    Richtungssektoren (DIN 45691, Anhang 2).
+FP_Abgrabung:
+  attributes:
+    abbaugut:
+      doc: Bezeichnung des Abbauguts.
+  doc: 'Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen
+    (§5, Abs. 2, Nr. 8 BauGB). Hier: Flächen für Abgrabungen und die Gewinnung von
+    Bodenschätzen.'
+FP_AnpassungKlimawandel:
+  attributes:
+    detailMassnahme:
+      doc: Detaillierung der durch das Attribut massnahme festgelegten Maßnahme über
+        eine Codeliste.
+    massnahme:
+      doc: Klassifikation der Massnahme
+  doc: 'Anlagen, Einrichtungen und sonstige Maßnahmen, die der Anpassung an den Klimawandel
+    dienen '
+FP_Aufschuettung:
+  attributes:
+    aufschuettungsmaterial:
+      doc: Bezeichnung des aufgeschütteten Materials
+  doc: 'Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen
+    (§5, Abs. 2, Nr. 8 BauGB). Hier: Flächen für Aufschüttungen.'
+FP_AusgleichsFlaeche:
+  attributes:
+    massnahme:
+      doc: Auf der Fläche durchzuführende Maßnahme.
+    refLandschaftsplan:
+      doc: Referenz auf den Landschaftsplan.
+    refMassnahmenText:
+      doc: Referenz auf ein Dokument in dem die Massnahmen beschrieben werden.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Attribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der auf der Fläche durchzuführenden Maßnahmen.
+  doc: Flächen und Maßnahmen zum Ausgleich gemäß § 5, Abs. 2a  BauBG.
+FP_BebauungsFlaeche:
+  attributes:
+    BMZ:
+      doc: Angabe einer maximalen Baumassenzahl als Maß der baulichen Nutzung.
+    GFZ:
+      doc: Angabe einer maximalen Geschossflächenzahl als Maß der baulichen Nutzung.
+    GFZdurchschnittlich:
+      doc: Durchschnittliche GFZ im Baugebiet
+    GFZmax:
+      doc: Maximale Geschossflächenzahl bei einer Bereichsangabe (GFZmin muss ebenfalls
+        spezifiziert werden).
+    GFZmin:
+      doc: Minimale Geschossflächenzahl bei einer Bereichsangabe (GFZmax muss ebenfalls
+        spezifiziert werden).
+    GRZ:
+      doc: Angabe einer maximalen Grundflächenzahl als Maß der baulichen Nutzung.
+    abweichungBauNVO:
+      doc: Art der zulässigen Abweichung von der BauNVO.
+    allgArtDerBaulNutzung:
+      doc: Angabe der allgemeinen Art der baulichen Nutzung.
+    besondereArtDerBaulNutzung:
+      doc: Angabe der besonderen Art der baulichen Nutzung.
+    detaillierteArtDerBaulNutzung:
+      doc: Über eine Codeliste definierte detailliertere Art der baulichen Nutzung,
+        mit der die allgemeine und/oder besondere Art der baulichen Nutzung näher
+        detailliert werden
+    sondernutzung:
+      doc: Differenziert Sondernutzungen nach §10 und §11 der BauNVO von 1977 und
+        1990. Das Attribut wird nur benutzt, wenn besondereArtDerBaulNutzung unbelegt
+        ist oder einen der Werte 2000 bzw. 2100 hat
+  doc: Darstellung einer für die Bebauung vorgesehenen Fläche (§ 5, Abs. 2, Nr. 1
+    BauGB).
+FP_Bereich:
+  attributes:
+    gehoertZuPlan:
+      doc: Referenz auf den Flächennutzungsplan, zu dem das Bereichsobjekt gehört.
+  doc: Diese Klasse modelliert einen Bereich eines Flächennutzungsplans.
+FP_DarstellungNachLandesrecht:
+  attributes:
+    detailZweckbestimmung:
+      doc: Über eine Codeliste definierte detaillierte Zweckbestimmung der Planinhalts-
+    kurzbeschreibung:
+      doc: Textuelle Beschreibung des Planinhalts.
+  doc: Inhalt des Flächennutzungsplans, der auf einer spezifischen Rechtsverordnung
+    eines Bundeslandes beruht.
+FP_FlaecheOhneDarstellung:
+  attributes: {}
+  doc: Fläche, für die keine geplante Nutzung angegben werden kann
+FP_Flaechenobjekt:
+  attributes:
+    flaechenschluss:
+      doc: 'Zeigt an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt
+        gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen,
+        sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte
+        der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte
+        überdeckt den Geltungsbereich des Flächennutzungsplans vollständig. '
+    position:
+      doc: 'Flächenhafter Raumbezug des Objektes (Eine Einzelfläche oder eine Menge
+        von Flächen, die sich nicht überlappen dürfen). '
+  doc: 'Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem
+    Raumbezug (eine Einzelfläche oder eine Menge von Flächen, die sich nicht überlappen
+    dürfen).  Die von '
+FP_Flaechenschlussobjekt:
+  attributes: {}
+  doc: "Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem\
+    \ Raumbezug, die auf Ebene 0 immer Flächenschlussobjekte sind.\r\n"
+FP_Gemeinbedarf:
+  attributes:
+    traeger:
+      doc: Trägerschaft einer Gemeinbedarfs-Fläche
+    zugunstenVon:
+      doc: Angabe des Begünstigten der Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Fläche
+  doc: Darstellung von Flächen für den Gemeinbedarf nach § 5,  Abs. 2, Nr. 2 BauGB.
+FP_GenerischesObjekt:
+  attributes:
+    zweckbestimmung:
+      doc: Über eine Codeliste definierte Zweckbestimmung des Generischen Objekts.
+  doc: Klasse zur Modellierung aller Inhalte des FPlans, die durch keine spezifische
+    XPlanung-Klasse repräsentiert werden können.
+FP_Geometrieobjekt:
+  attributes:
+    flaechenschluss:
+      doc: "Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt\
+        \ oder Überlagerungsobjekt gebildet werden soll.\r\nFlächenschlussobjekte\
+        \ dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren,\
+        \ wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen.\
+        \ Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich\
+        \ des Flächennutzungsplans vollständig. "
+    flussrichtung:
+      doc: "Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften\
+        \ Raumbezug hat. Ist es mit dem Wert true belegt, wird damit ausgedrückt,\
+        \ dass der Linie eine Flussrichtung  in Digitalisierungsrichtung zugeordnet\
+        \ ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge\
+        \ der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung\
+        \  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist,\
+        \ bleibt der Implementierung überlassen.\r\nIst der Attributwert false oder\
+        \ das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte\
+        \ irrelevant."
+    nordwinkel:
+      doc: Orientierung des Objektes bei punkförmigem Raumbezug als Winkel gegen die
+        Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd
+        und West).
+    position:
+      doc: Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte
+        Geometrie ist nicht zugelassen.
+  doc: Basisklasse für alle Objekte eines Flächennutzungsplans mit variablem Raumbezug.
+    Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften
+    Raumbezug haben, gemischte Geometrie ist nicht zugelassen.
+FP_Gruen:
+  attributes:
+    nutzungsform:
+      doc: Nutzungsform der Grünfläche.
+    zugunstenVon:
+      doc: Begünstigter der Ausweisung
+    zweckbestimmung:
+      doc: Zweckbestimmung der Grünfläche.
+  doc: Darstellung einer Grünfläche nach § 5, Abs. 2, Nr. 5 BauGB,
+FP_KeineZentrAbwasserBeseitigungFlaeche:
+  attributes: {}
+  doc: Baufläche, für die eine zentrale Abwasserbeseitigung nicht vorgesehen ist (§
+    5, Abs. 2, Nr. 1 BauGB).
+FP_Kennzeichnung:
+  attributes:
+    istVerdachtsflaeche:
+      doc: Legt fest, ob eine Altlast-Verdachtsfläche vorliegt
+    nummer:
+      doc: Nummer in einem Altlastkataster
+    zweckbestimmung:
+      doc: Zweckbestimmung der Kennzeichnung.
+  doc: Kennzeichnung gemäß §5 Abs. 3 BauGB.
+FP_KomplexeSondernutzung:
+  attributes:
+    allgemein:
+      doc: Allgemeine Festlegung der Sondernutzung
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Sondernutzung, die die allgemeine Sondernutzung
+        näher detaillieren.
+    nutzungText:
+      doc: Textliche Spezifikation der Sondernutzung.
+  doc: Spezifikation einer Sondernutzung
+FP_KomplexeZweckbestGemeinbedarf:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung der Fläche
+FP_KomplexeZweckbestGruen:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Grünfläche
+FP_KomplexeZweckbestLandwirtschaft:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Fläche für die Landwirtschaft.
+FP_KomplexeZweckbestSpielSportanlage:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Spiel- und Sportanlage.
+FP_KomplexeZweckbestVerEntsorgung:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Fläche für Ver- oder Entsorgung
+FP_KomplexeZweckbestWald:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung einer Waldfläche.
+FP_Landwirtschaft:
+  attributes:
+    zweckbestimmung:
+      doc: Zweckbestimmungen der Ausweisung
+  doc: Darstellung einer Landwirtschaftsfläche nach §5, Abs. 2, Nr. 9a.
+FP_Linienobjekt:
+  attributes:
+    position:
+      doc: Linienförmiger Raumbezug (Einzelne zusammenhängende Kurve, die aus Linienstücken
+        und Kreisbögen aufgebaut ist, oder eine Menge derartiger Kurven).
+  doc: "Basisklasse für alle Objekte eines Flächennutzungsplans mit linienförmigem\
+    \ Raumbezug (eine einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen\
+    \ zusammengesetzt sein kann, oder eine Menge derartiger Kurven).\r\n"
+FP_Nutzungsbeschraenkung:
+  attributes:
+    detaillierteTechnVorkehrung:
+      doc: Detaillierte Klassifizierung der auf der Fläche zu treffenden baulichen
+        oder sonstigen technischen Vorkehrungen.
+    nutzung:
+      doc: Festgesetzte Nutzung der Fläche
+    technVorkehrung:
+      doc: Klassifizierung der auf der Fläche zu treffenden baulichen oder sonstigen
+        technischen Vorkehrungen
+    typ:
+      doc: Differenzierung der Fläche gemäß BauGB
+  doc: Umgrenzungen von Flächen für Nutzungsbeschränkungen oder für Vorkehrungen zum
+    Schutz gegen schädliche Umwelteinwirkungen im Sinne des Bundes-Immissionsschutzgesetzes
+    (§ 5, Abs. 2, Nr. 6 BauGB)
+FP_Objekt:
+  attributes:
+    spezifischePraegung:
+      doc: Über eine Codeliste definierte spezifische bauliche Prägung einer Darstellung.
+    vonGenehmigungAusgenommen:
+      doc: Angabe, ob Teile des Flächennutzungsplans nach §6 Abs. 3 BauGB von der
+        Genehmigung ausgenommen sind
+    wirdAusgeglichenDurchFlaeche:
+      doc: Referenz auf eine Ausgleichsfläche, die den Eingriff ausgleicht.
+    wirdAusgeglichenDurchSPE:
+      doc: Referenz auf eine Schutz-,Pflege- oder Entwicklungsmaßnahme, die den Eingriff
+        ausgleicht.
+  doc: Basisklasse für alle Fachobjekte des Flächennutzungsplans.
+FP_Plan:
+  attributes:
+    aenderungenBisDatum:
+      doc: Datum, bis zu dem Änderungen des Plans berücksichtigt wurden.
+    aufstellungsbeschlussDatum:
+      doc: Datum des Plan-Aufstellungsbeschlusses.
+    auslegungsEndDatum:
+      doc: End-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    auslegungsStartDatum:
+      doc: Start-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    bereich:
+      doc: Referenz auf einen Bereich des Flächennutzungsplans
+    entwurfsbeschlussDatum:
+      doc: Datum des Entwurfsbeschlusses
+    gemeinde:
+      doc: Zuständige Gemeinde
+    planArt:
+      doc: Typ des FPlans
+    planaufstellendeGemeinde:
+      doc: Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese
+        nicht unter dem Attribut gemeinde aufgeführt ist. Dies kann z.B. nach Gemeindefusionen
+        der Fall sein.
+    planbeschlussDatum:
+      doc: Datum des Planbeschlusses
+    plangeber:
+      doc: "Für die Planung zuständige Institution\r\n"
+    rechtsstand:
+      doc: Aktueller Rechtsstand des Plans.
+    sachgebiet:
+      doc: Sachgebiet eines Teilflächennutzungsplans.
+    sonstPlanArt:
+      doc: Sonstiger Typ des FPlans bei "planArt" == 9999.
+    status:
+      doc: Über eine Codeliste definierter Status des Plans.
+    traegerbeteiligungsEndDatum:
+      doc: End-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung  können
+        mehrere Datumsangaben spezifiziert werden.
+    traegerbeteiligungsStartDatum:
+      doc: Start-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können
+        mehrere Datumsangaben spezifiziert werden.
+    verfahren:
+      doc: Verfahren nach dem ein FPlan aufgestellt oder geändert wird.
+    versionBauGB:
+      doc: Spezifikation der dem Gesamtplan zugrunde liegenden Version des BauGB
+    versionBauNVO:
+      doc: Spezifikation der dem Gesamtplan zugrunde liegenden Version der BauNVO
+    versionSonstRechtsgrundlage:
+      doc: Spezifikation sonstiger Rechtsgrundlagen des Gesamtplans
+    wirksamkeitsDatum:
+      doc: Datum der Wirksamkeit
+  doc: Klasse zur Modellierung eines gesamten Flächennutzungsplans.
+FP_PrivilegiertesVorhaben:
+  attributes:
+    vorhaben:
+      doc: Nähere Beschreibung des Vorhabens.
+    zweckbestimmung:
+      doc: Zweckbestimmungen des Vorhabens.
+  doc: Standorte für privilegierte Außenbereichsvorhaben und für sonstige Anlagen
+    in Außenbereichen gem. § 35 Abs. 1 und 2 BauGB.
+FP_Punktobjekt:
+  attributes:
+    nordwinkel:
+      doc: Orientierung des Punktobjektes als Winkel gegen die Nordrichtung. Zählweise
+        im geographischen Sinn (von Nord über Ost nach Süd und West).
+    position:
+      doc: Punktförmiger Raumbezug (Einzelpunkt oder Punktmenge).
+  doc: Basisklasse für alle Objekte eines Flächennutzungsplans mit punktförmigem Raumbezug
+    (Einzelpunkt oder Punktmenge).
+FP_SchutzPflegeEntwicklung:
+  attributes:
+    istAusgleich:
+      doc: Gibt an, ob die Maßnahme zum Ausgleich eines Eingriffs benutzt wird.
+    massnahme:
+      doc: Durchzuführende Maßnahme.
+    sonstZiel:
+      doc: Textlich formuliertes Ziel, wenn das Attribut ziel den Wert 9999 (Sonstiges)
+        hat.
+    ziel:
+      doc: Ziel der Maßnahmen
+  doc: Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung
+    von Natur und Landschaft (§5 Abs. 2, Nr. 10 BauGB)
+FP_SpielSportanlage:
+  attributes:
+    zugunstenVon:
+      doc: Bebünstigter der Ausweisung
+    zweckbestimmung:
+      doc: Allgemeine Zweckbestimmung der Fläche.
+  doc: Darstellung von Flächen für Spiel- und Sportanlagen nach §5,  Abs. 2, Nr. 2
+    BauGB.
+FP_TextAbschnittFlaeche:
+  attributes: {}
+  doc: Bereich, in dem bestimmte Textliche Darstellungen gültig sind, die über die
+    Relation "
+FP_Ueberlagerungsobjekt:
+  attributes: {}
+  doc: Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem Raumbezug,
+    die immer Überlagerungsobjekte sind.
+FP_UnverbindlicheVormerkung:
+  attributes:
+    vormerkung:
+      doc: Text der Vormerkung.
+  doc: "Unverbindliche Vormerkung späterer Planungsabsichten\r\n"
+FP_VerEntsorgung:
+  attributes:
+    zugunstenVon:
+      doc: Angabe des Begünstigten der Ausweisung.
+    zweckbestimmung:
+      doc: Zweckbestimmung der Fläche.
+  doc: Flächen für Versorgungsanlagen, für die Abfallentsorgung und Abwasserbeseitigung
+    sowie für Ablagerungen (§5, Abs. 2, Nr. 4 BauGB).
+FP_VorbehalteFlaeche:
+  attributes:
+    vorbehalt:
+      doc: Textliche Formulierung des Vorbehalts.
+  doc: Flächen auf denen bestimmte Vorbehalte wirksam sind.
+FP_WaldFlaeche:
+  attributes:
+    betreten:
+      doc: Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die
+        in dem Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz.
+    eigentumsart:
+      doc: Festlegung der Eigentumsart des Waldes
+    zweckbestimmung:
+      doc: Funktion der Waldfläche.
+  doc: Darstellung von Waldflächen nach §5, Abs. 2, Nr. 9b,
+FP_ZentralerVersorgungsbereich:
+  attributes:
+    auspraegung:
+      doc: Über eine Codeliste definierte Ausprägung eines zentralen Versorgungsbereiches.
+  doc: "Darstellung nach § 5 Abs. 2 Nr. 2d (Ausstattung des Gemeindegebietes mit zentralen\
+    \ Versorgungsbereichen).\r\n"
+LP_AdressatKomplex:
+  attributes:
+    adressatArt:
+      doc: Art des Adressaten, an den sich das Ziel, das Erfordernis oder die Maßnahme
+        richtet.
+    adressatText:
+      doc: Erläuterung zu sonstigem Adressaten(adressatArt = 9999) oder ergänzende
+        Information zu ausgewähltem anderen Adressaten.
+  doc: "Angaben zu Adressaten, an den sich das Ziel, das Erfordernis oder die Maßnahme\
+    \ richtet.\r\n"
+LP_Bereich:
+  attributes:
+    gehoertZuPlan:
+      doc: Referenz auf den Landschaftsplan, zu dem der Bereich gehört.
+  doc: Die Klasse modelliert einen Planbereich mit landschaftsplanerischen Darstellungen
+    bzw. Festsetzungen sowie gutachterliche Aussagen der Landschaftsplanung.
+LP_BioVfBiotoptypKomplex:
+  attributes:
+    bioVfBiotoptyp_BKompV:
+      doc: "Biotoptypen-Katalog der Bundeskompensationsverordnung (Anlage 2 (zu §\
+        \ 5 Absatz 1 BKompV )\r\n"
+    bioVfBiotoptyp_LandesKS:
+      doc: "Biotoptyp gem. eines Landeskartierschlüssels\r\n"
+    bioVfBiotoptyp_Text:
+      doc: Textliche Angabe zum Biotoptypen; alternativ oder zusätzlich zur Auswahl
+        eines über Codelisten bereitgestellten Kartierschlüssels von Bund, Land oder
+        FFH-LRT.
+    bioVf_FFH_LRT:
+      doc: FFH-Lebensraumtypen gem. Anhang I der Fauna Flora Habitatrichtlinie
+  doc: 'Komplexes Attribut mit '
+LP_BioVfPflanzenArtKomplex:
+  attributes:
+    bioVfPflanzenArtName:
+      doc: Textliche Angabe zur Pflanzen-Art, botanisch oder Trivialnamen
+    bioVfPflanzenRechtlicherSchutz:
+      doc: "Rechtliche Grundlage für den Schutz einer Pflanzenart an.\r\n"
+    bioVfPflanzenRechtlicherSchutzText:
+      doc: "Textliche Erläuterung zu sonstigem Rechtlichen Schutz (bioVfPflanzenRechtlicherSchutz\
+        \ = 9999) oder ergänzende Information zu ausgewähltem rechtlichem Schutz.\r\
+        \n"
+    bioVfPflanzenSystematik:
+      doc: 'Gibt systematische Einordnung einer Pflanzenart an:'
+    bioVfPflanzenSystematikText:
+      doc: Textliche Erläuterung zu sonstiger PflanzenartenSystematik (wenn bioVfPflanzenSystematik=
+        9999) oder ergänzende Information zu einer anderen Systematischen Einordnung.
+  doc: Komplexes Attribut mit Angaben zum Planungsgegenstand Biologische Vielfalt
+    / Pflanzen
+LP_BioVfTiereArtKomplex:
+  attributes:
+    bioVfTierArtHabitatanforderung:
+      doc: Gibt besondere Habitatanforderungen einer Tierart an.
+    bioVfTierArtHabitatanforderungText:
+      doc: Erläuterung zu Sonstige Habitatanforderungen oder ergänzende Information
+        zu ausgewählten Habitatanforderungen.
+    bioVfTierArtName:
+      doc: 'Textliche Angabe zur Tierart; alternativ oder zusätzlich auch bioVfTierArtSystematik '
+    bioVfTierArtRechtlicherSchutz:
+      doc: "Rechtliche Grundlage für den Schutz einer Tierart an.\r\n"
+    bioVfTierArtRechtlicherSchutzText:
+      doc: "Textliche Erläuterung zu sonstigem rechtlichen Schutz (bioVfTierArtRechtlicherSchutz\
+        \ = 9999) oder ergänzende Information zu ausgewähltem Rechtlichem Schutz.\r\
+        \n"
+    bioVfTiereSystematik:
+      doc: "Gibt systematische Einordnung einer Tierart an\r\n"
+    bioVfTiereSystematikText:
+      doc: Textliche Erläuterung zu sonstiger Tierartensystematik (bioVfTiereSystematik=
+        9999) oder ergänzende Information zu ausgewählter Gruppe.
+  doc: Komplexes Attribut mit Angaben zum Planungsgegenstand Biologische Vielfalt
+    / Tiere
+LP_BiologischeVielfaltKomplex:
+  attributes:
+    bioVfArtFFHAnhangII:
+      doc: Gibt an, ob Nachweise für Tier- und Pflanzenarten von gemeinschaftlichem
+        Interesse kartiert wurden, für deren Erhaltung besondere Schutzgebiete ausgewiesen
+        werden müssen (gemäß Anhang II der FFH-RL).
+    bioVfBiotoptyp:
+      doc: Angaben zum Biotoptyp
+    bioVfPflanzenArt:
+      doc: Angaben zu Planzenarten als Bestandteil der biologischen Vielfalt.
+    bioVfTierArt:
+      doc: "Angaben zu Tierarten als Bestandteil der biologischen Vielfalt.\r\n"
+    bioVielfaltTypus:
+      doc: "Zeigt an, auf welchen Bestandteil der Biologischen Vielfalt sich das Objekt\
+        \ bezieht\r\n"
+  doc: Angaben zum Planungsgegenstand „Biologische Vielfalt“
+LP_BiologischeVielfaltTypKomplex:
+  attributes:
+    bioVielfaltTyp:
+      doc: 'Zeigt an, auf welchen Bestandteil der Biologischen Vielfalt sich das Objekt
+        bezieht:'
+    bioVielfaltTypText:
+      doc: Textliche Spezfizierung des Typs/Bestandteils der biologischen Vielfalt,
+        wenn bioVielfaltTyp =  9999 („Sonstiger Bestandteil Biologische Vielfalt“),
+        oder ergänzende Information zu anderen Typen der Biologischen Vielfalt
+  doc: 'Angaben, auf welchen Bestandteil / Typus der Biologischen Vielfalt sich das
+    Objekt bezieht:'
+LP_BiotopverbundBiotopvernetzung:
+  attributes:
+    bioVStandortFeuchte:
+      doc: Zeigt die Ausprägung der Standortverhältnisse des Verbundsystems im Hinblick
+        auf Feuchtigkeit an.
+    bioVerbundsystemArt:
+      doc: Zeigt die Art des Verbundsystems an.
+    bioVerbundsystemText:
+      doc: Textliche ergänzende Informationen zu Art und Ausprägung der Standortverhältnisse
+        des Verbundsystems.
+    foerdermoeglichkeit:
+      doc: Nennung von Fördermöglichkeiten für den Biotopverbund oder die Biotopvernetzung.
+    planungsEbene:
+      doc: Nutzungsregelung (Klassifikation).
+    rechtlicheSicherung:
+      doc: Rechtliche Sicherung für Flächen des Biotopverbunds und der Biotopvernetzung
+        nach § 21 Abs. 4 BNatSchG.
+    rechtlicheSicherungText:
+      doc: Erläuterung zu Sonstiger rechtlicher Sicherung in rechtlicheSicherung oder
+        ergänzende Information zur ausgewählten rechtlichen Sicherungsart.
+    typBioVerbund:
+      doc: Angaben zum Typen des Biotopverbundelementes
+  doc: Flächen und Elemente für Biotopverbund und Biotopvernetzung.
+LP_BodenKomplex:
+  attributes:
+    bodenAuspraegung:
+      doc: Ausprägungen in Bezug auf Boden, an die sich das Ziel, das Erfordernis
+        oder die Maßnahme richtet.
+    bodenText:
+      doc: "Erläuterung zu Sonstiger Boden (bodenAuspraegung = 9999) oder ergänzende\
+        \ Information zu anderer ausgewählter Ausprägung des Planungsgegenstandes\
+        \ Boden.\r\n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Boden, an die\
+    \ sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_Eingriffsregelung:
+  attributes:
+    eingriffsregelungFlaechenTyp:
+      doc: Angaben zum Flächentyp in Bezug auf Eingriffsregelung
+    kompensationText:
+      doc: 'Ergänzende Informationen zur Kompensation. '
+    massnahmentyp:
+      doc: Differenziert in nationalrechtliche und unionsrechtliche Kompensationsmaßnahmen.
+    umsetzungsstand:
+      doc: "Zeigt an, ob eine bereit umgesetzte oder angerechnete Kompensationsfläche\
+        \ oder -Maßnahme nachrichtlich übernommen oder für neue Kompensationsmaßenahmen\
+        \ vorgeschlagen wird. \r\n"
+  doc: "Planungsaussagen mit Bezug zur Eingriffsregelung und der Bewältigung von Eingriffsfolgen.\r\
+    \n"
+LP_EingriffsregelungKomplex:
+  attributes:
+    eRFlaechenArt:
+      doc: Differenzierung der Planungsaussagen mit Bezug zur Eingriffsregelung und
+        der Bewältigung von Eingriffsfolgen.
+    eRFlaechenArtText:
+      doc: Textliche Differenzierung der Planungsaussagen mit Bezug zur Eingriffsregelung
+        und der Bewältigung von Eingriffsfolgen, wenn ERFlaechenArt = 9999.
+  doc: Datentyp mit Angaben für eine komplexe Eingriffsregelung
+LP_ErholungKomplex:
+  attributes:
+    erholungFunktionArt:
+      doc: "Art der Erholungsfunktion oder -Infrastruktur, an die sich\r\n das Ziel,\
+        \ das Erfordernis oder die Maßnahme richtet."
+    erholungFunktionText:
+      doc: "Erläuterung zu Sonstiger Planungsgegenstand Erholung oder ergänzende Information\
+        \ zu einer anderen ausgewählten Erholungsfunktion/Infrastruktur.\r\n\r\n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Erholung, an\
+    \ die sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_GenerischesObjekt:
+  attributes:
+    zweckbestimmung:
+      doc: Über eine Codeliste definierte Zweckbestimmung des Generischen Objektes.
+  doc: Klasse zur Modellierung aller Inhalte des Landschaftsplans, die durch keine
+    spezifische XPlanung-Klasse repräsentiert werden können.
+LP_Geometrieobjekt:
+  attributes:
+    flussrichtung:
+      doc: "Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften\
+        \ Raumbezug hat. Ist es mit dem Wert true belegt, wird damit ausgedrückt,\
+        \ dass der Linie eine Flussrichtung  in Digitalisierungsrichtung zugeordnet\
+        \ ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge\
+        \ der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung\
+        \  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist,\
+        \ bleibt der Implementierung überlassen.\r\nIst der Attributwert false oder\
+        \ das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte\
+        \ irrelevant."
+    nordwinkel:
+      doc: Orientierung des Objektes bei punkförmigem Raumbezug als Winkel gegen die
+        Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd
+        und West).
+    position:
+      doc: Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte
+        Geometrie ist nicht zugelassen.
+  doc: Basisklasse für alle Objekte eines Landschaftsplans mit variablem Raumbezug.
+    Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften
+    Raumbezug haben, gemischte Geometrie ist nicht zugelassen.
+LP_KlimaKomplex:
+  attributes:
+    klimaArt:
+      doc: Art des Planungsgegenstand für Klima, an die sich das Ziel, das Erfordernis
+        oder die Maßnahme richtet.
+    klimaText:
+      doc: "Erläuterung zu Sonstiger Planungsgegenstand Schutzgut Klima oder ergänzende\
+        \ Information zu ausgewählten Planungsgegenständen.\r\n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Klima, an die\
+    \ sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_LandschaftsbildKomplex:
+  attributes:
+    landschaftsbildArt:
+      doc: Art des Planungsgegenstand für das Landschaftsbild, an die sich das Ziel,
+        das Erfordernis oder die Maßnahme richtet.
+    landschaftsbildText:
+      doc: "Erläuterung zu Sonstiger Planungsgegenstand Schutzgut Landschaftsbild\
+        \ oder ergänzende Information zu anderem ausgewähltem Planungsgegenstand Landschaftsbild.\r\
+        \n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Landschaftsbild,\
+    \ an die sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_LuftKomplex:
+  attributes:
+    luftArt:
+      doc: Art des Planungsgegenstand für Luft, an die sich das Ziel, das Erfordernis
+        oder die Maßnahme richtet.
+    luftText:
+      doc: "Erläuterung zu Sonstiger Planungsgegenstand Schutzgut Luft oder ergänzende\
+        \ Information zu anderem ausgewähltem Planungsgegenstand Luft.\r\n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Luft, an die\
+    \ sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_NutzungseinschraenkungKomplex:
+  attributes:
+    hatNutzungseinschraenkung:
+      doc: Zeigt an, ob eine Einschränkung bestimmter Nutzungen empfohlen/vorgeschlagen
+        wird.
+    nutzungseinschraenkungText:
+      doc: "Textfeld, Erläuterung von Art und Umfang der empfohlenen/vorgeschlagenen\
+        \ Einschränkung bestimmter Nutzungen.\r\n\r\n"
+  doc: "Komplexes Attribut mit Angaben zu Nutzungseinschränkungen.\r\n"
+LP_Objekt:
+  attributes:
+    raumkonkretisierung:
+      doc: Beschreibung der räumlichen Schärfe des geometrischen Objekts, d.h. wie
+        konkret die Geometrie in Attribut position die tatsächliche räumliche Gestalt
+        des Planinhalts darstellt.
+    rechtsCharText:
+      doc: Textliche Konkretisierung der rechtlichen Charakterisierung.
+    referenziertLPObjekt:
+      doc: "Angaben zu einem anderen LP-Planinhalt, der mit diesem LP-Objekt in Verbindung\
+        \ steht.\r\n"
+    vorschlagIntegrationBLP:
+      doc: Verweis auf ein Objekt im Modellbereich Bauleitplanung, das von der Landschaftsplanung
+        als Kopiervorlage zur Übernahme in den FNP/Bebauungsplan vorgeschlagen wird.
+        Referenziert ein Objekt mit Angabe der Begründung.
+    vorschlagIntegrationRO:
+      doc: Verweis auf ein Objekt im Modellbereich Raumordnung, das von der Landschaftsplanung
+        als Kopiervorlage zur Übernahme in den Raumordnungsplan vorgeschlagen wird.
+        Referenziert ein Objekt mit Angabe der Begründung.
+    wirdReferenziertVon:
+      doc: Rückwärtsreferenz zu einem LP- Objekt, das dieses LP-Objekt referenziert.
+  doc: Basisklasse für alle spezifischen Inhalte eines Landschaftsplans.
+LP_Plan:
+  attributes:
+    aenderungenBisDatum:
+      doc: Datum, bis zu dem Planänderungen berücksichtigt wurden.
+    aufstellungsbeschlussDatum:
+      doc: Datum des Aufstellungsbeschlusses
+    auslegungsEndDatum:
+      doc: End-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    auslegungsStartDatum:
+      doc: Start-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    bereich:
+      doc: Referenz auf die Bereiche des Landschaftsplans (einzelne Kartenblätter,
+        Detailkarten, Übersichtskarten etc.).
+    bundesland:
+      doc: Zuständiges Bundesland
+    endeBedingungen:
+      doc: Beschreibt Bedingung(en), bis wann ein Plan wirksam ist.
+    entwurfsbeschlussDatum:
+      doc: Datum des Entwurfsbeschlusses.
+    gemeinde:
+      doc: Die für diesen Plan zuständige Gemeinde.
+    inkrafttretenDatum:
+      doc: Datum des Inkrafttretens.
+    oeffentlichkeitsBetEndDatum:
+      doc: End-Datum der Öffentlichkeitsbeteiligung. Bei mehrfacher öffentlicher Beteiligung
+        können mehrere Datumsangaben spezifiziert werden.
+    oeffentlichkeitsBetStartDatum:
+      doc: Start-Datum der Öffentlichkeitsbeteiligung. Bei mehrfacher öffentlicher
+        Beteiligung können mehrere Datumsangaben spezifiziert werden.
+    planArt:
+      doc: Typ des vorliegenden Landschaftsplans.
+    planaufstellendeGemeinde:
+      doc: Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese
+        nicht unter dem Attribut gemeinde aufgeführt ist. Dies kann z.B. nach Gemeindefusionen
+        der Fall sein.
+    planbeschlussDatum:
+      doc: Datum des Planbeschlusses.
+    plangeber:
+      doc: "Für die Planung zuständige Institution falls von der Gemeinde abweichend,\
+        \ z.B. ein Planungsverband.\r\n"
+    rechtlicheAussenwirkung:
+      doc: Gibt an, ob der Plan eine rechtliche Außenwirkung hat.
+    rechtsstand:
+      doc: Rechtsstand des Plans
+    sonstPlanArt:
+      doc: Spezifikation einer "Sonstigen Planart", wenn kein Plantyp aus der Enumeration
+        LP_PlanArt zutreffend ist. Das Attribut "planArt" muss in diesem Fall der
+        Wert 9999 haben.
+    sonstVerfahrensDatum:
+      doc: Sonstiges Verfahrens-Datum (Verfahrens-Art siehe sonstVerfahrensText)
+    sonstVerfahrensText:
+      doc: Textliche Präzisierung des sonstigen Verfahrens gem. Attribut sonstVerfahrensDatum
+    startBedingungen:
+      doc: Beschreibt Bedingung(en),  ab wann ein Plan wirksam ist.
+    tOeBbeteiligungsEndDatum:
+      doc: End-Datum der ÖB-Trägerbeteiligung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    tOeBbeteiligungsStartDatum:
+      doc: Start-Datum der ÖB-Trägerbeteiligung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    veroeffentlichungsDatum:
+      doc: Datum der Veröffentlichung des Plans.
+  doc: Die Klasse modelliert ein Planwerk mit landschaftsplanerischen gutachterlichen
+    Aussagen, Darstellungen bzw. Festsetzungen.
+LP_ReferenzLPObjekt:
+  attributes:
+    beschreibung:
+      doc: Textliche Beschreibung der Beziehung zwischen diesem und dem referenzierten
+        Landschaftsplanungs-Objekt.
+    verbundenesLPObjekt:
+      doc: Referenz auf einen anderen Planinhalt, der mit diesem LP-Objekt in Verbindung
+        steht.
+  doc: "Verweis auf einen anderen Planinhalt (LP-Objekt) dieses Plans, der mit diesem\
+    \ LP-Objekt in Verbindung steht.\r\n"
+LP_SPEKomplex:
+  attributes:
+    schutzPflegeEntwicklungText:
+      doc: 'Textfeld, Erläuterung sonstigem Ziel Schutz, Pflege und Entwicklung oder
+        ergänzende Information zu ausgewählten Differenzierungen. '
+    schutzPflegeEntwicklungTyp:
+      doc: Differenzierung der Ziele, der Erfordernisse oder der Maßnahmen von Naturschutz
+        und Landschaftspflege.
+  doc: "Angaben zur Differenzierung der Schutz-, Pflege und Entwicklungsziele von\
+    \ Naturschutz und Landschaftspflege.\r\n"
+LP_SchutzBestimmterTeileVonNaturUndLandschaft:
+  attributes:
+    artDerFestlegung:
+      doc: Kategorien der Schutzgebiete und sonstigen geschützten Bestandteilen von
+        Natur und Landschaft nach Kap. 4 Bundesnaturschutzgesetz (BNatSchG) und Landes-Naturschutzgesetzen.
+    artDerFestlegungText:
+      doc: Erläuterung zu Sonstige Schutzgebietskategorie oder ergänzende Information
+        zu ausgewählten Schutzgebietskategorien.
+    detailGesetzlGeschBiotopLR:
+      doc: Über eine Codeliste definierte weitere gesetzlich geschützte Biotope z.B.
+        nach Landesrecht.
+    gesetzlGeschBiotop:
+      doc: Angabe einer gesetzlich geschützten Biotoptypen-Art gemäß §30 Abs. 2 Ziffern
+        1-6 BNatSchG.
+    gesetzlGeschBiotopText:
+      doc: Erläuterung zu Sonstige gesetzlich geschützte Biotope (wenn gesetzlichGeschuetztBiotop
+        = 9999) oder ergänzende Information zu anderem ausgewählten gesetzlich geschütztem
+        Biotoptyp.
+    name:
+      doc: Name des Schutzgebietes, z.B. "Leineaue zwischen Ruthe und Koldingen".
+    nummer:
+      doc: Schutzgebietsnummer, eindeutiges Kennzeichen des Gebiets, z.B. "NSG HA
+        203".
+    rechtsstandSchG:
+      doc: Rechtsstand des Schutzgebiets oder des geschützten Bestandteils von Natur
+        und Landschaft.
+    rechtsstandSchGText:
+      doc: Erläuterung zu Sonstigem Rechtsstand (wenn rechtsstandSchG = 9999) oder
+        ergänzende Information zu ausgewähltem Rechtsstand.
+    schutzzone:
+      doc: "Angabe der Schutzzone für zonierte Schutzgebiete, insbesondere Biosphärenreservate\
+        \ und Nationalparke.\r\n"
+    schutzzonenText:
+      doc: Erläuterung zu Sonstige Schutzzone (Konformitätsregel, wenn schutzzone
+        = 9999, dann Belegung Pflicht oder ergänzende Information zu ausgewählten
+        Schutzzonen.
+  doc: Schutzgebietskategorien gemäß Kapitel 4 BNatSchG „Schutz bestimmter Teile von
+    Natur und Landschaft“.
+LP_SchutzgutKomplex:
+  attributes:
+    schutzgutArt:
+      doc: Schutzgüter von Naturschutz und Landschaftspflege, abgeleitet aus § 1 BNatSchG.
+    schutzgutText:
+      doc: Erläuterung zu sonstigem Schutzgut (schutzgutArt = 9999) oder ergänzende
+        Information zu ausgewähltem anderen Schutzgut.
+  doc: 'Komplexes Attribut mit Angaben zum Schutzgut/Schutzgütern, auf die sich die
+    Ziele, Erfordernisse und Maßnahmen richten. '
+LP_TextAbschnittObjekt:
+  attributes: {}
+  doc: Bereich, in dem bestimmte textliche Festsetzungen gültig sind, die über die
+    Relation "
+LP_TypBioVerbundKomplex:
+  attributes:
+    flaechenTypBV:
+      doc: Flächentyp des Biotopverbunds nach § 21 Abs. 3 BNatSchG.
+    flaechentypBVSpeziell:
+      doc: Differenzierung des speziellen Flächentyp des Biotopverbunds nach § 21
+        Abs. 3 BNatSchG.
+    flaechentypSpeziellText:
+      doc: Textliche Ergänzungen zu flaechentypBVSpeziell.
+  doc: Datentyp mit Angaben zu Typen des Biotopverbunds.
+LP_VorschlagIntegrationBauleitplanung:
+  attributes:
+    begruendung:
+      doc: Begründung, warum die Landschaftsplanung die Übernahme in die Bauleitplanung
+        vorschlägt / empfiehlt / festsetzt.
+    refObjektBauleitplanung:
+      doc: Referenz auf ein Objekt im Modellbereich Bauleitplanung, das von der Landschaftsplanung
+        als Kopiervorlage zur Übernahme in einen Bauleitplan vorgeschlagen wird.
+  doc: Vorschlag zur Integration in die Bauleitplanung
+LP_VorschlagIntegrationRaumordnung:
+  attributes:
+    begruendung:
+      doc: Begründung, warum die Landschaftsplanung die Übernahme in die Bauleitplanung
+        vorschlägt / empfiehlt / festsetzt.
+    refObjektRaumordnung:
+      doc: Referenz auf ein Objekt im Modellbereich Raumordnung, das von der Landschaftsplanung
+        als Kopiervorlage zur Übernahme in einen Raumordnungsplan vorgeschlagen wird.
+  doc: Vorschlag zur Integration in die Raumordnung
+LP_WasserKomplex:
+  attributes:
+    wasserAuspraegung:
+      doc: Ausprägungen in Bezug auf Planungsgegenstand Wasser, an die sich das Ziel,
+        das Erfordernis oder die Maßnahme richtet.
+    wasserText:
+      doc: "Erläuterung zu Sonstiges (wasserAuspraegung = 9999) oder ergänzende Information\
+        \ zu anderer ausgewählter Ausprägung des Planungsgegenstandes Wasser.\r\n"
+  doc: "Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Wasser, an\
+    \ die sich das Ziel, das Erfordernis oder die Maßnahme richtet..\r\n"
+LP_ZielDimNatSchLaPflKomplex:
+  attributes:
+    zielDimensionText:
+      doc: Erläuterung zu sonstigem Teilziel (teilZielArt = 9999) oder ergänzende
+        Information zu ausgewähltem Teilziel.
+    zielDimensionTyp:
+      doc: Teilziele des Naturschutzes und der Landschaftspflege gemäß § 1 Abs. 1
+        Ziffern 1. bis 3. BNatSchG.
+  doc: Zieldimension von Naturschutz und Landschaftspflege; Teilziele des Naturschutzes
+    und der Landschaftspflege gemäß § 1 Abs. 1 Ziffern 1. bis 3. BNatSchG
+LP_ZieleErfordernisseMassnahmen:
+  attributes:
+    adressat:
+      doc: Adressat(en), an den oder die sich die Aussage der Landschaftsplanung richtet.
+    biologischeVielfalt:
+      doc: "Angaben zum Planungsgegenstand „Biologische Vielfalt“\r\n"
+    boden:
+      doc: Angaben zum Planungsgegenstand Boden
+    erholung:
+      doc: Angaben zum Planungsgegenstand Erholung in Natur und Landschaft.
+    foerdermoeglichkeit:
+      doc: "Textliche Nennung von Fördermöglichkeiten für Maßnahmen.\r\n"
+    freiraeume:
+      doc: "Textliche Erläuterung zum Planungsgegenstand Freiräume.\r\n"
+    klima:
+      doc: Angaben zum Planungsgegenstand Klima
+    landschaftsbild:
+      doc: Angaben zum Planungsgegenstand Landschaftsbild
+    luft:
+      doc: Angaben zum Planungsgegenstand Luft
+    nutzungseinschraenkung:
+      doc: Angaben zu Nutzungseinschränkungen.
+    schutzPflegeEntwicklung:
+      doc: "Differenzierung Schutz-, Pflege und Entwicklungsziele von Naturschutz\
+        \ und Landschaftspflege.\r\n"
+    schutzgut:
+      doc: Angaben zum Schutzgut / zu den Schutzgütern.
+    wasser:
+      doc: Angaben zum Planungsgegenstand Wasser
+    zielDimNatSchLaPfl:
+      doc: Zieldimension von Naturschutz und Landschaftspflege; Teilziele des Naturschutzes
+        und der Landschaftspflege gemäß § 1 Abs. 1 Ziffern 1. bis 3. BNatSchG
+    zieleErfordernisseMassnahmen:
+      doc: Zeigt an, ob es sich bei dem Objekt um ein Ziel, ein Erfordernis und/oder
+        um eine Maßnahme gemäß Kapitel 2 BNatSchG handelt.
+  doc: Ziele, Erfordernisse und Maßnahmen für Naturschutz und Landschaftspflege gem.
+    Kapitel 2 BNatSchG.
+RP_Achse:
+  attributes:
+    typ:
+      doc: Klassifikation verschiedener Achsen.
+  doc: Achsen bündeln i.d.R. Verkehrs- und Versorgungsinfrastruktur und enthalten
+    eine relativ dichte Folge von Siedlungskonzentrationen und Zentralen Orten.
+RP_Bereich:
+  attributes:
+    gehoertZuPlan:
+      doc: Relation auf den zugehörigen Plan
+    geltungsmassstab:
+      doc: (Rechtlicher) Geltungsmaßstab des Bereichs.
+    versionBROG:
+      doc: Bekanntmachungs-Datum der zugrunde liegenden Version des ROG.
+    versionBROGText:
+      doc: Titel der zugrunde liegenden Version des Bundesraumordnungsgesetzes.
+    versionLPLG:
+      doc: Bekanntmachungs-Datum des zugrunde liegenden Landesplanungsgesetzes.
+    versionLPLGText:
+      doc: Titel des zugrunde liegenden Landesplanungsgesetzes.
+  doc: Die Klasse RP_Bereich modelliert einen Bereich eines Raumordnungsplans. Bereiche
+    strukturieren Pläne räumlich und inhaltlich.
+RP_Bodenschutz:
+  attributes:
+    typ:
+      doc: Klassifikation von Bodenschutztypen.
+  doc: Maßnahmen, die zum Schutz von Böden und Bodenfunktionen (auch vorsorglich)
+    unter dem Aspekt des Natur- und Umweltschutzes getroffen werden.
+RP_Einzelhandel:
+  attributes:
+    typ:
+      doc: Klassifikation von Einzelhandelstypen.
+  doc: Einzelhandelsstruktur und -funktionen.
+RP_Energieversorgung:
+  attributes:
+    primaerenergieTyp:
+      doc: Klassifikation von der mit der Infrastruktur in Beziehung stehenden Primärenergie.
+    spannung:
+      doc: Klassifikation von Spannungen.
+    typ:
+      doc: Klassifikation von Energieversorgungs-Einrichtungen.
+  doc: Infrastruktur zur Energieversorgung. Beinhaltet Energieerzeugung und die Belieferung
+    von Verbrauchern mit Nutzenergie. Erneuerbare Energie wie Windkraft wird im Normalfall
+    auf die Klasse RP_ErneuerbareEnergie im Unterpaket Freiraumstruktur zugeordnet.
+    Je nach Kontext kann aber auch eine Zuordnung auf RP_Energieversorgung stattfinden.
+RP_Entsorgung:
+  attributes:
+    abfallTyp:
+      doc: Klassifikation von mit der Entsorgungsinfrastruktur in Beziehung stehenden
+        Abfalltypen
+    istAufschuettungAblagerung:
+      doc: Gibt an, ob die Entsorgung in Form einer Aufschüttung oder Ablagerung erfolgt
+    typAE:
+      doc: Klassifikation von Abfallentsorgung-Infrastruktur.
+    typAW:
+      doc: Klassifikation von Abwasser-Infrastruktur.
+  doc: "Entsorgungs-Infrastruktur Beinhaltet Abfallentsorgung und Abwasserentsorgung.\r\
+    \n"
+RP_Erholung:
+  attributes:
+    besondererTyp:
+      doc: Klassifikation von besonderen Typen für Tourismus und/oder Erholung.
+    typErholung:
+      doc: Klassifikation von Erholungstypen.
+    typTourismus:
+      doc: Klassifikation von Tourismustypen.
+  doc: Freizeit, Erholung und Tourismus.
+RP_ErneuerbareEnergie:
+  attributes:
+    typ:
+      doc: Klassifikation von Typen Erneuerbarer Energie.
+  doc: "Erneuerbare Energie inklusive Windenergienutzung.\r\n"
+RP_Forstwirtschaft:
+  attributes:
+    typ:
+      doc: Klassifikation von Forstwirtschaftstypen und Wäldern.
+  doc: "Forstwirtschaft ist die zielgerichtete Bewirtschaftung von Wäldern.\r\n"
+RP_Freiraum:
+  attributes:
+    imVerbund:
+      doc: Zeigt an, ob das Objekt in einem (Freiraum-)Verbund liegt.
+    istAusgleichsgebiet:
+      doc: Zeigt an, ob das Objekt ein Ausgleichsgebiet ist.
+  doc: "Allgemeines Freiraumobjekt.\r\n"
+RP_Funktionszuweisung:
+  attributes:
+    bezeichnung:
+      doc: Bezeichnung und/oder Erörterung einer Gebietsfunktion.
+    typ:
+      doc: Klassifikation des Gebietes nach Bundesraumordnungsgesetz.
+  doc: Gebiets- und Gemeindefunktionen.
+RP_GenerischesObjekt:
+  attributes:
+    typ:
+      doc: Über eine CodeList definierte Zweckbestimmung der Festlegung.
+  doc: Klasse zur Modellierung aller Inhalte des Raumordnungsplans, die durch keine
+    andere Klasse des RPlan-Fachschemas dargestellt werden können.
+RP_Geometrieobjekt:
+  attributes:
+    flaechenschluss:
+      doc: Zeigt an, ob für das Objekt Flächenschluss vorliegt.
+    flussrichtung:
+      doc: "Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften\
+        \ Raumbezug hat. Ist es mit dem Wert true belegt, wird damit ausgedrückt,\
+        \ dass der Linie eine Flussrichtung  in Digitalisierungsrichtung zugeordnet\
+        \ ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge\
+        \ der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung\
+        \  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist,\
+        \ bleibt der Implementierung überlassen.\r\nIst der Attributwert false oder\
+        \ das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte\
+        \ irrelevant."
+    nordwinkel:
+      doc: Orientierung des Objektes bei punktförmigem Raumbezug als Winkel gegen
+        die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach
+        Süd und West).
+    position:
+      doc: Variabler Raumbezug.
+  doc: Basisklasse für alle Objekte eines Raumordnungsplans mit variablem Raumbezug.
+    Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften
+    Raumbezug haben, gemischte Geometrie ist nicht zugelassen. RP_Geometrieobjekt
+    selbst ist abstrakt.
+RP_Gewaesser:
+  attributes:
+    gewaesserTyp:
+      doc: Spezifiziert den Typ des Gewässers.
+  doc: Gewässer, die nicht andersweitig erfasst werden, zum Beispiel Flüsse oder Seen.
+RP_Grenze:
+  attributes:
+    sonstTyp:
+      doc: Erweiterter Typ.
+    spezifischerTyp:
+      doc: Spezifischer Typ der Grenze
+    typ:
+      doc: Typ der Grenze
+  doc: Grenzen.
+RP_GruenzugGruenzaesur:
+  attributes:
+    typ:
+      doc: Klassifikation von Zäsurtypen.
+  doc: Grünzüge und kleinräumigere Grünzäsuren sind Ordnungsinstrumente zur Freiraumsicherung.
+    Teilweise werden Grünzüge auch Trenngrün genannt.
+RP_Hochwasserschutz:
+  attributes:
+    typ:
+      doc: Klassifikation von Hochwasserschutztypen.
+  doc: "Die Klasse RP_Hochwasserschutz enthält Hochwasserschutz und vorbeugenden Hochwasserschutz.\r\
+    \n"
+RP_IndustrieGewerbe:
+  attributes:
+    typ:
+      doc: Klassifikation von Industrie- und Gewerbetypen.
+  doc: Industrie- und Gewerbestrukturen und -funktionen.
+RP_Klimaschutz:
+  attributes:
+    typ:
+      doc: Klassifikation von Lufttypen.
+  doc: (Siedlungs-) Klimaschutz. Beinhaltet zum Beispiel auch Kalt- und Frischluftschneisen.
+RP_Kommunikation:
+  attributes:
+    typ:
+      doc: Klassifikation von Kommunikations-Infrastruktur.
+  doc: Infrastruktur zur Telekommunikation, digitale Infrastruktur oder Kommunikationsinfrastruktur.
+RP_Kulturlandschaft:
+  attributes:
+    typ:
+      doc: Klassifikation von Kulturlandschaftstypen.
+  doc: "Landschaftsbereich mit überwiegend anthropogenen Ökosystemen (historisch geprägt\
+    \ und gewachsen). Sie sind nach §2, Nr. 5 des ROG mit ihren Kultur- und Naturdenkmälern\
+    \ zu erhalten und zu entwickeln. \r\n"
+RP_LaermschutzBauschutz:
+  attributes:
+    typ:
+      doc: Klassifikation von Lärmschutztypen.
+  doc: Infrastruktur zum Lärmschutz und/oder Bauschutz.
+RP_Landwirtschaft:
+  attributes:
+    typ:
+      doc: Klassifikation von Landwirtschaftstypen.
+  doc: Landwirtschaft, hauptsächlich im ländlichen Raum angesiedelt, erfüllt für die
+    Gesellschaft wichtige Funktionen in der Produktion- und Versorgung mit Lebensmitteln,
+    für Freizeit und Freiraum oder zur Biodiversität.
+RP_Luftverkehr:
+  attributes:
+    typ:
+      doc: Klassifikation von Luftverkehr-Infrastruktur.
+  doc: Luftverkehr-Infrastruktur ist Infrastruktur, die  im Zusammenhang mit der Beförderung
+    von Personen, Gepäck, Fracht und Post mit staatlich zugelassenen Luftfahrzeugen,
+    besonders Flugzeugen steht.
+RP_NaturLandschaft:
+  attributes:
+    typ:
+      doc: Klassifikation von Naturschutz, Landschaftsschutz und Naturlandschafttypen.
+  doc: Naturlandschaften sind von umitellbaren menschlichen Aktivitäten weitestgehend
+    unbeeinflusst gebliebene Landschaft.
+RP_NaturschutzrechtlichesSchutzgebiet:
+  attributes:
+    istKernzone:
+      doc: Gibt an, ob es sich um eine Kernzone handelt.
+    typ:
+      doc: Klassifikation des Naturschutzgebietes.
+  doc: Schutzgebiet nach Bundes-Naturschutzgesetz.
+RP_Objekt:
+  attributes:
+    bedeutsamkeit:
+      doc: Bedeutsamkeit eines Objekts.
+    gebietsTyp:
+      doc: Gebietstyp eines Objekts.
+    istZweckbindung:
+      doc: Zeigt an, ob es sich bei diesem Objekt um eine Zweckbindung handelt.
+    konkretisierung:
+      doc: Konkretisierung des Rechtscharakters.
+    kuestenmeer:
+      doc: Zeigt an, ob das Objekt im Küstenmeer liegt.
+  doc: RP_Objekt ist die Basisklasse für alle spezifischen Festlegungen eines Raumordnungsplans.
+    Sie selbst ist abstrakt, d.h. sie wird selbst nicht als eigenes Objekt verwendet,
+    sondern vererbt nur ihre Attribute an spezielle Klassen.
+RP_Plan:
+  attributes:
+    aenderungenBisDatum:
+      doc: Datum, bis zu dem Planänderungen berücksichtigt wurden.
+    amtlicherSchluessel:
+      doc: Amtlicher Schlüssel eines Plans auf Basis des  AGS-Schlüssels (Amtlicher
+        Gemeindeschlüssel).
+    aufstellungsbeschlussDatum:
+      doc: Datum des Aufstellungsbeschlusses.
+    auslegungEndDatum:
+      doc: End-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    auslegungStartDatum:
+      doc: Start-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung
+        können mehrere Datumsangaben spezifiziert werden.
+    bereich:
+      doc: Relation auf einen Bereich
+    bundesland:
+      doc: Zuständige Bundesländer für den Plan.
+    datumDesInkrafttretens:
+      doc: Datum des Inkrafttretens des Plans.
+    entwurfsbeschlussDatum:
+      doc: Datum des Entwurfsbeschlusses
+    genehmigungsbehoerde:
+      doc: Zuständige Genehmigungsbehörde
+    planArt:
+      doc: Art des Raumordnungsplans.
+    planbeschlussDatum:
+      doc: Datum des Planbeschlusses.
+    planungsregion:
+      doc: Kennziffer der Planungsregion.
+    rechtsstand:
+      doc: Rechtsstand des Plans.
+    sonstPlanArt:
+      doc: Spezifikation einer weiteren Planart (CodeList) bei planArt == 9999.
+    status:
+      doc: Status des Plans, definiert über eine CodeList.
+    teilabschnitt:
+      doc: Kennziffer des Teilabschnittes.
+    traegerbeteiligungsEndDatum:
+      doc: End-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können
+        mehrere Datumsangaben spezifiziert werden.
+    traegerbeteiligungsStartDatum:
+      doc: Start-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können
+        mehrere Datumsangaben spezifiziert werden.
+    verfahren:
+      doc: Verfahrensstatus des Plans.
+  doc: Die Klasse RP_Plan modelliert einen Raumordnungsplan.
+RP_Planungsraum:
+  attributes:
+    planungsraumBeschreibung:
+      doc: Textliche Beschreibung eines Planungsrauminhalts.
+  doc: Modelliert einen allgemeinen Planungsraum.
+RP_RadwegWanderweg:
+  attributes:
+    typ:
+      doc: Klassifikation von Radwegen und Wanderwegen.
+  doc: Radwege und Wanderwege. Straßenbegleitend oder selbstständig geführt.
+RP_Raumkategorie:
+  attributes:
+    besondererTyp:
+      doc: Klassifikation verschiedener besonderer Raumkategorien.
+    typ:
+      doc: Klassifikation verschiedener Raumkategorien.
+  doc: Raumkategorien sind nach bestimmten Kriterien abgegrenze Gebiete, in denen
+    vergleichbare Strukturen bestehen und in denen die Raumordnung gleichartige Ziele
+    verfolgt. Kriterien können z.B. siedlungsstrukturell, qualitativ oder potentialorientiert
+    sein.
+RP_Rohstoff:
+  attributes:
+    bergbauplanungTyp:
+      doc: Klassifikation von Bergbauplanungstypen.
+    detaillierterRohstoffTyp:
+      doc: Abgebauer Rohstoff in Textform
+    folgenutzung:
+      doc: Klassifikation von Folgenutzungen bestimmter bergbaulicher Maßnahmen.
+    folgenutzungText:
+      doc: Textliche Festlegungen und Spezifizierungen zur Folgenutzung einer Bergbauplanung.
+    istAufschuettungAblagerung:
+      doc: Gibt an, ob der Rohstoff aus einer Aufschüttung oder Ablagerung gewonnen
+        wird
+    rohstoffTyp:
+      doc: Abgebauter Rohstoff.
+    tiefe:
+      doc: Tiefe eines Rohstoffes
+    zeitstufe:
+      doc: Zeitstufe des Rohstoffabbaus.
+    zeitstufeText:
+      doc: Textliche Spezifizierung einer Rohstoffzeitstufe, zum Beispiel kurzfristiger
+        Abbau (Zeitstufe I) und langfristige Sicherung für mindestens 25-30 Jahre
+        (Zeitstufe II).
+  doc: Rohstoff, inklusive Rohstoffprospektion, Rohstoffsicherung, Rohstoffabbau,
+    Bergbau und Bergbaufolgelandschaft.
+RP_Schienenverkehr:
+  attributes:
+    besondererTyp:
+      doc: Klassifikation von besonderer Schienenverkehr-Infrastruktur.
+    typ:
+      doc: Klassifikation von Schienenverkehr-Infrastruktur.
+  doc: Schienenverkehr-Infrastruktur.
+RP_Siedlung:
+  attributes:
+    bauhoehenbeschraenkung:
+      doc: Assoziierte Bauhöhenbeschränkung.
+    istSiedlungsbeschraenkung:
+      doc: Abfrage, ob der FeatureType eine Siedlungsbeschränkung ist.
+  doc: Allgemeines Siedlungsobjekt. Dieses vererbt an mehrere Spezialisierungen, ist
+    aber selbst nicht abstrakt.
+RP_SonstVerkehr:
+  attributes:
+    typ:
+      doc: Sonstige Klassifikation von Verkehrs-Infrastruktur.
+  doc: Sonstige Verkehrsinfrastruktur, die sich nicht eindeutig einem anderen Typ
+    zuordnen lässt.
+RP_SonstigeInfrastruktur:
+  attributes: {}
+  doc: Sonstige Infrastruktur.
+RP_SonstigerFreiraumschutz:
+  attributes: {}
+  doc: Sonstiger Freiraumschutz. Nicht anderweitig zuzuordnende Freiraumstrukturen.
+RP_SonstigerSiedlungsbereich:
+  attributes: {}
+  doc: Sonstiger Siedlungsbereich.
+RP_SozialeInfrastruktur:
+  attributes:
+    typ:
+      doc: Klassifikation von Sozialer Infrastruktur.
+  doc: Soziale Infrastruktur ist ein (unpräziser) Sammelbegriff für Einrichtungen,
+    Leistungen und Dienste in den Kommunen, distinkt von Verkehr, Energieversorgung
+    und Entsorgung. Sie umfasst u.a. Bildung, Gesundheit, Sozialeinrichtungen, Kultureinrichtungen
+    und Einrichtungen der öffentlichen Verwaltung.
+RP_Sperrgebiet:
+  attributes:
+    typ:
+      doc: Klassifikation verschiedener Sperrgebiettypen.
+  doc: Sperrgebiet, Gelände oder Areal, das für die Zivilbevölkerung überhaupt nicht
+    oder zeitweise nicht zugänglich ist.
+RP_Sportanlage:
+  attributes:
+    typ:
+      doc: Klassifikation von Sportanlagen.
+  doc: "Sportanlagen und -bereiche.\r\n"
+RP_Strassenverkehr:
+  attributes:
+    besondererTyp:
+      doc: Klassifikation von besonderer Strassenverkehr-Infrastruktur.
+    typ:
+      doc: Klassifikation von Strassenverkehr-Infrastruktur.
+  doc: Strassenverkehr-Infrastruktur.
+RP_Verkehr:
+  attributes:
+    allgemeinerTyp:
+      doc: Allgemeine Klassifikation der Verkehrs-Arten.
+    bezeichnung:
+      doc: Bezeichnung eines Verkehrstyps.
+    status:
+      doc: Klassifikation von Verkehrsstati.
+  doc: Enthält allgemeine Verkehrs-Infrastruktur, die auch multiple Typen (etwa Straße
+    und Schiene) beinhalten kann. Die Klasse selbst vererbt an spezialisierte Verkehrsarten,
+    ist aber nicht abstrakt (d.h. sie kann selbst auch verwendet werden).
+RP_Wasserschutz:
+  attributes:
+    typ:
+      doc: Klassifikation des Wasserschutztyps.
+    zone:
+      doc: Wasserschutzzone
+  doc: Grund-, Trink- und Oberflächenwasserschutz.
+RP_Wasserverkehr:
+  attributes:
+    typ:
+      doc: Klassifikation von Wasserverkehr-Infrastruktur.
+  doc: Wasserverkehr-Infrastruktur.
+RP_Wasserwirtschaft:
+  attributes:
+    typ:
+      doc: Klassifikation von Anlagen und Einrichtungen der Wasserwirtschaft
+  doc: Wasserwirtschaft beinhaltet die zielbewusste Ordnung aller menschlichen Einwirkungen
+    auf das ober- und unterirdische Wasser. Im Datenschema werden Gewässer, Wasserschutz,
+    Hochwasserschutz und Wasserverkehr in gesonderten Klassen gehalten.
+RP_WohnenSiedlung:
+  attributes:
+    typ:
+      doc: Klassifikation von Wohnen- und Siedlungstypen.
+  doc: Wohn- und Siedlungsstruktur und -funktionen.
+RP_ZentralerOrt:
+  attributes:
+    sonstigerTyp:
+      doc: Sonstige Klassifikation von Zentralen Orten.
+    typ:
+      doc: Klassifikation von Zentralen Orten.
+  doc: Zentrale Orte übernehmen die Versorgung ihrer Einwohner sowie Versorgungs-
+    und Entwicklungsfunktionen für den Einzugsbereich des Zentralen Ortes. Das zentralörtliche
+    System ist hierarchisch gegliedert.
+SO_Baubeschraenkung:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung des Bauverbots bzw. der Baubeschränkung
+    detailArtDerFestlegung:
+      doc: Detaillierte Klassifizierung des Bauverbots bzw. der Baubeschränkung über
+        eine Codeliste
+    name:
+      doc: Informelle bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung
+    rechtlicheGrundlage:
+      doc: Rechtliche Grundlage des Bauverbots bzw. der Baubeschränkung
+  doc: Bereich, in denen Verbote oder Beschränkungen für die Errichtung baulicher
+    Anlagen bestehen
+SO_Bereich:
+  attributes:
+    gehoertZuPlan:
+      doc: Referenz auf den Plan, zu dem der Bereich gehört
+  doc: "Bereich eines sonstigen raumbezogenen Plans.\r\n"
+SO_Bodenschutzrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung der Festlegung.
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere Klassifizierung der Festlegung.
+    istVerdachtsflaeche:
+      doc: Angabe ob es sich um eine Verdachtsfläche handelt.
+    name:
+      doc: Informelle Bezeichnung der Festlegung.
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung. bzw. Nummer in einem
+        Altlast-Kataster
+  doc: "Festlegung nach Bodenschutzrecht.\r\n"
+SO_Denkmalschutzrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Rechtliche Klassifizierung der Festlegung
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere rechtliche Klassifizierung
+        der Festlegung.
+    name:
+      doc: Informelle Bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung.
+    weltkulturerbe:
+      doc: Gibt an, ob das geschützte Objekt zum Weltkulturerbe gehört.
+  doc: "Festlegung nach Denkmalschutzrecht\r\n"
+SO_Flaechenobjekt:
+  attributes:
+    flaechenschluss:
+      doc: 'Zeigt an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt
+        gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen,
+        sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte
+        der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte
+        überdeckt den Geltungsbereich des sonstigen raumbezogenen Plans vollständig. '
+    position:
+      doc: 'Flächenhafter Raumbezug des Objektes (Eine Einzelfläche oder eine Menge
+        von Flächen, die sich nicht überlappen dürfen). '
+  doc: Basisklasse für alle Objekte mit flächenhaftem Raumbezug (eine Einzelfläche
+    oder eine Menge von Flächen, die sich nicht überlappen dürfen).
+SO_Forstrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung der Eigentumsart des Waldes.
+    betreten:
+      doc: Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die
+        in dem Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz.
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere Klassifizierung der Eigentumsart
+        des Waldes
+    funktion:
+      doc: Klassifizierung der Fukktion des Waldes
+    name:
+      doc: Informelle Bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung
+  doc: Festlegung nach Forstrecht
+SO_Gebiet:
+  attributes:
+    aufstellungsbeschhlussDatum:
+      doc: Datum des Aufstellungsbeschlusses
+    durchfuehrungEndDatum:
+      doc: End-Datum der Durchführung
+    durchfuehrungStartDatum:
+      doc: Start-Datum der Durchführung
+    gebietsArt:
+      doc: Klassifikation des Gebietes nach BauGB.
+    gemeinde:
+      doc: Zuständige Gemeinde
+    rechtsstandGebiet:
+      doc: Rechtsstand der Gebietsausweisung
+    sonstGebietsArt:
+      doc: Über eine Codeliste definierte Klassifikation einer nicht auf dem BauGB
+        beruhenden, z.B. länderspezifischen Gebietsausweisung. In dem Fall muss das
+        Attribut "gebietsArt" den Wert 9999 (Sonstiges) haben.
+    sonstRechtsstandGebiet:
+      doc: Über eine Codeliste definierter sonstiger Rechtsstand der Gebietsausweisung,
+        der nicht durch die Liste SO_RechtsstandGebietTyp wiedergegeben werden kann.
+        Das Attribut "rechtsstandGebiet" muss in diesem Fall den Wert 9999 (Sonstiges)
+        haben.
+    traegerMassnahme:
+      doc: Maßnahmen-Träger
+  doc: "Umgrenzung eines sonstigen Gebietes nach BauGB\r\n"
+SO_Gelaendemorphologie:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifikation der Geländestruktur
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere Klassifikation der Geländestruktur
+    name:
+      doc: Informelle Bezeichnung der Struktur
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Struktur
+  doc: Das Landschaftsbild prägende Geländestruktur
+SO_Geometrieobjekt:
+  attributes:
+    flaechenschluss:
+      doc: 'Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt
+        oder Überlagerungsobjekt gebildet werden soll. Flächenschlussobjekte dürfen
+        sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die
+        jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung
+        der Flächenschlussobjekte überdeckt den Geltungsbereich des sonstigen raumbezogenen
+        Plans vollständig. '
+    flussrichtung:
+      doc: "Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften\
+        \ Raumbezug hat. Ist es mit dem Wert true belegt, wird damit ausgedrückt,\
+        \ dass der Linie eine Flussrichtung  in Digitalisierungsrichtung zugeordnet\
+        \ ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge\
+        \ der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung\
+        \  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist,\
+        \ bleibt der Implementierung überlassen.\r\nIst der Attributwert false oder\
+        \ das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte\
+        \ irrelevant."
+    nordwinkel:
+      doc: Orientierung des Objektes bei punktförmigem Raumbezug als Winkel gegen
+        die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach
+        Süd und West)
+    position:
+      doc: Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte
+        Geometrie ist nicht zugelassen.
+  doc: Basisklasse für alle Objekte mit variablem Raumbezug. Ein konkretes Objekt
+    muss entweder punktförmigen, linienförmigen oder flächenhaften Raumbezug haben,
+    gemischte Geometrie ist nicht zugelassen.
+SO_Gewaesser:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung des Gewässers
+    name:
+      doc: Informelle Bezeichnung dees Gewässers
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer des Gewässers.
+  doc: 'Planartübergreifende Klasse zur Abbildung von Gewässern '
+SO_Grenze:
+  attributes:
+    sonstTyp:
+      doc: Über eine Codeliste definierte weitere Grenztypen, wenn das Attribut typ
+        den Wert 9999 hat.
+    typ:
+      doc: Typ der Grenze
+  doc: Grenze einer Verwaltungseinheit oder sonstige Grenze in raumbezogenen Plänen.
+SO_KomplexeFestlegungGewaesser:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        näher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en).
+  doc: Spezifikation der Zweckbestimmung der Fläche
+SO_KomplexeZweckbestStrassenverkehr:
+  attributes:
+    allgemein:
+      doc: Allgemeine Zweckbestimmung der Fläche oder Anlage
+    aufschrift:
+      doc: Aufschrift
+    detail:
+      doc: ber eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung
+        nher detaillieren.
+    textlicheErgaenzung:
+      doc: Textliche Ergänzung der spezifizierten Zweckbestimmung(en)
+  doc: Spezifikation der Zweckbestimmung einer Fläche oder Anlage für den Strassenverkehr
+SO_Linienobjekt:
+  attributes:
+    position:
+      doc: Linienförmiger Raumbezug (Einzelne zusammenhängende Kurve, die aus Linienstücken
+        und Kreisbögen aufgebaut ist, oder eine Menge derartiger Kurven),
+  doc: Basisklasse für Objekte mit linienförmigem Raumbezug (eine einzelne zusammenhängende
+    Kurve, die aus Linienstücken und Kreisbögen zusammengesetzt sein kann, oder eine
+    Menge derartiger Kurven).
+SO_Luftverkehrsrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Rechtliche Klassifizierung der Festlegung.
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere Klassifizierung der Festlegung.
+    laermschutzzone:
+      doc: Lärmschutzzone nach LuftVG.
+    name:
+      doc: Informelle Bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung
+  doc: "Festlegung nach Luftverkehrsrecht.\r\n"
+SO_Objekt:
+  attributes:
+    sonstRechtscharakter:
+      doc: Klassifizierung des Rechtscharakters wenn das Attribut "rechtscharakter"
+        den Wert "Sonstiges" (9999)  hat.
+  doc: Basisklasse für die Inhalte sonstiger raumbezogener Planwerke ,von Klassen
+    zur Modellierung nachrichtlicher Übernahmen, sowie Planart-übergreifende Planinhalte.
+SO_Plan:
+  attributes:
+    bereich:
+      doc: Referenz auf einen Bereich des sonstigen raumbezogenen Plans.
+    gemeinde:
+      doc: Zuständige Gemeinde
+    planArt:
+      doc: Über eine Codeliste definierter Typ des Plans.
+    planaufstellendeGemeinde:
+      doc: Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese
+        nicht unter dem Attribut gemeinde aufgeführt ist. Dies kann z.B. nach Gemeindefusionen
+        der Fall sein.
+    plangeber:
+      doc: "Für den Plan zuständige Stelle.\r\n"
+    versionBauGBDatum:
+      doc: Bekanntmachungs-Datum der zugrunde liegenden Version des BauGB.
+    versionBauGBText:
+      doc: Textliche Spezifikation der zugrunde liegenden Version des BauGB.
+    versionSonstRechtsgrundlageDatum:
+      doc: Bekanntmachungs-Datum einer zugrunde liegenden anderen Rechtsgrundlage
+        als das BauGB.
+    versionSonstRechtsgrundlageText:
+      doc: Textliche Spezifikation einer zugrunde liegenden anderen Rechtsgrundlage
+        als das  BauGB.
+  doc: Klasse für sonstige, z. B. länderspezifische raumbezogene Planwerke.
+SO_Punktobjekt:
+  attributes:
+    nordwinkel:
+      doc: Orientierung des Punktobjektes als Winkel gegen die Nordrichtung. Zählweise
+        im geographischen Sinn (von Nord über Ost nach Süd und West).
+    position:
+      doc: Punktförmiger Raumbezug (Einzelpunkt oder Punktmenge).
+  doc: Basisklasse für Objekte mit punktförmigem Raumbezug (Einzelpunkt oder Punktmenge).
+SO_Schienenverkehrsrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Rechtliche Klassifizierung der Festlegung
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere rechtliche Klassifizierung
+        der Festlegung.
+    name:
+      doc: Informelle Bezeichnung der Festlegung.
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung.
+  doc: Festlegung nach Schienenverkehrsrecht.
+SO_SchutzgebietWasserrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung des Schutzgebietes
+    detailArtDerFestlegung:
+      doc: Über eine Codelieste definierte detailliertere Klassifizierung
+    name:
+      doc: Informelle Bezeichnung des Gebiets
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer des Gebiets.
+    zone:
+      doc: Klassifizierung der Schutzzone
+  doc: "Schutzgebiet nach WasserSchutzGesetz (WSG) bzw. HeilQuellenSchutzGesetz (HQSG).\r\
+    \n"
+SO_Sichtflaeche:
+  attributes:
+    art:
+      doc: Klassifikation der Einmündung einer untergeordneten auf eine übergeordnete
+        Straße gemäß den "Richtlinien für die Anlage von Stadtstraßen" (TAST 06)
+    geschwindigkeit:
+      doc: Zulässige Geschwindigkeit in der übergeordneten Straße, im km/h
+    knotenpunkt:
+      doc: Klassifikation des Knotenpunktes, dem die Sichtfläche zugeordnet ist
+    schenkellaenge:
+      doc: Schenkellänge des Sichtdreiecks gemäß RAST 06
+  doc: Flächenhafte Festlegung einer Sichtfläche bzw. eines Sichtdreiecks
+SO_SonstigesRecht:
+  attributes:
+    artDerFestlegung:
+      doc: Rechtliche Klassifizierung der Festlegung
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere rechtliche Klassifizierung
+        der Festlegung.
+    name:
+      doc: Informelle Bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung
+  doc: "Sonstige Festlegung.\r\n"
+SO_Strassenverkehr:
+  attributes:
+    BM:
+      doc: Maximal zulässige Baumasse.
+    BMZ:
+      doc: Maximal zulässige Baumassenzahl.
+    BMZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumassenzahl.
+    BM_Ausn:
+      doc: Ausnahmsweise maximal zulässige Baumasse.
+    Bmax:
+      doc: Maximale Breite von Baugrundstücken.
+    Bmin:
+      doc: Minimale Breite von Baugrundstücken
+    Fmax:
+      doc: Höchstmaß für die Größe (Fläche) eines Baugrundstücks.
+    Fmin:
+      doc: Mindestmaß für die Größe (Fläche) eines Baugrundstücks.
+    GF:
+      doc: Maximal zulässige Geschossfläche.
+    GFZ:
+      doc: Maximal zulässige Geschossflächenzahl.
+    GFZ_Ausn:
+      doc: Maximal zulässige Geschossflächenzahl als Ausnahme.
+    GFZmax:
+      doc: Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut
+        GFZmin muss ebenfalls belegt sein.
+    GFZmin:
+      doc: Minimal zulässige Geschossflächenzahl .
+    GF_Ausn:
+      doc: Ausnahmsweise maximal zulässige Geschossfläche.
+    GFmax:
+      doc: Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut
+        GFmin muss ebenfalls belegt sein.
+    GFmin:
+      doc: Minimal zulässige Geschossfläche
+    GR:
+      doc: Maximal zulässige Grundfläche.
+    GRZ:
+      doc: Maximal zulässige Grundflächenzahl
+    GRZ_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundflächenzahl.
+    GRZmax:
+      doc: Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut
+        GRZmin muss ebenfalls spezifiziert werden.
+    GRZmin:
+      doc: Minimal zulässige Grundflächenzahl.
+    GR_Ausn:
+      doc: Ausnahmsweise maximal zulässige Grundfläche.
+    GRmax:
+      doc: Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin
+        muss ebenfalls spezifiziert werden.
+    GRmin:
+      doc: Minimal zulässige Grundfläche.
+    MZspezial:
+      doc: Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in
+        Abhängigkeit von der Bebauungsart.
+    MaxZahlWohnungen:
+      doc: Höchstzulässige Zahl der Wohnungen in Wohngebäuden
+    MinGRWohneinheit:
+      doc: Minimale Größe eines Grundstücks pro Wohneinheit
+    Tmax:
+      doc: Maximale Tiefe von Baugrundstücken.
+    Tmin:
+      doc: Minimale Tiefe von Baugrundstücken.
+    Z:
+      doc: Maximalzahl der oberirdischen Vollgeschosse.
+    ZU:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse.
+    ZU_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.
+    ZUmax:
+      doc: Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe.
+        Das Attribut ZUmin muss ebenfalls belegt sein.
+    ZUmin:
+      doc: Minimal zulässige Zahl der unterirdischen Geschosse.
+    ZUzwingend:
+      doc: Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.
+    Z_Ausn:
+      doc: Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.
+    Z_Dach:
+      doc: Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse
+        sind.
+    Z_Staffel:
+      doc: Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche
+        Staffelgeschosse
+    Zmax:
+      doc: Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe.
+        Das Attribut Zmin muss ebenfalls belegt sein.
+    Zmin:
+      doc: Minimal zulässige Zahl der oberirdischen Vollgeschosse.
+    Zzwingend:
+      doc: Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.
+    artDerFestlegung:
+      doc: Zweckbestimmung der Straßenverkehrsfläche oder Anlage
+    begrenzungslinie:
+      doc: Referenz auf eine Linie, die die Straßenverkehrsfläche begrenzt.
+    einteilung:
+      doc: Straßeneinteilung nach Bundes-Fernstraßengesetz
+    hatDarstellungMitBesondZweckbest:
+      doc: Bei true wird ein flächenhaftes Planobjekt gemäß § 6.3 PlanZV dargestellt
+        ("Verkehrsflächen besonderer Zweckbestimmung"), und bei false gemäß § 6.1
+        PlanZV ("Straßenverkehrsflächen").
+    istOrtsdurchfahrt:
+      doc: Gibt an, ob es sich um eine Ortsdurchfahrt handelt
+    name:
+      doc: Informelle Bezeichnung der Festlegung.
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung.
+    nutzungsform:
+      doc: Nutzungsform der Fläche / Anlage
+    zugunstenVon:
+      doc: Begünstigter der Ausweisung
+  doc: 'Verkehrsfläche besonderer Zweckbestimmung (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB),
+    Darstellung von Flächen für den überörtlichen Verkehr und für die örtlichen Hauptverkehrszüge
+    ( §5, Abs. 2, Nr. 3 BauGB) sowie Festlegung nach Straßenverkehrsrecht. '
+SO_TextAbschnittFlaeche:
+  attributes: {}
+  doc: Bereich, in dem bestimmte textlich spezifizierte Planinhalte gültig sind, die
+    über die Relation "
+SO_Wasserrecht:
+  attributes:
+    artDerFestlegung:
+      doc: Rechtliche Klassifizierung der Festlegung.
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere rechtliche Klassifizierung
+        der Festlegung.
+    istNatuerlichesUberschwemmungsgebiet:
+      doc: Gibt an, ob es sich bei der Fläche um ein natürliches Überschwemmungsgebiet
+        handelt.
+    name:
+      doc: Informelle Bezeichnung der Festlegung
+    nummer:
+      doc: Amtliche Bezeichnung / Kennziffer der Festlegung
+  doc: Festlegung nach Wasserhaushaltsgesetz (WHG)
+SO_Wasserwirtschaft:
+  attributes:
+    artDerFestlegung:
+      doc: Klassifizierung der Festlegung
+    detailArtDerFestlegung:
+      doc: Über eine Codeliste definierte detailliertere rechtliche Klassifizierung
+        der Festlegung.
+  doc: Flächen für die Wasserwirtschaft, sowie Flächen für Hochwasserschutzanlagen
+    und für die Regelung des Wasserabflusses (§9 Abs. 1 Nr. 16a und 16b BauGB, §5
+    Abs. 2 Nr. 7 BauGB).
+XP_AbstraktesPraesentationsobjekt:
+  attributes:
+    art:
+      doc: "\"art\" gibt die Namen der Attribute an, die mit dem Präsentationsobjekt\
+        \ dargestellt werden sollen. Dabei ist beim Verweis auf komplexe Attribute\
+        \ des Fachobjekts die Xpath-Syntax zu verwenden. Wenn das zugehörige Attribut\
+        \ oder Sub-Attribut des Fachobjekts mehrfach belegt ist, muss die []-Syntax\
+        \ zur Spezifikation des zugehörigen Instanz-Attributs benutzt werden. \r\n\
+        \r\nDas Attribut 'art' darf nur bei \"Freien Präsentationsobjekten\" (dientZurDarstellungVon\
+        \ = NULL) nicht belegt sein."
+    darstellungsprioritaet:
+      doc: Enthält die Darstellungspriorität für Elemente der Signatur. Eine vom Standardwert
+        abweichende Priorität wird über dieses Attribut definiert und nicht über eine
+        neue Signatur.
+    dientZurDarstellungVon:
+      doc: Verweis auf das Fachobjekt, deren Plandarstellung durch das Präsentationsobjekt
+        unterstützt werden soll.
+    gehoertZuBereich:
+      doc: Referenz auf den Bereich, zu dem das Präsentationsobjekt gehört.
+    stylesheetId:
+      doc: Das Attribut "stylesheetId" zeigt auf ein extern definiertes Stylesheet,
+        das Parameter zur Visualisierung von Flächen, Linien, Punkten und Texten enthält.
+        Jedem Stylesheet ist weiterhin eine Darstellungspriorität zugeordnet. Außerdem
+        kann ein Stylesheet logische Elemente enthalten,  die die Visualisierung abhängig
+        machen vom Wert des durch "art" definierten Attributes des Fachobjektes, das
+        durch die Relation "dientZurDarstellungVon" referiert wird.
+  doc: 'Abstrakte Basisklasse für alle Präsentationsobjekte. Die Attribute entsprechen
+    dem ALKIS-Objekt AP_GPO, wobei das Attribut "signaturnummer" in '
+XP_BegruendungAbschnitt:
+  attributes:
+    refText:
+      doc: Referenz auf ein externes Dokument das den Begründungs-Abschnitt enthält.
+    schluessel:
+      doc: Schlüssel zur Referenzierung des Abschnitts von einem Fachobjekt aus.
+    text:
+      doc: Inhalt eines Abschnitts der Begründung.
+  doc: Ein Abschnitt der Begründung des Plans.
+XP_Bereich:
+  attributes:
+    aendertPlan:
+      doc: "Verweis auf einen anderen Plan, der durch den vorliegenden Planbereich\
+        \ geändert wird.\r\n\r\nDies Konzept befindet sich noch in der Erprobung.\
+        \ Es wird in nachfolgenden Versionen des Standards voraussichtlich geändert\
+        \ oder erweitert."
+    aendertPlanBereich:
+      doc: "Verweis auf einen Planbereich eines anderen Plans, der durch den vorliegenden\
+        \ Planbereich geändert wird.\r\n\r\nDies Konzept befindet sich noch in der\
+        \ Erprobung. Es wird in nachfolgenden Versionen des Standards voraussichtlich\
+        \ geändert oder erweitert."
+    bedeutung:
+      doc: Spezifikation der semantischen Bedeutung eines Bereiches.
+    detaillierteBedeutung:
+      doc: Detaillierte Erklärung der semantischen Bedeutung eines Bereiches, in Ergänzung
+        des Attributs "bedeutung".
+    erstellungsMassstab:
+      doc: Der bei der Erstellung der Inhalte des Bereichs benutzte Kartenmaßstab.
+        Wenn dieses Attribut nicht spezifiziert ist, gilt für den Bereich der auf
+        Planebene (XP_Plan) spezifizierte Maßstab.
+    geltungsbereich:
+      doc: Räumliche Abgrenzung des Bereiches. Wenn dieses Attribut nicht spezifiziert
+        ist, gilt für den Bereich der auf Planebene (XP_Plan) spezifizierte Geltungsbereich.
+    name:
+      doc: Bezeichnung des Bereiches
+    nummer:
+      doc: Nummer des Bereichs. Bereichsnummern beginnen standardmäßig mit 0.
+    planinhalt:
+      doc: Verweis auf einen Planinhalt des Bereichs
+    praesentationsobjekt:
+      doc: Referenz auf ein Präsentationsbereich, das zum Bereich gehört.
+    refScan:
+      doc: "Referenz auf einen georeferenzierte Rasterplan, der die Inhalte des Bereichs\
+        \ wiedergibt. Das über refScan referierte Rasterbild zeigt einen Plan, dessen\
+        \ Geltungsbereich durch den Geltungsbereich des Bereiches (Attribut geltungsbereich\
+        \ von XP_Bereich) oder, wenn geltungsbereich nicht belegt ist, den Geltungsbereich\
+        \ des Gesamtplans (Attribut raeumlicherGeltungsbereich von XP_Plan) definiert\
+        \ ist. \r\n\r\nIm Standard sind nur georeferenzierte Rasterpläne zugelassen.\
+        \ Die über refScan referierte externe Referenz muss deshalb entweder von der\
+        \ Art \"PlanMitGeoreferenz\" sein oder die URL eines Geodienstes enthalten."
+    texte:
+      doc: Referenz auf einen textlich formulierten Planinhalt.
+    wurdeGeaendertVonPlan:
+      doc: "Verweis auf einen anderen Plan, durch den der vorliegende Planbereich\
+        \ geändert wurde.\r\n\r\nDies Konzept befindet sich noch in der Erprobung.\
+        \ Es wird in nachfolgenden Versionen des Standards voraussichtlich geändert\
+        \ oder erweitert."
+    wurdeGeaendertVonPlanBereich:
+      doc: "Verweis auf einen Planbereich eines anderen Plan, durch den der vorliegende\
+        \ Planbereich geändert wurde.\r\n\r\nDies Konzept befindet sich noch in der\
+        \ Erprobung. Es wird in nachfolgenden Versionen des Standards voraussichtlich\
+        \ geändert oder erweitert."
+  doc: Abstrakte Oberklasse für die Modellierung von Bereichen. Ein Bereich fasst
+    die Inhalte eines Plans nach bestimmten Kriterien zusammen.
+XP_DatumAttribut:
+  attributes:
+    wert:
+      doc: Attributwert
+  doc: "Generische Attribute vom Datentyp \"Datum\"\r\n"
+XP_DoubleAttribut:
+  attributes:
+    wert:
+      doc: Attributwert
+  doc: "Generisches Attribut vom Datentyp \"Double\".\r\n"
+XP_ExterneReferenz:
+  attributes:
+    art:
+      doc: 'Typisierung der referierten Dokumente: Beliebiges Dokument oder georeferenzierter
+        Plan.'
+    beschreibung:
+      doc: Beschreibung des referierten Dokuments
+    datum:
+      doc: Datum des referierten Dokuments
+    georefURL:
+      doc: Referenz auf eine Georeferenzierungs-Datei. Das Attribut ist nur relevant
+        bei Verweisen auf georeferenzierte Rasterbilder. Wenn der XPlanGML Datensatz
+        und das referierte Dokument in einem hierarchischen Ordnersystem gespeichert
+        sind, kann die URI auch einen relativen Pfad vom XPlanGML-Datensatz zum Dokument
+        enthalten.
+    referenzMimeType:
+      doc: Mime-Type des referierten Dokuments
+    referenzName:
+      doc: Name bzw. Titel des referierten Dokuments. Der Standardname ist "Unbekannt".
+    referenzURL:
+      doc: "URI des referierten Dokuments, über den auf das Dokument lesend zugegriffen\
+        \ werden kann. Wenn der XPlanGML Datensatz und das referierte Dokument in\
+        \ einem hierarchischen Ordnersystem gespeichert sind, kann die URI auch einen\
+        \ relativen Pfad vom XPlanGML-Datensatz zum Dokument enthalten. \r\nStandardmaßig\
+        \ wird der Wert des Attributes referenzName verwendet."
+  doc: Verweis auf ein extern gespeichertes Dokument oder einen extern gespeicherten,
+    georeferenzierten Plan. Einer der beiden Attribute "
+XP_FPO:
+  attributes:
+    position:
+      doc: Zur Plandarstellung benutzte Flächengeometrie.
+  doc: "Flächenförmiges Präsentationsobjekt. Entspricht der ALKIS Objektklasse AP_FPO.\r\
+    \n"
+XP_Gemeinde:
+  attributes:
+    ags:
+      doc: Amtlicher Gemeindeschlüssel (früher Gemeinde-Kennziffer)
+    gemeindeName:
+      doc: Name der Gemeinde.
+    ortsteilName:
+      doc: Name des Ortsteils
+    rs:
+      doc: Regionalschlüssel
+  doc: Spezifikation einer für die Aufstellung des Plans zuständigen Gemeinde.
+XP_GenerAttribut:
+  attributes:
+    name:
+      doc: Name des Generischen Attributs
+  doc: "Abstrakte Basisklasse für Generische Attribute.\r\n"
+XP_GesetzlicheGrundlage:
+  attributes:
+    datum:
+      doc: Bekanntmachungs-Datum des Gesetzes
+    detail:
+      doc: Detaillierte Spezifikation der gesetzlichen Grundlage mit Angabe einer
+        Paragraphennummer
+    name:
+      doc: Name / Titel des Gesetzes
+  doc: Angeben zur Spezifikation der gesetzlichen Grundlage eines Planinhalts
+XP_Hoehenangabe:
+  attributes:
+    abweichenderBezugspunkt:
+      doc: Textuelle Spezifikation eines Höhenbezugspunktes wenn das Attribut "bezugspunkt"
+        nicht belegt ist.
+    abweichenderHoehenbezug:
+      doc: Textuelle Spezifikation des Höhenbezuges wenn das Attribut "hoehenbezug"
+        nicht belegt ist.
+    bezugspunkt:
+      doc: Bestimmung des Bezugspunktes der Höhenangaben. Wenn weder dies Attribut
+        noch das Attribut "abweichenderBezugspunkt" belegt sind, soll die Höhenangabe
+        als vertikale Einschränkung des zugeordneten Planinhalts interpretiert werden.
+    bezugspunktText:
+      doc: 'Das Attribut spezifiziert  oder ergänzt den Bezug des Höhenbezugspunktes
+        (insbesondere der Traufhöhe), z. B. als "bergseitig, "talseitig", "straßenseitig"
+        oder "gartenseitig". '
+    h:
+      doc: Maximal zulässige Höhe des Bezugspunktes (bezugspunkt) .
+    hMax:
+      doc: 'Maximal zulässige Höhe des Bezugspunktes (bezugspunkt) bei einer Bereichsangabe,
+        bzw. obere Grenze des vertikalen Gültigkeitsbereiches eines Planinhalts, wenn
+        "bezugspunkt" nicht belegt ist.  In diesem Fall gilt: Ist  "hMin" nicht belegt,
+        gilt die Festlegung bis zur Höhe "hMax".'
+    hMin:
+      doc: 'Minimal zulässige Höhe des Bezugspunktes (bezugspunkt) bei einer Bereichsangabe,
+        bzw. untere Grenze des vertikalen Gültigkeitsbereiches eines Planinhalts,
+        wenn "bezugspunkt" nicht belegt ist. In diesem Fall gilt: Ist  "hMax" nicht
+        belegt, gilt die Festlegung ab der Höhe "hMin".'
+    hZwingend:
+      doc: Zwingend einzuhaltende Höhe des Bezugspunktes (bezugspunkt) , bzw. Beschränkung
+        der vertikalen Gültigkeitsbereiches eines Planinhalts auf eine bestimmte Höhe.
+    hoehenbezug:
+      doc: "Art des Höhenbezuges.\r\n"
+  doc: Spezifikation einer Angabe zur vertikalen Höhe oder zu einem Bereich vertikaler
+    Höhen. Es ist möglich, spezifische Höhenangaben (z.B. die First- oder Traufhöhe
+    eines Gebäudes) vorzugeben oder einzuschränken, oder den Gültigkeitsbereich eines
+    Planinhalts auf eine bestimmte Höhe (
+XP_IntegerAttribut:
+  attributes:
+    wert:
+      doc: Attributwert
+  doc: "Generische Attribute vom Datentyp \"Integer\".\r\n"
+XP_LPO:
+  attributes:
+    position:
+      doc: Zur Plandarstellung benutzte Liniengeometrie.
+  doc: "Linienförmiges Präsentationsobjekt. Entspricht der ALKIS Objektklasse AP_LPO.\r\
+    \n"
+XP_LTO:
+  attributes:
+    position:
+      doc: Linienführung des Textes
+  doc: "Textförmiges Präsentationsobjekt mit linienförmiger Textgeometrie. Entspricht\
+    \ der ALKIS-Objektklasse AP_LTO.\r\n"
+XP_Nutzungsschablone:
+  attributes:
+    spaltenAnz:
+      doc: Anzahl der Spalten in der Nutzungsschablone
+    zeilenAnz:
+      doc: Anzahl der Zeilen in der Nutzungsschablone
+  doc: "Modelliert eine Nutzungsschablone. Die darzustellenden Attributwerte werden\
+    \ zeilenweise in die Nutzungsschablone geschrieben.\r\n"
+XP_Objekt:
+  attributes:
+    aufschrift:
+      doc: Spezifischer Text zur Beschriftung von Planinhalten
+    ebene:
+      doc: Zuordnung des Objektes zu einer vertikalen Ebene. Der Standard-Ebene 0
+        sind Objekte auf der Erdoberfläche zugeordnet. Nur unter diesen Objekten wird
+        der Flächenschluss hergestellt. Bei Plan-Objekten, die im wesentlichen unterhalb
+        der Erdoberfläche liegen  (z.B. Tunnel), ist ebene < 0. Bei  Objekten, die
+        im wesentlichen oberhalb der Erdoberfläche liegen (z.B. Festsetzungen auf
+        Brücken), ist ebene > 0. Zwischen Objekten auf Ebene 0 und einer Ebene <>
+        0 muss nicht unbedingt eine (vollständige) physikalische Trennung bestehen.
+    endeBedingung:
+      doc: Notwendige Bedingung für das Ende der Wirksamkeit eines Planinhalts.
+    externeReferenz:
+      doc: Referenz auf ein Dokument oder einen georeferenzierten Rasterplan.
+    gehoertZuBereich:
+      doc: Verweis auf den Bereich, zu dem der Planinhalt gehört. Diese Relation sollte
+        immer belegt werden. In Version 6.0 wird sie in eine Pflicht-Relation umgewandelt
+        werden.
+    gesetzlicheGrundlage:
+      doc: Angabe der gesetzlichen Grundlage des Planinhalts.
+    gliederung1:
+      doc: ' Die „gliederung1“ beinhaltet bei einer Nummerierung der Baugebietsteilfläche
+        oder Baufläche die Gliederungszahl, unter Umständen zusätzlich ein Kürzel
+        für eingeschränkte Nutzungen, z.B. gliederung1=2 bei WA 2, gliederung1=-E
+        3 bei GE-E 3; bei einer überlagernde Festlegung beinhaltet „gliederung1“ ein
+        Kürzel und eine Gliederungszahl, z.B. gliederung1 = AP 1 bei AP 1.'
+    gliederung2:
+      doc: 'Die `gliederung2` kommt bei weitergehenden, besonderen Festsetzungen für
+        Texteinschriebe mit Zahlen-, Buchstabencodes oder Paragrafenbezügen im Plan
+        zum Einsatz. Beispiele: (A), (A, B, G) oder Zone 1.'
+    hatGenerAttribut:
+      doc: Erweiterung des definierten Attributsatzes eines Objektes durch generische
+        Attribute.
+    hoehenangabe:
+      doc: Angaben zur vertikalen Lage und Höhe eines Planinhalts.
+    rechtscharakter:
+      doc: Rechtliche Charakterisierung eines Planinhalts
+    rechtsstand:
+      doc: "Angabe, ob der Planinhalt bereits besteht, geplant ist, oder zukünftig\
+        \ wegfallen soll. \r\nDas Attribut sollte nur verwendet werden, wenn es für\
+        \ die planerische Aussage notwendig ist. Eine generelle Belegung für jedes\
+        \ Objekt ist nicht hilfreich."
+    refBegruendungInhalt:
+      doc: Referenz eines raumbezogenen Fachobjektes auf Teile der Begründung.
+    refTextInhalt:
+      doc: Referenz eines raumbezogenen Fachobjektes auf textuell formulierte Planinhalte.
+    startBedingung:
+      doc: Notwendige Bedingung für die Wirksamkeit eines Planinhalts.
+    text:
+      doc: Beliebiger Text
+    uuid:
+      doc: Eindeutiger Identifier des Objektes.
+    wirdDargestelltDurch:
+      doc: Verweis auf ein Präsentationsobjekt, das die Plandarstellung des Fachobjektes
+        unterstützen soll.
+  doc: Abstrakte Oberklasse für alle XPlanung-Fachobjekte. Die Attribute dieser Klasse
+    werden über den Vererbungs-Mechanismus an alle Fachobjekte weitergegeben.
+XP_PPO:
+  attributes:
+    drehwinkel:
+      doc: Winkel um den der Text oder die Signatur mit punktförmiger Bezugsgeometrie
+        aus der Horizontalen gedreht ist, Angabe in Grad. Zählweise im mathematisch
+        positiven Sinn (von Ost über Nord nach West und Süd).
+    hat:
+      doc: Die Relation ermöglicht es, einem punktförmigen Präsentationsobjekt ein
+        linienförmiges Präsentationsobjekt zuzuweisen. Einziger bekannter Anwendungsfall
+        ist der Zuordnungspfeil eines Symbols oder einer Nutzungsschablone.
+    position:
+      doc: Position des zur Visualisierung benutzten  Textes oder Symbols,
+    skalierung:
+      doc: Skalierungsfaktor für Symbole.
+  doc: "Punktförmiges Präsentationsobjekt. Entspricht der ALKIS-Objektklasse AP_PPO.\r\
+    \n"
+XP_PTO:
+  attributes:
+    drehwinkel:
+      doc: Winkel um den der Text oder die Signatur mit punktförmiger Bezugsgeometrie
+        aus der Horizontalen gedreht ist, Angabe in Grad. Zählweise im mathematisch
+        positiven Sinn (von Ost über Nord nach West und Süd).
+    position:
+      doc: Position des Textes
+  doc: "Textförmiges Präsentationsobjekt mit punktförmiger Festlegung der Textposition.\
+    \ Entspricht der ALKIS-Objektklasse AP_PTO.\r\n"
+XP_Plan:
+  attributes:
+    aendertPlan:
+      doc: Verweis auf einen anderen Plan, der durch den vorliegenden Plan geändert
+        wird.
+    aendertPlanBereich:
+      doc: "Verweis auf einen Planbereich eines anderen Plans, der durch den vorliegenden\
+        \ Plan geändert wird.\r\n\r\nDies Konzept befindet sich noch in der Erprobung.\
+        \ Es wird in nachfolgenden Versionen des Standards voraussichtlich geändert\
+        \ oder erweitert."
+    begruendungsTexte:
+      doc: Referenz auf einen Abschnitt der Begründung. Diese Relation darf nicht
+        verwendet werden, wenn die Begründung als Gesamt-Dokument referiert werden
+        soll. In diesem Fall sollte über das Attribut externeReferenz eine Objekt
+        XP_SpezExterneReferent mit typ=1010 (Begruendung) verwendet werden.
+    beschreibung:
+      doc: Kommentierende Beschreibung des Plans.
+    bezugshoehe:
+      doc: Standard Bezugshöhe (absolut NhN) für relative Höhenangaben von Planinhalten.
+    erstellungsMassstab:
+      doc: Der bei der Erstellung des Plans benutzte Kartenmaßstab.
+    externeReferenz:
+      doc: 'Referenz auf ein Dokument, einen Datenbankeintrag oder einen georeferenzierten
+        Rasterplan. '
+    genehmigungsDatum:
+      doc: Datum der Genehmigung des Plans
+    hatGenerAttribut:
+      doc: Erweiterung der vorgegebenen Attribute durch generische Attribute.
+    hoehenbezug:
+      doc: Bei Höhenangaben im Plan standardmäßig verwendeter Höhenbezug (z.B. Höhe
+        über NN).
+    internalId:
+      doc: Interner Identifikator des Plans.
+    kommentar:
+      doc: Beliebiger Kommentar zum Plan.
+    name:
+      doc: Name des Plans.
+    nummer:
+      doc: Nummer des Plans.
+    raeumlicherGeltungsbereich:
+      doc: Grenze des räumlichen Geltungsbereiches des Plans.
+    technHerstellDatum:
+      doc: Datum, an dem der Plan technisch ausgefertigt wurde.
+    technischerPlanersteller:
+      doc: Bezeichnung der Institution oder Firma, die den Plan technisch erstellt
+        hat.
+    texte:
+      doc: 'Referenz auf einen textlich formulierten Planinhalt. '
+    untergangsDatum:
+      doc: Datum, an dem der Plan (z.B. durch Ratsbeschluss oder Gerichtsurteil) aufgehoben
+        oder für nichtig erklärt wurde.
+    verfahrensMerkmale:
+      doc: Vermerke der am Planungsverfahren beteiligten Akteure.
+    wurdeGeaendertVonPlan:
+      doc: Verweis auf einen anderen Plan, durch den der vorliegende Plan geändert
+        wurde.
+    wurdeGeaendertVonPlanBereich:
+      doc: "Verweis auf einen Planbereich eines anderen Plan, durch den der vorliegende\
+        \ Plan geändert wurde.\r\n\r\nDies Konzept befindet sich noch in der Erprobung.\
+        \ Es wird in nachfolgenden Versionen des Standards voraussichtlich geändert\
+        \ oder erweitert."
+  doc: Abstrakte Oberklasse für alle Klassen raumbezogener Pläne.
+XP_Plangeber:
+  attributes:
+    kennziffer:
+      doc: Kennziffer des Plangebers.
+    name:
+      doc: Name des Plangebers.
+  doc: Spezifikation der Institution, die für den Plan verantwortlich ist.
+XP_Praesentationsobjekt:
+  attributes: {}
+  doc: "Entspricht der ALKIS-Objektklasse AP_Darstellung mit dem Unterschied, dass\
+    \ auf das Attribut \"positionierungssregel\" verzichtet wurde.  Die Klasse darf\
+    \ nur als gebundenes Präsentationsobjekt verwendet werden. Die Standard-Darstellung\
+    \ des verbundenen Fachobjekts wird dann durch die über stylesheetId spezifizierte\
+    \ Darstellung ersetzt. Die Umsetzung dieses Konzeptes ist der Implementierung\
+    \ überlassen.\r\n"
+XP_SPEMassnahmenDaten:
+  attributes:
+    klassifizMassnahme:
+      doc: Klassifikation der Maßnahme
+    massnahmeKuerzel:
+      doc: Kürzel der durchzuführenden Maßnahme.
+    massnahmeText:
+      doc: Durchzuführende Maßnahme als freier Text.
+  doc: Spezifikation der Attribute für einer Schutz-, Pflege- oder Entwicklungsmaßnahme.
+XP_SpezExterneReferenz:
+  attributes:
+    typ:
+      doc: Typ / Inhalt des referierten Dokuments oder Rasterplans.
+  doc: Ergänzung des Datentyps XP_ExterneReferenz um ein Attribut zur semantischen
+    Beschreibung des referierten Dokuments.
+XP_StringAttribut:
+  attributes:
+    wert:
+      doc: Attributwert
+  doc: "Generisches Attribut vom Datentyp \"CharacterString\"\r\n"
+XP_TPO:
+  attributes:
+    fontSperrung:
+      doc: Die Zeichensperrung steuert den zusätzlichen Raum, der zwischen 2 aufeinanderfolgende
+        Zeichenkörper geschoben wird. Er ist ein Faktor, der mit der angegebenen Zeichenhöhe
+        multipliziert wird, um den einzufügenden Zusatzabstand zu erhalten. Mit der
+        Abhängigkeit von der Zeichenhöhe wird erreicht, dass das Schriftbild unabhängig
+        von der Zeichenhöhe gleich wirkt. Der Defaultwert ist 0.
+    hat:
+      doc: Die Relation ermöglicht es, einem textlichen Präsentationsobjekt ein linienförmiges
+        Präsentationsobjekt zuzuweisen. Einziger bekannter Anwendungsfall ist der
+        Zuordnungspfeil eines Symbols oder einer Nutzungsschablone.
+    horizontaleAusrichtung:
+      doc: "Gibt die Ausrichtung des Textes bezüglich der Textgeometrie an.\r\nlinksbündig:\
+        \ Der Text beginnt an der Punktgeometrie bzw. am Anfangspunkt der Liniengeometrie.\r\
+        \nrechtsbündig: Der Text endet an der Punktgeometrie bzw. am Endpunkt der\
+        \ Liniengeometrie\r\nzentrisch: Der Text erstreckt sich von der Punktgeometrie\
+        \ gleich weit nach links und rechts bzw. steht auf der Mitte der Standlinie."
+    schriftinhalt:
+      doc: Schriftinhalt; enthält den darzustellenden Text.
+    skalierung:
+      doc: Skalierungsfaktor der Schriftgröße, bezogen auf die von der interpretierenden
+        Software festgelegte Standardschrift
+    vertikaleAusrichtung:
+      doc: Die vertikale Ausrichtung eines Textes gibt an, ob die Bezugsgeometrie
+        die Basis (Grundlinie) des Textes, die Mitte oder obere Buchstabenbegrenzung
+        betrifft.
+  doc: Abstrakte Oberklasse für textliche Präsentationsobjekte. Entspricht der ALKIS
+    Objektklasse AP_TPO
+XP_TextAbschnitt:
+  attributes:
+    gesetzlicheGrundlage:
+      doc: Gesetzliche Grundlage des Text-Abschnittes
+    rechtscharakter:
+      doc: Rechtscharakter des textlich formulierten Planinhalts
+    refText:
+      doc: Referenz auf ein externes Dokument das den zugehörigen Textabschnitt enthält.
+    schluessel:
+      doc: Schlüssel zur Referenzierung des Abschnitts.
+    text:
+      doc: Inhalt eines Abschnitts der textlichen Planinhalte
+  doc: Ein Abschnitt der textlich formulierten Inhalte  des Plans.
+XP_URLAttribut:
+  attributes:
+    wert:
+      doc: Attributwert
+  doc: "Generische Attribute vom Datentyp \"URL\"\r\n"
+XP_VerbundenerPlan:
+  attributes:
+    aenderungsArt:
+      doc: Spezifikation der Art der Änderungsbeziehung zwischen den verbundenen Plan-
+        bzw. Planbereichs-Objekten.
+    aenderungsdatum:
+      doc: Datum, an dem die Änderung in Kraft getreten ist. Das Attribut muss mit
+        dem Datum des Inkrafttretens des ändernden Plans konsistent sein.
+    nummer:
+      doc: Nummer (Attribut "nummer" von XP_Plan) des verbundenen Plans
+    planName:
+      doc: Name (Attribut "name" von XP_Plan) des verbundenen Plans.
+    verbundenerPlan:
+      doc: Referenz auf einen verbundenen Plan, der den aktuellen Plan oder Planbereich
+        ändert oder von ihm geändert wird.
+  doc: Spezifikation eines anderen Plans, der mit dem Ausgangsplan oder Planbereich
+    verbunden ist und diesen ändert bzw. von ihm geändert wird.
+XP_VerbundenerPlanBereich:
+  attributes:
+    bereichNummer:
+      doc: Nummer (Attribut nummer von XP_Bereich) des verbundenen Planbereiches.
+    verbundenerPlanBereich:
+      doc: Referenz auf einen verbundenen Planbereich, der den aktuellen Plan oder
+        Planbereich ändert oder von ihm geändert wird.
+  doc: Spezifikation eines anderen Planbereichs, der mit einem Ausgangsplan oder Ausgangsbereich
+    verknüpft ist und diesen ändert bzw. von ihm geändert wird.
+XP_VerfahrensMerkmal:
+  attributes:
+    datum:
+      doc: Datum des Vermerks
+    signatur:
+      doc: Unterschrift
+    signiert:
+      doc: Angabe, ob die Unterschrift erfolgt ist.
+    vermerk:
+      doc: Inhalt des Vermerks.
+  doc: "Vermerk eines am Planungsverfahren beteiligten Akteurs.\r\n"
+XP_WirksamkeitBedingung:
+  attributes:
+    bedingung:
+      doc: Textlich formulierte Bedingung für die Wirksamkeit oder Unwirksamkeit einer
+        Festsetzung.
+    datumAbsolut:
+      doc: Datum an dem eine Festsetzung wirksam oder unwirksam wird.
+    datumRelativ:
+      doc: Zeitspanne, nach der eine Festsetzung wirksam oder unwirksam wird, wenn
+        die im Attribut bedingung spezifizierte Bedingung erfüllt ist.
+  doc: Spezifikation von Bedingungen für die Wirksamkeit oder Unwirksamkeit einer
+    Festsetzung.

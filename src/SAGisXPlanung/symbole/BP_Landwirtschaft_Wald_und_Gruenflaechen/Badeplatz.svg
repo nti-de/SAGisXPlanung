@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 34 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-miterlimit:10;">
+    <g transform="matrix(1.56338,0,0,1.50805,-14.2676,-5.08048)">
+        <rect x="9.35" y="3.601" width="21.3" height="12.797" style="fill:white;stroke:black;stroke-width:0.45px;"/>
+    </g>
+    <g transform="matrix(1,0,0,1,-0.25,-0.503336)">
+        <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        <g transform="matrix(1,0,0,1,0,2)">
+            <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,0,4)">
+            <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,0,6)">
+            <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,0,8)">
+            <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        </g>
+        <g transform="matrix(1,0,0,1,0,10)">
+            <path d="M4.5,6C4.5,6 7.75,5 9.5,5C11.2,5 13.8,6 15.5,6C17.333,6 19.167,5 21,5C22.7,5 24.5,5.917 26,6C27.342,6.075 30,5.5 30,5.5" style="fill:none;stroke:black;stroke-width:0.7px;stroke-miterlimit:1.5;"/>
+        </g>
+    </g>
+</svg>

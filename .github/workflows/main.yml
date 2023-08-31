@@ -1,0 +1,124 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - master
+      - ce
+      - lite
+
+  pull_request:
+    branches:
+      - master
+      - ce
+      - lite
+
+  workflow_dispatch:
+
+jobs:
+  commit-sha:
+    name: Get Commit Hash
+    runs-on: ubuntu-latest
+
+    outputs:
+      commit_sha: ${{steps.get_hash.outputs.COMMIT_SHA}}
+
+    steps:
+    - name: Checkout Project
+      uses: actions/checkout@v3
+
+    - name: commit sha
+      id: get_hash
+      run: echo "::set-output name=COMMIT_SHA::$(git rev-parse --short HEAD)"
+
+  test:
+    name: Test on ${{matrix.container }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        container: ['qgis/qgis:release-3_22', 'qgis/qgis:release-3_24', 'qgis/qgis:release-3_26', 'qgis/qgis:release-3_28']
+
+    container: ${{ matrix.container }}
+
+    steps:
+    
+    - name: Checkout Project
+      uses: actions/checkout@v3
+        
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install pytest pytest-cov pytest-qt pytest-mock pytest-asyncio nest-asyncio
+        pip install -r requirements.txt
+        
+    - name: Unit Tests
+      env:
+        DISPLAY: :99
+      run: |
+        xvfb-run qgis_testrunner.sh tests.run_tests.run_all
+
+  alembic-revision:
+    name: Generate SQL Scripts
+    needs: [test, commit-sha]
+    runs-on: ubuntu-latest
+
+    container: 'qgis/qgis:release-3_22'
+
+    steps:
+    - name: Checkout Project
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip install alembic
+        pip install -r requirements.txt
+
+    - name: Parse Alembic History
+      id: alembic_history
+      run: |
+        prev_revision=`alembic history | head -n1 | awk '{print $1}'`
+        revision_tag=`alembic history | head -n1 | awk '{print $NF}'`
+        prev_tag=`alembic history | head -n2 | tail -n1 | awk '{print $NF}'`
+
+        echo "::set-output name=prev_revision::$prev_revision"
+        echo "::set-output name=revision_tag::$revision_tag"
+        echo "::set-output name=prev_tag::$prev_tag"
+
+    - name: Generate Revisions
+      run: |
+        alembic upgrade head --sql > create_${{steps.alembic_history.outputs.revision_tag}}.sql
+        alembic downgrade head:${{steps.alembic_history.outputs.prev_revision}} --sql > downgrade_to_${{steps.alembic_history.outputs.prev_tag}}.sql
+        alembic upgrade ${{steps.alembic_history.outputs.prev_revision}}:head --sql > upgrade_from_${{steps.alembic_history.outputs.prev_tag}}.sql
+
+    - name: Upload SQL Scripts
+      uses: actions/upload-artifact@v2
+      with:
+        name: SAGis.XPlanung.sql-scripts@${{ needs.commit-sha.outputs.commit_sha }}
+        path: '*.sql'
+
+  publish:
+    name: Upload artifact
+    needs: [test, commit-sha]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v3
+
+      - name: copy source files and scripts
+        run: |
+          mkdir dist
+          cp -r src/SAGisXPlanung dist/XPlanung/
+
+      - uses: docker://pandoc/latex:2.9
+        with:
+          args: --from markdown -o dist/README.pdf README.md
+
+      - name: QGIS plugin distribution
+        uses: actions/upload-artifact@v2
+        with:
+          name: SAGis.XPlanung.source@${{ needs.commit-sha.outputs.commit_sha }}
+          path: ./dist
