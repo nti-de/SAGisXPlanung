@@ -97,6 +97,7 @@ class GMLReader:
                     if value.__class__ in PRE_FILLED_CLASSES:
                         obj_from_db = query_existing(value)
                         value = obj_from_db if obj_from_db is not None else value
+
                 if (a := getattr(self.plan, node_name)) is not None:
                     a.append(value)
                 else:
