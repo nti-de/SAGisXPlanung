@@ -271,10 +271,7 @@ class GMLReader:
 
     @staticmethod
     def read_attribute(col_type, node_name, obj, node):
-        logger.debug(f'node {node_name} col {col_type}, obj class {obj.__class__} node {node}')
-
         if isinstance(col_type, Geometry):
-            logger.debug(node[0])
             value = GMLReader.readGeometry(node[0])
             if value is None:
                 return
