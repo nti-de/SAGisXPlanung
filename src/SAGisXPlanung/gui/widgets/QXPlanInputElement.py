@@ -98,7 +98,7 @@ class QXPlanInputElement(ABC):
                 enum_values = [e for e in field_type.item_type.enums if field_type.item_type.enum_class[e].version in [None, version]]
             else:
                 enum_values = field_type.item_type.enums
-            return QCheckableComboBoxInput(enum_values)
+            return QCheckableComboBoxInput(enum_values, enum_type=field_type.item_type.enum_class)
         if hasattr(field_type, 'enums'):
             should_include_default = isinstance(field_type, XPEnum) and field_type.include_default
             version = export_version()
@@ -465,7 +465,11 @@ class QDateListInput(LineEditMixin, QXPlanInputElement, QWidget, metaclass=XPlan
     def setDefault(self, default):
         if not default:
             return
-        dates = [datetime.datetime.strptime(date, "%d.%m.%Y") for date in str(default).split(', ')]
+        if not all(isinstance(d, datetime.date) for d in default):
+            dates = [datetime.datetime.strptime(date, "%d.%m.%Y") for date in str(default).split(', ')]
+        else:
+            dates = default
+
         if not dates:
             return
         self.first_input.setDefault(dates[0])
@@ -479,12 +483,15 @@ class QDateListInput(LineEditMixin, QXPlanInputElement, QWidget, metaclass=XPlan
 
 class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
 
-    def __init__(self, items=None):
+    def __init__(self, items=None, enum_type=None):
         super(QCheckableComboBoxInput, self).__init__()
+        self.enum_type = enum_type
         if items is not None:
             self.addItems(items)
 
     def value(self):
+        if self.enum_type is not None:
+            return [self.enum_type[enum_text] for enum_text in self.checkedItems()]
         return self.checkedItems()
 
     def setDefault(self, default):

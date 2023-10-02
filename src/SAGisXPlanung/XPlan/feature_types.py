@@ -128,7 +128,6 @@ class XP_Plan(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMi
                 try:
                     input_element = tabs.widget(page).fields[attr]
                     input_element.setDefault(attribute_value)
-                    logger.debug(f'setDefault on attr {attr} value {attribute_value}')
                 except KeyError:
                     pass
 

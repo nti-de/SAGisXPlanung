@@ -132,7 +132,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
             base_classes = [c for c in list(inspect.getmro(self._xplanung_item.xtype)) if issubclass(c, Base)]
             cls = next(c for c in base_classes if hasattr(c, attribute_name) and c.attr_fits_version(attribute_name, export_version()))
             field_type = getattr(cls, attribute_name).property.columns[0].type
-            dlg = XPEditAttributeDialog(attribute_name, field_type, index.data(), self._xplanung_item.xtype, parent=self)
+            dlg = XPEditAttributeDialog(attribute_name, field_type, index.data(role=ObjectRole),
+                                        self._xplanung_item.xtype, parent=self)
 
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.onAttributeChanged(i, a, value))

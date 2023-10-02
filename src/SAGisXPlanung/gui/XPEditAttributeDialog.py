@@ -43,9 +43,6 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.discard_button = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
         self.discard_button.clicked.connect(lambda s: self.setOriginalValue())
 
-        if isinstance(self.field_type, Date) and self.original_value:
-            self.original_value = datetime.datetime.strptime(self.original_value, "%d.%m.%Y")
-
         self.control: QXPlanInputElement = QXPlanInputElement.create(self.field_type, self)
         self.setOriginalValue()
 
