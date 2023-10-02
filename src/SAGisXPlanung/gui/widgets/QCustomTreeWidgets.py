@@ -1,8 +1,12 @@
+import logging
+
 from qgis.PyQt import QtWidgets, QtCore
 
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry
 from SAGisXPlanung.utils import CLASSES
+
+logger = logging.getLogger(__name__)
 
 
 class QObjectTypeSelectionTreeWidget(QtWidgets.QTreeWidget):
@@ -19,7 +23,10 @@ class QObjectTypeSelectionTreeWidget(QtWidgets.QTreeWidget):
     def setup(self, cls_type):
         self.clear()
         plan_type_prefix = cls_type.__name__[:2]
-        self.iterateSubclass(CLASSES[f'{plan_type_prefix}_Objekt'])
+        try:
+            self.iterateSubclass(CLASSES[f'{plan_type_prefix}_Objekt'])
+        except KeyError as e:
+            logger.exception(e)
         if plan_type_prefix != 'SO':
             self.iterateSubclass(CLASSES['SO_Objekt'])
 
