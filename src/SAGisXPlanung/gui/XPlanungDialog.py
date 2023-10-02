@@ -239,15 +239,15 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         # find object
         proxy_model = self.details_dialog.objectTree.proxy
-        index_list = proxy_model.match(proxy_model.index(0, 0), Qt.DisplayRole, xplan_item.xtype, -1,
-                                       Qt.MatchStartsWith | Qt.MatchRecursive | Qt.MatchWrap)
-        items = [proxy_model.itemAtIndex(i) for i in index_list]
-        i, item = next((i, item) for i, item in enumerate(items) if item._data.xid == xplan_item.xid)
+        index_list = proxy_model.match(proxy_model.index(0, 0), XID_ROLE, xplan_item.xid, -1,
+                                       Qt.MatchWildcard | Qt.MatchRecursive)
+        if not index_list:
+            return
 
         selection_model = self.details_dialog.objectTree.selectionModel()
-        selection_model.select(index_list[i], QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
+        selection_model.select(index_list[0], QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
 
-        self.details_dialog.objectTree.scrollTo(index_list[i], QAbstractItemView.PositionAtCenter)
+        self.details_dialog.objectTree.scrollTo(index_list[0], QAbstractItemView.PositionAtCenter)
 
     @qasync.asyncSlot(XPlanungItem)
     async def onFeatureSaved(self, xplan_item: XPlanungItem):
