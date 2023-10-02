@@ -488,7 +488,10 @@ class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclas
         return self.checkedItems()
 
     def setDefault(self, default):
-        items = str(default).split(", ")
+        if isinstance(default, list):
+            items = list(map(lambda enum: enum.name, default))
+        else:
+            items = str(default).split(", ")
         self.setCheckedItems(items)
 
     def validate_widget(self, required):

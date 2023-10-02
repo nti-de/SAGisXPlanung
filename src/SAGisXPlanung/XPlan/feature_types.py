@@ -97,7 +97,7 @@ class XP_Plan(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMi
         def iterate_relations(obj, parent_class=None, page=0):
             for attr in obj.__class__.element_order(version=export_version()):
                 attribute_value = getattr(obj, attr)
-                if not attribute_value:
+                if attribute_value is None:
                     continue
 
                 rel = next((obj for obj in obj.relationships() if obj[0] == attr), None)
@@ -128,6 +128,7 @@ class XP_Plan(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMi
                 try:
                     input_element = tabs.widget(page).fields[attr]
                     input_element.setDefault(attribute_value)
+                    logger.debug(f'setDefault on attr {attr} value {attribute_value}')
                 except KeyError:
                     pass
 
