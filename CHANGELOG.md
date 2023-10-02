@@ -1,5 +1,20 @@
 ## Changelog
 
+### [2.2.1] - 02.10.2023
+
+#### Veränderungen
+
+- unbekannte Codelist-Werte werden nicht mehr in der Datenbank gespeichert (edcb6368)
+
+#### Fehlerbehebungen
+
+- Attribute abfragen bei Sortierung des Objektbaums nach Kategorie korrigiert (cfb9e064)
+- fehlende Stilisierung für `BP_Wegerecht` hinzugefügt (a4739409)
+- Dialog zum Hinzufügen von Planinhalten erscheint korrekt, wenn ein Landschaftsplan gewählt ist (b2e01840)
+- Download von Codelisten aus der GDI Registry korrigiert (8e1779cc)
+- fehlerhafte Anzeige von Attributen mit Boolean oder Enum-List Datentyp beim Bearbeiten eines Plans (189c666a)
+- Fehler der Vorwärts/Zurück-Funktion nach Änderung von Attributen mit Enum-List Datentyp behoben (49e70202)
+
 ### [2.2.0] - 29.08.2023
 
 #### Neue Funktionen
