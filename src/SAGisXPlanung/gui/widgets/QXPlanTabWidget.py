@@ -5,6 +5,7 @@ from qgis.PyQt import QtWidgets
 
 from sqlalchemy import inspect
 
+from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.XPlan.types import ConformityException, InvalidFormException
 from SAGisXPlanung.gui.widgets.QXPlanScrollPage import QXPlanScrollPage
 
@@ -19,6 +20,9 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(lambda index: self.closeTab(index))
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+
+        if issubclass(self.parent_type, XP_Objekt):
+            return
 
         self.createTab(self.main_type, parent=parent_type)
 

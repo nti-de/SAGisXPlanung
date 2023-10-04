@@ -321,6 +321,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             data_class_action = QtWidgets.QAction(f'{action_name} ({rel[1].entity.class_.__name__})', self)
             data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=rel[1].entity.class_:
                                                 self.onCreateDataClass(p_item, d_class, attr))
+            data_class_action.setEnabled(not issubclass(item._data.xtype, XP_Objekt))
             if not rel[1].uselist and item.childCount():
                 for i in range(item.childCount()):
                     child_item = item.child(i)
