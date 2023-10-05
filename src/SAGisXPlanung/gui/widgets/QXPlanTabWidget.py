@@ -21,7 +21,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         self.tabCloseRequested.connect(lambda index: self.closeTab(index))
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
-        if issubclass(self.parent_type, XP_Objekt):
+        if self.parent_type is not None and issubclass(self.parent_type, XP_Objekt):
             return
 
         self.createTab(self.main_type, parent=parent_type)
