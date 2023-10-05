@@ -24,6 +24,7 @@ Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen.
 | Export von XPlanGML-Dokumenten                               | [^abbr1]           | :heavy_check_mark: |
 | Bearbeiten von XPlanung-Attributen                           | [^abbr1]           | :heavy_check_mark: |
 | Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                    | :heavy_check_mark: |
+| Codelist-Attribute                                           |                    | :heavy_check_mark: |
 [^abbr1]: Nur für Basisobjekte möglich (teilvektorielle Erfassung)
 
 
