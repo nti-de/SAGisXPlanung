@@ -7,11 +7,11 @@
     <x>0</x>
     <y>0</y>
     <width>395</width>
-    <height>407</height>
+    <height>423</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>XPlanung</string>
+   <string>SAGis XPlanung</string>
   </property>
   <widget class="QWidget" name="dockWidgetContents">
    <property name="sizePolicy">

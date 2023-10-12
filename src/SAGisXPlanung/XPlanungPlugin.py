@@ -92,7 +92,7 @@ class XPlanung(QObject):
 
         xp_icon = os.path.abspath(os.path.join(os.path.dirname(__file__), 'gui/resources/sagis_icon.png'))
         settings_icon = ':/images/themes/default/mActionOptions.svg'
-        self.main_action = QAction(QIcon(xp_icon), 'XPlanung', self.iface.mainWindow())
+        self.main_action = QAction(QIcon(xp_icon), 'SAGis XPlanung', self.iface.mainWindow())
         self.main_action.setToolTip('Plugin zum Erfassen von XPlanung konformen Bauleitplänen')
         self.main_action.triggered.connect(self.run)
         self.sagis_toolbar.addAction(self.main_action)
