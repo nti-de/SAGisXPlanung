@@ -318,20 +318,22 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
             action_name, _ = item.xplanItem().xtype.relation_prop_display(rel)
 
-            data_class_action = QtWidgets.QAction(f'{action_name} ({rel[1].entity.class_.__name__})', self)
-            data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=rel[1].entity.class_:
-                                                self.onCreateDataClass(p_item, d_class, attr))
-            data_class_action.setEnabled(not issubclass(item._data.xtype, XP_Objekt))
-            if not rel[1].uselist and item.childCount():
-                for i in range(item.childCount()):
-                    child_item = item.child(i)
-                    with Session() as session:
-                        col = next(iter(rel[1].remote_side)).description
-                        ex = session.query(exists().where(getattr(rel[1].entity.class_, col) == item.id())).scalar()
-                    if ex and child_item.xplanItem().xtype == rel[1].entity.class_:
-                        data_class_action.setToolTip('Objekt existiert bereits!')
-                        data_class_action.setEnabled(False)
-            data_class_menu.addAction(data_class_action)
+            for entity_class in [rel[1].entity.class_, *rel[1].entity.class_.__subclasses__()]:
+
+                data_class_action = QtWidgets.QAction(f'{action_name} ({entity_class.__name__})', self)
+                data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=entity_class:
+                                                    self.onCreateDataClass(p_item, d_class, attr))
+                data_class_action.setEnabled(not issubclass(item._data.xtype, XP_Objekt))
+                if not rel[1].uselist and item.childCount():
+                    for i in range(item.childCount()):
+                        child_item = item.child(i)
+                        with Session() as session:
+                            col = next(iter(rel[1].remote_side)).description
+                            ex = session.query(exists().where(getattr(rel[1].entity.class_, col) == item.id())).scalar()
+                        if ex and child_item.xplanItem().xtype == rel[1].entity.class_:
+                            data_class_action.setToolTip('Objekt existiert bereits!')
+                            data_class_action.setEnabled(False)
+                data_class_menu.addAction(data_class_action)
 
         if not data_class_menu.isEmpty():
             menu.addSeparator()

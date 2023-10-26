@@ -142,6 +142,7 @@ class XP_SpezExterneReferenz(XP_ExterneReferenz):
     __mapper_args__ = {
         'polymorphic_identity': 'xp_spez_externe_referenz',
     }
+    __avoidRelation__ = ['plan']
 
     id = Column(ForeignKey("xp_externe_referenz.id", ondelete='CASCADE'), primary_key=True)
 
