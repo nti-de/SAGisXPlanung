@@ -295,8 +295,10 @@ class GMLWriter:
 
     @staticmethod
     def write_attributes(node, xplan_object, version: XPlanVersion):
+        rels = xplan_object.relationships()
         for attr in xplan_object.__class__.element_order(version=version):
-            if attr not in vars(xplan_object).keys():  # TODO: is this check needed?
+            # don't process any relations at this point (this method only writes direct attributes)
+            if any(attr in rel for rel in rels):
                 continue
             value = getattr(xplan_object, attr)
             if value is None:
