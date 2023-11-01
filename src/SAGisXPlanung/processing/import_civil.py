@@ -137,12 +137,22 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
         plan.name = res.name
         plan.planArt = BP_PlanArt[res.art]
 
-        s = text("SELECT ST_AsText(geom) AS g, ST_SRID(geom) AS srid FROM civil_line WHERE plan_id = :xid AND layer LIKE '%Geltungsbereich%'")
+        s = text("SELECT ST_AsText(ST_Multi(u.geometry)) AS g, ST_SRID(u.geometry) AS srid FROM "
+                 "(SELECT ST_Union(geom) AS geometry FROM civil_line WHERE plan_id = :xid AND layer LIKE "
+                 "'%15.13-Geltungsbereich%') u;")
         res = conn.execute(s, {"xid": plan_xid}).first()
+        srid = res.srid
+
+        s = text("SELECT auth_name FROM spatial_ref_sys WHERE srid = :srid")
+        crs_name = conn.execute(s, {"srid": srid}).scalar_one()
+        feedback.pushInfo(f'Koordinatenbezug: {crs_name}:{srid}')
 
         geometry = wkt.loads(res.g)
         if not geometry.is_valid:
             raise QgsProcessingException(f'Geometrie ist nicht gültig: {explain_validity(geometry)}')
+
+        if geometry.is_empty or geometry is None:
+            raise QgsProcessingException(f'Geometrie des Geltungsbereich ist leer.')
 
         geltungsbereich_polygons = []
         for line in geometry.geoms:
@@ -152,26 +162,27 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
             geltungsbereich_polygons.append(Polygon(line))
 
         geltungsbereich_geom = MultiPolygon(geltungsbereich_polygons)
-        plan.raeumlicherGeltungsbereich = WKTElement(geltungsbereich_geom.wkt, srid=res.srid)
-
-        bereich = BP_Bereich()
-        bereich.id = uuid.uuid4()
-        bereich.name = 'Geltungsbereich'
-        bereich.nummer = '0'
-        bereich.bedeutung = XP_BedeutungenBereich.Teilbereich
-        bereich.geltungsbereich = plan.raeumlicherGeltungsbereich
+        plan.raeumlicherGeltungsbereich = WKTElement(geltungsbereich_geom.wkt, srid=srid)
 
         mappings = {"civil_area": CIVIL_STYLE_AREAS, "civil_point": CIVIL_STYLE_POINTS, "civil_line": CIVIL_STYLE_LINES}
-        for table, mapper in mappings.items():
-            s = text(f"SELECT id FROM {table} WHERE plan_id = :xid")
-            res = conn.execute(s, {"xid": plan_xid})
-            for row in res:
-                feedback.pushDebugInfo(f"Verarbeitung des Planinhalts: {row.id}")
-                planinhalt = self.processPlaninhalt(row.id, table, mapper, conn, feedback)
-                if planinhalt:
-                    bereich.planinhalt.append(planinhalt)
+        for i, bereich_poly in enumerate(geltungsbereich_polygons):
+            bereich = BP_Bereich()
+            bereich.id = uuid.uuid4()
+            bereich.name = 'Geltungsbereich'
+            bereich.nummer = i + 1
+            bereich.bedeutung = XP_BedeutungenBereich.Teilbereich
+            bereich.geltungsbereich = WKTElement(bereich_poly.wkt, srid=srid)
 
-        plan.bereich.append(bereich)
+            plan.bereich.append(bereich)
+
+            for table, mapper in mappings.items():
+                s = text(f"SELECT id FROM {table} WHERE plan_id = :xid AND ST_INTERSECTS(geom, ST_GeomFromText(:wkt))")
+                res = conn.execute(s, {"xid": plan_xid, "wkt": bereich_poly.wkt})
+                for row in res:
+                    feedback.pushDebugInfo(f"Verarbeitung des Planinhalts: {row.id}")
+                    planinhalt = self.processPlaninhalt(row.id, table, mapper, conn, feedback)
+                    if planinhalt:
+                        bereich.planinhalt.append(planinhalt)
 
         return plan
 
