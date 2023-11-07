@@ -137,7 +137,9 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
         plan.name = res.name
         plan.planArt = BP_PlanArt[res.art]
 
-        s = text("SELECT ST_AsText(ST_Multi(u.geometry)) AS g, ST_SRID(u.geometry) AS srid FROM "
+        # RemoveRepeatedPoints does not remove duplicated points from geometry column directly, most likely a bug???
+        # dump to wkt and create new geometry as workaround
+        s = text("SELECT ST_AsText(RemoveRepeatedPoints(ST_GeomFromText(ST_AsText(ST_Multi(u.geometry))))) AS g, ST_SRID(u.geometry) AS srid FROM "
                  "(SELECT ST_Union(geom) AS geometry FROM civil_line WHERE plan_id = :xid AND layer LIKE "
                  "'%15.13-Geltungsbereich%') u;")
         res = conn.execute(s, {"xid": plan_xid}).first()
@@ -187,7 +189,9 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
         return plan
 
     def processPlaninhalt(self, planinhalt_xid, table, mapper, conn, feedback) -> XP_Objekt:
-        s = text(f"SELECT layer, rechtscharakter, ST_AsText(geom) AS geom, ST_SRID(geom) AS srid FROM {table} WHERE id = :xid")
+        # RemoveRepeatedPoints does not remove duplicated points from geometry column directly, most likely a bug???
+        # dump to wkt and create new geometry as workaround
+        s = text(f"SELECT layer, rechtscharakter, ST_AsText(RemoveRepeatedPoints(ST_GeomFromText(ST_AsText(geom)))) AS g, ST_SRID(geom) AS srid FROM {table} WHERE id = :xid")
         res = conn.execute(s, {"xid": planinhalt_xid}).first()
 
         # for each civil-styleid, check if the id is in the layer string, if yes create the corresponding object
@@ -200,7 +204,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
             bp_objekt.rechtscharakter = BP_Rechtscharakter[res.rechtscharakter]
 
             # parse and assign geometry
-            geometry = wkt.loads(res.geom)
+            geometry = wkt.loads(res.g)
             if not geometry.is_valid:
                 raise QgsProcessingException(f'Geometrie ist nicht gültig: {explain_validity(geometry)}')
             bp_objekt.position = WKTElement(geometry.wkt, srid=res.srid)
