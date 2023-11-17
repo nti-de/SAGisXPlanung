@@ -318,10 +318,11 @@ def checkDbConnection():
         msgBox.setText('Keine Verbindung mit der Datenbank möglich')
         msgBox.addButton(QPushButton('Einstellungen'), QMessageBox.YesRole)
         msgBox.addButton(QMessageBox.Ok)
+        msgBox.setEscapeButton(QMessageBox.Ok)
         ret = msgBox.exec_()
         if not ret:
             Settings().exec_()
-        return checkDbConnection()
+        return False
 
 
 def is_valid_db():
