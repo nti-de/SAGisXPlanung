@@ -71,26 +71,20 @@ class BP_Wegerecht(PolygonGeometry, BP_Objekt):
     def symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
-        symbol.setClipFeaturesToExtent(False)
 
-        path = os.path.abspath(os.path.join(BASE_DIR, f'symbole/Sonstiges/BP_WegerechtFlaeche.svg'))
-        svg_symbol_layer = QgsSvgMarkerSymbolLayer(path, size=4)
-        svg_symbol_layer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-
-        marker_line = QgsMarkerLineSymbolLayer(interval=5)
-        marker_line.setOffset(0.8)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        marker_symbol = QgsMarkerSymbol()
-        marker_symbol.deleteSymbolLayer(0)
-        marker_symbol.appendSymbolLayer(svg_symbol_layer)
-        marker_line.setSubSymbol(marker_symbol)
+        white_marker = QgsSimpleLineSymbolLayer(QColor('#ffffff'))
+        white_marker.setWidth(1)
+        white_marker.setOffset(0.5)
+        white_marker.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        white_marker.setUseCustomDashPattern(True)
+        white_marker.setCustomDashVector([3, 1.5])
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
-        border.setWidth(0.25)
+        border.setWidth(0.2)
         border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
 
+        symbol.appendSymbolLayer(white_marker)
         symbol.appendSymbolLayer(border)
-        symbol.appendSymbolLayer(marker_line)
         return symbol
 
     @classmethod

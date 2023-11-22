@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, column_property, declared_attr
 
 from qgis.core import (QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer, QgsSymbol, QgsWkbTypes, QgsGeometry,
-                       QgsCoordinateReferenceSystem, QgsProject)
+                       QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt
 
@@ -130,13 +130,21 @@ class BP_Plan(XP_Plan):
     def renderer(cls, geom_type: GeometryType = None):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
+        symbol.setOutputUnit(QgsUnitTypes.RenderMapUnits)
 
-        line = QgsSimpleLineSymbolLayer.create({})
-        line.setColor(QColor(0, 0, 0))
-        line.setWidth(0.8)
-        line.setPenStyle(Qt.DashDotLine)
+        dashed_border = QgsSimpleLineSymbolLayer.create({})
+        dashed_border.setColor(QColor(0, 0, 0))
+        dashed_border.setWidth(2)
+        dashed_border.setOffset(-1)
+        dashed_border.setPenStyle(Qt.DashLine)
+        dashed_border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
 
-        symbol.appendSymbolLayer(line)
+        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        border.setWidth(0.25)
+        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+
+        symbol.appendSymbolLayer(dashed_border)
+        symbol.appendSymbolLayer(border)
         return QgsSingleSymbolRenderer(symbol)
 
     def enforceFlaechenschluss(self):
