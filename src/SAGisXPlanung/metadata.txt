@@ -3,7 +3,7 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=SAGis XPlanung
+name=SAGis XPlanung (Community Version)
 qgisMinimumVersion=3.22
 description=Plugin zur XPlanung-konformen Erfassung und Verwaltung von Bauleitplänen
 version=2.2.1
@@ -27,7 +27,7 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=xplanung, bplan, fnp, bebauungsplan
 
-homepage=https://www.nti.biz/de/
+homepage=http://www.nti.biz/de/
 category=Plugins
 icon=gui/resources/sagis_icon.png
 # experimental flag
