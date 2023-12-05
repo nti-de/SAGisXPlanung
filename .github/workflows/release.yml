@@ -62,7 +62,7 @@ jobs:
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install alembic
+        pip install alembic alembic-postgresql-enum
         pip install -r requirements.txt
     - name: Parse Alembic History
       id: alembic_history

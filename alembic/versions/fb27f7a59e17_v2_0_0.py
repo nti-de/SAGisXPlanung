@@ -13,14 +13,11 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 import sqlalchemy as sa
 
-
-
 PROJECT_PATH = os.getcwd()
 SOURCE_PATH = os.path.join(
     PROJECT_PATH, "src"
 )
 sys.path.append(SOURCE_PATH)
-
 
 # revision identifiers, used by Alembic.
 revision = 'fb27f7a59e17'
@@ -77,7 +74,7 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
-    op.execute("ALTER TYPE xp_externereferenztyp ADD VALUE 'Schutzgebietsverordnung';")
+    op.execute("ALTER TYPE xp_externereferenztyp ADD VALUE IF NOT EXISTS 'Schutzgebietsverordnung';")
 
     # CR-025
     op.execute("CREATE TYPE xp_traegerschaft AS ENUM('EinrichtungBund','EinrichtungLand', 'EinrichtungKreis', 'KommunaleEinrichtung', 'ReligioeserTraeger', 'SonstTraeger');")
@@ -88,19 +85,27 @@ def upgrade():
     op.execute('UPDATE xp_externe_referenz SET "referenzURL"="referenzURL" WHERE "referenzURL" is NULL;')
 
     # CR-023
-    op.execute("ALTER TYPE xp_sondernutzungen ADD VALUE 'SondergebietGrosshandel';")
+    op.execute("ALTER TYPE xp_sondernutzungen ADD VALUE IF NOT EXISTS 'SondergebietGrosshandel';")
 
     # CR-048, CR-059
 
-    op.execute("ALTER TYPE xp_spemassnahmentypen ADD VALUE 'ArtenreicherGehoelzbestand';")
+    op.execute("ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'ArtenreicherGehoelzbestand';")
+    op.execute("ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'Moor';")
+
+    op.sync_enum_values('public', 'xp_spemassnahmentypen',
+                        ['ArtenreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland',
+                         'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
+                         'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
+                         'Sonstiges'],
+                        [('xp_spe_daten', '"klassifizMassnahme"')],
+                        enum_values_to_rename=[('ArtentreicherGehoelzbestand', 'ArtenreicherGehoelzbestand')])
 
     # The previous statement has to be committed in order for the update to work.
     # This is a bit inconvenient as the whole transaction is now split. So if latter part fails the first migrations
     # are still run.
-    with op.get_context().autocommit_block():
-        op.execute('UPDATE xp_spe_daten SET "klassifizMassnahme" = \'ArtenreicherGehoelzbestand\'::xp_spemassnahmentypen WHERE "klassifizMassnahme" = \'ArtentreicherGehoelzbestand\'::xp_spemassnahmentypen;')
-
-    op.execute("ALTER TYPE xp_spemassnahmentypen ADD VALUE 'Moor';")
+    # with op.get_context().autocommit_block():
+    #     op.execute(
+    #         'UPDATE xp_spe_daten SET "klassifizMassnahme" = \'ArtenreicherGehoelzbestand\'::xp_spemassnahmentypen WHERE "klassifizMassnahme" = \'ArtentreicherGehoelzbestand\'::xp_spemassnahmentypen;')
 
     # CR-014: create trigger to keep `verfahren` attribute in sync
     op.execute("ALTER TABLE bp_bereich ADD COLUMN verfahren bp_verfahren;")
@@ -139,6 +144,7 @@ def upgrade():
 
     # CR-40: Rechtscharakter
     op.execute("""
+        DROP TYPE IF EXISTS xp_rechtscharakter;
         CREATE TYPE xp_rechtscharakter AS ENUM (
         'FestsetzungBPlan',
         'NachrichtlicheUebernahme',
@@ -214,7 +220,7 @@ def upgrade():
             RETURN NEW;
         end $$;
         
-        create constraint trigger bp_objekt_sync_attr_hoehenbezug
+        create constraint trigger bp_objekt_sync_attr_rechtscharakter
         after insert or update on xp_objekt
         DEFERRABLE
         for each row when (pg_trigger_depth() = 0)
@@ -341,11 +347,11 @@ def upgrade():
     """)
 
     # add enum value 'BebauungsplanZurWohnraumversorgung' to BP_PlanArt
-    op.execute("ALTER TYPE bp_planart ADD VALUE 'BebauungsplanZurWohnraumversorgung';")
+    op.execute("ALTER TYPE bp_planart ADD VALUE IF NOT EXISTS 'BebauungsplanZurWohnraumversorgung';")
     # add enum value 'Naturerfahrungsraum' to XP_ZweckbestimmungGruen
-    op.execute("ALTER TYPE xp_zweckbestimmunggruen ADD VALUE 'Naturerfahrungsraum';")
+    op.execute("ALTER TYPE xp_zweckbestimmunggruen ADD VALUE IF NOT EXISTS 'Naturerfahrungsraum';")
     # add enum value 'DoerflichesWohngebiet' to XP_BesondereArtDerBaulNutzung
-    op.execute("ALTER TYPE xp_besondereartderbaulnutzung ADD VALUE 'DoerflichesWohngebiet';")
+    op.execute("ALTER TYPE xp_besondereartderbaulnutzung ADD VALUE IF NOT EXISTS 'DoerflichesWohngebiet';")
 
     # CR-025 für BP_GruenFlaeche
     op.execute("""
@@ -572,12 +578,12 @@ def upgrade():
 
     # CR-019
     op.execute("""
-        ALTER TYPE bp_rechtsstand ADD VALUE 'Entwurfsbeschluss';
-        ALTER TYPE bp_rechtsstand ADD VALUE 'TeilweiseAufgehoben';
-        ALTER TYPE bp_rechtsstand ADD VALUE 'TeilweiseAusserKraft';
+        ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'Entwurfsbeschluss';
+        ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAufgehoben';
+        ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAusserKraft';
         
-        ALTER TYPE rp_rechtsstand ADD VALUE 'TeilweiseAusserKraft';
-        ALTER TYPE fp_rechtsstand ADD VALUE 'Entwurfsbeschluss';
+        ALTER TYPE rp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAusserKraft';
+        ALTER TYPE fp_rechtsstand ADD VALUE IF NOT EXISTS 'Entwurfsbeschluss';
     """)
 
     # CR-025 BP_SpielSportanlagenFlaeche
@@ -1269,7 +1275,7 @@ def downgrade():
     op.execute('ALTER TABLE fp_gruen DROP COLUMN "zugunstenVon"')
 
     op.execute("DROP TRIGGER fp_sport_sync_attr_zweckbestimmung ON fp_spiel_sportanlage")
-    op.execute("DROP TABLE fp_zweckbestimmung_gemeinbedarf")
+    op.execute("DROP TABLE fp_zweckbestimmung_sport")
     op.execute('ALTER TABLE fp_spiel_sportanlage DROP COLUMN "zugunstenVon"')
 
     op.execute("DROP TRIGGER fp_gemeinbedarf_sync_attr_zweckbestimmung_on_delete ON fp_zweckbestimmung_gemeinbedarf")
@@ -1300,9 +1306,9 @@ def downgrade():
     op.execute("DROP TABLE so_wasserwirtschaft")
     op.execute("DROP TYPE so_klassifizwasserwirtschaft")
 
-    op.execute("DROP TABLE so_gewaesser")
     op.execute("DROP TABLE so_festlegung_gewaesser")
-    op.execute("DROP TYPE so_festlegung_gewaesser")
+    op.execute("DROP TABLE so_gewaesser")
+    op.execute("DROP TYPE so_klassifizgewaesser")
 
     op.execute("ALTER TABLE xp_externe_referenz DROP COLUMN veraenderungssperre_id")
     op.execute("DROP TABLE bp_veraenderungssperre_daten")
@@ -1326,10 +1332,11 @@ def downgrade():
     op.execute("DROP TRIGGER bp_spiel_sportanlage_sync_attr_zweckbestimmung ON bp_spiel_sportanlage")
 
     # change FP_Gemeinbedarf.zweckbestimmung back to single enum
-    op.execute("ALTER TABLE fp_gemeinbedarf ALTER zweckbestimmung DROP DEFAULT, ALTER zweckbestimmung type xp_zweckbestimmunggemeinbedarf using zweckbestimmung[1], alter zweckbestimmung set default NULL;")
+    op.execute(
+        "ALTER TABLE fp_gemeinbedarf ALTER zweckbestimmung DROP DEFAULT, ALTER zweckbestimmung type xp_zweckbestimmunggemeinbedarf using zweckbestimmung[1], alter zweckbestimmung set default NULL;")
 
-    op.execute("DROP TABLE so_strassenverkehr")
     op.execute("DROP TABLE so_zweckbestimmung_strassenverkehr")
+    op.execute("DROP TABLE so_strassenverkehr")
     op.execute("DROP TYPE so_zweckbestimmungstrassenverkehr")
     op.execute("DROP TYPE so_strasseneinteilung")
 
@@ -1347,16 +1354,25 @@ def downgrade():
     op.execute("ALTER TABLE xp_objekt DROP COLUMN rechtscharakter")
     op.execute("DROP TRIGGER so_objekt_sync_attr_rechtscharakter ON xp_objekt")
     op.execute("DROP TRIGGER fp_objekt_sync_attr_rechtscharakter ON xp_objekt")
-    op.execute("DROP TRIGGER bp_objekt_sync_attr_rechtscharakter ON xp_objekt")
+    op.execute("DROP TRIGGER IF EXISTS bp_objekt_sync_attr_rechtscharakter ON xp_objekt")
+    # fix for falsely named trigger in revisions until revision <=194bb883
+    op.execute("DROP TRIGGER IF EXISTS bp_objekt_sync_attr_hoehenbezug ON xp_objekt")
     op.execute("DROP TRIGGER xp_objekt_sync_attr_rechtscharakter ON bp_objekt")
     op.execute("DROP TRIGGER xp_objekt_sync_attr_rechtscharakter_from_fp ON fp_objekt")
     op.execute("DROP TRIGGER xp_objekt_sync_attr_rechtscharakter_from_so ON so_objekt")
+    op.execute("DROP TYPE xp_rechtscharakter")
 
     op.execute("ALTER TABLE bp_bereich DROP COLUMN verfahren")
     op.execute("DROP TRIGGER bp_plan_sync_attr_verfahren ON bp_bereich")
     op.execute("DROP TRIGGER bp_bereich_sync_attr_verfahren ON bp_plan")
 
-    op.execute('UPDATE xp_spe_daten SET "klassifizMassnahme" = \'ArtentreicherGehoelzbestand\'::xp_spemassnahmentypen WHERE "klassifizMassnahme" = \'ArtenreicherGehoelzbestand\'::xp_spemassnahmentypen;')
+    op.sync_enum_values('public', 'xp_spemassnahmentypen',
+                        ['ArtentreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland',
+                         'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
+                         'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
+                         'Sonstiges'],
+                        [('xp_spe_daten', '"klassifizMassnahme"')],
+                        enum_values_to_rename=[('ArtenreicherGehoelzbestand', 'ArtentreicherGehoelzbestand')])
 
     op.execute("ALTER TABLE bp_gemeinbedarf DROP COLUMN traeger")
     op.execute("DROP TYPE xp_traegerschaft CASCADE")

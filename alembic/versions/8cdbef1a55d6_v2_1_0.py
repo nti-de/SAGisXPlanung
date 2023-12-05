@@ -36,8 +36,8 @@ def upgrade():
             ALTER TABLE bp_plan ADD COLUMN "versionSonstRechtsgrundlage_id" uuid REFERENCES xp_gesetzliche_grundlage(id);
         """)
 
-    op.execute("ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE 'SonstigeInfrastruktur'")
-    op.execute("ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE 'SonstigeSicherheitOrdnung'")
+    op.execute("ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeInfrastruktur'")
+    op.execute("ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeSicherheitOrdnung'")
 
 
 def downgrade():
