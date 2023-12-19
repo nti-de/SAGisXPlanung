@@ -1,6 +1,6 @@
 #define MyAppName "SAGis XPlanung"
 #define MyAppPublisher "NTI Deutschland GmbH"
-#define MyAppURL "https://www.nti.biz/de/produkte/sagis-loesungen/"
+#define MyAppURL "https://www.nti-group.com/de/produkte/sagis-loesungen/"
 
 #ifndef SAGIS_VERSION
   #define SAGIS_VERSION "2.2.1-dev"

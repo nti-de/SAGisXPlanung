@@ -27,7 +27,7 @@ hasProcessingProvider=yes
 # Tags are comma separated with spaces allowed
 tags=xplanung, bplan, fnp, bebauungsplan
 
-homepage=http://www.nti.biz/de/
+homepage=https://github.com/nti-de/SAGisXPlanung/
 category=Plugins
 icon=gui/resources/sagis_icon.png
 # experimental flag

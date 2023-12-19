@@ -470,7 +470,7 @@
         </font>
        </property>
        <property name="text">
-        <string>&lt;a href=&quot;https://www.nti.biz/de/produkte/sagis-loesungen/&quot;&gt;nti.biz/de&lt;/a&gt;</string>
+        <string>&lt;a href=&quot;https://www.nti-group.com/de/produkte/sagis-loesungen/&quot;&gt;nti-group.com/de&lt;/a&gt;</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
