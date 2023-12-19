@@ -13,6 +13,8 @@ from sqlalchemy.dialects import postgresql
 from alembic import op
 import sqlalchemy as sa
 
+from alembic_postgresql_enum import TableReference
+
 PROJECT_PATH = os.getcwd()
 SOURCE_PATH = os.path.join(
     PROJECT_PATH, "src"
@@ -97,7 +99,7 @@ def upgrade():
                          'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
                          'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
                          'Sonstiges'],
-                        [('xp_spe_daten', '"klassifizMassnahme"')],
+                        [TableReference('xp_spe_daten', '"klassifizMassnahme"')],
                         enum_values_to_rename=[('ArtentreicherGehoelzbestand', 'ArtenreicherGehoelzbestand')])
 
     # The previous statement has to be committed in order for the update to work.
@@ -1371,7 +1373,7 @@ def downgrade():
                          'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
                          'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
                          'Sonstiges'],
-                        [('xp_spe_daten', '"klassifizMassnahme"')],
+                        [TableReference('xp_spe_daten', '"klassifizMassnahme"')],
                         enum_values_to_rename=[('ArtenreicherGehoelzbestand', 'ArtentreicherGehoelzbestand')])
 
     op.execute("ALTER TABLE bp_gemeinbedarf DROP COLUMN traeger")
