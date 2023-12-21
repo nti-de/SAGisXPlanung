@@ -29,3 +29,21 @@ def xp_version(versions: List[XPlanVersion]):
         setattr(cls, 'xp_versions', versions)
         return cls
     return decorator_versions
+
+
+def fallback_renderer(renderer_function):
+    """
+    Decorator for `renderer` classmethod in subclassed of :class:`SAGisXPlanung.XPlan.mixins.RendererMixin`.
+
+    Tries to access renderer from QgsConfig, otherwise falls back to using the renderer_function
+    """
+
+    @functools.wraps(renderer_function)
+    def wrapper(cls, geom_type=None):
+        r = super(cls, cls).renderer(geom_type)
+        if r is not None:
+            return r
+
+        return renderer_function(cls, geom_type)
+
+    return wrapper

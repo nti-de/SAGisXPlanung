@@ -22,7 +22,7 @@ from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Zulaessigkeit, BP_Bauweise,
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateData, BuildingTemplateCellDataType, BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
 from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt
@@ -146,6 +146,7 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         return QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         color_map = [
             ('Wohngebiet', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#f4c3b4')),
@@ -348,6 +349,7 @@ class BP_BauGrenze(LineGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -390,6 +392,7 @@ class BP_BauLinie(LineGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -474,6 +477,7 @@ class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship, declared_attr
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald, \
     XP_EigentumsartWald, XP_WaldbetretungTyp, XP_ZweckbestimmungGruen
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
@@ -131,6 +131,7 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Landwirtschaft_Wald_und_Gruenflaechen')
         return renderer
@@ -183,6 +184,7 @@ class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -237,6 +239,7 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

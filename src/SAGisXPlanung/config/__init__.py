@@ -8,6 +8,8 @@ from SAGisXPlanung import XPlanVersion, Base
 
 from qgis.PyQt.QtCore import QSettings
 
+from .qgis_config import QgsConfig
+
 try:
     from functools import cache
 except ImportError:

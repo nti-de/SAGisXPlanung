@@ -13,7 +13,7 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_Sondernutzungen,
                                        XP_AbweichungBauNVOTypen)
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
@@ -76,6 +76,7 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
         return QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         color_map = [
             ('Wohngebiet', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#fb6868')),

@@ -28,10 +28,27 @@ SOFTWARE.
 """
 
 import math
+from contextlib import asynccontextmanager
 
 from qgis.PyQt.QtCore import QRect, QTimer, Qt
 from qgis.PyQt.QtGui import QColor, QPainter, QPaintEvent
 from qgis.PyQt.QtWidgets import QWidget
+
+
+@asynccontextmanager
+async def loading_animation(widget):
+    spinner = None
+
+    try:
+        spinner = WaitingSpinner(widget, disableParentWhenSpinning=True, radius=5,
+                                 lines=20, line_length=5, line_width=1, color=(0, 6, 128), modality=Qt.WindowModal)
+
+        spinner.start()
+        yield spinner
+
+    finally:
+        if spinner is not None:
+            spinner.stop()
 
 
 class WaitingSpinner(QWidget):

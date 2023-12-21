@@ -15,7 +15,7 @@ from qgis.PyQt.QtCore import Qt
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import enforce_wkb_constraints, geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import BP_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
@@ -127,6 +127,7 @@ class BP_Plan(XP_Plan):
         ]
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
@@ -210,6 +211,12 @@ class BP_Bereich(XP_Bereich):
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE'))
     gehoertZuPlan = relationship('BP_Plan', back_populates='bereich')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        return QgsSingleSymbolRenderer(symbol)
 
 
 class BP_Objekt(XP_Objekt):

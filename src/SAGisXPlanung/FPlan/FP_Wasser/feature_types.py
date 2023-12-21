@@ -8,7 +8,7 @@ from sqlalchemy import Column, ForeignKey, Enum, ARRAY
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGewaesser
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -45,6 +45,7 @@ class FP_Gewaesser(PolygonGeometry, FP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

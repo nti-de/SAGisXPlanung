@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey, Enum
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGewaesser
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -53,6 +53,7 @@ class BP_GewaesserFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Wasser', symbol_size=20)
         return renderer

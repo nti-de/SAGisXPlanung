@@ -11,7 +11,7 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGemeinbedarf, XP_ZweckbestimmungSpielSportanlage, \
     XP_Traegerschaft
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
@@ -73,6 +73,7 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
@@ -151,6 +152,7 @@ class FP_SpielSportanlage(MixedGeometry, FP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())

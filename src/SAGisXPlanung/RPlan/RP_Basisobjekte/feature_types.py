@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung.RPlan.RP_Basisobjekte.enums import RP_Art, RP_Rechtsstand, RP_Verfahren
+from SAGisXPlanung.XPlan.core import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -48,6 +49,7 @@ class RP_Plan(XP_Plan):
     bereich = relationship("RP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
@@ -79,4 +81,10 @@ class RP_Bereich(XP_Bereich):
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('rp_plan.id', ondelete='CASCADE'))
     gehoertZuPlan = relationship('RP_Plan', back_populates='bereich')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        return QgsSingleSymbolRenderer(symbol)
 

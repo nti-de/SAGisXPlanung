@@ -48,3 +48,6 @@ class RuleBasedSymbolRenderer(QgsRuleBasedRenderer):
             root_rule.appendChild(rule)
 
         root_rule.removeChildAt(0)
+
+    def symbol(self) -> QgsSymbol:
+        return self.base_symbology

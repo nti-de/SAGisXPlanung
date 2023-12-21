@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship, declared_attr
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType
@@ -128,6 +128,7 @@ class BP_VerEntsorgung(PolygonGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Ver_und_Entsorgung')
         return renderer

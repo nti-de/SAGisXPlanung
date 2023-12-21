@@ -11,6 +11,7 @@ from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY
 from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
+from SAGisXPlanung.XPlan.core import fallback_renderer
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry
 from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum
 
@@ -30,7 +31,7 @@ class BP_FlaecheOhneFestsetzung(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     @classmethod
-    def renderer(cls, geom_type: GeometryType = None):
+    def symbol(cls):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
@@ -40,7 +41,17 @@ class BP_FlaecheOhneFestsetzung(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
 
         symbol.appendSymbolLayer(fill)
         symbol.setOpacity(0.2)
-        return QgsSingleSymbolRenderer(symbol)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
 class BP_Wegerecht(PolygonGeometry, BP_Objekt):
@@ -88,6 +99,7 @@ class BP_Wegerecht(PolygonGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -142,6 +154,7 @@ class BP_NutzungsartenGrenze(LineGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

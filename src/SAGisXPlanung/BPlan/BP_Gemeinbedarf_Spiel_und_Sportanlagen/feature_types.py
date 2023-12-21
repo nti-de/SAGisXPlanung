@@ -13,7 +13,7 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_BebauungsArt, BP_Bauweise
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungSpielSportanlage, XP_ZweckbestimmungGemeinbedarf, \
     XP_Traegerschaft
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
@@ -140,6 +140,7 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Gemeinbedarf_Spiel_und_Sportanlagen')
         return renderer
@@ -265,6 +266,7 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Gemeinbedarf_Spiel_und_Sportanlagen')
         return renderer

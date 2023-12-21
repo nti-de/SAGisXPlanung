@@ -12,7 +12,7 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol
+from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
 from SAGisXPlanung.XPlan.mixins import PointGeometry, PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import Length, GeometryType
@@ -101,6 +101,7 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
         if geom_type == QgsWkbTypes.PointGeometry:
             renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.point_symbol(),
@@ -162,6 +163,7 @@ class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

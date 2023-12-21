@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
@@ -74,6 +74,7 @@ class LP_Plan(XP_Plan):
     bereich = relationship("LP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
@@ -99,3 +100,9 @@ class LP_Bereich(XP_Bereich):
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('lp_plan.id', ondelete='CASCADE'))
     gehoertZuPlan = relationship('LP_Plan', back_populates='bereich')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        return QgsSingleSymbolRenderer(symbol)

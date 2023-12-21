@@ -1,3 +1,4 @@
+import glob
 import logging
 import os.path
 
@@ -8,20 +9,22 @@ from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphic
 from qgis.PyQt.QtPrintSupport import QPrinter
 
 from qgis.core import (QgsMapLayerType, QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
-                       QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication)
+                       QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication, QgsVectorLayer)
 from qgis.gui import QgsMapLayerAction
 from qgis import processing
 
 import qasync
 
+from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.Settings import Settings, is_valid_db, tryConnect
+from SAGisXPlanung.config import QgsConfig
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
 from SAGisXPlanung.gui.XPPlanDetailsDialog import displayPlanOnCanvas, reloadPlan
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
 from SAGisXPlanung.processing.provider import SAGisProvider
-from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning
+from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning, CLASSES
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,21 @@ class XPlanung(QObject):
         self.dockWidget.details_dialog.hide()
 
         self.settings = Settings()
+
+        # load all file-based styles into the QgsConfig if they are not already present
+        folder_path = os.path.join(BASE_DIR, 'symbole/')
+        qml_files = glob.glob(os.path.join(folder_path, "**/*.qml"))
+
+        for qml_file in qml_files:
+            base_name = os.path.basename(qml_file)
+            class_name, geometry_type = os.path.splitext(base_name)[0].rsplit('-', 1)
+
+            if QgsConfig.class_renderer(CLASSES[class_name], geometry_type):
+                continue
+            layer = QgsVectorLayer("Polygon", "result", "memory")
+            layer.loadNamedStyle(qml_file)
+
+            QgsConfig.set_class_renderer(CLASSES[class_name], geometry_type, layer.renderer())
 
         # TODO: hackish solution, because there currently is no signal on project loaded:
         # see https://github.com/qgis/QGIS/issues/40483

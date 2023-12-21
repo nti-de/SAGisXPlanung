@@ -15,14 +15,14 @@ from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.config import export_version
-from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin
+from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
 from .types import LargeString, Angle, Length
 from ..MapLayerRegistry import MapLayerRegistry
 
 logger = logging.getLogger(__name__)
 
 
-class XP_Plan(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
+class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
     """ Abstrakte Oberklasse für alle Klassen raumbezogener Pläne. """
 
     __tablename__ = 'xp_plan'
@@ -136,7 +136,7 @@ class XP_Plan(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMi
         return tabs
 
 
-class XP_Bereich(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
+class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
     """ XP_Bereich
 
     Abstrakte Oberklasse für die Modellierung von Bereichen.
@@ -218,7 +218,7 @@ class XP_Bereich(PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanva
         return ['praesentationsobjekt', 'simple_geometry']
 
 
-class XP_Objekt(RelationshipMixin, ElementOrderMixin, MapCanvasMixin, Base):
+class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMixin, Base):
     """Abstrakte Oberklasse für alle XPlanung - Fachobjekte """
 
     __tablename__ = 'xp_objekt'

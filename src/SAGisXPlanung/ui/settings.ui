@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_common">
       <property name="enabled">
@@ -91,7 +91,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_attributes">
+     <widget class="AttributeConfigPage" name="tab_attributes">
       <attribute name="title">
        <string>Formulare</string>
       </attribute>
@@ -104,7 +104,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_database">
+     <widget class="DatabaseConfigPage" name="tab_database">
       <attribute name="title">
        <string>Datenbank</string>
       </attribute>
@@ -112,7 +112,7 @@
        <item>
         <widget class="QTabWidget" name="tab_database_actions">
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="tab_db_connection">
           <attribute name="title">
@@ -497,6 +497,20 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>AttributeConfigPage</class>
+   <extends>QWidget</extends>
+   <header>SAGisXPlanung/gui/widgets.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DatabaseConfigPage</class>
+   <extends>QWidget</extends>
+   <header>SAGisXPlanung/gui/widgets.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

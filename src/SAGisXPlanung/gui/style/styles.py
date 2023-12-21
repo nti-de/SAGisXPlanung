@@ -1,7 +1,7 @@
 import logging
 
 from qgis.PyQt.QtCore import QModelIndex, QRect, Qt
-from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush
+from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush, QIcon
 from qgis.PyQt.QtWidgets import QStyledItemDelegate, QStyleOptionViewItem, QProxyStyle, QStyleOption, QStyle
 
 logger = logging.getLogger(__name__)
@@ -73,3 +73,13 @@ class HighlightRowProxyStyle(QProxyStyle):
         elif element == QStyle.PE_FrameFocusRect:
             return
         super(HighlightRowProxyStyle, self).drawPrimitive(element, option, painter)
+
+
+class ClearIconProxyStyle(QProxyStyle):
+    """ Proxy style that can be applied to QLineEdit's
+        to swap the default clear button with the QGIS variant"""
+    def standardIcon(self, standard_icon, option=None, widget=None):
+        logger.debug(f'called standardIcon {widget} with icon {standard_icon}')
+        if standard_icon == QStyle.SP_LineEditClearButton:
+            return QIcon(':/images/themes/default/mIconClearText.svg')
+        return super().standardIcon(standard_icon, option, widget)

@@ -11,12 +11,22 @@ from sqlalchemy.orm import class_mapper, RelationshipProperty
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
 from SAGisXPlanung.GML.geometry import geom_type_as_layer_url
+from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
-from SAGisXPlanung.config import xplan_tooltip, export_version
+from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
 
 logger = logging.getLogger(__name__)
+
+
+class RendererMixin:
+    """ Mixin für XPlanung-Klassen, die als Geometrieobjekte auf der Karte visualisiert werden können """
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        # if possible, try to access renderer from saved config
+        return QgsConfig.class_renderer(cls, geom_type)
 
 
 class RelationshipMixin:
@@ -66,7 +76,8 @@ class RelationshipMixin:
 
 
 class GeometryObject:
-    pass
+    """ Abstrakte Oberklasse für XPlanung-Geometrietypen """
+    __geometry_type__ = QgsWkbTypes.UnknownGeometry
 
 
 class MixedGeometry(GeometryObject):
@@ -94,7 +105,7 @@ class PolygonGeometry(GeometryObject):
     __geometry_type__ = QgsWkbTypes.PolygonGeometry
 
 
-class LineGeometry:
+class LineGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen als Liniengeometrien"""
     __geometry_type__ = QgsWkbTypes.LineGeometry
 

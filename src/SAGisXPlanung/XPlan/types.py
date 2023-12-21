@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 if Qgis.versionInt() >= 33000:
     GeometryType = Qgis.GeometryType
 else:
-    GeometryType = QgsWkbTypes.PointGeometry
+    GeometryType = QgsWkbTypes.GeometryType
 
 
 class ConformityException(Exception):

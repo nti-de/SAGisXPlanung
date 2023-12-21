@@ -8,6 +8,7 @@ from sqlalchemy import Column, ForeignKey, Enum, String, Boolean
 
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzgebietWasserrecht, SO_SchutzzonenWasserrecht
+from SAGisXPlanung.XPlan.core import fallback_renderer
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 
@@ -44,6 +45,7 @@ class SO_SchutzgebietWasserrecht(PolygonGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

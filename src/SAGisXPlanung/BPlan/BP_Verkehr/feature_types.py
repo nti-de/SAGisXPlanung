@@ -12,7 +12,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Verkehr.enums import BP_ZweckbestimmungStrassenverkehr, BP_BereichOhneEinAusfahrtTypen, \
     BP_EinfahrtTypen
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType, XPEnum
@@ -83,6 +83,7 @@ class BP_StrassenVerkehrsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obje
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -120,6 +121,7 @@ class BP_StrassenbegrenzungsLinie(LineGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -224,6 +226,7 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(PolygonGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Verkehr')
         return renderer
@@ -274,6 +277,7 @@ class BP_BereichOhneEinAusfahrtLinie(LineGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -313,6 +317,7 @@ class BP_EinfahrtPunkt(PointGeometry, BP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 

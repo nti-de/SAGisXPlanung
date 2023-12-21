@@ -3,6 +3,8 @@ from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QColor, QFocusEvent, QKeyE
 from qgis.PyQt.QtWidgets import QLineEdit, QToolButton, QProxyStyle, QStyle, QApplication
 from qgis.PyQt.QtCore import QEvent, QSize, Qt, pyqtSlot
 
+from SAGisXPlanung.gui.style import ClearIconProxyStyle
+
 
 class QCollapsibleSearch(QLineEdit):
 
@@ -78,10 +80,3 @@ class QCollapsibleSearch(QLineEdit):
             qp.fillRect(img.rect(), QColor(color))
             qp.end()
         return QIcon(img)
-
-
-class ClearIconProxyStyle(QProxyStyle):
-    def standardIcon(self, standard_icon, option=None, widget=None):
-        if standard_icon == QStyle.SP_LineEditClearButton and isinstance(widget, QCollapsibleSearch):
-            return QIcon(':/images/themes/default/mIconClearText.svg')
-        return super().standardIcon(standard_icon, option, widget)

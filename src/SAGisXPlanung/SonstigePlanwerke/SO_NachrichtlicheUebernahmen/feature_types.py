@@ -13,6 +13,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr, \
     SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft
+from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
@@ -50,6 +51,7 @@ class SO_Schienenverkehrsrecht(PolygonGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -97,6 +99,7 @@ class SO_Denkmalschutzrecht(PolygonGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
@@ -181,6 +184,7 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
@@ -220,6 +224,7 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
@@ -282,6 +287,7 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser', symbol_size=20)

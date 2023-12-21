@@ -4,26 +4,43 @@ import logging
 from enum import Enum
 import yaml
 
-from qgis.PyQt.QtGui import QFontMetrics, QIcon
+from qgis.PyQt.QtGui import QFontMetrics, QIcon, QCloseEvent
 from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSettings, QSortFilterProxyModel,
                               pyqtSlot, QObject, QEvent, QPoint, QSize)
-from qgis.PyQt.QtWidgets import (QTreeView, QHeaderView, QAbstractItemView, QToolTip, QMenu, QAction)
+from qgis.PyQt.QtWidgets import (QTreeView, QHeaderView, QAbstractItemView, QToolTip, QMenu, QAction, QLineEdit)
 from sqlalchemy import inspect
 
-from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.XPlan.mixins import ElementOrderMixin
 from SAGisXPlanung.config import xplan_tooltip
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.utils import CLASSES
 
+from .basepage import SettingsPage
+
 logger = logging.getLogger(__name__)
 
 
-class SortOptions(Enum):
-    SortHierarchy = 0
-    SortAlphabet = 1
-    SortCategory = 2
+class AttributeConfigPage(SettingsPage):
+    def __init__(self, parent=None):
+        super(AttributeConfigPage, self).__init__(parent)
+        self.ui = None
+
+    def setupUi(self, ui):
+        self.ui = ui
+        self.ui.attribute_view = QAttributeConfigView()
+        self.ui.tab_attributes.layout().addWidget(self.ui.attribute_view)
+        self.ui.filter_edit.setPlaceholderText('Suchen...')
+        self.ui.filter_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.ui.filter_edit.textChanged.connect(self.ui.attribute_view.onFilterTextChanged)
+
+    def setupData(self):
+        self.ui.attribute_view.setupModelData()
+
+    def closeEvent(self, event: QCloseEvent):
+        conf = self.ui.attribute_view.config_dict()
+        s = QSettings()
+        s.setValue(f"plugins/xplanung/attribute_config", yaml.dump(conf, default_flow_style=False))
 
 
 class QAttributeConfigView(QTreeView):
@@ -62,6 +79,9 @@ class QAttributeConfigView(QTreeView):
         config = yaml.safe_load(s.value(f"plugins/xplanung/attribute_config", '')) or {}
 
         for xplan_class_name, xplan_class in CLASSES.items():
+            if hasattr(xplan_class, 'xp_versions') and export_version() not in xplan_class.xp_versions:
+                continue
+
             node = AttributeTreeNode(xplan_class_name, '', False)
 
             if not issubclass(xplan_class, ElementOrderMixin):

@@ -9,7 +9,7 @@ from sqlalchemy import Column, ForeignKey, Enum
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.FPlan.FP_Verkehr.enums import FP_ZweckbestimmungStrassenverkehr
-from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
@@ -47,6 +47,7 @@ class FP_Strassenverkehr(PolygonGeometry, FP_Objekt):
         return symbol
 
     @classmethod
+    @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(cls.symbol())
 
