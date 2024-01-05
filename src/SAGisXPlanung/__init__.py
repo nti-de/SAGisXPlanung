@@ -71,7 +71,7 @@ except Exception as e:
 
 # =========================================================
 
-VERSION = '2.2.2'
+VERSION = '2.3.0'
 COMPATIBLE_DB_REVISIONS = ['ce95b86bc010']
 DEPENDENCIES = [
     'lxml',
