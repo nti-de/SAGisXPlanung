@@ -401,7 +401,7 @@ class BP_BauLinie(LineGeometry, BP_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
-class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, BP_Objekt):
+class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Festsetzung einer Fläche mit besonderem Nutzungszweck, der durch besondere städtebauliche Gründe erfordert
         wird (§9 Abs. 1 Nr. 9 BauGB.). """
 

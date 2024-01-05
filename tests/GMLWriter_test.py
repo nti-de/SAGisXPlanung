@@ -25,7 +25,7 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import F
 from SAGisXPlanung.GML.GMLWriter import writeTextNode, GMLWriter
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, XP_PTO
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_SpezExterneReferenz, XP_ExterneReferenz, \
-    XP_Hoehenangabe
+    XP_Hoehenangabe, XP_GesetzlicheGrundlage
 from SAGisXPlanung.XPlan.enums import XP_WaldbetretungTyp, XP_ArtHoehenbezugspunkt
 
 
@@ -44,6 +44,10 @@ def gml_writer():
     plangeber = XP_Plangeber()
     plangeber.name = 'test'
     plan.plangeber = plangeber
+    baugb = XP_GesetzlicheGrundlage()
+    baugb.name = 'Baugesetzbuch'
+    baugb.datum = datetime.date(2024, 1, 1)
+    plan.versionBauGB = baugb
 
     ref = XP_SpezExterneReferenz()
     ref.beschreibung = 'test'

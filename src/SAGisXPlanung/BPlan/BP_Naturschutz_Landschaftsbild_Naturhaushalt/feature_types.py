@@ -14,7 +14,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
-from SAGisXPlanung.XPlan.mixins import PointGeometry, PolygonGeometry, MixedGeometry
+from SAGisXPlanung.XPlan.mixins import PointGeometry, PolygonGeometry, MixedGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType
 
 
@@ -118,7 +118,7 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         return QIcon(os.path.abspath(os.path.join(BASE_DIR, 'symbole/BP_Naturschutz_Landschaftsbild_Naturhaushalt/Anpflanzen_Baum.svg')))
 
 
-class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, BP_Objekt):
+class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
         (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB) """
 
