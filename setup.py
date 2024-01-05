@@ -42,7 +42,7 @@ def get_ext_paths(root_dir, exclude_files):
 
 setup(
     name='SAGisXPlanung',
-    version='2.2.1',
+    version='2.2.2',
     packages=find_packages(),
     ext_modules=cythonize(
         get_ext_paths('src/SAGisXPlanung/', EXCLUDE_FILES),

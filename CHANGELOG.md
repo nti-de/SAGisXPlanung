@@ -1,5 +1,27 @@
 ## Changelog
 
+### [2.2.2] - 05.01.2023
+
+#### Neue Funktionen
+
+- Benutzerdefinierte Symbolisierung und Darstellungsreihenfolge für XPlanung-Objekte (Vollversion)
+  - Neuer Einstellungsdialog zur Anpassung der Symbolisierung
+  - Import/Export der Darstellungskonfiguration
+
+#### Veränderungen
+
+- Doppelte Stützpunkte werden beim Civil-Import automatisch entfernt (57af1da0)
+- verbesserte Stilisierung für `BP_Plan`, `BP_Wegerecht`, `SO_Denkmalsschutz`, `BP_SchutzPflegeEntwicklungsFlaeche` (017e2268)
+- Domainwechsel zu nti-group.com (85c1e027)
+
+#### Fehlerbehebungen
+
+- Endlossschleife von Warnungsdialogen beim ersten Start der Anwendung behoben (9dc1e21d)
+- Fehler beim Speichern von Objekten vom Typ XP_SpezExterneReferenz im Attribut refScan von XP_Bereich behoben (375a23f8, b1fd27ed)
+- Korrektur des Civil-Imports bei mehreren XP_Bereich-Instanzen (70d905b0)
+- SQL-Offline Revisionen zwischen Versionen 1.10 und 2.0 korrigiert (4864341f, ce9d8474)
+- Fehler beim Export von Objekten des Typs `XP_GesetzlicheGrundlage` behoben (04e66bce)
+
 ### [2.2.1] - 02.10.2023
 
 #### Veränderungen

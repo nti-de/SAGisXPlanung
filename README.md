@@ -25,6 +25,7 @@ Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen.
 | Bearbeiten von XPlanung-Attributen                           | [^abbr1]           | :heavy_check_mark: |
 | Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                    | :heavy_check_mark: |
 | Codelist-Attribute                                           |                    | :heavy_check_mark: |
+| Benutzerdefinierte Symbolisierung                            |                    | :heavy_check_mark: |
 [^abbr1]: Nur für Basisobjekte möglich (teilvektorielle Erfassung)
 
 
@@ -62,7 +63,7 @@ Für eine erfolgreiche Ausführung des Programms müssen zudem folgende Python-K
 ### Beispieldaten
 
 > [!NOTE]  
-> Zum Testen stellt die [Leitstelle XPlanung/XBau](https://xleitstelle.de) im folgenden Repository Testdaten im XPlanGML-Format zur Verfügung: https://bitbucket.org/geowerkstatt-hamburg/xplan-testdaten/src/master/
+> Zum Testen stellt die [Leitstelle XPlanung/XBau](https://xleitstelle.de) im folgenden Repository Testdaten im XPlanGML-Format zur Verfügung: https://gitlab.opencode.de/xleitstelle/xplanung/testdaten
 
 <details><summary><b>Visualisierung Beispielplan mit SAGis XPlanung</b></summary>
 <div>
@@ -74,7 +75,7 @@ Für eine erfolgreiche Ausführung des Programms müssen zudem folgende Python-K
 ### Kontakt
 
 - Mail: qgis-de@nti.biz
-- Web: https://nti.biz/de
+- Web: https://nti-group.com/de
 ---
 
 <sup>
