@@ -26,13 +26,11 @@ for file in "${files[@]}"; do
     # Perform version replacement using sed
     sed -i "s/\($current_version\)/$new_version/I" "$file"
 
-    # Additional replacements specific to your use case
-    # You may add more sed commands as needed for your specific files
-
     echo "Version in $file updated from $current_version to $new_version"
 done
 
 # Rename sql file for database setup
+# TODO: not only rename the file, but also generate new changes from alembic upgrade head
 old_sql_file="src/SAGisXPlanung/database/create_v$current_version.sql"
 new_sql_file="src/SAGisXPlanung/database/create_v$new_version.sql"
 

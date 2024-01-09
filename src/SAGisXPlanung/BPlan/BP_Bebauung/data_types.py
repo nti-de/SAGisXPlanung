@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
-from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform
+from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
 from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
@@ -110,3 +110,23 @@ class BP_KomplexeSondernutzung(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['baugebiet_id']
+
+class BP_KomplexeZweckbestNebenanlagen(RelationshipMixin, ElementOrderMixin, Base):
+    """ Spezifikation der Zweckbestimmung einer Nebenanlagenfläche. """
+
+    __tablename__ = 'bp_zweckbestimmung_nebenanlagen'
+    __avoidRelation__ = ['nebenanlage']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    allgemein = Column(Enum(BP_ZweckbestimmungNebenanlagen), nullable=False)
+
+    textlicheErgaenzung = Column(String)
+    aufschrift = Column(String)
+
+    nebenanlage_id = Column(UUID(as_uuid=True), ForeignKey('bp_nebenanlage.id', ondelete='CASCADE'))
+    nebenanlage = relationship('BP_NebenanlagenFlaeche', back_populates='rel_zweckbestimmung')
+
+    @classmethod
+    def avoid_export(cls):
+        return ['nebenanlage_id']

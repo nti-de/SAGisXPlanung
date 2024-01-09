@@ -129,6 +129,16 @@ class FlaechenschlussObjekt:
     pass
 
 
+class UeberlagerungsObjekt:
+    """ Mixin, zum Deklarieren eines Überlagerungsobjekts.
+    Alle Objektklassen die von xplan:*P_Ueberlagerungsobjekt abgeleitet sind, müssen mit diesem Mixin dekoriert werden,
+    damit der schema-konforme Export ins XPlanGML gewährleistet ist.
+
+    Überlagerungsobjekte zeichnen sich dadurch aus, dass das Attribut `flaechenschluss` zwingend den Wert `falsch`
+    erhält. """
+    pass
+
+
 class ElementOrderDeclarativeInheritanceFixMixin:
     """ Mixin, zum Dekorieren einer sqlalchemy @declarative_base Klasse, damit die `element_order` Methode korrekt
         funktioniert.

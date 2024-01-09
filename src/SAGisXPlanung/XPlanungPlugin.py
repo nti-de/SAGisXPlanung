@@ -54,7 +54,8 @@ class XPlanung(QObject):
             self.sagis_menu = QMenu('&SAGis', self.iface.mainWindow().menuBar())
             self.sagis_menu.setObjectName('sagis_menu')
             actions = self.iface.mainWindow().menuBar().actions()
-            self.iface.mainWindow().menuBar().insertMenu(actions[-2], self.sagis_menu)
+            if len(actions) > 3:
+                self.iface.mainWindow().menuBar().insertMenu(actions[-2], self.sagis_menu)
 
         self.sagis_toolbar = self.iface.mainWindow().findChild(QToolBar, 'sagis_toolbar')
         if not self.sagis_toolbar:

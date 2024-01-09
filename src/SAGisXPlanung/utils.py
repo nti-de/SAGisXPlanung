@@ -11,9 +11,10 @@ from qgis.utils import iface
 from SAGisXPlanung import Session, Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.data_types import BP_VeraenderungssperreDaten
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt
-from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung
+from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
+    BP_KomplexeZweckbestNebenanlagen
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
-    BP_BesondererNutzungszweckFlaeche
+    BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -115,11 +116,13 @@ CLASSES = {
     'BP_KomplexeZweckbestLandwirtschaft': BP_KomplexeZweckbestLandwirtschaft,
     'BP_KomplexeZweckbestWald': BP_KomplexeZweckbestWald,
     'BP_KomplexeZweckbestVerEntsorgung': BP_KomplexeZweckbestVerEntsorgung,
+    'BP_KomplexeZweckbestNebenanlagen': BP_KomplexeZweckbestNebenanlagen,
     'BP_KomplexeSondernutzung': BP_KomplexeSondernutzung,
     'BP_VeraenderungssperreDaten': BP_VeraenderungssperreDaten,
     'BP_NutzungsartenGrenze': BP_NutzungsartenGrenze,
     'BP_BereichOhneEinAusfahrtLinie': BP_BereichOhneEinAusfahrtLinie,
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
+    'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
 
     'FP_Objekt': FP_Objekt,
     'FP_BebauungsFlaeche': FP_BebauungsFlaeche,

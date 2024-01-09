@@ -63,3 +63,19 @@ class BP_GrenzBebauung(XPlanungEnumMixin, Enum):
     Verboten = 1000
     Erlaubt = 2000
     Erzwungen = 3000
+
+
+class BP_ZweckbestimmungNebenanlagen(XPlanungEnumMixin, Enum):
+    """ Spezifikation der Zweckbestimmung einer Nebenanlage """
+
+    Stellplaetze = 1000
+    Garagen = 2000
+    Spielplatz = 3000
+    Carport = 3100
+    Tiefgarage = 3200
+    Nebengebaeude = 3300
+    AbfallSammelanlagen = 3400
+    EnergieVerteilungsanlagen = 3500
+    AbfallWertstoffbehaelter = 3600
+    Fahrradstellplaetze = 3700
+    Sonstiges = 9999

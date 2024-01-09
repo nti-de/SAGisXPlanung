@@ -3,7 +3,7 @@ import os
 import uuid
 from typing import List
 
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingleSymbolRenderer,
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingleSymbolRenderer, QgsUnitTypes,
                        QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer, QgsSymbolLayerUtils,
                        QgsSimpleFillSymbolLayer)
 from qgis.PyQt.QtGui import QColor, QIcon
@@ -18,14 +18,15 @@ from sqlalchemy.orm import relationship, load_only, joinedload, declared_attr
 from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung
-from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung
+from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
+                                                   BP_ZweckbestimmungNebenanlagen)
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateData, BuildingTemplateCellDataType, BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
-from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Angle, Area, Length, Volume, Scale, ConformityException, GeometryType, XPEnum
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
@@ -474,6 +475,73 @@ class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, FlaechenschlussObjekt, 
 
         symbol.appendSymbolLayer(line)
         symbol.appendSymbolLayer(fill)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
+class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Fläche für Nebenanlagen, die auf Grund anderer Vorschriften für die Nutzung von Grundstücken erforderlich sind,
+    wie Spiel-, Freizeit- und Erholungsflächen sowie die Fläche für Stellplätze und Garagen mit ihren Einfahrten
+    (§9 Abs. 1 Nr. 4 BauGB) """
+
+    __tablename__ = 'bp_nebenanlage'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_nebenanlage',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @declared_attr
+    def zweckbestimmung(cls):
+        return XPCol(ARRAY(Enum(BP_ZweckbestimmungNebenanlagen)), version=XPlanVersion.FIVE_THREE,
+                     import_attr=cls.import_zweckbestimmung_attr)
+
+    rel_zweckbestimmung = relationship("BP_KomplexeZweckbestNebenanlagen", back_populates="nebenanlage",
+                                       cascade="all, delete", passive_deletes=True)
+
+    Zmax = Column(Integer)
+
+    def layer_fields(self):
+        return {
+            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+        }
+
+    @classmethod
+    def import_zweckbestimmung_attr(cls, version):
+        if version == XPlanVersion.FIVE_THREE:
+            return 'zweckbestimmung'
+        else:
+            return 'rel_zweckbestimmung'
+
+    @classmethod
+    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
+        return [
+            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
+                                   allowed_version=XPlanVersion.SIX)
+        ]
+
+    @classmethod
+    def attributes(cls):
+        return ['zweckbestimmung']
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        red_outline = QgsSimpleLineSymbolLayer(QColor('red'))
+        red_outline.setWidth(0.3)
+        red_outline.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+
+        symbol.appendSymbolLayer(red_outline)
         return symbol
 
     @classmethod
