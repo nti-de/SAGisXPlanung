@@ -125,3 +125,6 @@ class XPEnum(types.TypeDecorator):
 
     impl = types.Enum
     cache_ok = True
+
+    def process_bind_param(self, value, dialect):
+        return value

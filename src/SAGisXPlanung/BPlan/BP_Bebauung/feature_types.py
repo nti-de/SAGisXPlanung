@@ -511,7 +511,7 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
     def layer_fields(self):
         return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
         }
 
     @classmethod
@@ -539,6 +539,7 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
         red_outline = QgsSimpleLineSymbolLayer(QColor('red'))
         red_outline.setWidth(0.3)
+        red_outline.setPenStyle(Qt.DashLine)
         red_outline.setOutputUnit(QgsUnitTypes.RenderMapUnits)
 
         symbol.appendSymbolLayer(red_outline)

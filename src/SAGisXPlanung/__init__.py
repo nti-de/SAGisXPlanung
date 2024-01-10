@@ -72,7 +72,7 @@ except Exception as e:
 # =========================================================
 
 VERSION = '2.3.0'
-COMPATIBLE_DB_REVISIONS = ['ce95b86bc010']
+COMPATIBLE_DB_REVISIONS = ['346f4a91caf3']
 DEPENDENCIES = [
     'lxml',
     'SQLAlchemy==1.4.46',
