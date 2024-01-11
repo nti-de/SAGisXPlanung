@@ -32,9 +32,7 @@ def upgrade():
     nebenanlagen_enum = postgresql.ENUM('Stellplaetze', 'Garagen', 'Spielplatz', 'Carport', 'Tiefgarage', 'Nebengebaeude',
                                 'AbfallSammelanlagen', 'EnergieVerteilungsanlagen', 'AbfallWertstoffbehaelter',
                                 'Fahrradstellplaetze', 'Sonstiges',
-                                name='bp_zweckbestimmungnebenanlagen', create_type=False)
-    if not context.is_offline_mode():
-        nebenanlagen_enum.create(op.get_bind(), checkfirst=True)
+                                name='bp_zweckbestimmungnebenanlagen')
 
     op.create_table('bp_nebenanlage',
                     sa.Column('id', sa.UUID(), nullable=False),
@@ -45,7 +43,7 @@ def upgrade():
                     )
     op.create_table('bp_zweckbestimmung_nebenanlagen',
                     sa.Column('id', sa.UUID(), nullable=False),
-                    sa.Column('allgemein', postgresql.ARRAY(nebenanlagen_enum)),
+                    sa.Column('allgemein', nebenanlagen_enum),
                     sa.Column('textlicheErgaenzung', sa.String(), nullable=True),
                     sa.Column('aufschrift', sa.String(), nullable=True),
                     sa.Column('nebenanlage_id', sa.UUID(), nullable=True),

@@ -2613,5 +2613,47 @@ CREATE TYPE bp_einfahrttypen AS ENUM (
 
 UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.version_num = '8cdbef1a55d6';
 
+-- Running upgrade ce95b86bc010 -> 346f4a91caf3
+
+CREATE TYPE bp_zweckbestimmungnebenanlagen AS ENUM ('Stellplaetze', 'Garagen', 'Spielplatz', 'Carport', 'Tiefgarage', 'Nebengebaeude', 'AbfallSammelanlagen', 'EnergieVerteilungsanlagen', 'AbfallWertstoffbehaelter', 'Fahrradstellplaetze', 'Sonstiges');
+
+CREATE TABLE bp_nebenanlage (
+    id UUID NOT NULL,
+    zweckbestimmung bp_zweckbestimmungnebenanlagen[],
+    "Zmax" INTEGER,
+    PRIMARY KEY (id),
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TABLE bp_zweckbestimmung_nebenanlagen (
+    id UUID NOT NULL,
+    allgemein bp_zweckbestimmungnebenanlagen,
+    "textlicheErgaenzung" VARCHAR,
+    aufschrift VARCHAR,
+    nebenanlage_id UUID,
+    PRIMARY KEY (id),
+    FOREIGN KEY(nebenanlage_id) REFERENCES bp_nebenanlage (id) ON DELETE CASCADE
+);
+
+ALTER TABLE bp_einfahrtpunkt ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+
+ALTER TABLE bp_keine_ein_ausfahrt ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+
+ALTER TABLE bp_nutzungsgrenze ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+
+ALTER TABLE bp_komplexe_sondernutzung ADD COLUMN detail_id UUID;
+
+ALTER TABLE bp_zweckbestimmung_gruen ADD COLUMN detail_id UUID;
+
+ALTER TABLE lp_plan ALTER COLUMN bundesland SET NOT NULL;
+
+ALTER TABLE lp_plan ALTER COLUMN "rechtlicheAussenwirkung" SET NOT NULL;
+
+ALTER TABLE so_strassenverkehr ALTER COLUMN "hatDarstellungMitBesondZweckbest" SET NOT NULL;
+
+ALTER TABLE xp_objekt ADD FOREIGN KEY("gesetzlicheGrundlage_id") REFERENCES xp_gesetzliche_grundlage (id);
+
+UPDATE alembic_version SET version_num='346f4a91caf3' WHERE alembic_version.version_num = 'ce95b86bc010';
+
 COMMIT;
 
