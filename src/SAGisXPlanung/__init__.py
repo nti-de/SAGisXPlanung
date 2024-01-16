@@ -120,7 +120,7 @@ class XPlanVersion(Enum):
             return cls.SIX
         elif ns.startswith("http://www.xplanung.de/xplangml/5/"):
             return cls.FIVE_THREE
-        raise ValueError(f'XPlanung Version {ns} nicht unterstüzt.')
+        raise ValueError(f'XPlanung Version {ns} nicht unterstützt.')
 
     def short_id(self) -> str:
         return str(self.value).replace('.', '')
