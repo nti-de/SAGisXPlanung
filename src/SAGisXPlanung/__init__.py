@@ -62,8 +62,6 @@ def compile_ui_file(ui_file):
 
 # ================ PYTHON DEBUG CONFIG ====================
 try:
-    sys.path.append(
-        "C:/Users/Jakob/AppData/Local/JetBrains/Toolbox/apps/PyCharm-P/ch-0/231.9011.38/debug-eggs/pydevd-pycharm.egg")
     import pydevd_pycharm
 
     pydevd_pycharm.settrace('localhost', port=51699, stdoutToServer=True, stderrToServer=True, suspend=False)
