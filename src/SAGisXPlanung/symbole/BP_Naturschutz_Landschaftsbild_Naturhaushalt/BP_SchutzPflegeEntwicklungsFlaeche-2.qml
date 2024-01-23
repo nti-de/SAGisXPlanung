@@ -128,7 +128,7 @@
             </data_defined_properties>
             <layer id="{39bd2014-4ede-4311-8830-78fbacb68343}" locked="0" class="FontMarker" pass="0" enabled="1">
               <Option type="Map">
-                <Option type="QString" value="180" name="angle"/>
+                <Option type="QString" value="0" name="angle"/>
                 <Option type="QString" value="T" name="chr"/>
                 <Option type="QString" value="0,0,0,255" name="color"/>
                 <Option type="QString" value="Open Sans" name="font"/>
