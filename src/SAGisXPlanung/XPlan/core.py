@@ -8,6 +8,7 @@ from SAGisXPlanung import XPlanVersion
 
 
 class XPCol(Column):
+    inherit_cache = True
 
     def __init__(self, *args, version=XPlanVersion.FIVE_THREE, attribute=None, import_attr=None, **kwargs):
         self.version = version

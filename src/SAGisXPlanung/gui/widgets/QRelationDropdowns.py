@@ -161,8 +161,10 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
         values = []
 
         if not isinstance(self.cb, QgsCheckableComboBox):
+            if (selected_id := self.cb.currentData()) is None:
+                return
             with Session.begin() as session:
-                return session.get(self.cls, self.cb.currentData())
+                return session.get(self.cls, selected_id)
 
         user_data = self.cb.checkedItemsData()
         with Session.begin() as session:
