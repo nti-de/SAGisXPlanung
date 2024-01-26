@@ -6,9 +6,10 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSize)
 from qgis.PyQt.QtWidgets import (QTreeView)
 from qgis.gui import QgsHighlight
-from qgis.core import QgsVectorLayer, QgsGeometry, QgsWkbTypes
+from qgis.core import QgsVectorLayer
 from qgis.utils import iface
 
+from SAGisXPlanung.GML.geometry import geometry_drop_z
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle
 
 logger = logging.getLogger(__name__)
@@ -42,14 +43,9 @@ class QSelectedGeometriesView(QTreeView):
 
     def geometries(self):
         feat_ids = [self.model.data(self.model.index(i, 0)) for i in range(self.model.rowCount(QModelIndex()))]
-        geometries = [self.geometry_drop_z(self.layer.getGeometry(fid)) for fid in feat_ids]
+        geometries = [geometry_drop_z(self.layer.getGeometry(fid)) for fid in feat_ids]
 
         return geometries
-
-    def geometry_drop_z(self, geom: QgsGeometry):
-        if QgsWkbTypes.hasZ(geom.wkbType()):
-            geom.constGet().dropZValue()
-        return geom
 
     def itemCount(self) -> int:
         return self.model.rowCount(QModelIndex())

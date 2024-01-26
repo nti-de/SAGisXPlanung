@@ -2,18 +2,16 @@ import logging
 from typing import Union
 
 from geoalchemy2 import WKTElement
-from qgis.PyQt.QtWidgets import QSizePolicy, QLabel, QCheckBox
+from qgis.PyQt.QtWidgets import QSizePolicy, QCheckBox
 from qgis.PyQt import QtWidgets, QtCore
 from qgis.gui import QgsMapLayerComboBox, QgsFeaturePickerWidget
-from qgis.core import QgsMapLayerProxyModel, QgsGeometry, QgsFeature
+from qgis.core import QgsMapLayerProxyModel, QgsGeometry, QgsFeature, QgsDataSourceUri
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import pyqtSlot, QEvent
 from qgis.utils import iface
 
-from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
+from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, geometry_drop_z
 from SAGisXPlanung.Tools.IdentifyFeatureTool import IdentifyFeatureTool
-from shapely.geometry import MultiPolygon
-from shapely.wkt import loads
 
 from SAGisXPlanung.gui.widgets import ElideLabel
 from SAGisXPlanung.gui.widgets.QXPlanInputElement import XPlanungInputMeta, QXPlanInputElement
@@ -60,10 +58,12 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         self.label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.horizontalLayout.addWidget(self.label)
         self.cbFeature = QgsFeaturePickerWidget(self)
+        self.cbFeature.setFetchGeometry(False)  # don't require to fetch geometry
         self.cbFeature.setMaximumWidth(self.cbFeature.sizeHint().width() + 40)
         self.cbFeature.setLayer(self.layer)
         self.cbFeature.featureChanged.connect(self.onFeatureChanged)
         self.cbFeature.setAllowNull(True)
+        self.set_fetch_limit()
         self.horizontalLayout.addWidget(self.cbFeature)
 
         self.bIdentify = QtWidgets.QPushButton(self)
@@ -159,12 +159,13 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         self.layer = self.mMapLayerComboBox.currentLayer()
         self.mapTool.setLayer(self.layer)
         self.cbFeature.setLayer(self.layer)
+        self.set_fetch_limit()
         self.setInvalid(False)
 
     def onFeatureChanged(self, feat: QgsFeature):
         self.layer.removeSelection()
         self.layer.select([feat.id()])
-        self.featureGeometry = feat.geometry()
+        self.featureGeometry = geometry_drop_z(self.layer.getGeometry(feat.id()))
         self.setInvalid(False)
         if self.featureGeometry:
             self.geometry_text.setText(self.featureGeometry.asWkt())
@@ -187,24 +188,10 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         self.verticalLayout.setContentsMargins(5, 5, 5, 5)
         self.setStyleSheet('QFeatureIdentify {background-color: #ffb0b0; border: 1px solid red; border-radius:5px;}')
 
+    def set_fetch_limit(self):
+        if not self.layer:
+            return
 
-def load_geometry(feat):
-    """
-    Konvertiert Geometrie eines QGIS Polygon-Vektorlayer Features in eine entsprechende shapely-Geometrie.
-
-    Parameters
-    ----------
-    feat: qgis.core.QgsFeature
-        Polygon-Vektorlayer
-    Returns
-    -------
-    shapely.geometry.MultiPolygon
-    """
-    if not feat.geometry():
-        return
-    geom = feat.geometry()
-    geom.convertToStraightSegment()
-    feature = loads(geom.asWkt())
-    if feature.geom_type == 'MultiPolygon':
-        return feature
-    return MultiPolygon([feature])
+        source_uri = QgsDataSourceUri(self.layer.source())
+        if not source_uri.hasParam('url'):
+            self.cbFeature.setFetchLimit(250)  # increase fetch limit if not it's a local layer, but fetched via web

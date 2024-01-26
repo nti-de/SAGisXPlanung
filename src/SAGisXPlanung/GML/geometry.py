@@ -39,3 +39,10 @@ def geom_type_as_layer_url(geom_type: GeometryType) -> str:
         return 'linestring'
     else:
         return QgsWkbTypes.geometryDisplayString(geom_type)
+
+
+def geometry_drop_z(geom: QgsGeometry) -> QgsGeometry:
+    """ Removes Z-dimension from a geometry instance """
+    if QgsWkbTypes.hasZ(geom.wkbType()):
+        geom.constGet().dropZValue()
+    return geom

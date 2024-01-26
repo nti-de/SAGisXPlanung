@@ -1,10 +1,10 @@
 import pytest
 from qgis.PyQt.QtCore import Qt, QVariant
-from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsField, QgsProject
+from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsField, QgsProject, QgsWkbTypes
 from qgis.utils import iface
 
 from SAGisXPlanung.Tools.IdentifyFeatureTool import IdentifyFeatureTool
-from SAGisXPlanung.gui.widgets.QFeatureIdentify import load_geometry, QFeatureIdentify
+from SAGisXPlanung.gui.widgets.QFeatureIdentify import QFeatureIdentify
 
 
 @pytest.fixture
@@ -29,32 +29,19 @@ def vector_feat():
 
 
 @pytest.fixture()
-def widget():
-    return QFeatureIdentify()
+def widget(vector_feat):
+    layer, feature = vector_feat('PointZ (10, 10, 10)')
+    QgsProject.instance().addMapLayer(layer)
+    widget = QFeatureIdentify()
+    return widget
 
 
-class TestQFeatureIdentify_loadLayer:
-
-    def test_loadArea_with_polygon(self, vector_feat):
-        _, feat = vector_feat('POLYGON ((0 0, 1 1, 1 0, 0 0))')
-        geom = load_geometry(feat)
-        assert geom.wkt == 'MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)))'
-
-    def test_loadArea_with_multipolygon(self, vector_feat):
-        _, feat = vector_feat('MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)))')
-        geom = load_geometry(feat)
-        assert geom.wkt == 'MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)))'
-
-
-class TestQFeatureIdentify_createWidget:
+class TestQFeatureIdentify:
 
     def test_createWidget(self, qtbot, widget):
         qtbot.addWidget(widget)
         assert widget.mapTool
         assert widget.bIdentify
-
-
-class TestQFeatureIdentify_testFeatureIdentify:
 
     def test_identifyFeature(self, vector_feat, qtbot, widget):
         layer, _ = vector_feat('MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)))')
@@ -63,6 +50,26 @@ class TestQFeatureIdentify_testFeatureIdentify:
         qtbot.addWidget(widget)
         qtbot.mouseClick(widget.bIdentify, Qt.LeftButton)
 
-        assert widget.layer == layer
         assert iface.mapCanvas().mapTool().__class__ == IdentifyFeatureTool
         assert iface.mapCanvas().mapTool() == widget.mapTool
+
+    def test_on_feature_changed(self, widget, vector_feat):
+        layer, feature = vector_feat('PointZ (1, 1, 1)')
+        widget.layer = layer
+
+        widget.onFeatureChanged(feature)
+
+        assert widget.featureGeometry is not None
+        assert not QgsWkbTypes.hasZ(widget.featureGeometry.wkbType())
+        assert layer.selectedFeatureCount() == 1
+        assert feature.id() in layer.selectedFeatureIds()
+
+    def test_on_layer_changed(self, widget, vector_feat):
+        layer, feature = vector_feat('PointZ (1, 1, 1)')
+        QgsProject.instance().addMapLayer(layer)
+        widget.mMapLayerComboBox.setLayer(layer)
+
+        widget.onLayerChanged()
+
+        assert widget.layer == layer
+        assert widget.cbFeature.layer() == layer
