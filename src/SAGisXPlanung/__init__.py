@@ -180,8 +180,9 @@ def classFactory(iface):
     # reload config module required so that new configured `Base` is used
     importlib.reload(SAGisXPlanung.config)
 
-    from SAGisXPlanung.Settings import configureSession
-    configureSession()
+    from SAGisXPlanung.core.connection import establish_session
+    establish_session(Session)
+    establish_session(SessionAsync)
 
     from SAGisXPlanung.XPlanungPlugin import XPlanung
     return XPlanung(iface)

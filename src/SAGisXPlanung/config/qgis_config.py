@@ -1,3 +1,4 @@
+import typing
 from typing import Union
 
 from qgis.PyQt.QtXml import QDomDocument
@@ -15,6 +16,7 @@ class ConfigSaveException(Exception):
 class QgsConfig:
 
     STYLES = 'plugins/xplanung/styles'
+    CONNECTION = 'plugins/xplanung/connection'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -74,3 +76,15 @@ class QgsConfig:
 
         qs = QSettings()
         qs.setValue(f"{QgsConfig.STYLES}/{xplan_class}/{geometry_type}/layer_prio", layer_priority)
+
+    @staticmethod
+    def connection_params() -> typing.Dict:
+        qs = QSettings()
+        conn_name = qs.value(QgsConfig.CONNECTION)
+        return {
+            "username": qs.value(f"PostgreSQL/connections/{conn_name}/username"),
+            "password": qs.value(f"PostgreSQL/connections/{conn_name}/password"),
+            "host": qs.value(f"PostgreSQL/connections/{conn_name}/host"),
+            "port": qs.value(f"PostgreSQL/connections/{conn_name}/port"),
+            "db": qs.value(f"PostgreSQL/connections/{conn_name}/database")
+        }

@@ -36,12 +36,20 @@ from qgis.PyQt.QtWidgets import QWidget
 
 
 @asynccontextmanager
-async def loading_animation(widget):
+async def loading_animation(widget, **kwargs):
     spinner = None
+    default_args = {
+        'disableParentWhenSpinning': True,
+        'radius': 5,
+        'lines': 20,
+        'line_length': 5,
+        'line_width': 1,
+        'color': (0, 6, 128),
+        'modality': Qt.WindowModal
+    }
 
     try:
-        spinner = WaitingSpinner(widget, disableParentWhenSpinning=True, radius=5,
-                                 lines=20, line_length=5, line_width=1, color=(0, 6, 128), modality=Qt.WindowModal)
+        spinner = WaitingSpinner(widget, **{**default_args, **kwargs})
 
         spinner.start()
         yield spinner

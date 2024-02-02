@@ -9,13 +9,16 @@ from qgis.utils import iface
 
 from qgis.PyQt.QtCore import pyqtSlot, QSettings, Qt, QTimer
 from qgis.PyQt.QtWidgets import QLineEdit
+from qgis.PyQt.QtGui import QIcon
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DatabaseError, DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from SAGisXPlanung import BASE_DIR, VERSION
+from SAGisXPlanung import BASE_DIR, VERSION, Session, SessionAsync
+from SAGisXPlanung.core.connection import verify_db_connection, establish_session
 from SAGisXPlanung.ext.spinner import loading_animation
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor, with_color_palette, apply_color
 from .basepage import SettingsPage
 
 logger = logging.getLogger(__name__)
@@ -25,6 +28,9 @@ class DatabaseConfigPage(SettingsPage):
     def __init__(self, parent=None):
         super(DatabaseConfigPage, self).__init__(parent)
         self.ui = None
+
+        self.check_icon_base = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
+                                              color=ApplicationColor.Grey400))
 
     def setupUi(self, ui):
         self.ui = ui
@@ -37,24 +43,14 @@ class DatabaseConfigPage(SettingsPage):
         for w in self.db_create_options:
             w.textChanged.connect(self.db_create_options_changed)
 
+        self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
+        # schedule asyncio task and return None, so that void return type of sip method is satisfied
+        # otherwise throws a lot of TypeError: invalid argument to sipBadCatcherResult()
+        self.ui.connection_test_label.mousePressEvent = lambda e: asyncio.create_task(self.test_connection()) and None
+
         self.ui.tab_database_actions.setStyleSheet('''
             QToolButton {
                 border: 0px;
-            }
-            #category {
-                text-transform: uppercase;
-                font-weight: 400;
-                color: #374151;
-            }
-            #name {
-                font-size: 1.125rem;
-                font-weight: 500;
-                color: #1c1917;
-            }
-            #error_message{
-                font-weight: bold; 
-                font-size: 7pt; 
-                color: #991B1B;
             }
             QTabWidget::pane {
                 border: none;
@@ -82,6 +78,9 @@ class DatabaseConfigPage(SettingsPage):
                 color: #111827;
             }
         ''')
+        with_color_palette(self.ui.tab_database_actions, [
+            ApplicationColor.Primary, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
+        ], class_='QLabel')
 
     def setupData(self):
         self.fill_connections()
@@ -195,11 +194,50 @@ class DatabaseConfigPage(SettingsPage):
         self.on_connection_index_changed()
 
 
-    @pyqtSlot()
-    def on_connection_index_changed(self):
+    @qasync.asyncSlot()
+    async def on_connection_index_changed(self):
+        self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
+        self.ui.connection_test_result_label.setText(f'Verbindungstatus unbekannt')
+        apply_color(self.ui.connection_test_result_label, ApplicationColor.Grey600)
+
         conn_name = str(self.ui.cbConnections.currentText())
         qs = QSettings()
         username = qs.value(f"PostgreSQL/connections/{conn_name}/username", '')
         password = qs.value(f"PostgreSQL/connections/{conn_name}/password", '')
         self.ui.tbUsername.setText(username)
         self.ui.tbPassword.setText(password)
+
+        qs.setValue(f"plugins/xplanung/connection", conn_name)
+        establish_session(Session)
+        establish_session(SessionAsync)
+
+    async def test_connection(self):
+
+        def _test_connection():
+            logger.debug('call verification')
+            result, meta = verify_db_connection(raise_exeptions=True)
+
+            self.ui.connection_test_result_label.setText(f'XPlan-Datenbank: {meta.revision}')
+            apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)
+
+        spinner_args = {
+            'radius': 4,
+            'lines': 16,
+            'line_length': 4,
+        }
+        async with loading_animation(self.ui.connnection_test_status_icon, **spinner_args) as spinner:
+            try:
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, _test_connection)
+
+                check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
+                                            color=ApplicationColor.Success))
+                self.ui.connnection_test_status_icon.setIcon(check_icon)
+
+            except Exception as e:
+                error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
+                                            color=ApplicationColor.Error))
+                self.ui.connnection_test_status_icon.setIcon(error_icon)
+                logger.debug(e)
+
+            apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)

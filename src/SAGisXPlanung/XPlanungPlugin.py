@@ -1,11 +1,10 @@
-import glob
 import logging
 import os.path
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtCore import Qt, pyqtSlot, QObject, QSizeF, QUrl, QDir
 from qgis.PyQt.QtGui import QIcon, QPageLayout, QPainter
-from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphicsItem, QToolBar
+from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphicsItem, QToolBar, QMessageBox
 from qgis.PyQt.QtPrintSupport import QPrinter
 
 from qgis.core import (QgsMapLayerType, QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
@@ -15,11 +14,10 @@ from qgis import processing
 
 import qasync
 
-from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
-from SAGisXPlanung.Settings import Settings, is_valid_db, tryConnect
-from SAGisXPlanung.config import QgsConfig
+from SAGisXPlanung.Settings import Settings
+from SAGisXPlanung.core.connection import attempt_connection, verify_db_connection
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
 from SAGisXPlanung.gui.XPPlanDetailsDialog import displayPlanOnCanvas, reloadPlan
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
@@ -75,21 +73,6 @@ class XPlanung(QObject):
         self.dockWidget.details_dialog.hide()
 
         self.settings = Settings()
-
-        # load all file-based styles into the QgsConfig if they are not already present
-        folder_path = os.path.join(BASE_DIR, 'symbole/')
-        qml_files = glob.glob(os.path.join(folder_path, "**/*.qml"))
-
-        for qml_file in qml_files:
-            base_name = os.path.basename(qml_file)
-            class_name, geometry_type = os.path.splitext(base_name)[0].rsplit('-', 1)
-
-            if QgsConfig.class_renderer(CLASSES[class_name], geometry_type):
-                continue
-            layer = QgsVectorLayer("Polygon", "result", "memory")
-            layer.loadNamedStyle(qml_file)
-
-            QgsConfig.set_class_renderer(CLASSES[class_name], geometry_type, layer.renderer())
 
         # TODO: hackish solution, because there currently is no signal on project loaded:
         # see https://github.com/qgis/QGIS/issues/40483
@@ -164,7 +147,7 @@ class XPlanung(QObject):
 
     @pyqtSlot()
     def run(self):
-        if is_valid_db():
+        if self.is_valid_db():
             if self.first_start:
                 self.dockWidget.cbPlaene.refresh()
             self.dockWidget.show()
@@ -178,7 +161,7 @@ class XPlanung(QObject):
         self.settings.exec_()
 
         self.dockWidget.details_dialog.hide()
-        if not is_valid_db():
+        if not self.is_valid_db():
             self.dockWidget.hide()
 
         self.dockWidget.cbPlaene.refresh()
@@ -191,7 +174,7 @@ class XPlanung(QObject):
     @qasync.asyncSlot()
     async def onXPlanungMenuAboutToShow(self):
         try:
-            tryConnect()
+            attempt_connection()
             self.data_action.setDisabled(False)
         except Exception:
             self.data_action.setDisabled(True)
@@ -310,3 +293,20 @@ class XPlanung(QObject):
 
             self.iface.layerTreeView().addIndicator(node, xp_indicator)
             self.iface.layerTreeView().addIndicator(node, reload_indicator)
+
+    def is_valid_db(self) -> bool:
+        result, meta = verify_db_connection()
+        if result:
+            return True
+
+        msg_box = QMessageBox()
+        msg_box.setWindowTitle('Inkompatiblität mit der Datenbank')
+        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setText(meta.error)
+        settings_button = msg_box.addButton('Einstellungen', QMessageBox.YesRole)
+        msg_box.addButton(QMessageBox.Cancel)
+        msg_box.setEscapeButton(QMessageBox.Cancel)
+        msg_box.exec()
+        if msg_box.clickedButton() == settings_button:
+            self.settings.exec()
+        return False
