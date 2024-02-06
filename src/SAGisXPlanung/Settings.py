@@ -84,16 +84,10 @@ class Settings(QDialog, FORM_CLASS):
             self.cbXPlanVersion.setCurrentIndex(index)
 
     def saveSettings(self):
-        conn_name = str(self.cbConnections.currentText())
         qs = QSettings()
         qs.setValue(f"plugins/xplanung/export_version", self.cbXPlanVersion.currentText())
         if self.checkPath.isChecked():
             qs.setValue(f"plugins/xplanung/export_path", '')
         else:
             qs.setValue(f"plugins/xplanung/export_path", self.tbPath.text())
-        qs.setValue(f"plugins/xplanung/connection", conn_name)
-        qs.setValue(f"PostgreSQL/connections/{conn_name}/username", self.tbUsername.text())
-        qs.setValue(f"PostgreSQL/connections/{conn_name}/password", self.tbPassword.text())
-        establish_session(Session)
-        establish_session(SessionAsync)
         self.accept()

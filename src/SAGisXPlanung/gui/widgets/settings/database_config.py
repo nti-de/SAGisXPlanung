@@ -4,6 +4,7 @@ import logging
 import os
 
 import qasync
+from PyQt5.QtGui import QCloseEvent
 from qgis.core import QgsDataSourceUri, QgsProviderRegistry
 from qgis.utils import iface
 
@@ -84,6 +85,9 @@ class DatabaseConfigPage(SettingsPage):
 
     def setupData(self):
         self.fill_connections()
+
+    def closeEvent(self, event: QCloseEvent):
+        self.save_settings()
 
     @qasync.asyncSlot()
     async def on_database_create_clicked(self):
@@ -193,6 +197,14 @@ class DatabaseConfigPage(SettingsPage):
             self.ui.cbConnections.setCurrentIndex(0)
         self.on_connection_index_changed()
 
+    def save_settings(self):
+        qs = QSettings()
+        conn_name = str(self.ui.cbConnections.currentText())
+        qs.setValue(f"plugins/xplanung/connection", conn_name)
+        qs.setValue(f"PostgreSQL/connections/{conn_name}/username", self.ui.tbUsername.text())
+        qs.setValue(f"PostgreSQL/connections/{conn_name}/password", self.ui.tbPassword.text())
+        establish_session(Session)
+        establish_session(SessionAsync)
 
     @qasync.asyncSlot()
     async def on_connection_index_changed(self):
@@ -212,9 +224,9 @@ class DatabaseConfigPage(SettingsPage):
         establish_session(SessionAsync)
 
     async def test_connection(self):
+        self.save_settings()
 
         def _test_connection():
-            logger.debug('call verification')
             result, meta = verify_db_connection(raise_exeptions=True)
 
             self.ui.connection_test_result_label.setText(f'XPlan-Datenbank: {meta.revision}')
@@ -233,11 +245,12 @@ class DatabaseConfigPage(SettingsPage):
                 check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                             color=ApplicationColor.Success))
                 self.ui.connnection_test_status_icon.setIcon(check_icon)
+                apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)
 
             except Exception as e:
                 error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
                                             color=ApplicationColor.Error))
                 self.ui.connnection_test_status_icon.setIcon(error_icon)
-                logger.debug(e)
-
-            apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)
+                apply_color(self.ui.connection_test_result_label, ApplicationColor.Error)
+                self.ui.connection_test_result_label.setText(str(e))
+                logger.error(e)

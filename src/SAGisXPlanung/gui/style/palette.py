@@ -28,13 +28,18 @@ def with_color_palette(widget, colors: List[ApplicationColor], class_=''):
                 color: {color.value};
             }}
         '''
-    logger.debug(stylesheet)
-    logger.debug(widget.styleSheet() + stylesheet)
+
     widget.setStyleSheet(widget.styleSheet() + stylesheet)
 
 
 def apply_color(widget, color: ApplicationColor):
-    # TODO: remove any previously set color from properties
+    # remove any previous color props
+    properties = widget.dynamicPropertyNames()
+    for prop in properties:
+        for enum_color in ApplicationColor:
+            if str(enum_color) in prop.data().decode('utf-8'):
+                widget.setProperty(prop, None)
+
     widget.setProperty(str(color), True)
     widget.style().unpolish(widget)
     widget.style().polish(widget)
