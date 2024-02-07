@@ -4,24 +4,14 @@ import logging
 import os
 
 import qasync
-import yaml
-
-from qgis.core import QgsDataSourceUri, QgsProviderRegistry
-from qgis.utils import iface
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import pyqtSlot, QSettings, Qt, QTimer
-from qgis.PyQt.QtGui import QIcon, QShowEvent, QCloseEvent
-from qgis.PyQt.QtWidgets import QLineEdit, QDialog, QMessageBox, QPushButton
-from sqlalchemy import create_engine, text
-from sqlalchemy.exc import DatabaseError, DBAPIError
-from sqlalchemy.ext.asyncio import create_async_engine
+from qgis.PyQt.QtCore import QSettings
+from qgis.PyQt.QtGui import QShowEvent, QCloseEvent
+from qgis.PyQt.QtWidgets import QDialog
 
-
-from SAGisXPlanung import Session, VERSION, COMPATIBLE_DB_REVISIONS, SessionAsync, BASE_DIR, XPlanVersion
-from SAGisXPlanung.config import QgsConfig
-from SAGisXPlanung.core.connection import establish_session, attempt_connection
-from SAGisXPlanung.ext.spinner import WaitingSpinner
+from SAGisXPlanung import VERSION, XPlanVersion
+from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
 
@@ -90,4 +80,12 @@ class Settings(QDialog, FORM_CLASS):
             qs.setValue(f"plugins/xplanung/export_path", '')
         else:
             qs.setValue(f"plugins/xplanung/export_path", self.tbPath.text())
+
+        validation_config = GeometryValidationConfig(
+            correct_geometries=self.checkbox_clean_geometry.isChecked(),
+            correct_method=GeometryCorrectionMethod.PreserveTopology if self.radiobutton_preserve_geometry.isChecked() else GeometryCorrectionMethod.RigorousRemoval
+        )
+        logger.debug(validation_config.correct_method)
+        QgsConfig.set_geometry_validation_config(validation_config)
+
         self.accept()

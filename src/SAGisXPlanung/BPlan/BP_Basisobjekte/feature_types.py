@@ -1,11 +1,12 @@
+import logging
 import uuid
 from typing import List
 
 from geoalchemy2 import Geometry, WKBElement, WKTElement
-from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event
+from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import relationship, column_property, declared_attr
+from sqlalchemy.orm import relationship, column_property, declared_attr, object_session
 
 from qgis.core import (QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer, QgsSymbol, QgsWkbTypes, QgsGeometry,
                        QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes)
@@ -22,6 +23,9 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Verfahren, BP_Rechtsstand, BP_PlanArt, BP_Rechtscharakter
 from SAGisXPlanung.XPlan.types import XPEnum, GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.config import QgsConfig, GeometryCorrectionMethod
+
+logger = logging.getLogger(__name__)
 
 
 class BP_Plan(XP_Plan):
@@ -260,3 +264,29 @@ class BP_Objekt(XP_Objekt):
     def hidden_inputs(cls):
         h = super(BP_Objekt, cls).hidden_inputs()
         return h + ['position']
+
+
+@event.listens_for(BP_Objekt, 'before_insert', propagate=True)
+@event.listens_for(BP_Objekt, 'before_update', propagate=True)
+def clean_and_modify_geometry(mapper, connection, target):
+    if target.position is None:
+        return
+
+    validation_config = QgsConfig.geometry_validation_config()
+    if not validation_config.correct_geometries:
+        return
+
+    # Apply ST_RemoveRepeatedPoints and DP-Simplification to remove repeated points
+    # considers trade-off between preservation of topology and finding all duplicates
+    if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
+        simplify_func = func.ST_SimplifyPreserveTopology
+    else:
+        simplify_func = func.ST_Simplify
+
+    target.position = connection.scalar(
+        func.ST_ForcePolygonCCW(
+            func.ST_RemoveRepeatedPoints(
+                simplify_func(target.position, 0)
+            )
+        )
+    )

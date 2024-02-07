@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_common">
       <property name="enabled">
@@ -70,6 +70,81 @@
            <widget class="QLabel" name="label_8">
             <property name="text">
              <string>XPlanung - Version </string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Validierung</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="0">
+           <widget class="QRadioButton" name="radiobutton_preserve_geometry">
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">margin-left: 25px;</string>
+            </property>
+            <property name="text">
+             <string>Topologie erhalten</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">validation__option_buttongroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkbox_clean_geometry">
+            <property name="text">
+             <string>Geometrien automatisch bereinigen</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="radiobutton_repeated_points">
+            <property name="styleSheet">
+             <string notr="true">margin-left: 25px;</string>
+            </property>
+            <property name="text">
+             <string>bessere Erkennung doppelter Stützpunkte</string>
+            </property>
+            <attribute name="buttonGroup">
+             <string notr="true">validation__option_buttongroup</string>
+            </attribute>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QToolButton" name="info_button1">
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="autoRaise">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QToolButton" name="info_button2">
+            <property name="text">
+             <string>...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QToolButton" name="info_button3">
+            <property name="text">
+             <string>...</string>
             </property>
            </widget>
           </item>
@@ -558,4 +633,7 @@
  </customwidgets>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="validation__option_buttongroup"/>
+ </buttongroups>
 </ui>

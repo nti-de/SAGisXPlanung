@@ -1,4 +1,6 @@
 import typing
+from dataclasses import dataclass
+from enum import Enum
 from typing import Union
 
 from qgis.PyQt.QtXml import QDomDocument
@@ -13,10 +15,23 @@ class ConfigSaveException(Exception):
     pass
 
 
+class GeometryCorrectionMethod(Enum):
+    PreserveTopology = 1
+    RigorousRemoval = 2
+
+
+@dataclass
+class GeometryValidationConfig:
+    correct_geometries: bool
+    correct_method: GeometryCorrectionMethod
+
+
 class QgsConfig:
 
     STYLES = 'plugins/xplanung/styles'
     CONNECTION = 'plugins/xplanung/connection'
+    CORRECT_GEOMETRIES = 'plugins/xplanung/correct_geometries'
+    CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -88,3 +103,19 @@ class QgsConfig:
             "port": qs.value(f"PostgreSQL/connections/{conn_name}/port"),
             "db": qs.value(f"PostgreSQL/connections/{conn_name}/database")
         }
+
+    @staticmethod
+    def geometry_validation_config() -> GeometryValidationConfig:
+        qs = QSettings()
+        return GeometryValidationConfig(
+            correct_geometries=qs.value(QgsConfig.CORRECT_GEOMETRIES),
+            correct_method=GeometryCorrectionMethod(int(qs.value(QgsConfig.CORRECT_GEOMETRIES_METHOD)))
+        )
+
+    @staticmethod
+    def set_geometry_validation_config(config: GeometryValidationConfig):
+        qs = QSettings()
+        qs.setValue(QgsConfig.CORRECT_GEOMETRIES, config.correct_geometries)
+        qs.setValue(QgsConfig.CORRECT_GEOMETRIES_METHOD, config.correct_method.value)
+
+
