@@ -7,11 +7,12 @@ import qasync
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtGui import QShowEvent, QCloseEvent
+from qgis.PyQt.QtGui import QShowEvent, QCloseEvent, QIcon
 from qgis.PyQt.QtWidgets import QDialog
 
-from SAGisXPlanung import VERSION, XPlanVersion
+from SAGisXPlanung import VERSION, XPlanVersion, BASE_DIR
 from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
 
@@ -27,10 +28,25 @@ class Settings(QDialog, FORM_CLASS):
         self.versionLabel.setText(VERSION)
 
         self.checkPath.stateChanged.connect(lambda state: self.tbPath.setEnabled((not bool(state))))
+        self.checkbox_clean_geometry.stateChanged.connect(self.checkbox_clean_geometry_state_changed)
 
         self.cbXPlanVersion.addItems([e.value for e in XPlanVersion])
-        self.setXPlanVersion()
         self.cbXPlanVersion.currentIndexChanged.connect(self.onXPlanVersionChanged)
+        self.setXPlanVersion()
+
+        info_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/info-outline.svg'),
+                                   color=ApplicationColor.Grey600))
+        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
+        self.info_clean_geometry.setIcon(info_icon)
+        self.info_preserve_topology.setIcon(info_icon)
+        self.info_repeated_points.setIcon(info_icon)
+        self.info_clean_geometry.installEventFilter(self.info_button_highlight_filter)
+        self.info_preserve_topology.installEventFilter(self.info_button_highlight_filter)
+        self.info_repeated_points.installEventFilter(self.info_button_highlight_filter)
+        self.info_clean_geometry.setToolTip('<qt>Beim Erfassen neuer Geometrien, wird automatisch der Umlaufsinn aller Stützpunkte angepasst und eventuell doppelt erfasste Stützpunkte werden entfernt.</qt>')
+        self.info_preserve_topology.setToolTip('<qt>Die Geometriebereinigung erhält die topologische Struktur der Geometrien. Es werden nur doppelte, aufeinanderfolgende Stützpunkte entfernt.</qt>')
+        self.info_repeated_points.setToolTip('<qt>Eine genauere Erkennung doppelter Stützpunkte wird angewendet. Die Geometriebereinigung entfernt auch doppelte Stützpunkte, die nicht aufeinanderfolgend sind. Dies kann jedoch zu Änderungen in der Topologie führen.</qt>')
+        self.set_validation_options()
 
         self.status_label.hide()
 
@@ -40,9 +56,16 @@ class Settings(QDialog, FORM_CLASS):
 
         self.tabs.setCurrentIndex(0)
 
+        self.validation_options_group.setStyleSheet('''
+            QToolButton {
+                border: 0px;
+            }
+        ''')
+
     def showEvent(self, e: QShowEvent):
         super(Settings, self).showEvent(e)
         self.setXPlanVersion()
+        self.set_validation_options()
 
         for i in range(1, self.tabs.count()):
             self.tabs.widget(i).setupData()
@@ -66,12 +89,29 @@ class Settings(QDialog, FORM_CLASS):
         # refresh attribute config when version changed
         self.tabs.widget(1).setupData()
 
+    @qasync.asyncSlot(int)
+    def checkbox_clean_geometry_state_changed(self, state):
+        for row in range(1, 3):
+            for column in range(self.validation_options_group.layout().columnCount()):
+                widget = self.validation_options_group.layout().itemAtPosition(row, column)
+                if widget is not None:
+                    widget.widget().setEnabled(state != 0)
+
     def setXPlanVersion(self):
         s = QSettings()
         default_version = s.value(f"plugins/xplanung/export_version", '')
         index = self.cbXPlanVersion.findText(str(default_version))
         if index >= 0:
             self.cbXPlanVersion.setCurrentIndex(index)
+
+    def set_validation_options(self):
+        validation_config = QgsConfig.geometry_validation_config()
+        self.checkbox_clean_geometry.setChecked(validation_config.correct_geometries)
+        if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
+            self.radiobutton_preserve_topology.setChecked(True)
+        else:
+            self.radiobutton_repeated_points.setChecked(True)
+        QgsConfig.set_geometry_validation_config(validation_config)
 
     def saveSettings(self):
         qs = QSettings()
@@ -83,9 +123,8 @@ class Settings(QDialog, FORM_CLASS):
 
         validation_config = GeometryValidationConfig(
             correct_geometries=self.checkbox_clean_geometry.isChecked(),
-            correct_method=GeometryCorrectionMethod.PreserveTopology if self.radiobutton_preserve_geometry.isChecked() else GeometryCorrectionMethod.RigorousRemoval
+            correct_method=GeometryCorrectionMethod.PreserveTopology if self.radiobutton_preserve_topology.isChecked() else GeometryCorrectionMethod.RigorousRemoval
         )
-        logger.debug(validation_config.correct_method)
         QgsConfig.set_geometry_validation_config(validation_config)
 
         self.accept()

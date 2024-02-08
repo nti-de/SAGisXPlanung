@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 class ApplicationColor(str, Enum):
     Primary = '#000000'
-    Secondary = '#4b5563'
+    Secondary = '#111827'
     Error = '#be123c'
     Success = '#15803d'
 

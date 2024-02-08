@@ -77,13 +77,16 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox_3">
+        <widget class="QGroupBox" name="validation_options_group">
+         <property name="mouseTracking">
+          <bool>true</bool>
+         </property>
          <property name="title">
           <string>Validierung</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
           <item row="1" column="0">
-           <widget class="QRadioButton" name="radiobutton_preserve_geometry">
+           <widget class="QRadioButton" name="radiobutton_preserve_topology">
             <property name="autoFillBackground">
              <bool>false</bool>
             </property>
@@ -125,7 +128,10 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QToolButton" name="info_button1">
+           <widget class="QToolButton" name="info_clean_geometry">
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>...</string>
             </property>
@@ -135,14 +141,20 @@
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QToolButton" name="info_button2">
+           <widget class="QToolButton" name="info_preserve_topology">
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>...</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QToolButton" name="info_button3">
+           <widget class="QToolButton" name="info_repeated_points">
+            <property name="mouseTracking">
+             <bool>true</bool>
+            </property>
             <property name="text">
              <string>...</string>
             </property>

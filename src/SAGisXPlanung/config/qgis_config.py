@@ -108,8 +108,8 @@ class QgsConfig:
     def geometry_validation_config() -> GeometryValidationConfig:
         qs = QSettings()
         return GeometryValidationConfig(
-            correct_geometries=qs.value(QgsConfig.CORRECT_GEOMETRIES),
-            correct_method=GeometryCorrectionMethod(int(qs.value(QgsConfig.CORRECT_GEOMETRIES_METHOD)))
+            correct_geometries=bool(qs.value(QgsConfig.CORRECT_GEOMETRIES, True)),
+            correct_method=GeometryCorrectionMethod(int(qs.value(QgsConfig.CORRECT_GEOMETRIES_METHOD, 1)))
         )
 
     @staticmethod
