@@ -2,8 +2,10 @@ from typing import Union
 
 from geoalchemy2 import WKBElement, WKTElement
 from qgis.core import QgsGeometry, QgsWkbTypes
+from sqlalchemy import func
 
 from SAGisXPlanung.XPlan.types import GeometryType
+from SAGisXPlanung.config import QgsConfig, GeometryCorrectionMethod
 
 SRID_FLAG = 0x20000000  # flag byte denoting that a srid is embedded within EWKB
 
@@ -46,3 +48,36 @@ def geometry_drop_z(geom: QgsGeometry) -> QgsGeometry:
     if QgsWkbTypes.hasZ(geom.wkbType()):
         geom.constGet().dropZValue()
     return geom
+
+
+def correct_geometry(connection, qgs_geom: QgsGeometry, geom_element: Union[WKBElement, WKTElement]):
+    """ Applies geometry correction methods. Runs in database, therefore requires connection object."""
+    validation_config = QgsConfig.geometry_validation_config()
+    if not validation_config.correct_geometries:
+        return
+
+    if QgsWkbTypes.isCurvedType(qgs_geom.wkbType()):
+        # if curved type is found, don't apply DP simplification
+        return connection.scalar(
+            func.ST_ForcePolygonCCW(
+                func.ST_RemoveRepeatedPoints(
+                    geom_element
+                )
+            )
+        )
+
+    else:
+        # Apply ST_RemoveRepeatedPoints and DP-Simplification to remove repeated points
+        # considers trade-off between preservation of topology and finding all duplicates
+        if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
+            simplify_func = func.ST_SimplifyPreserveTopology
+        else:
+            simplify_func = func.ST_Simplify
+
+        return connection.scalar(
+            func.ST_ForcePolygonCCW(
+                func.ST_RemoveRepeatedPoints(
+                    simplify_func(geom_element, 0)
+                )
+            )
+        )

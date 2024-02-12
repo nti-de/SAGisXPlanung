@@ -78,6 +78,7 @@ class RelationshipMixin:
 class GeometryObject:
     """ Abstrakte Oberklasse für XPlanung-Geometrietypen """
     __geometry_type__ = QgsWkbTypes.UnknownGeometry
+    __geometry_column_name__ = 'position'
 
 
 class MixedGeometry(GeometryObject):

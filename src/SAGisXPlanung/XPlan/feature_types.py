@@ -13,7 +13,7 @@ from .conversions import XP_Rechtscharakter_EnumType
 from .core import XPCol
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
-from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
+from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
 from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
 from .types import LargeString, Angle, Length
@@ -28,6 +28,8 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
     __tablename__ = 'xp_plan'
 
     __readonly_columns__ = ['raeumlicherGeltungsbereich']
+
+    __geometry_column_name__ = 'raeumlicherGeltungsbereich'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     type = Column(String(50))
@@ -147,6 +149,8 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
     __avoidRelation__ = ['planinhalt', 'praesentationsobjekt', 'simple_geometry']
     __readonly_columns__ = ['geltungsbereich']
 
+    __geometry_column_name__ = 'geltungsbereich'
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     type = Column(String(50))
 
@@ -156,7 +160,7 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
     detaillierteBedeutung = Column(LargeString, doc='Erklärung der Bedeutung')
     erstellungsMassstab = Column(Integer, doc='Erstellungsmaßstab')
     geltungsbereich = Column(Geometry(),
-                             CheckConstraint('st_dimension("raeumlicherGeltungsbereich")) = 2',
+                             CheckConstraint('st_dimension("geltungsbereich")) = 2',
                                              name='check_geometry_type'),
                              doc='Geltungsbereich')
 
@@ -328,3 +332,19 @@ def receive_after_delete(mapper, connection, target: XP_Objekt):
                 po.remove_from_canvas()
 
             break
+
+
+@event.listens_for(XP_Objekt, 'before_insert', propagate=True)
+@event.listens_for(XP_Objekt, 'before_update', propagate=True)
+@event.listens_for(XP_Plan, 'before_insert', propagate=True)
+@event.listens_for(XP_Plan, 'before_update', propagate=True)
+@event.listens_for(XP_Bereich, 'before_insert', propagate=True)
+@event.listens_for(XP_Bereich, 'before_update', propagate=True)
+def correct_geometry_trigger(mapper, connection, target):
+    geom_element = getattr(target, target.__geometry_column_name__)
+    if geom_element is None:
+        return
+
+    corrected_geom = correct_geometry(connection, target.geometry(), geom_element)
+    if corrected_geom is not None:
+        setattr(target, target.__geometry_column_name__, corrected_geom)

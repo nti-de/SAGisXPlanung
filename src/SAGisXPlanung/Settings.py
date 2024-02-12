@@ -90,7 +90,7 @@ class Settings(QDialog, FORM_CLASS):
         self.tabs.widget(1).setupData()
 
     @qasync.asyncSlot(int)
-    def checkbox_clean_geometry_state_changed(self, state):
+    async def checkbox_clean_geometry_state_changed(self, state):
         for row in range(1, 3):
             for column in range(self.validation_options_group.layout().columnCount()):
                 widget = self.validation_options_group.layout().itemAtPosition(row, column)
@@ -106,12 +106,12 @@ class Settings(QDialog, FORM_CLASS):
 
     def set_validation_options(self):
         validation_config = QgsConfig.geometry_validation_config()
+        logger.debug(validation_config.correct_geometries)
         self.checkbox_clean_geometry.setChecked(validation_config.correct_geometries)
         if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
             self.radiobutton_preserve_topology.setChecked(True)
         else:
             self.radiobutton_repeated_points.setChecked(True)
-        QgsConfig.set_geometry_validation_config(validation_config)
 
     def saveSettings(self):
         qs = QSettings()

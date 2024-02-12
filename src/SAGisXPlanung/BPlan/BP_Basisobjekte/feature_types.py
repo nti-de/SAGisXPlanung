@@ -264,29 +264,3 @@ class BP_Objekt(XP_Objekt):
     def hidden_inputs(cls):
         h = super(BP_Objekt, cls).hidden_inputs()
         return h + ['position']
-
-
-@event.listens_for(BP_Objekt, 'before_insert', propagate=True)
-@event.listens_for(BP_Objekt, 'before_update', propagate=True)
-def clean_and_modify_geometry(mapper, connection, target):
-    if target.position is None:
-        return
-
-    validation_config = QgsConfig.geometry_validation_config()
-    if not validation_config.correct_geometries:
-        return
-
-    # Apply ST_RemoveRepeatedPoints and DP-Simplification to remove repeated points
-    # considers trade-off between preservation of topology and finding all duplicates
-    if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
-        simplify_func = func.ST_SimplifyPreserveTopology
-    else:
-        simplify_func = func.ST_Simplify
-
-    target.position = connection.scalar(
-        func.ST_ForcePolygonCCW(
-            func.ST_RemoveRepeatedPoints(
-                simplify_func(target.position, 0)
-            )
-        )
-    )

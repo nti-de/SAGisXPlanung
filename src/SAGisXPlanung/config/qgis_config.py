@@ -1,3 +1,4 @@
+import logging
 import typing
 from dataclasses import dataclass
 from enum import Enum
@@ -8,6 +9,8 @@ from qgis.core import QgsFeatureRenderer, QgsReadWriteContext
 from qgis.PyQt.QtCore import QSettings
 
 from SAGisXPlanung.XPlan.types import GeometryType
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigSaveException(Exception):
@@ -108,14 +111,14 @@ class QgsConfig:
     def geometry_validation_config() -> GeometryValidationConfig:
         qs = QSettings()
         return GeometryValidationConfig(
-            correct_geometries=bool(qs.value(QgsConfig.CORRECT_GEOMETRIES, True)),
+            correct_geometries=bool(int(qs.value(QgsConfig.CORRECT_GEOMETRIES, 1))),
             correct_method=GeometryCorrectionMethod(int(qs.value(QgsConfig.CORRECT_GEOMETRIES_METHOD, 1)))
         )
 
     @staticmethod
     def set_geometry_validation_config(config: GeometryValidationConfig):
         qs = QSettings()
-        qs.setValue(QgsConfig.CORRECT_GEOMETRIES, config.correct_geometries)
+        qs.setValue(QgsConfig.CORRECT_GEOMETRIES, int(config.correct_geometries))
         qs.setValue(QgsConfig.CORRECT_GEOMETRIES_METHOD, config.correct_method.value)
 
 
