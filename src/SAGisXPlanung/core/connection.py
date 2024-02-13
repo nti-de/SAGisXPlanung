@@ -29,7 +29,7 @@ class ConnectionMeta:
 def establish_session(session_maker: sessionmaker):
     try:
         conn = QgsConfig.connection_params()
-        if isinstance(session_maker.class_, AsyncSession):
+        if session_maker.class_._is_asyncio:
             async_db_str = f"postgresql+asyncpg://{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
             async_engine = create_async_engine(async_db_str)
             session_maker.configure(bind=async_engine)
