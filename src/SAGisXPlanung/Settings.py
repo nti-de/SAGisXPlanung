@@ -106,7 +106,6 @@ class Settings(QDialog, FORM_CLASS):
 
     def set_validation_options(self):
         validation_config = QgsConfig.geometry_validation_config()
-        logger.debug(validation_config.correct_geometries)
         self.checkbox_clean_geometry.setChecked(validation_config.correct_geometries)
         if validation_config.correct_method == GeometryCorrectionMethod.PreserveTopology:
             self.radiobutton_preserve_topology.setChecked(True)

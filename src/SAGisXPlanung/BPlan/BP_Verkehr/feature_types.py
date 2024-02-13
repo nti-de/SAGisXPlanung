@@ -14,7 +14,8 @@ from SAGisXPlanung.BPlan.BP_Verkehr.enums import BP_ZweckbestimmungStrassenverke
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry
+from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry, \
+    MixedGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType, XPEnum
 
 
@@ -131,7 +132,7 @@ class BP_StrassenbegrenzungsLinie(LineGeometry, BP_Objekt):
 
 
 @xp_version(versions=[XPlanVersion.FIVE_THREE])
-class BP_VerkehrsflaecheBesondererZweckbestimmung(PolygonGeometry, BP_Objekt):
+class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
     """ Verkehrsfläche besonderer Zweckbestimmung (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB). """
 
     __tablename__ = 'bp_verkehr_besonders'
@@ -205,7 +206,7 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(PolygonGeometry, BP_Objekt):
         return ['zweckbestimmung', 'skalierung', 'drehwinkel']
 
     @classmethod
-    def symbol(cls) -> QgsSymbol:
+    def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
@@ -228,12 +229,15 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(PolygonGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Verkehr')
-        return renderer
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Verkehr')
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
 
     @classmethod
     def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
 
 
 class BP_BereichOhneEinAusfahrtLinie(LineGeometry, BP_Objekt):

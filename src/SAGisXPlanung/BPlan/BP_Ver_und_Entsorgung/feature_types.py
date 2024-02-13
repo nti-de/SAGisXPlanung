@@ -12,11 +12,11 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry
+from SAGisXPlanung.XPlan.mixins import MixedGeometry, PolygonGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType
 
 
-class BP_VerEntsorgung(PolygonGeometry, BP_Objekt):
+class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     """ Flächen und Leitungen für Versorgungsanlagen, für die Abfallentsorgung und Abwasserbeseitigung sowie für
         Ablagerungen (§9 Abs. 1, Nr. 12, 14 und Abs. 6 BauGB) """
 
@@ -118,7 +118,7 @@ class BP_VerEntsorgung(PolygonGeometry, BP_Objekt):
         return ['zweckbestimmung', 'skalierung', 'drehwinkel']
 
     @classmethod
-    def symbol(cls) -> QgsSymbol:
+    def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
@@ -130,9 +130,13 @@ class BP_VerEntsorgung(PolygonGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Ver_und_Entsorgung')
-        return renderer
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Ver_und_Entsorgung')
+            return renderer
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
 
     @classmethod
     def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))

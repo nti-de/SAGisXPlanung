@@ -1,5 +1,4 @@
 import logging
-import os
 
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpleFillSymbolLayer, QgsSymbolLayerUtils,
                        QgsSvgMarkerSymbolLayer, QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes,
@@ -8,11 +7,11 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt, QSize
 from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY
 
-from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
 from SAGisXPlanung.XPlan.core import fallback_renderer
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry
+from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
+    UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)
@@ -54,14 +53,10 @@ class BP_FlaecheOhneFestsetzung(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
-class BP_Wegerecht(PolygonGeometry, BP_Objekt):
+class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Festsetzung von Flächen, die mit Geh-, Fahr-, und Leitungsrechten zugunsten der Allgemeinheit, eines
         Erschließungsträgers, oder eines beschränkten Personenkreises belastet sind (§ 9 Abs. 1 Nr. 21 und Abs. 6
         BauGB). """
-
-    def __init__(self):
-        # BP_Wegerecht muss ein Überlagerungsobjekt sein; Konformitätsbedingung 4.14.2.1
-        self.flaechenschluss = False
 
     __readonly_columns__ = ['position', 'flaechenschluss']
 

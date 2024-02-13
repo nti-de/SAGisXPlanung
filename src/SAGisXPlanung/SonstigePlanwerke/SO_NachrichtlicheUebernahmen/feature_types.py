@@ -19,7 +19,7 @@ from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
 
 
-class SO_Schienenverkehrsrecht(PolygonGeometry, SO_Objekt):
+class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
     """ Festlegung nach Schienenverkehrsrecht """
 
     __tablename__ = 'so_schienenverkehr'
@@ -34,7 +34,7 @@ class SO_Schienenverkehrsrecht(PolygonGeometry, SO_Objekt):
     nummer = Column(String)
 
     @classmethod
-    def symbol(cls) -> QgsSymbol:
+    def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
@@ -53,14 +53,18 @@ class SO_Schienenverkehrsrecht(PolygonGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(cls.symbol())
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
 
     @classmethod
     def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(48, 48))
 
 
-class SO_Denkmalschutzrecht(PolygonGeometry, SO_Objekt):
+class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     """ Festlegung nach Denkmalschutzrecht """
 
     __tablename__ = 'so_denkmalschutz'
@@ -76,7 +80,7 @@ class SO_Denkmalschutzrecht(PolygonGeometry, SO_Objekt):
     nummer = Column(String)
 
     @classmethod
-    def symbol(cls) -> QgsSymbol:
+    def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
@@ -101,11 +105,15 @@ class SO_Denkmalschutzrecht(PolygonGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(cls.symbol())
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
 
     @classmethod
     def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(64, 64))
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(64, 64))
 
 
 class SO_Strassenverkehr(MixedGeometry, SO_Objekt):

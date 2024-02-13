@@ -73,14 +73,14 @@ class TestRenderer:
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_besonderer_verkehr_renderer(self):
-        r = BP_VerkehrsflaecheBesondererZweckbestimmung.renderer()
+        r = BP_VerkehrsflaecheBesondererZweckbestimmung.renderer(QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
         assert len(r.rootRule().children()) == 4
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_ver_entsorgung_renderer(self):
-        r = BP_VerEntsorgung.renderer()
+        r = BP_VerEntsorgung.renderer(geom_type=QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
         assert len(r.rootRule().children()) == 10
