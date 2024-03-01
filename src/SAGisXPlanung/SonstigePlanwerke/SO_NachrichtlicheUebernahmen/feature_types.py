@@ -12,7 +12,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_KlassifizNachSchienenverkehrsrecht,
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr, \
-    SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft
+    SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen
 from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
@@ -299,6 +299,79 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser', symbol_size=20)
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
+
+
+class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
+    """
+    Festlegung nach Luftverkehrsrecht.
+    """
+
+    __tablename__ = 'so_luftverkehr'
+    __mapper_args__ = {
+        'polymorphic_identity': 'so_luftverkehr',
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizNachLuftverkehrsrecht, include_default=True))
+
+    detailArtDerFestlegung_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
+                                      attribute='detailArtDerFestlegung')
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachLuftverkehrsrecht", back_populates="so_luftverkehr",
+                                          foreign_keys=[detailArtDerFestlegung_id])
+
+    name = Column(String)
+    nummer = Column(String)
+    laermschutzzone = Column(XPEnum(SO_LaermschutzzoneTypen, include_default=True))
+
+    __icon_map__ = [
+        ('Flughafen', '"artDerFestlegung" LIKE \'1000\'', 'Flughafen.svg'),
+        ('Landeplatz', '"artDerFestlegung" LIKE \'2000\'', 'Landeplatz.svg'),
+        ('Segelfluggelände', '"artDerFestlegung" LIKE \'3000\'', 'Segelflugflaeche.svg'),
+        ('Hubschrauberlandeplatz', '"artDerFestlegung" LIKE \'4000\'', 'Hubschrauberlandeplatz.svg'),
+        ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
+    ]
+
+    def layer_fields(self):
+        return {
+            'artDerFestlegung': self.artDerFestlegung.value if self.artDerFestlegung else '',
+            'skalierung': self.skalierung if self.skalierung else '',
+            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
+        }
+
+    @classmethod
+    def attributes(cls):
+        return ['artDerFestlegung', 'skalierung', 'drehwinkel']
+
+    @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        symbol.appendSymbolLayer(fill)
+
+        colored_strip = QgsSimpleLineSymbolLayer(QColor('#c052c2'))
+        colored_strip.setWidth(5)
+        colored_strip.setOffset(2.5)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.MiterJoin)
+        symbol.appendSymbolLayer(colored_strip)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'SO_SonstigeGebiete')
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

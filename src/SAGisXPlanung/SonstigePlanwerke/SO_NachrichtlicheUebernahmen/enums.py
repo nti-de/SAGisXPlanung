@@ -1,5 +1,6 @@
 from enum import Enum
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.XPlan.mixins import XPlanungEnumMixin
 
 
@@ -112,3 +113,37 @@ class SO_KlassifizWasserwirtschaft(XPlanungEnumMixin, Enum):
     RegenRueckhaltebecken = 1500
     Sonstiges = 9999
 
+
+class SO_KlassifizNachLuftverkehrsrecht(XPlanungEnumMixin, Enum):
+    """ Rechtliche Klassifizierung der Festlegung für Luftverkehrsrecht """
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, _: int, version: XPlanVersion = None):
+        self._xplan_version = version
+
+    @property
+    def version(self) -> XPlanVersion:
+        return self._xplan_version
+
+    Flughafen = 1000
+    Landeplatz = 2000
+    Segelfluggelaende = 3000
+    HubschrauberLandeplatz = 4000
+    Ballonstartplatz = 5000
+    Haengegleiter = 5200
+    Gleitsegler = 5400
+    Laermschutzbereich = 6000
+    Baubeschraenkungsbereich = 7000, XPlanVersion.FIVE_THREE
+    Sonstiges = 9999
+
+
+class SO_LaermschutzzoneTypen(XPlanungEnumMixin, Enum):
+    """ Lärmschutzzone nach LuftVG """
+
+    TagZone1 = 1000
+    TagZone2 = 2000
+    Nacht = 3000

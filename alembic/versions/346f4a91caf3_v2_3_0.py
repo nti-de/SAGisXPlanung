@@ -51,6 +51,23 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    op.create_table('so_luftverkehr',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('artDerFestlegung', sa.Enum('Flughafen', 'Landeplatz', 'Segelfluggelaende',
+                                                          'HubschrauberLandeplatz', 'Ballonstartplatz', 'Haengegleiter',
+                                                          'Gleitsegler', 'Laermschutzbereich',
+                                                          'Baubeschraenkungsbereich', 'Sonstiges',
+                                                          name='so_klassifiznachluftverkehrsrecht'), nullable=True),
+                    sa.Column('detailArtDerFestlegung_id', sa.UUID(), nullable=True),
+                    sa.Column('name', sa.String(), nullable=True),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.Column('laermschutzzone', sa.Enum('TagZone1', 'TagZone2', 'Nacht',
+                                                         name='so_laermschutzzonetypen'), nullable=True),
+                    sa.ForeignKeyConstraint(['detailArtDerFestlegung_id'], ['codelist_values.id'], ),
+                    sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
     op.create_foreign_key(None, 'bp_einfahrtpunkt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
@@ -78,9 +95,13 @@ def downgrade():
     op.drop_column('bp_komplexe_sondernutzung', 'detail_id')
     op.drop_column('bp_zweckbestimmung_gruen', 'detail_id')
 
-    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_nebenanlage');")
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_nebenanlage', 'so_luftverkehr');")
 
     op.drop_table('bp_zweckbestimmung_nebenanlagen')
     op.drop_table('bp_nebenanlage')
     op.execute('DROP TYPE bp_zweckbestimmungnebenanlagen CASCADE;')
+
+    op.drop_table('so_luftverkehr')
+    op.execute('DROP TYPE so_laermschutzzonetypen;')
+    op.execute('DROP TYPE so_klassifiznachluftverkehrsrecht;')
     # ### end Alembic commands ###
