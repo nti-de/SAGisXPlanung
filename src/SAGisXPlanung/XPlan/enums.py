@@ -633,3 +633,24 @@ class XP_ArtHoehenbezugspunkt(XPlanungEnumMixin, Enum):
     GBH = 6000
     WH = 6500
     GOK = 6600
+
+
+class XP_RechtscharakterPlanaenderung(XPlanungEnumMixin, Enum):
+    """ Rechtscharakter der Planänderung """
+
+    Aenderung = 1000
+    Ergaenzung = 1100
+    Aufhebung = 2000
+    Aufhebungsverfahren = 20000
+    Ueberplanung = 20001
+
+
+class XP_Aenderungsarten(XPlanungEnumMixin, Enum):
+    """ Spezifikation der Art der Änderungsbeziehung zwischen den verbundenen Plan- bzw. Planbereichs-Objekten """
+
+    Änderung = 1000
+    Ersetzung = 10000
+    Ergänzung = 10001
+    Streichung = 10002
+    Aufhebung = 2000
+    Überplanung = 3000

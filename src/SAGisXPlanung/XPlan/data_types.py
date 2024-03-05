@@ -1,4 +1,3 @@
-import datetime
 from uuid import uuid4
 
 from lxml import etree
@@ -11,8 +10,8 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.codelists import CodeList
 from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt, XP_ExterneReferenzTyp, XP_SPEMassnahmenTypen, \
-    XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin, ElementOrderDeclarativeInheritanceFixMixin
+    XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt, XP_RechtscharakterPlanaenderung, XP_Aenderungsarten
+from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import RefURL, RegExString, ConformityException, LargeString, Length
 
 XP_PlanXP_GemeindeAssoc = Table('xp_plan_gemeinde', Base.metadata,
@@ -305,3 +304,52 @@ class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def hidden_inputs(cls):
         return ['dachgestaltung']
+
+
+class XP_VerbundenerPlan(RelationshipMixin, ElementOrderMixin, Base):
+    """ Spezifikation eines anderen Plans, der mit dem Ausgangsplan oder Planbereich verbunden ist und diesen ändert
+    bzw. von ihm geändert wird. """
+
+    __tablename__ = 'xp_verbundener_plan'
+    __avoidRelation__ = ['aendert_verbundenerPlan', 'wurdeGeaendertVon_verbundenerPlan',
+                         'aendertPlan_verbundenerPlan', 'wurdeGeaendertVonPlan_verbundenerPlan']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    planName = Column(String)
+    rechtscharakter = XPCol(Enum(XP_RechtscharakterPlanaenderung), version=XPlanVersion.FIVE_THREE)
+    aenderungsArt = XPCol(Enum(XP_Aenderungsarten), version=XPlanVersion.SIX)
+
+    nummer = Column(String)
+    aenderungsdatum = XPCol(Date, version=XPlanVersion.SIX)
+
+    aendert_verbundenerPlan_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'),
+                                       version=XPlanVersion.FIVE_THREE)
+    aendert_verbundenerPlan = relationship('XP_Plan', back_populates='aendert',
+                                           foreign_keys=[aendert_verbundenerPlan_id])
+    wurdeGeaendertVon_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
+                                                 ForeignKey('xp_plan.id', ondelete='CASCADE'),
+                                                 version=XPlanVersion.FIVE_THREE)
+    wurdeGeaendertVon_verbundenerPlan = relationship('XP_Plan', back_populates='wurdeGeaendertVon',
+                                                     foreign_keys=[wurdeGeaendertVon_verbundenerPlan_id])
+
+    aendertPlan_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
+                                           ForeignKey('xp_bereich.id', ondelete='CASCADE'),
+                                           version=XPlanVersion.SIX)
+    aendertPlan_verbundenerPlan = relationship('XP_Bereich', back_populates='aendertPlan',
+                                               foreign_keys=[aendertPlan_verbundenerPlan_id])
+    wurdeGeaendertVonPlan_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
+                                                     ForeignKey('xp_bereich.id', ondelete='CASCADE'),
+                                                     version=XPlanVersion.SIX)
+    wurdeGeaendertVonPlan_verbundenerPlan = relationship('XP_Bereich', back_populates='wurdeGeaendertVonPlan',
+                                                         foreign_keys=[wurdeGeaendertVonPlan_verbundenerPlan_id])
+
+    @classmethod
+    def avoid_export(cls):
+        return ['aendert_verbundenerPlan_id', 'wurdeGeaendertVon_verbundenerPlan_id',
+                'aendertPlan_verbundenerPlan_id', 'wurdeGeaendertVonPlan_verbundenerPlan_id']
+
+    @classmethod
+    def hidden_inputs(cls):
+        return ['aendert_verbundenerPlan', 'wurdeGeaendertVon_verbundenerPlan',
+                'aendertPlan_verbundenerPlan', 'wurdeGeaendertVonPlan_verbundenerPlan']

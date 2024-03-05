@@ -57,7 +57,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Abstra
 from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneReferenz, XP_VerfahrensMerkmal,
                                             XP_Gemeinde,
                                             XP_Plangeber, XP_GesetzlicheGrundlage, XP_SPEMassnahmenDaten,
-                                            XP_Hoehenangabe)
+                                            XP_Hoehenangabe, XP_VerbundenerPlan)
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.XPlan.simple_depth import XP_SimpleGeometry
 
@@ -74,6 +74,7 @@ CLASSES = {
     'BP_Bereich': BP_Bereich,
     'RP_Bereich': RP_Bereich,
     'LP_Bereich': LP_Bereich,
+    'XP_VerbundenerPlan': XP_VerbundenerPlan,
 
     'XP_Objekt': XP_Objekt,
     'XP_ExterneReferenz': XP_ExterneReferenz,

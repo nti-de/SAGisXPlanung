@@ -29,10 +29,11 @@ depends_on = None
 
 
 def upgrade():
-    nebenanlagen_enum = postgresql.ENUM('Stellplaetze', 'Garagen', 'Spielplatz', 'Carport', 'Tiefgarage', 'Nebengebaeude',
-                                'AbfallSammelanlagen', 'EnergieVerteilungsanlagen', 'AbfallWertstoffbehaelter',
-                                'Fahrradstellplaetze', 'Sonstiges',
-                                name='bp_zweckbestimmungnebenanlagen')
+    nebenanlagen_enum = postgresql.ENUM('Stellplaetze', 'Garagen', 'Spielplatz', 'Carport', 'Tiefgarage',
+                                        'Nebengebaeude',
+                                        'AbfallSammelanlagen', 'EnergieVerteilungsanlagen', 'AbfallWertstoffbehaelter',
+                                        'Fahrradstellplaetze', 'Sonstiges',
+                                        name='bp_zweckbestimmungnebenanlagen')
 
     op.create_table('bp_nebenanlage',
                     sa.Column('id', sa.UUID(), nullable=False),
@@ -65,6 +66,28 @@ def upgrade():
                                                          name='so_laermschutzzonetypen'), nullable=True),
                     sa.ForeignKeyConstraint(['detailArtDerFestlegung_id'], ['codelist_values.id'], ),
                     sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
+    op.create_table('xp_verbundener_plan',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('planName', sa.String(), nullable=True),
+                    sa.Column('rechtscharakter',
+                              sa.Enum('Aenderung', 'Ergaenzung', 'Aufhebung', 'Aufhebungsverfahren',
+                                      'Ueberplanung', name='xp_rechtscharakterplanaenderung')),
+                    sa.Column('aenderungsArt',
+                              sa.Enum('Änderung', 'Ersetzung', 'Ergänzung', 'Streichung', 'Aufhebung',
+                                      'Überplanung', name='xp_aenderungsarten')),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.Column('aenderungsdatum', sa.Date(), nullable=True),
+                    sa.Column('aendert_verbundenerPlan_id', sa.UUID(), nullable=True),
+                    sa.Column('wurdeGeaendertVon_verbundenerPlan_id', sa.UUID(), nullable=True),
+                    sa.Column('aendertPlan_verbundenerPlan_id', sa.UUID(), nullable=True),
+                    sa.Column('wurdeGeaendertVonPlan_verbundenerPlan_id', sa.UUID(), nullable=True),
+                    sa.ForeignKeyConstraint(['aendert_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
+                    sa.ForeignKeyConstraint(['wurdeGeaendertVon_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
+                    sa.ForeignKeyConstraint(['aendertPlan_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
+                    sa.ForeignKeyConstraint(['wurdeGeaendertVonPlan_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
 
@@ -104,4 +127,8 @@ def downgrade():
     op.drop_table('so_luftverkehr')
     op.execute('DROP TYPE so_laermschutzzonetypen;')
     op.execute('DROP TYPE so_klassifiznachluftverkehrsrecht;')
+
+    op.drop_table('xp_verbundener_plan')
+    op.execute('DROP TYPE xp_aenderungsarten;')
+    op.execute('DROP TYPE xp_rechtscharakterplanaenderung;')
     # ### end Alembic commands ###

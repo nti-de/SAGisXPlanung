@@ -1,4 +1,5 @@
 import logging
+from typing import List
 from uuid import uuid4
 
 from geoalchemy2 import Geometry, WKTElement
@@ -10,7 +11,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer,
 
 from .XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from .conversions import XP_Rechtscharakter_EnumType
-from .core import XPCol
+from .core import XPCol, XPRelationshipProperty
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
@@ -42,6 +43,13 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
     technHerstellDatum = Column(Date, doc='Datum der technischen Ausfertigung')
     genehmigungsDatum = Column(Date, doc='Datum der Genehmigung')
     untergangsDatum = Column(Date, doc='Untergangsdatum')
+
+    aendert = relationship("XP_VerbundenerPlan", back_populates="aendert_verbundenerPlan", cascade="all, delete",
+                           passive_deletes=True, foreign_keys='XP_VerbundenerPlan.aendert_verbundenerPlan_id')
+    wurdeGeaendertVon = relationship("XP_VerbundenerPlan", back_populates="wurdeGeaendertVon_verbundenerPlan",
+                                     cascade="all, delete", passive_deletes=True,
+                                     foreign_keys='XP_VerbundenerPlan.wurdeGeaendertVon_verbundenerPlan_id')
+
     erstellungsMassstab = Column(Integer, doc='Erstellungsmaßstab')
     bezugshoehe = Column(Float, doc='Standard Bezugshöhe')
     hoehenbezug = XPCol(String(), doc='Höhenbezug', version=XPlanVersion.SIX)
@@ -60,6 +68,15 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
         "polymorphic_identity": "xp_plan",
         "polymorphic_on": type,
     }
+
+    @classmethod
+    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
+        return [
+            XPRelationshipProperty(rel_name='wurdeGeaendertVon', xplan_attribute='wurdeGeaendertVon',
+                                   allowed_version=XPlanVersion.FIVE_THREE),
+            XPRelationshipProperty(rel_name='aendert', xplan_attribute='aendert',
+                                   allowed_version=XPlanVersion.FIVE_THREE),
+        ]
 
     @classmethod
     def avoid_export(cls):
@@ -170,6 +187,12 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
                               passive_deletes=True)
     praesentationsobjekt = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="gehoertZuBereich",
                                         cascade="all, delete", passive_deletes=True)
+    aendertPlan = relationship("XP_VerbundenerPlan", back_populates="aendertPlan_verbundenerPlan",
+                               cascade="all, delete", passive_deletes=True,
+                               foreign_keys='XP_VerbundenerPlan.aendertPlan_verbundenerPlan_id')
+    wurdeGeaendertVonPlan = relationship("XP_VerbundenerPlan", back_populates="wurdeGeaendertVonPlan_verbundenerPlan",
+                                         cascade="all, delete", passive_deletes=True,
+                                         foreign_keys='XP_VerbundenerPlan.wurdeGeaendertVonPlan_verbundenerPlan_id')
 
     # non XPlanung attributes
     simple_geometry = relationship("XP_SimpleGeometry", back_populates="gehoertZuBereich", cascade="all, delete",
@@ -212,6 +235,15 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
         feat_id = self.addFeatureToLayer(layer, self.asFeature(layer.fields()))
         layer.setCustomProperty(f'xplanung/feat-{feat_id}', str(self.id))
         MapLayerRegistry().addLayer(layer, group=layer_group)
+
+    @classmethod
+    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
+        return [
+            XPRelationshipProperty(rel_name='wurdeGeaendertVonPlan', xplan_attribute='wurdeGeaendertVonPlan',
+                                   allowed_version=XPlanVersion.SIX),
+            XPRelationshipProperty(rel_name='aendertPlan', xplan_attribute='aendertPlan',
+                                   allowed_version=XPlanVersion.SIX),
+        ]
 
     @classmethod
     def hidden_inputs(cls):
