@@ -12,6 +12,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
 from SAGisXPlanung import Base
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.mixins import RelationshipMixin, MapCanvasMixin
+from SAGisXPlanung.XPlan.types import GeometryType
 
 
 class XP_SimpleGeometry(Base, RelationshipMixin, MapCanvasMixin):
@@ -28,9 +29,8 @@ class XP_SimpleGeometry(Base, RelationshipMixin, MapCanvasMixin):
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     gehoertZuBereich = relationship('XP_Bereich', back_populates='simple_geometry')
 
-    @property
-    def __geometry_type__(self):
-        return str(to_shape(self.position).type)
+    def geomType(self) -> GeometryType:
+        return self.geometry().type()
 
     def displayName(self):
         return self.xplanung_type
