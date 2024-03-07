@@ -17,6 +17,18 @@
       <xplan:name>bp_plan</xplan:name>
       <xplan:kommentar>test_kommentar</xplan:kommentar>
       <xplan:technHerstellDatum>2021-06-04</xplan:technHerstellDatum>
+      <xplan:aendert>
+        <xplan:XP_VerbundenerPlan>
+          <xplan:planName>Entwurf</xplan:planName>
+          <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+        </xplan:XP_VerbundenerPlan>
+      </xplan:aendert>
+      <xplan:wurdeGeaendertVon>
+        <xplan:XP_VerbundenerPlan>
+          <xplan:planName>1. Änderung</xplan:planName>
+          <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+        </xplan:XP_VerbundenerPlan>
+      </xplan:wurdeGeaendertVon>
       <xplan:raeumlicherGeltungsbereich>
         <gml:Polygon gml:id="GML_35e3d5ed-036a-4b44-afdc-35fcb25f6e5b" srsName="EPSG:25833">
           <gml:exterior>

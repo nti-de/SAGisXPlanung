@@ -60,9 +60,9 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
                                         nullable=False, doc='Geltungsbereich')
 
     verfahrensMerkmale = relationship("XP_VerfahrensMerkmal", back_populates="plan", cascade="all, delete",
-                                      passive_deletes=True, doc='Verfahrensmerkmale')
+                                      passive_deletes=True)
     externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
-                                   passive_deletes=True, doc='Externe Referenzen')
+                                   passive_deletes=True)
 
     __mapper_args__ = {
         "polymorphic_identity": "xp_plan",
@@ -182,7 +182,7 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
                              doc='Geltungsbereich')
 
     refScan = relationship("XP_ExterneReferenz", back_populates="bereich", cascade="all, delete",
-                           passive_deletes=True, doc='Externe Referenz')
+                           passive_deletes=True)
     planinhalt = relationship("XP_Objekt", back_populates="gehoertZuBereich", cascade="all, delete",
                               passive_deletes=True)
     praesentationsobjekt = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="gehoertZuBereich",

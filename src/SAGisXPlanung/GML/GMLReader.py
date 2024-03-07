@@ -48,7 +48,7 @@ class GMLReader:
         plan_element = self.root.xpath(".//xplan:*[contains(name(),'_Plan')][1]", namespaces=self.nsmap)[0]
         type_name = etree.QName(plan_element).localname
         self.type = CLASSES[type_name]
-        self.plan = self.readPlan(plan_element)
+        self.plan = self.read_xp_object(plan_element)
 
         # ...
         end = timer()
@@ -59,56 +59,6 @@ class GMLReader:
             return
         self.progress_callback((self.current_progress, self.object_count))
         self.current_progress = progress
-
-    def readPlan(self, gml):
-        """
-        Liest den Basisknoten eines Planwerks aus.
-
-        Parameters
-        ----------
-        gml: lxml.etree.Element
-            XPlanGML-Knoten eines Planwerk-Objekts (xplan:*_Plan)
-        Returns
-        -------
-        any:
-            Objekt vom Typ des XPlanGML-Knoten
-
-        """
-        self.plan = self.type()
-        gml_id = gml.xpath('@gml:id', namespaces=self.nsmap)[0]
-        self.plan.id = gml_id[gml_id.find('_')+1:]
-        for node in gml.iterchildren():
-            node_name = etree.QName(node).localname
-
-            if node_name == "boundedBy":
-                continue
-            elif node_name == "bereich":
-                bereich_id = node.xpath('@xlink:href', namespaces=self.nsmap)[0]
-                bereich_id = str(bereich_id).replace('#', '')
-                bereich = self.root.xpath(f"//*[@gml:id='{bereich_id}'][1]", namespaces=self.nsmap)[0]
-                value = self.readXPBereich(bereich)
-                getattr(self.plan, node_name).append(value)
-            elif node_name in [r[0] for r in self.plan.relationships()]:
-                if len(node) == 0:
-                    # node is an xlink reference not a subobject, this should not be hit
-                    raise NotImplementedError('reading xlink references on XP_Plan not implemented')
-                else:
-                    value = self.read_data_object(node[0], files=self.files)
-                    if value.__class__ in PRE_FILLED_CLASSES:
-                        obj_from_db = query_existing(value)
-                        value = obj_from_db if obj_from_db is not None else value
-
-                if (a := getattr(self.plan, node_name)) is not None:
-                    a.append(value)
-                else:
-                    setattr(self.plan, node_name, value)
-            elif hasattr(self.plan, node_name):
-                col_type = getattr(self.type, node_name).property.columns[0].type
-                GMLReader.read_attribute(col_type, node_name, self.plan, node)
-
-        self.setProgress(self.current_progress + 1)
-        return self.plan
-
 
     @staticmethod
     def readGeometry(gml_node) -> WKTElement:
@@ -138,56 +88,7 @@ class GMLReader:
 
         return WKTElement(geom.ExportToWkt(), srid=srid)
 
-    def readXPBereich(self, gml):
-        """
-        Liest den GML-Knoten eines Planbereichs aus.
-
-        Parameters
-        ----------
-        gml: lxml.etree.Element
-            XPlanGML-Knoten eines Planbereich-Objekts (xplan:*_Bereich)
-        Returns
-        -------
-        any:
-            Objekt vom Typ des XPlanGML-Knoten
-
-        """
-        type_name = etree.QName(gml).localname
-        bereich_type = CLASSES[type_name]
-        bereich = bereich_type()
-
-        gml_id = gml.xpath('@gml:id', namespaces=self.nsmap)[0]
-        bereich.id = gml_id[gml_id.find('_') + 1:]
-
-        for node in gml.iterchildren():
-            node_name = etree.QName(node).localname
-            if node_name == "boundedBy" or node_name == "gehoertZuPlan":
-                continue
-
-            if node_name == "refScan":
-                value = self.read_data_object(node[0], files=self.files)
-                getattr(bereich, node_name).append(value)
-                continue
-            elif node_name == 'planinhalt':
-                plancontent_id = node.xpath('@xlink:href', namespaces=self.nsmap)[0]
-                plancontent_id = str(plancontent_id).lstrip('#')
-                plancontent = self.root.xpath(f"//*[@gml:id='{plancontent_id}'][1]", namespaces=self.nsmap)[0]
-                value = self.readXPObjekt(plancontent)
-                if value:
-                    getattr(bereich, node_name).append(value)
-
-                gml.remove(node)
-                del node
-                continue
-
-            if hasattr(bereich, node_name) and node_name not in [r[0] for r in bereich.relationships()]:
-                col_type = getattr(bereich_type, node_name).property.columns[0].type
-                GMLReader.read_attribute(col_type, node_name, bereich, node)
-
-        self.setProgress(self.current_progress + 1)
-        return bereich
-
-    def readXPObjekt(self, gml):
+    def read_xp_object(self, gml):
         """
         Erstellt aus einem XPlanGML-Knoten eine XP_Objekt-Instanz.
 
@@ -209,7 +110,8 @@ class GMLReader:
             node_name = etree.QName(node).localname
             if not hasattr(obj, node_name):
                 continue
-            if node_name in ['gehoertZuBereich', 'dientZurDarstellungVon']:
+            if node_name in ['gehoertZuBereich', 'praesentationsobjekt', 'dientZurDarstellungVon', 'boundedBy',
+                             'gehoertZuPlan']:
                 continue
 
             col = getattr(object_type, node_name)
@@ -231,7 +133,7 @@ class GMLReader:
                         continue
 
                     node.append(linked_node[0])
-                    value = self.readXPObjekt(linked_node[0])
+                    value = self.read_xp_object(linked_node[0])
 
                     if isinstance(value, XP_Nutzungsschablone):
                         value.hidden = False
@@ -241,12 +143,19 @@ class GMLReader:
                         continue
                 else:
                     value = self.read_data_object(node[0], files=self.files)
-                    if value.__class__ in PRE_FILLED_CLASSES:
-                        obj_from_db = query_existing(value)
-                        if obj_from_db is not None:
-                            # object could already be in session from previous loops, therefore store only id
-                            node_name = f'{node_name}_id'
-                            value = obj_from_db.id
+
+                # skip if no value is read, e.g. when reading a class that is not present in schema
+                if value is None:
+                    continue
+
+                pre_classes = [*PRE_FILLED_CLASSES]
+                if value.__class__ in pre_classes:
+                    obj_from_db = query_existing(value)
+                    value = obj_from_db if obj_from_db is not None else value
+                    if obj_from_db is not None and hasattr(obj, f'{node_name}_id'):
+                        # object could already be in session from previous loops, therefore store only id if possible
+                        node_name = f'{node_name}_id'
+                        value = obj_from_db.id
                 if (a := getattr(obj, node_name)) is not None:
                     a.append(value)
                 else:

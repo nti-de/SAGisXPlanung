@@ -7,7 +7,7 @@ from geoalchemy2 import WKTElement, WKBElement
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.GML.GMLReader import GMLReader
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PPO, XP_PTO, XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber
+from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_VerbundenerPlan
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzTyp, XP_ExterneReferenzArt
 
 
@@ -75,6 +75,10 @@ class TestGMLReader_readPlan:
         assert len(plan.auslegungsStartDatum) == 2
         assert len(plan.externeReferenz) == 1
         assert plan.externeReferenz[0].referenzName == 'ref1'
+        assert len(plan.aendert) == 1
+        assert len(plan.wurdeGeaendertVon) == 1
+        assert isinstance(plan.aendert[0], XP_VerbundenerPlan)
+        assert isinstance(plan.wurdeGeaendertVon[0], XP_VerbundenerPlan)
 
         assert len(plan.bereich) == 2
         assert len(plan.bereich[1].planinhalt) == 3

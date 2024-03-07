@@ -125,7 +125,8 @@ class BP_Plan(XP_Plan):
 
     @classmethod
     def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
+        s = super().xp_relationship_properties()
+        return s + [
             XPRelationshipProperty(rel_name='rel_veraenderungssperre', xplan_attribute='veraenderungssperre',
                                    allowed_version=XPlanVersion.SIX),
             XPRelationshipProperty(rel_name='versionBauNVO', xplan_attribute='versionBauNVO',

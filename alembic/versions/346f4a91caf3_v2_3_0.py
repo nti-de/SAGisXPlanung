@@ -86,8 +86,8 @@ def upgrade():
                     sa.Column('wurdeGeaendertVonPlan_verbundenerPlan_id', sa.UUID(), nullable=True),
                     sa.ForeignKeyConstraint(['aendert_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
                     sa.ForeignKeyConstraint(['wurdeGeaendertVon_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
-                    sa.ForeignKeyConstraint(['aendertPlan_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
-                    sa.ForeignKeyConstraint(['wurdeGeaendertVonPlan_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
+                    sa.ForeignKeyConstraint(['aendertPlan_verbundenerPlan_id'], ['xp_bereich.id'], ondelete='CASCADE'),
+                    sa.ForeignKeyConstraint(['wurdeGeaendertVonPlan_verbundenerPlan_id'], ['xp_bereich.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
 
