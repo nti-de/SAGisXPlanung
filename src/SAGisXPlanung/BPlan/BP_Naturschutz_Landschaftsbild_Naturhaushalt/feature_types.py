@@ -111,7 +111,7 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         elif geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
-            raise NotImplementedError('Liniengeometrien nicht umgesetzt')
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
     @classmethod
     def previewIcon(cls):

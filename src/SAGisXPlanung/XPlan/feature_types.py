@@ -2,7 +2,9 @@ import logging
 from typing import List
 from uuid import uuid4
 
+from PyQt5.QtCore import QSize
 from geoalchemy2 import Geometry, WKTElement
+from qgis._core import QgsSymbolLayerUtils, QgsRuleBasedRenderer
 from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -17,7 +19,7 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
 from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
-from .types import LargeString, Angle, Length
+from .types import LargeString, Angle, Length, GeometryType
 from ..MapLayerRegistry import MapLayerRegistry
 
 logger = logging.getLogger(__name__)
@@ -333,6 +335,17 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
                 pass
 
         super(XP_Objekt, self).toCanvas(layer_group, plan_xid)
+
+    @classmethod
+    def preview_icon(cls, geom_type: GeometryType):
+        renderer = cls.renderer(geom_type)
+        if isinstance(renderer, QgsRuleBasedRenderer):
+            symbol = renderer.rootRule().children()[0].symbol()
+        else:
+            symbol = renderer.symbol()
+
+        icon = QgsSymbolLayerUtils.symbolPreviewIcon(symbol, QSize(16, 16))
+        return icon
 
 
 @event.listens_for(XP_Objekt, 'before_delete', propagate=True)

@@ -91,6 +91,17 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    op.create_table('bp_generisches_objekt',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+    op.create_table('fp_generisches_objekt',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
     op.create_foreign_key(None, 'bp_einfahrtpunkt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
@@ -131,4 +142,7 @@ def downgrade():
     op.drop_table('xp_verbundener_plan')
     op.execute('DROP TYPE xp_aenderungsarten;')
     op.execute('DROP TYPE xp_rechtscharakterplanaenderung;')
+
+    op.drop_table('bp_generisches_objekt')
+    op.drop_table('fp_generisches_objekt')
     # ### end Alembic commands ###

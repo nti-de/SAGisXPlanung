@@ -26,7 +26,7 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types 
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
     BP_SchutzPflegeEntwicklungsFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
-    BP_NutzungsartenGrenze
+    BP_NutzungsartenGrenze, BP_GenerischesObjekt
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
@@ -41,6 +41,7 @@ from SAGisXPlanung.FPlan.FP_Gemeinbedarf.feature_types import FP_Gemeinbedarf, F
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.data_types import FP_KomplexeZweckbestGruen, \
     FP_KomplexeZweckbestLandwirtschaft, FP_KomplexeZweckbestWald
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_Gruen, FP_Landwirtschaft, FP_WaldFlaeche
+from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
 from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich
@@ -92,6 +93,7 @@ CLASSES = {
     'XP_SimpleGeometry': XP_SimpleGeometry,
 
     'BP_Objekt': BP_Objekt,
+    'BP_GenerischesObjekt': BP_GenerischesObjekt,
     'BP_FlaecheOhneFestsetzung': BP_FlaecheOhneFestsetzung,
     'BP_BesondererNutzungszweckFlaeche': BP_BesondererNutzungszweckFlaeche,
     'BP_GemeinbedarfsFlaeche': BP_GemeinbedarfsFlaeche,
@@ -126,6 +128,7 @@ CLASSES = {
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
 
     'FP_Objekt': FP_Objekt,
+    'FP_GenerischesObjekt': FP_GenerischesObjekt,
     'FP_BebauungsFlaeche': FP_BebauungsFlaeche,
     'FP_KomplexeSondernutzung': FP_KomplexeSondernutzung,
     'FP_Gemeinbedarf': FP_Gemeinbedarf,

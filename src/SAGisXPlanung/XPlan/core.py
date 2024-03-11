@@ -2,9 +2,13 @@ import functools
 from dataclasses import dataclass
 from typing import List
 
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor
+from qgis.core import QgsSymbol, QgsWkbTypes, QgsUnitTypes, QgsSingleSymbolRenderer
 from sqlalchemy import Column
 
 from SAGisXPlanung import XPlanVersion
+from SAGisXPlanung.XPlan.types import GeometryType
 
 
 class XPCol(Column):
@@ -48,3 +52,26 @@ def fallback_renderer(renderer_function):
         return renderer_function(cls, geom_type)
 
     return wrapper
+
+
+def generic_objects_renderer(geom_type: GeometryType):
+    if geom_type is None:
+        raise Exception('parameter geom_type should not be None')
+
+    symbol = QgsSymbol.defaultSymbol(geom_type)
+    if geom_type == QgsWkbTypes.PointGeometry:
+        point = symbol.symbolLayer(0)
+        point.setColor(QColor('#cbcbcb'))
+        point.setSize(4)
+        point.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+    elif geom_type == QgsWkbTypes.LineGeometry:
+        line = symbol.symbolLayer(0)
+        line.setColor(QColor('#cbcbcb'))
+        line.setWidth(0.75)
+        line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+    else:
+        fill = symbol.symbolLayer(0)
+        fill.setFillColor(QColor('#cbcbcb'))
+        fill.setBrushStyle(Qt.BDiagPattern)
+        fill.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+    return QgsSingleSymbolRenderer(symbol)
