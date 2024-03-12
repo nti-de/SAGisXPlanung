@@ -27,6 +27,7 @@ from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_ty
     BP_SchutzPflegeEntwicklungsFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
     BP_NutzungsartenGrenze, BP_GenerischesObjekt
+from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
@@ -126,6 +127,7 @@ CLASSES = {
     'BP_BereichOhneEinAusfahrtLinie': BP_BereichOhneEinAusfahrtLinie,
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
+    'BP_Immissionsschutz': BP_Immissionsschutz,
 
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,

@@ -103,6 +103,18 @@ class Scale(types.TypeDecorator, XPlanungMeasureType):
     MAX_VALUE = 100
 
 
+class Sound(types.TypeDecorator, XPlanungMeasureType):
+    """ Repräsentation des XPlanGML MeasureTypes für Dezibel-Angaben """
+
+    impl = types.Float
+    python_type = float
+    cache_ok = True
+
+    UOM = 'dB'
+    MIN_VALUE = 0
+    MAX_VALUE = sys.float_info.max
+
+
 class RegExString(types.TypeDecorator):
     """ String-Datentyp, mit vorgegebenem RegEx-Muster """
 

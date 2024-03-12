@@ -654,3 +654,20 @@ class XP_Aenderungsarten(XPlanungEnumMixin, Enum):
     Streichung = 10002
     Aufhebung = 2000
     Überplanung = 3000
+
+
+class XP_ImmissionsschutzTypen(XPlanungEnumMixin, Enum):
+    """ Differenzierung der Immissionsschutz-Fläche."""
+
+    Schutzflaeche = 1000
+    BesondereAnlagenVorkehrungen = 2000
+
+
+class XP_TechnVorkehrungenImmissionsschutz(XPlanungEnumMixin, Enum):
+    """ Klassifizierung der auf der Fläche zu treffenden baulichen oder sonstigen technischen Vorkehrungen"""
+
+    Laermschutzvorkehrung = 1000
+    FassadenMitSchallschutzmassnahmen = 10000
+    Laermschutzwand = 10001
+    Laermschutzwall = 10002
+    SonstigeVorkehrung = 9999

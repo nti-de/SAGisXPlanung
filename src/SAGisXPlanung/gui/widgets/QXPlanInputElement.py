@@ -17,7 +17,7 @@ from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.utils import is_url
 from SAGisXPlanung.XPlan.types import LargeString, RefURL, Angle, Length, Volume, Area, Scale, XPlanungMeasureType, \
-    RegExString, XPEnum
+    RegExString, XPEnum, Sound
 
 PYQT_DEFAULT_DATE = datetime.date(1752, 9, 14)
 
@@ -341,7 +341,7 @@ class QMeasureTypeInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=
             return None
         if isinstance(self.measure_type, (Scale, Angle)):
             return int(self.text())
-        if isinstance(self.measure_type, (Area, Volume, Length)):
+        if isinstance(self.measure_type, (Area, Volume, Length, Sound)):
             return float(self.text())
 
     def setDefault(self, default):
@@ -350,8 +350,8 @@ class QMeasureTypeInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=
     def error_message_text(self) -> str:
         if isinstance(self.measure_type, Angle):
             return 'Feld erwartet einen Winkel zwischen 0 und 360'
-        if isinstance(self.measure_type, (Area, Volume, Length)):
-            return 'Feld erwartet eine positive Zahl'
+        if isinstance(self.measure_type, (Area, Volume, Length, Sound)):
+            return f'Feld erwartet eine positive Zahl ({self.measure_type.UOM})'
         if isinstance(self.measure_type, Scale):
             return 'Feld erwartet eine Prozentwert zwischen 0 und 100'
 
@@ -361,7 +361,7 @@ class QMeasureTypeInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=
                 return True
             if isinstance(self.measure_type, Angle) and 0 <= int(self.value()) <= 360:
                 return True
-            elif isinstance(self.measure_type, (Area, Volume, Length)) and 0 <= float(self.value()) <= sys.float_info.max:
+            elif isinstance(self.measure_type, (Area, Volume, Length, Sound)) and 0 <= float(self.value()) <= sys.float_info.max:
                 return True
             elif isinstance(self.measure_type, Scale) and 0 <= int(self.value()) <= 100:
                 return True
