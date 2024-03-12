@@ -81,7 +81,7 @@ class TestGMLReader_readPlan:
         assert isinstance(plan.wurdeGeaendertVon[0], XP_VerbundenerPlan)
 
         assert len(plan.bereich) == 2
-        assert len(plan.bereich[1].planinhalt) == 3
+        assert len(plan.bereich[1].planinhalt) == 4
         assert plan.bereich[1].planinhalt[1].__class__.__name__ == 'BP_Wegerecht'
         assert len(plan.bereich[1].planinhalt[1].typ) == 2
 

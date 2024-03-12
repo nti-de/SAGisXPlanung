@@ -160,6 +160,7 @@
       <xplan:planinhalt xlink:href="#GML_44edf1ef-101a-4ce2-b8e3-94b69c501080"/>
       <xplan:planinhalt xlink:href="#Gml_427CD7AE-BFC7-468E-A4EA-003173DB0D5B"/>
       <xplan:planinhalt xlink:href="#GML_b5f66983-6732-4cdc-8910-ba4d40a060e8"/>
+      <xplan:planinhalt xlink:href="#GML_f81a06f0-a8f4-497c-9dd8-effa63398c8c"/>
     </xplan:BP_Bereich>
   </gml:featureMember>
   <gml:featureMember>
@@ -204,6 +205,29 @@
       <xplan:besondereArtDerBaulNutzung>1200</xplan:besondereArtDerBaulNutzung>
       <xplan:bebauungsArt>1000</xplan:bebauungsArt>
     </xplan:BP_BaugebietsTeilFlaeche>
+  </gml:featureMember>
+  <gml:featureMember>
+    <xplan:BP_Immissionsschutz gml:id="GML_f81a06f0-a8f4-497c-9dd8-effa63398c8c">
+      <gml:boundedBy>
+        <gml:Envelope srsName="EPSG:25832">
+          <gml:lowerCorner>571565.1413881596 5941287.593603491</gml:lowerCorner>
+          <gml:upperCorner>571620.1145028933 5941350.771660722</gml:upperCorner>
+        </gml:Envelope>
+      </gml:boundedBy>
+      <xplan:rechtsstand>1000</xplan:rechtsstand>
+      <xplan:gehoertZuBereich xlink:href="#GML_30101d2a-21e2-4d0e-a820-0df812038b86"/>
+      <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+      <xplan:position>
+        <gml:Polygon srsName="EPSG:25832" gml:id="GML_640999a1-f14a-4d73-b4f5-bbd5730b1995">
+          <gml:exterior>
+            <gml:LinearRing>
+              <gml:posList>571565.14138816 5941333.54128148 571576.901805739 5941289.50809007 571620.114502893 5941287.59360349 571614.918039312 5941350.77166072 571565.14138816 5941333.54128148</gml:posList>
+            </gml:LinearRing>
+          </gml:exterior>
+        </gml:Polygon>
+      </xplan:position>
+      <xplan:laermpegelbereich>1200</xplan:laermpegelbereich>
+    </xplan:BP_Immissionsschutz>
   </gml:featureMember>
   <gml:featureMember>
     <xplan:BP_Wegerecht gml:id="Gml_427CD7AE-BFC7-468E-A4EA-003173DB0D5B">

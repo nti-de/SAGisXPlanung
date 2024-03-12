@@ -20,13 +20,15 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types 
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
+from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich
+from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_WaldFlaeche
 from SAGisXPlanung.GML.GMLWriter import writeTextNode, GMLWriter
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, XP_PTO
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_SpezExterneReferenz, XP_ExterneReferenz, \
     XP_Hoehenangabe, XP_GesetzlicheGrundlage
-from SAGisXPlanung.XPlan.enums import XP_WaldbetretungTyp, XP_ArtHoehenbezugspunkt
+from SAGisXPlanung.XPlan.enums import XP_WaldbetretungTyp, XP_ArtHoehenbezugspunkt, XP_ImmissionsschutzTypen
 
 
 @pytest.fixture()
@@ -106,6 +108,12 @@ def gml_writer():
     o_with_empty_array.position = plan.raeumlicherGeltungsbereich
     o_with_empty_array.typ = []
     bereich.planinhalt.append(o_with_empty_array)
+
+    bp_immissionsschutz = BP_Immissionsschutz()
+    bp_immissionsschutz.position = plan.raeumlicherGeltungsbereich
+    bp_immissionsschutz.typ = XP_ImmissionsschutzTypen.Schutzflaeche
+    bp_immissionsschutz.laermpegelbereich = BP_Laermpegelbereich.III
+    bereich.planinhalt.append(bp_immissionsschutz)
 
     plan.bereich.append(bereich)
     return GMLWriter(plan)

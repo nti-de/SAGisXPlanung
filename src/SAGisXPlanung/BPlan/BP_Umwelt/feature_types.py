@@ -35,8 +35,8 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
     massgeblAussenLaermpegelTag = XPCol(Sound, version=XPlanVersion.SIX)
     massgeblAussenLaermpegelNacht = XPCol(Sound, version=XPlanVersion.SIX)
 
-    typ = XPCol(XPEnum(XP_ImmissionsschutzTypen, include_default=True))
-    technVorkehrung = XPCol(XPEnum(XP_TechnVorkehrungenImmissionsschutz, include_default=True))
+    typ = Column(XPEnum(XP_ImmissionsschutzTypen, include_default=True))
+    technVorkehrung = Column(XPEnum(XP_TechnVorkehrungenImmissionsschutz, include_default=True))
 
 
     @classmethod
