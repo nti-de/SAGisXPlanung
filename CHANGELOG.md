@@ -18,6 +18,7 @@
   - `BP_SchutzPflegeEntwicklungsFlaeche`: Korrekte Orientierung der T-Symbole, bessere Schriftart (7a9df5c0, 630649dd)
   - `SO_Denkmalschutzrecht` (51557b7c)
 - Erfassung neuer Planinhalte aus Geometrien mit Z-Dimension (3D) möglich (c8bef963)
+- Dialog zur Zuordnung der XPlan-Objektklasse zeigt nur noch zum Geometrietyp passende Objekte
 
 #### Fehlerbehebungen
 

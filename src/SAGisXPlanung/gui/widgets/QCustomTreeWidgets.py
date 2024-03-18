@@ -41,6 +41,8 @@ class QObjectTypeSelectionTreeWidget(QtWidgets.QTreeWidget):
             if derived.hidden:
                 continue
             if issubclass(derived, (LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry)):
+                if not issubclass(derived, MixedGeometry) and derived.__geometry_type__ != self.geometry_type:
+                    continue
                 module_name = derived.__module__.split('.')[-2]
                 items = self.findItems(module_name, QtCore.Qt.MatchFixedString)
                 icon = derived.preview_icon(self.geometry_type)
