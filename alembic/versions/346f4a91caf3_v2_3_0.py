@@ -120,6 +120,19 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    op.create_table('bp_abgrabung',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('abbaugut', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+    op.create_table('bp_aufschuettung',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('aufschuettungsmaterial', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
     op.create_foreign_key(None, 'bp_einfahrtpunkt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
@@ -148,7 +161,8 @@ def downgrade():
     op.drop_column('bp_zweckbestimmung_gruen', 'detail_id')
 
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_nebenanlage', 'so_luftverkehr', "
-               "'bp_generisches_objekt', 'fp_generisches_objekt', 'bp_immissionsschutz');")
+               "'bp_generisches_objekt', 'fp_generisches_objekt', 'bp_immissionsschutz', 'bp_aufschuettung', "
+               "'bp_abgrabung');")
 
     op.drop_table('bp_zweckbestimmung_nebenanlagen')
     op.drop_table('bp_nebenanlage')
@@ -169,4 +183,7 @@ def downgrade():
     op.execute('DROP TYPE bp_laermpegelbereich;')
     op.execute('DROP TYPE xp_immissionsschutztypen;')
     op.execute('DROP TYPE xp_technvorkehrungenimmissionsschutz;')
+
+    op.drop_table('bp_aufschuettung')
+    op.drop_table('bp_abgrabung')
     # ### end Alembic commands ###

@@ -9,6 +9,8 @@ from qgis.gui import QgsLayerTreeViewIndicator
 from qgis.utils import iface
 
 from SAGisXPlanung import Session, Base
+from SAGisXPlanung.BPlan.BP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import BP_AbgrabungsFlaeche, \
+    BP_AufschuettungsFlaeche
 from SAGisXPlanung.BPlan.BP_Basisobjekte.data_types import BP_VeraenderungssperreDaten
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
@@ -128,6 +130,8 @@ CLASSES = {
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
     'BP_Immissionsschutz': BP_Immissionsschutz,
+    'BP_AbgrabungsFlaeche': BP_AbgrabungsFlaeche,
+    'BP_AufschuettungsFlaeche': BP_AufschuettungsFlaeche,
 
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,
