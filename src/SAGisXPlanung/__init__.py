@@ -75,7 +75,7 @@ VERSION = '2.2.2'
 COMPATIBLE_DB_REVISIONS = ['ce95b86bc010']
 DEPENDENCIES = [
     'lxml',
-    'SQLAlchemy==1.4.13',
+    'SQLAlchemy==1.4.46',
     'GeoAlchemy2==0.12.5',
     'shapely==2.0.0',
     'qasync==0.22.0',
