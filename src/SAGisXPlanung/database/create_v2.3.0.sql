@@ -1375,7 +1375,7 @@ CREATE TABLE xp_gesetzliche_grundlage (
     PRIMARY KEY (id)
 );
 
-ALTER TYPE xp_externereferenztyp ADD VALUE 'Schutzgebietsverordnung';;
+ALTER TYPE xp_externereferenztyp ADD VALUE IF NOT EXISTS 'Schutzgebietsverordnung';;
 
 CREATE TYPE xp_traegerschaft AS ENUM('EinrichtungBund','EinrichtungLand', 'EinrichtungKreis', 'KommunaleEinrichtung', 'ReligioeserTraeger', 'SonstTraeger');;
 
@@ -1385,17 +1385,66 @@ UPDATE xp_externe_referenz SET "referenzName"='Unbekannt' WHERE "referenzName" i
 
 UPDATE xp_externe_referenz SET "referenzURL"="referenzURL" WHERE "referenzURL" is NULL;;
 
-ALTER TYPE xp_sondernutzungen ADD VALUE 'SondergebietGrosshandel';;
+ALTER TYPE xp_sondernutzungen ADD VALUE IF NOT EXISTS 'SondergebietGrosshandel';;
 
-ALTER TYPE xp_spemassnahmentypen ADD VALUE 'ArtenreicherGehoelzbestand';;
+ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'ArtenreicherGehoelzbestand';;
 
-COMMIT;
+ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'Moor';;
 
-UPDATE xp_spe_daten SET "klassifizMassnahme" = 'ArtenreicherGehoelzbestand'::xp_spemassnahmentypen WHERE "klassifizMassnahme" = 'ArtentreicherGehoelzbestand'::xp_spemassnahmentypen;;
+ALTER TYPE public.xp_spemassnahmentypen RENAME TO xp_spemassnahmentypen_old;
 
-BEGIN;
+CREATE TYPE public.xp_spemassnahmentypen AS ENUM('ArtenreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland', 'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache', 'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide', 'Sonstiges');
 
-ALTER TYPE xp_spemassnahmentypen ADD VALUE 'Moor';;
+CREATE FUNCTION new_old_not_equals(
+                new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+            )
+            RETURNS boolean AS $$
+                SELECT new_enum_val::text != CASE
+                    WHEN old_enum_val::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'
+
+                    ELSE old_enum_val::text
+                END;
+            $$ LANGUAGE SQL IMMUTABLE;
+
+CREATE OPERATOR != (
+            leftarg = public.xp_spemassnahmentypen,
+            rightarg = public.xp_spemassnahmentypen_old,
+            procedure = new_old_not_equals
+        );
+
+CREATE FUNCTION new_old_equals(
+                new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+            )
+            RETURNS boolean AS $$
+                SELECT new_enum_val::text = CASE
+                    WHEN old_enum_val::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'
+
+                    ELSE old_enum_val::text
+                END;
+            $$ LANGUAGE SQL IMMUTABLE;
+
+CREATE OPERATOR = (
+            leftarg = public.xp_spemassnahmentypen,
+            rightarg = public.xp_spemassnahmentypen_old,
+            procedure = new_old_equals
+        );
+
+ALTER TABLE public.xp_spe_daten ALTER COLUMN "klassifizMassnahme" TYPE public.xp_spemassnahmentypen 
+                USING CASE 
+                WHEN "klassifizMassnahme"::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::public.xp_spemassnahmentypen
+
+                ELSE "klassifizMassnahme"::text::public.xp_spemassnahmentypen
+                END;
+
+DROP FUNCTION new_old_not_equals(
+            new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+        ) CASCADE;
+
+DROP FUNCTION new_old_equals(
+            new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+        ) CASCADE;
+
+DROP TYPE public.xp_spemassnahmentypen_old;
 
 ALTER TABLE bp_bereich ADD COLUMN verfahren bp_verfahren;;
 
@@ -1431,7 +1480,8 @@ create or replace function bp_bereich_sync_attr_verfahren()
         for each row when (pg_trigger_depth() = 0)
         execute procedure bp_plan_sync_attr_verfahren();;
 
-CREATE TYPE xp_rechtscharakter AS ENUM (
+DROP TYPE IF EXISTS xp_rechtscharakter;
+        CREATE TYPE xp_rechtscharakter AS ENUM (
         'FestsetzungBPlan',
         'NachrichtlicheUebernahme',
         'DarstellungFPlan',
@@ -1506,7 +1556,7 @@ CREATE TYPE xp_rechtscharakter AS ENUM (
             RETURN NEW;
         end $$;
         
-        create constraint trigger bp_objekt_sync_attr_hoehenbezug
+        create constraint trigger bp_objekt_sync_attr_rechtscharakter
         after insert or update on xp_objekt
         DEFERRABLE
         for each row when (pg_trigger_depth() = 0)
@@ -1631,11 +1681,11 @@ CREATE TYPE xp_rechtscharakter AS ENUM (
         for each row when (pg_trigger_depth() = 0)
         execute procedure so_objekt_sync_attr_rechtscharakter();;
 
-ALTER TYPE bp_planart ADD VALUE 'BebauungsplanZurWohnraumversorgung';;
+ALTER TYPE bp_planart ADD VALUE IF NOT EXISTS 'BebauungsplanZurWohnraumversorgung';;
 
-ALTER TYPE xp_zweckbestimmunggruen ADD VALUE 'Naturerfahrungsraum';;
+ALTER TYPE xp_zweckbestimmunggruen ADD VALUE IF NOT EXISTS 'Naturerfahrungsraum';;
 
-ALTER TYPE xp_besondereartderbaulnutzung ADD VALUE 'DoerflichesWohngebiet';;
+ALTER TYPE xp_besondereartderbaulnutzung ADD VALUE IF NOT EXISTS 'DoerflichesWohngebiet';;
 
 CREATE TABLE bp_zweckbestimmung_gruen (
             id UUID NOT NULL,
@@ -1849,12 +1899,12 @@ ALTER TABLE so_objekt ALTER COLUMN nordwinkel TYPE FLOAT USING nordwinkel::float
 
 ALTER TABLE fp_gemeinbedarf ALTER zweckbestimmung DROP DEFAULT, ALTER zweckbestimmung type xp_zweckbestimmunggemeinbedarf[] using NULLIF(ARRAY[zweckbestimmung], '{null}'), alter zweckbestimmung set default '{}';;
 
-ALTER TYPE bp_rechtsstand ADD VALUE 'Entwurfsbeschluss';
-        ALTER TYPE bp_rechtsstand ADD VALUE 'TeilweiseAufgehoben';
-        ALTER TYPE bp_rechtsstand ADD VALUE 'TeilweiseAusserKraft';
+ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'Entwurfsbeschluss';
+        ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAufgehoben';
+        ALTER TYPE bp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAusserKraft';
         
-        ALTER TYPE rp_rechtsstand ADD VALUE 'TeilweiseAusserKraft';
-        ALTER TYPE fp_rechtsstand ADD VALUE 'Entwurfsbeschluss';;
+        ALTER TYPE rp_rechtsstand ADD VALUE IF NOT EXISTS 'TeilweiseAusserKraft';
+        ALTER TYPE fp_rechtsstand ADD VALUE IF NOT EXISTS 'Entwurfsbeschluss';;
 
 CREATE TABLE bp_zweckbestimmung_sport (
             id UUID NOT NULL,
@@ -2470,9 +2520,9 @@ ALTER TABLE bp_plan ADD COLUMN "versionBauNVO_id" uuid REFERENCES xp_gesetzliche
             ALTER TABLE bp_plan ADD COLUMN "versionBauGB_id" uuid REFERENCES xp_gesetzliche_grundlage(id);
             ALTER TABLE bp_plan ADD COLUMN "versionSonstRechtsgrundlage_id" uuid REFERENCES xp_gesetzliche_grundlage(id);;
 
-ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE 'SonstigeInfrastruktur';
+ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeInfrastruktur';
 
-ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE 'SonstigeSicherheitOrdnung';
+ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeSicherheitOrdnung';
 
 UPDATE alembic_version SET version_num='8cdbef1a55d6' WHERE alembic_version.version_num = 'fb27f7a59e17';
 
@@ -2508,8 +2558,8 @@ CREATE TABLE codelist (
         ALTER TABLE fp_plan ADD COLUMN "status_id" uuid REFERENCES codelist_values(id);
         ALTER TABLE fp_baugebiet ADD COLUMN "detaillierteArtDerBaulNutzung_id" uuid REFERENCES codelist_values(id);
         
-        ALTER TABLE so_schienenverkehr ADD COLUMN "detailArtDerFestlegung_id" uuid REFERENCES codelist_values(id);;
-        ALTER TABLE so_denkmalschutz ADD COLUMN "detailArtDerFestlegung_id" uuid REFERENCES codelist_values(id);
+        ALTER TABLE so_schienenverkehr ADD COLUMN "detailArtDerFestlegung_id" uuid REFERENCES codelist_values(id);
+        ALTER TABLE so_denkmalschutz ADD COLUMN "detailArtDerFestlegung_id" uuid REFERENCES codelist_values(id);;
 
 CREATE TABLE assoc_detail_sondernutzung (
             "codelist_id" UUID,
@@ -2618,21 +2668,116 @@ UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.vers
 CREATE TYPE bp_zweckbestimmungnebenanlagen AS ENUM ('Stellplaetze', 'Garagen', 'Spielplatz', 'Carport', 'Tiefgarage', 'Nebengebaeude', 'AbfallSammelanlagen', 'EnergieVerteilungsanlagen', 'AbfallWertstoffbehaelter', 'Fahrradstellplaetze', 'Sonstiges');
 
 CREATE TABLE bp_nebenanlage (
-    id UUID NOT NULL,
-    zweckbestimmung bp_zweckbestimmungnebenanlagen[],
-    "Zmax" INTEGER,
-    PRIMARY KEY (id),
+    id UUID NOT NULL, 
+    zweckbestimmung bp_zweckbestimmungnebenanlagen[], 
+    "Zmax" INTEGER, 
+    PRIMARY KEY (id), 
     FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE bp_zweckbestimmung_nebenanlagen (
-    id UUID NOT NULL,
-    allgemein bp_zweckbestimmungnebenanlagen,
-    "textlicheErgaenzung" VARCHAR,
-    aufschrift VARCHAR,
-    nebenanlage_id UUID,
-    PRIMARY KEY (id),
+    id UUID NOT NULL, 
+    allgemein bp_zweckbestimmungnebenanlagen, 
+    "textlicheErgaenzung" VARCHAR, 
+    aufschrift VARCHAR, 
+    nebenanlage_id UUID, 
+    PRIMARY KEY (id), 
     FOREIGN KEY(nebenanlage_id) REFERENCES bp_nebenanlage (id) ON DELETE CASCADE
+);
+
+CREATE TYPE so_klassifiznachluftverkehrsrecht AS ENUM ('Flughafen', 'Landeplatz', 'Segelfluggelaende', 'HubschrauberLandeplatz', 'Ballonstartplatz', 'Haengegleiter', 'Gleitsegler', 'Laermschutzbereich', 'Baubeschraenkungsbereich', 'Sonstiges');
+
+CREATE TYPE so_laermschutzzonetypen AS ENUM ('TagZone1', 'TagZone2', 'Nacht');
+
+CREATE TABLE so_luftverkehr (
+    id UUID NOT NULL, 
+    "artDerFestlegung" so_klassifiznachluftverkehrsrecht, 
+    "detailArtDerFestlegung_id" UUID, 
+    name VARCHAR, 
+    nummer VARCHAR, 
+    laermschutzzone so_laermschutzzonetypen, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
+    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE xp_rechtscharakterplanaenderung AS ENUM ('Aenderung', 'Ergaenzung', 'Aufhebung', 'Aufhebungsverfahren', 'Ueberplanung');
+
+CREATE TYPE xp_aenderungsarten AS ENUM ('Änderung', 'Ersetzung', 'Ergänzung', 'Streichung', 'Aufhebung', 'Überplanung');
+
+CREATE TABLE xp_verbundener_plan (
+    id UUID NOT NULL, 
+    "planName" VARCHAR, 
+    rechtscharakter xp_rechtscharakterplanaenderung, 
+    "aenderungsArt" xp_aenderungsarten, 
+    nummer VARCHAR, 
+    aenderungsdatum DATE, 
+    "aendert_verbundenerPlan_id" UUID, 
+    "wurdeGeaendertVon_verbundenerPlan_id" UUID, 
+    "aendertPlan_verbundenerPlan_id" UUID, 
+    "wurdeGeaendertVonPlan_verbundenerPlan_id" UUID, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY("aendert_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
+    FOREIGN KEY("wurdeGeaendertVon_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
+    FOREIGN KEY("aendertPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE, 
+    FOREIGN KEY("wurdeGeaendertVonPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE
+);
+
+CREATE TABLE bp_generisches_objekt (
+    id UUID NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TABLE fp_generisches_objekt (
+    id UUID NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE bp_laermpegelbereich AS ENUM ('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'SpezifizierungBereich');
+
+CREATE TYPE xp_immissionsschutztypen AS ENUM ('Schutzflaeche', 'BesondereAnlagenVorkehrungen');
+
+CREATE TYPE xp_technvorkehrungenimmissionsschutz AS ENUM ('Laermschutzvorkehrung', 'FassadenMitSchallschutzmassnahmen', 'Laermschutzwand', 'Laermschutzwall', 'SonstigeVorkehrung');
+
+CREATE TABLE bp_immissionsschutz (
+    id UUID NOT NULL, 
+    nutzung VARCHAR, 
+    laermpegelbereich bp_laermpegelbereich, 
+    "massgeblAussenLaermpegelTag" FLOAT, 
+    "massgeblAussenLaermpegelNacht" FLOAT, 
+    typ xp_immissionsschutztypen, 
+    "technVorkehrung" xp_technvorkehrungenimmissionsschutz, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TABLE bp_abgrabung (
+    id UUID NOT NULL, 
+    abbaugut VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TABLE bp_aufschuettung (
+    id UUID NOT NULL, 
+    aufschuettungsmaterial VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE so_klassifiznachsonstigemrecht AS ENUM ('Bauschutzbereich', 'Berggesetz', 'Richtfunkverbindung', 'Truppenuebungsplatz', 'VermessungsKatasterrecht', 'Rekultivierungsflaeche', 'Renaturierungsflaeche', 'Lärmschutzbereich', 'SchutzzoneLeitungstrasse', 'Sonstiges');
+
+CREATE TABLE so_sonstiges_recht (
+    id UUID NOT NULL, 
+    nummer VARCHAR, 
+    "artDerFestlegung" so_klassifiznachsonstigemrecht, 
+    "detailArtDerFestlegung_id" UUID, 
+    name VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
+    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 ALTER TABLE bp_einfahrtpunkt ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;

@@ -1,6 +1,32 @@
 ## Changelog
 
-### [2.2.2] - 05.01.2023
+### [2.3.0] - 19.03.2024
+
+#### Neue Funktionen
+
+- Neue Objektklassen: 
+  - `BP_NebenanlagenFlaeche`, `SO_Luftverkehrsrecht`, `XP_VerbundenerPlan`, `BP_GenerischesObjekt`, `FP_GenerischesObjekt`, `BP_Immissionsschutz`, `BP_AbgrabungsFlaeche`, `BP_AufschuettungsFlaeche`, `SO_SonstigesRecht`
+- Automatische Geometriekorrektur beim Speichern von Objekten in der Datenbank: 
+  - Anpassung des Umlaufsinns von Polygon-Stützpunkten auf CCW 
+  - Entfernung doppelter Stützpunkte 
+- Neue Funktion zum Überprüfen der Datenbank-Verbindung in den Einstellungen
+- Warnung vor dem Überschreiben der Vollversion durch eine Installation aus dem QGIS-Plugin Repository
+
+#### Veränderungen
+
+- Verbesserte Darstellungsstile
+  - `BP_SchutzPflegeEntwicklungsFlaeche`: Korrekte Orientierung der T-Symbole, bessere Schriftart (7a9df5c0, 630649dd)
+  - `SO_Denkmalschutzrecht` (51557b7c)
+- Erfassung neuer Planinhalte aus Geometrien mit Z-Dimension (3D) möglich (c8bef963)
+
+#### Fehlerbehebungen
+
+- Fehler beim Erfassen von XPlan-Objekten aus Layern mit mehr als 100 Features behoben (64aa3aa1)
+- GML-Export mit Codelisten-Werten korrigiert (8a86dc75)
+- keine doppelten Einträge in der Stilkonfiguration bei mehrfachem Aufruf der Einstellungen mehr (5f56b885)
+- Fehlerhafte Anzeige von Planinhalten auf der Karte in Kombination mit einfacher Erfassungstiefe behoben (19e4a6e2)
+
+### [2.2.2] - 05.01.2024
 
 #### Neue Funktionen
 
