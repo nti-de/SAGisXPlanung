@@ -13,6 +13,7 @@ def search_widget():
 
 class TestQCollapsibleSearch:
 
+    @pytest.mark.asyncio
     async def test_expand_and_shrink(self, search_widget, qtbot):
         qtbot.addWidget(search_widget)
         assert not search_widget.property('expanded')
