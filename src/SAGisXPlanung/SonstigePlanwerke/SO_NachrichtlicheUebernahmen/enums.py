@@ -147,3 +147,30 @@ class SO_LaermschutzzoneTypen(XPlanungEnumMixin, Enum):
     TagZone1 = 1000
     TagZone2 = 2000
     Nacht = 3000
+
+
+class SO_KlassifizNachSonstigemRecht(XPlanungEnumMixin, Enum):
+    """ Rechtliche Klassifizierung der Festlegung für SonstigesRecht """
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, _: int, version: XPlanVersion = None):
+        self._xplan_version = version
+
+    @property
+    def version(self) -> XPlanVersion:
+        return self._xplan_version
+
+    Bauschutzbereich = 1000, XPlanVersion.FIVE_THREE
+    Berggesetz = 1100
+    Richtfunkverbindung = 1200
+    Truppenuebungsplatz = 1300
+    VermessungsKatasterrecht = 1400
+    Rekultivierungsflaeche = 1500
+    Renaturierungsflaeche = 1600
+    Lärmschutzbereich = 1700, XPlanVersion.SIX
+    SchutzzoneLeitungstrasse = 1800, XPlanVersion.SIX
+    Sonstiges = 9999

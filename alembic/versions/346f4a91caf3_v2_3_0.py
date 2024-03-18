@@ -133,6 +133,22 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    op.create_table('so_sonstiges_recht',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.Column('artDerFestlegung', sa.Enum('Bauschutzbereich', 'Berggesetz',
+                                                          'Richtfunkverbindung', 'Truppenuebungsplatz',
+                                                          'VermessungsKatasterrecht', 'Rekultivierungsflaeche',
+                                                          'Renaturierungsflaeche', 'Lärmschutzbereich',
+                                                          'SchutzzoneLeitungstrasse', 'Sonstiges',
+                                                          name='so_klassifiznachsonstigemrecht'), nullable=True),
+                    sa.Column('detailArtDerFestlegung_id', sa.UUID(), nullable=True),
+                    sa.Column('name', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['detailArtDerFestlegung_id'], ['codelist_values.id'], ),
+                    sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
     op.create_foreign_key(None, 'bp_einfahrtpunkt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
@@ -162,7 +178,7 @@ def downgrade():
 
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_nebenanlage', 'so_luftverkehr', "
                "'bp_generisches_objekt', 'fp_generisches_objekt', 'bp_immissionsschutz', 'bp_aufschuettung', "
-               "'bp_abgrabung');")
+               "'bp_abgrabung', 'so_sonstiges_recht');")
 
     op.drop_table('bp_zweckbestimmung_nebenanlagen')
     op.drop_table('bp_nebenanlage')
@@ -186,4 +202,7 @@ def downgrade():
 
     op.drop_table('bp_aufschuettung')
     op.drop_table('bp_abgrabung')
+
+    op.drop_table('so_sonstiges_recht')
+    op.execute('DROP TYPE so_klassifiznachsonstigemrecht;')
     # ### end Alembic commands ###

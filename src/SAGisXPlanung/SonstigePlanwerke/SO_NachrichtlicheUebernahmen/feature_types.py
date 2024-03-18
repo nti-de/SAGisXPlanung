@@ -12,7 +12,8 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_KlassifizNachSchienenverkehrsrecht,
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr, \
-    SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen
+    SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
+    SO_KlassifizNachSonstigemRecht
 from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
@@ -379,3 +380,29 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
+
+
+class SO_SonstigesRecht(MixedGeometry, SO_Objekt):
+    """ Sonstige Festlegung """
+
+    __tablename__ = 'so_sonstiges_recht'
+    __mapper_args__ = {
+        'polymorphic_identity': 'so_sonstiges_recht',
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    nummer = Column(String)
+    artDerFestlegung = Column(XPEnum(SO_KlassifizNachSonstigemRecht, include_default=True))
+
+    detailArtDerFestlegung_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
+                                      attribute='detailArtDerFestlegung')
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachSonstigemRecht", back_populates="so_sonstiges_recht",
+                                          foreign_keys=[detailArtDerFestlegung_id])
+
+    name = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
