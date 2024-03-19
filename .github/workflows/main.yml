@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ['qgis/qgis:release-3_22', 'qgis/qgis:release-3_24', 'qgis/qgis:release-3_26', 'qgis/qgis:release-3_28']
+        container: ['qgis/qgis:release-3_22', 'qgis/qgis:release-3_28', 'qgis/qgis:release-3_34']
 
     container: ${{ matrix.container }}
 
@@ -64,7 +64,7 @@ jobs:
     needs: [test, commit-sha]
     runs-on: ubuntu-latest
 
-    container: 'qgis/qgis:release-3_22'
+    container: 'qgis/qgis:release-3_28'
 
     steps:
     - name: Checkout Project
