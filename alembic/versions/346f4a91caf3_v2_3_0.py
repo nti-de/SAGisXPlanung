@@ -36,30 +36,30 @@ def upgrade():
                                         name='bp_zweckbestimmungnebenanlagen')
 
     op.create_table('bp_nebenanlage',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('zweckbestimmung', postgresql.ARRAY(nebenanlagen_enum)),
                     sa.Column('Zmax', sa.Integer(), nullable=True),
                     sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_table('bp_zweckbestimmung_nebenanlagen',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('allgemein', nebenanlagen_enum),
                     sa.Column('textlicheErgaenzung', sa.String(), nullable=True),
                     sa.Column('aufschrift', sa.String(), nullable=True),
-                    sa.Column('nebenanlage_id', sa.UUID(), nullable=True),
+                    sa.Column('nebenanlage_id', postgresql.UUID(), nullable=True),
                     sa.ForeignKeyConstraint(['nebenanlage_id'], ['bp_nebenanlage.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
 
     op.create_table('so_luftverkehr',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('artDerFestlegung', sa.Enum('Flughafen', 'Landeplatz', 'Segelfluggelaende',
                                                           'HubschrauberLandeplatz', 'Ballonstartplatz', 'Haengegleiter',
                                                           'Gleitsegler', 'Laermschutzbereich',
                                                           'Baubeschraenkungsbereich', 'Sonstiges',
                                                           name='so_klassifiznachluftverkehrsrecht'), nullable=True),
-                    sa.Column('detailArtDerFestlegung_id', sa.UUID(), nullable=True),
+                    sa.Column('detailArtDerFestlegung_id', postgresql.UUID(), nullable=True),
                     sa.Column('name', sa.String(), nullable=True),
                     sa.Column('nummer', sa.String(), nullable=True),
                     sa.Column('laermschutzzone', sa.Enum('TagZone1', 'TagZone2', 'Nacht',
@@ -70,7 +70,7 @@ def upgrade():
                     )
 
     op.create_table('xp_verbundener_plan',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('planName', sa.String(), nullable=True),
                     sa.Column('rechtscharakter',
                               sa.Enum('Aenderung', 'Ergaenzung', 'Aufhebung', 'Aufhebungsverfahren',
@@ -80,10 +80,10 @@ def upgrade():
                                       'Überplanung', name='xp_aenderungsarten')),
                     sa.Column('nummer', sa.String(), nullable=True),
                     sa.Column('aenderungsdatum', sa.Date(), nullable=True),
-                    sa.Column('aendert_verbundenerPlan_id', sa.UUID(), nullable=True),
-                    sa.Column('wurdeGeaendertVon_verbundenerPlan_id', sa.UUID(), nullable=True),
-                    sa.Column('aendertPlan_verbundenerPlan_id', sa.UUID(), nullable=True),
-                    sa.Column('wurdeGeaendertVonPlan_verbundenerPlan_id', sa.UUID(), nullable=True),
+                    sa.Column('aendert_verbundenerPlan_id', postgresql.UUID(), nullable=True),
+                    sa.Column('wurdeGeaendertVon_verbundenerPlan_id', postgresql.UUID(), nullable=True),
+                    sa.Column('aendertPlan_verbundenerPlan_id', postgresql.UUID(), nullable=True),
+                    sa.Column('wurdeGeaendertVonPlan_verbundenerPlan_id', postgresql.UUID(), nullable=True),
                     sa.ForeignKeyConstraint(['aendert_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
                     sa.ForeignKeyConstraint(['wurdeGeaendertVon_verbundenerPlan_id'], ['xp_plan.id'], ondelete='CASCADE'),
                     sa.ForeignKeyConstraint(['aendertPlan_verbundenerPlan_id'], ['xp_bereich.id'], ondelete='CASCADE'),
@@ -92,18 +92,18 @@ def upgrade():
                     )
 
     op.create_table('bp_generisches_objekt',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_table('fp_generisches_objekt',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
 
     op.create_table('bp_immissionsschutz',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('nutzung', sa.String(), nullable=True),
                     sa.Column('laermpegelbereich', sa.Enum('I', 'II', 'III', 'IV', 'V', 'VI', 'VII',
                                                            'SpezifizierungBereich', name='bp_laermpegelbereich'),
@@ -121,20 +121,20 @@ def upgrade():
                     )
 
     op.create_table('bp_abgrabung',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('abbaugut', sa.String(), nullable=True),
                     sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_table('bp_aufschuettung',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('aufschuettungsmaterial', sa.String(), nullable=True),
                     sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
 
     op.create_table('so_sonstiges_recht',
-                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('id', postgresql.UUID(), nullable=False),
                     sa.Column('nummer', sa.String(), nullable=True),
                     sa.Column('artDerFestlegung', sa.Enum('Bauschutzbereich', 'Berggesetz',
                                                           'Richtfunkverbindung', 'Truppenuebungsplatz',
@@ -142,7 +142,7 @@ def upgrade():
                                                           'Renaturierungsflaeche', 'Lärmschutzbereich',
                                                           'SchutzzoneLeitungstrasse', 'Sonstiges',
                                                           name='so_klassifiznachsonstigemrecht'), nullable=True),
-                    sa.Column('detailArtDerFestlegung_id', sa.UUID(), nullable=True),
+                    sa.Column('detailArtDerFestlegung_id', postgresql.UUID(), nullable=True),
                     sa.Column('name', sa.String(), nullable=True),
                     sa.ForeignKeyConstraint(['detailArtDerFestlegung_id'], ['codelist_values.id'], ),
                     sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
@@ -153,8 +153,8 @@ def upgrade():
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
 
-    op.add_column('bp_komplexe_sondernutzung', sa.Column('detail_id', sa.UUID(), nullable=True))
-    op.add_column('bp_zweckbestimmung_gruen', sa.Column('detail_id', sa.UUID(), nullable=True))
+    op.add_column('bp_komplexe_sondernutzung', sa.Column('detail_id', postgresql.UUID(), nullable=True))
+    op.add_column('bp_zweckbestimmung_gruen', sa.Column('detail_id', postgresql.UUID(), nullable=True))
 
     op.alter_column('lp_plan', 'bundesland',
                     existing_type=postgresql.ENUM('BB', 'BE', 'BW', 'BY', 'HB', 'HE', 'HH', 'MV', 'NI', 'NW', 'RP',

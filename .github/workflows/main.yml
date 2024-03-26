@@ -94,31 +94,8 @@ jobs:
         alembic upgrade ${{steps.alembic_history.outputs.prev_revision}}:head --sql > upgrade_from_${{steps.alembic_history.outputs.prev_tag}}.sql
 
     - name: Upload SQL Scripts
+      if: ${{ !env.ACT }} # skip during local actions testing
       uses: actions/upload-artifact@v2
       with:
         name: SAGis.XPlanung.sql-scripts@${{ needs.commit-sha.outputs.commit_sha }}
         path: '*.sql'
-
-  publish:
-    name: Upload artifact
-    needs: [test, commit-sha]
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v3
-
-      - name: copy source files and scripts
-        run: |
-          mkdir dist
-          cp -r src/SAGisXPlanung dist/XPlanung/
-
-      - uses: docker://pandoc/latex:2.9
-        with:
-          args: --from markdown -o dist/README.pdf README.md
-
-      - name: QGIS plugin distribution
-        uses: actions/upload-artifact@v2
-        with:
-          name: SAGis.XPlanung.source@${{ needs.commit-sha.outputs.commit_sha }}
-          path: ./dist
