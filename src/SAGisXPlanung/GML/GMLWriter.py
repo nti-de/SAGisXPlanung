@@ -139,6 +139,11 @@ class GMLWriter:
                 continue
             if isinstance(value, list) and not value:
                 continue
+            if attr == "gemeinde" or attr == "externeReferenz" or attr == "verfahrensMerkmale":
+                for g in value:
+                    f = etree.SubElement(xplan, f"{{{self.nsmap['xplan']}}}{attr}")
+                    f.append(self.writeSubObject(g))
+                continue
             if isinstance(value, Enum) and hasattr(value, 'version'):
                 if value.version not in [None, self.version]:
                     continue

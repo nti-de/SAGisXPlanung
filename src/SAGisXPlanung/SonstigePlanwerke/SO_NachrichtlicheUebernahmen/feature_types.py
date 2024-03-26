@@ -5,6 +5,7 @@ from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolL
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase)
 
 from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float, ARRAY
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
@@ -323,11 +324,6 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
 
     artDerFestlegung = Column(XPEnum(SO_KlassifizNachLuftverkehrsrecht, include_default=True))
 
-    detailArtDerFestlegung_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                                      attribute='detailArtDerFestlegung')
-    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachLuftverkehrsrecht", back_populates="so_luftverkehr",
-                                          foreign_keys=[detailArtDerFestlegung_id])
-
     name = Column(String)
     nummer = Column(String)
     laermschutzzone = Column(XPEnum(SO_LaermschutzzoneTypen, include_default=True))
@@ -394,11 +390,6 @@ class SO_SonstigesRecht(MixedGeometry, SO_Objekt):
 
     nummer = Column(String)
     artDerFestlegung = Column(XPEnum(SO_KlassifizNachSonstigemRecht, include_default=True))
-
-    detailArtDerFestlegung_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                                      attribute='detailArtDerFestlegung')
-    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachSonstigemRecht", back_populates="so_sonstiges_recht",
-                                          foreign_keys=[detailArtDerFestlegung_id])
 
     name = Column(String)
 
