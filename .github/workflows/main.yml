@@ -25,11 +25,11 @@ jobs:
 
     steps:
     - name: Checkout Project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: commit sha
       id: get_hash
-      run: echo "::set-output name=COMMIT_SHA::$(git rev-parse --short HEAD)"
+      run: echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
   test:
     name: Test on ${{matrix.container }}
@@ -45,7 +45,7 @@ jobs:
     steps:
     
     - name: Checkout Project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
         
     - name: Install dependencies
       run: |
@@ -68,13 +68,13 @@ jobs:
 
     steps:
     - name: Checkout Project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install alembic alembic-postgresql-enum
         pip install -r requirements.txt
+        pip install alembic alembic-postgresql-enum
 
     - name: Parse Alembic History
       id: alembic_history
@@ -83,9 +83,9 @@ jobs:
         revision_tag=`alembic history | head -n1 | awk '{print $NF}'`
         prev_tag=`alembic history | head -n2 | tail -n1 | awk '{print $NF}'`
 
-        echo "::set-output name=prev_revision::$prev_revision"
-        echo "::set-output name=revision_tag::$revision_tag"
-        echo "::set-output name=prev_tag::$prev_tag"
+        echo "prev_revision=$prev_revision" >> $GITHUB_OUTPUT
+        echo "revision_tag=$revision_tag" >> $GITHUB_OUTPUT
+        echo "prev_tag=$prev_tag" >> $GITHUB_OUTPUT 
 
     - name: Generate Revisions
       run: |

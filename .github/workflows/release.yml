@@ -12,11 +12,11 @@ jobs:
       upload_url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get Version Number
         id: get_version_number
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+        run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Pack Assets
@@ -57,31 +57,35 @@ jobs:
 
     steps:
     - name: Checkout Project
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Install dependencies
       run: |
         python3 -m pip install --upgrade pip
-        pip install alembic alembic-postgresql-enum
         pip install -r requirements.txt
+        pip install alembic alembic-postgresql-enum
+
     - name: Parse Alembic History
       id: alembic_history
       run: |
         prev_revision=`alembic history | head -n1 | awk '{print $1}'`
         revision_tag=`alembic history | head -n1 | awk '{print $NF}'`
         prev_tag=`alembic history | head -n2 | tail -n1 | awk '{print $NF}'`
-        echo "::set-output name=prev_revision::$prev_revision"
-        echo "::set-output name=revision_tag::$revision_tag"
-        echo "::set-output name=prev_tag::$prev_tag"
+        echo "prev_revision=$prev_revision" >> $GITHUB_OUTPUT
+        echo "revision_tag=$revision_tag" >> $GITHUB_OUTPUT
+        echo "prev_tag=$prev_tag" >> $GITHUB_OUTPUT
+
     - name: Generate Revisions
       run: |
         alembic upgrade head --sql > create_${{steps.alembic_history.outputs.revision_tag}}.sql
         alembic downgrade head:${{steps.alembic_history.outputs.prev_revision}} --sql > downgrade_to_${{steps.alembic_history.outputs.prev_tag}}.sql
         alembic upgrade ${{steps.alembic_history.outputs.prev_revision}}:head --sql > upgrade_from_${{steps.alembic_history.outputs.prev_tag}}.sql     
+
     - name: Package Files
       run: |
         apt-get install zip
         zip -R sql_scripts.zip *.sql
+
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
