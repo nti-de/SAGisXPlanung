@@ -20,6 +20,7 @@ from qgis.core import (QgsRasterLayer, QgsProject, QgsGeometry, QgsVectorLayer,
                        QgsLayerTreeGroup, QgsLayerTreeLayer, Qgis, QgsAnnotationLayer)
 from qgis.utils import iface
 from sqlalchemy import select, exists
+from sqlalchemy.exc import InternalError
 from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
@@ -42,11 +43,9 @@ from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, Attri
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets import QParishEdit
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
-from SAGisXPlanung.gui.widgets.QCustomTreeWidgetItems import (QGeometryPolygonTreeWidgetItem,
-                                                              QGeometryValidationTreeWidgetItem,
-                                                              QGeometryDuplicateVerticesTreeWidgetItem,
-                                                              QGeometryInvalidVerticesTreeWidgetItem,
-                                                              GeometryIntersectionType)
+from SAGisXPlanung.gui.widgets.QCustomTreeWidgetItems import (ValidationBaseTreeWidgetItem,
+                                                              GeometryIntersectionType, ValidationResult,
+                                                              ValidationGeometryErrorTreeWidgetItem)
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.style.styles import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -63,6 +62,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     planDeleted = pyqtSignal()
     nameChanged = pyqtSignal(str, str)  # xid, new plan name
+    validation_finished = pyqtSignal(ValidationResult)
 
     def __init__(self, parent=None):
         super(XPPlanDetailsDialog, self).__init__(parent)
@@ -99,6 +99,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.searchEdit.textChanged.connect(self.objectTree.filter)
 
         self.bValidate.clicked.connect(self.startValidation)
+        self.validation_finished.connect(self.on_validation_result)
         self.log.itemDoubleClicked.connect(self.onErrorDoubleClicked)
         self.log.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log.customContextMenuRequested.connect(self.showGeometryValidationItemContextMenu)
@@ -342,7 +343,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         menu.exec_(self.objectTree.mapToGlobal(point))
 
     def highlightGeometryError(self):
-        item: QGeometryValidationTreeWidgetItem = self.log.selectedItems()[0]
+        item: ValidationBaseTreeWidgetItem = self.log.selectedItems()[0]
         iface.mapCanvas().setExtent(item.extent())
         self.onErrorDoubleClicked(item, 0)  # highlights error and refreshes canvas
 
@@ -643,38 +644,43 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.lErrorCount.setText('')
         self.log.clear()
 
-        async with SessionAsync.begin() as session:
-            # highly optimized query to only load required columns and populate all required sub tables from the
-            # beginning so that no further sql is emitted
-            xp_objekt_polymorphic = with_polymorphic(XP_Objekt, "*")
-            attribute_tuples = [(attrgetter(f'{o_type.__name__}.position')(xp_objekt_polymorphic),
-                                 attrgetter(f'{o_type.__name__}.flaechenschluss')(xp_objekt_polymorphic))
-                                for o_type in OBJECT_BASE_TYPES]
-            attribute_list = itertools.chain(*attribute_tuples)
-            opts = [load_only('id', 'raeumlicherGeltungsbereich'),
-                    selectinload('bereich').options(
-                        load_only('id', 'geltungsbereich'),
-                        selectinload(XP_Bereich.planinhalt.of_type(xp_objekt_polymorphic)).options(
-                            load_only('id', *attribute_list)
-                        )
-                    )]
-            # plan = session.query(self.plan_type).options(*opts).get(self.plan_xid)
-            plan = await session.get(self.plan_type, self.plan_xid, opts)
+        try:
 
-            # validation tasks are heavy cpu work, therefore run them in threadpool
-            # unfortunately ProcessPoolExecutor does not work inside QGIS -> can't use multiprocessing to side-step GIL
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, self.validateFlaechenschluss, plan)
-            await loop.run_in_executor(None, self.validateUniqueVertices, plan)
+            async with SessionAsync.begin() as session:
+                # highly optimized query to only load required columns and populate all required sub tables from the
+                # beginning so that no further sql is emitted
+                xp_objekt_polymorphic = with_polymorphic(XP_Objekt, "*")
+                attribute_tuples = [(attrgetter(f'{o_type.__name__}.position')(xp_objekt_polymorphic),
+                                     attrgetter(f'{o_type.__name__}.flaechenschluss')(xp_objekt_polymorphic))
+                                    for o_type in OBJECT_BASE_TYPES]
+                attribute_list = itertools.chain(*attribute_tuples)
+                opts = [load_only('id', 'raeumlicherGeltungsbereich'),
+                        selectinload('bereich').options(
+                            load_only('id', 'geltungsbereich'),
+                            selectinload(XP_Bereich.planinhalt.of_type(xp_objekt_polymorphic)).options(
+                                load_only('id', *attribute_list)
+                            )
+                        )]
+                # plan = session.query(self.plan_type).options(*opts).get(self.plan_xid)
+                plan = await session.get(self.plan_type, self.plan_xid, opts)
 
-        error_count = self.log.topLevelItemCount()
-        self.lFinished.setVisible(True)
-        self.lErrorCount.setText(f'{error_count} Fehler gefunden' if error_count else 'Keine Fehler gefunden')
-        if error_count:
-            self.reset_label.setVisible(True)
-        self.bValidate.setEnabled(True)
+                # validation tasks are heavy cpu work, therefore run them in threadpool
+                # unfortunately ProcessPoolExecutor does not work inside QGIS -> can't use multiprocessing to side-step GIL
+                loop = asyncio.get_event_loop()
+                await loop.run_in_executor(None, self.validateFlaechenschluss, plan)
+                await loop.run_in_executor(None, self.validateUniqueVertices, plan)
 
-        self.validation_spinner.stop()
+        except Exception as e:
+            logger.error(e)
+        finally:
+            error_count = self.log.topLevelItemCount()
+            self.lFinished.setVisible(True)
+            self.lErrorCount.setText(f'{error_count} Fehler gefunden' if error_count else 'Keine Fehler gefunden')
+            if error_count:
+                self.reset_label.setVisible(True)
+            self.bValidate.setEnabled(True)
+
+            self.validation_spinner.stop()
 
     def validateFlaechenschluss(self, plan):
         """
@@ -707,11 +713,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     xp_plan
                 WHERE plan_contents.plan_id = xp_plan.id AND xp_plan.id = '{plan.id}';
             """
-            res = session.execute(stmt)
-            for row in res:
-                QGeometryPolygonTreeWidgetItem(self.log, uid=str(row.id), cls_type=XP_Plan,
-                                               polygon=row.wkt,
-                                               intersection_type=GeometryIntersectionType.NotCovered)
+            try:
+                res = session.execute(stmt)
+                for row in res:
+                    validation_result = ValidationResult(
+                        xid=str(row.id),
+                        xtype=XP_Plan,
+                        geom_wkt=row.wkt,
+                        intersection_type=GeometryIntersectionType.NotCovered
+                    )
+                    self.validation_finished.emit(validation_result)
+            except Exception as e:
+                logger.error(e)
 
     def validateUniqueVertices(self, plan: XP_Plan):
         """ Startet die Untersuchung aller Stützpunkte von XPlanung-Geometrien auf Duplikate"""
@@ -730,8 +743,13 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             return
         nodes_removed = geom_copy.removeDuplicateNodes()
         if nodes_removed:
-            QGeometryDuplicateVerticesTreeWidgetItem(self.log, uid=str(obj.id), cls_type=obj.__class__,
-                                                     polygon=geom_copy.asWkt())
+            validation_result = ValidationResult(
+                xid=str(obj.id),
+                xtype=obj.__class__,
+                geom_wkt=geom_copy.asWkt(),
+                error_msg='Planinhalt besitzt doppelte Stützpunkte'
+            )
+            self.validation_finished.emit(validation_result)
 
     def _validate_within_bounds(self, plan: XP_Plan):
         """ validate if all geometries of plan contents are within the bounds of the plan """
@@ -744,23 +762,44 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             # check that bereich is within bounds of plan
             difference = b_engine.difference(plan_geom_const)
             if not difference.isEmpty():
-                QGeometryPolygonTreeWidgetItem(self.log, uid=str(b.id), cls_type=b.__class__,
-                                               polygon=difference.asWkt(),
-                                               intersection_type=GeometryIntersectionType.Plan)
+                validation_result = ValidationResult(
+                    xid=str(b.id),
+                    xtype=b.__class__,
+                    geom_wkt=difference.asWkt(),
+                    intersection_type=GeometryIntersectionType.Plan
+                )
+                self.validation_finished.emit(validation_result)
 
             flaechenschluss_objekte = [p for p in b.planinhalt if p.flaechenschluss]
             for fs_objekt in flaechenschluss_objekte:
                 geom = fs_objekt.geometry()
                 const_geom = geom.constGet()
+
+                # first check if geometries are valid at all
+                is_valid, error_description = const_geom.isValid()
+                if not is_valid:
+                    validation_result = ValidationResult(
+                        xid=str(fs_objekt.id),
+                        xtype=fs_objekt.__class__,
+                        geom_wkt=geom.asWkt(),
+                        error_msg=error_description
+                    )
+                    self.validation_finished.emit(validation_result)
+                    continue
+
                 fl_engine = QgsGeometry.createGeometryEngine(const_geom)
                 fl_engine.prepareGeometry()
 
                 # check that geometries are within correct bounds of bereich
                 difference = fl_engine.difference(b_geom.constGet())
                 if not difference.isEmpty():
-                    QGeometryPolygonTreeWidgetItem(self.log, uid=str(fs_objekt.id), cls_type=fs_objekt.__class__,
-                                                   polygon=difference.asWkt(),
-                                                   intersection_type=GeometryIntersectionType.Bereich)
+                    validation_result = ValidationResult(
+                        xid=str(fs_objekt.id),
+                        xtype=fs_objekt.__class__,
+                        geom_wkt=difference.asWkt(),
+                        intersection_type=GeometryIntersectionType.Bereich
+                    )
+                    self.validation_finished.emit(validation_result)
 
     def _validate_overlaps(self, plan: XP_Plan):
         """ validates if any of the plan contents overlap each other"""
@@ -782,14 +821,23 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     ST_OVERLAPS(a.position, b.position);
             """
 
-            res = session.execute(stmt)
+            res = session.execute(stmt).all()
             for row in res:
-                QGeometryPolygonTreeWidgetItem(self.log, uid=str(row.id), cls_type=table_name_to_class(row.type),
-                                               polygon=row.wkt,
-                                               intersection_type=GeometryIntersectionType.Planinhalt)
+                validation_result = ValidationResult(
+                    xid=str(row.id),
+                    xtype=table_name_to_class(row.type),
+                    geom_wkt=row.wkt,
+                    intersection_type=GeometryIntersectionType.Planinhalt
+                )
+                self.validation_finished.emit(validation_result)
+
+    @pyqtSlot(ValidationResult)
+    def on_validation_result(self, validation_result: ValidationResult):
+        tree_item = ValidationGeometryErrorTreeWidgetItem(validation_result)
+        self.log.addTopLevelItem(tree_item)
 
     @pyqtSlot(QTreeWidgetItem, int)
-    def onErrorDoubleClicked(self, item: QGeometryValidationTreeWidgetItem, column):
+    def onErrorDoubleClicked(self, item: ValidationBaseTreeWidgetItem, column):
         for i in range(self.log.topLevelItemCount()):
             self.log.topLevelItem(i).removeFromCanvas()
         item.displayErrorOnCanvas()
