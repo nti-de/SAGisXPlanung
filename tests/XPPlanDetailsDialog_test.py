@@ -1,30 +1,24 @@
-import asyncio
 import os
 import uuid
 
 import pytest
 
-from geoalchemy2 import WKBElement, WKTElement
+from geoalchemy2 import WKTElement
 from geoalchemy2.shape import from_shape
 from qgis.PyQt import QtCore, QtTest
-from qgis.core import (QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer, QgsSymbol, QgsWkbTypes, QgsProject,
-                       QgsLayerTreeGroup)
-from qgis.PyQt.QtGui import QColor
+from qgis.core import QgsProject
 from qgis.PyQt.QtCore import Qt
-from qgis.utils import iface
-from shapely import wkt
 
-from shapely.geometry import Polygon, Point
-from shapely.strtree import STRtree
+from shapely.geometry import Polygon
 
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
-from SAGisXPlanung.XPlan.enums import XP_AllgArtDerBaulNutzung
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.gui.XPPlanDetailsDialog import createRasterLayer
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
-from SAGisXPlanung.gui.widgets.QCustomTreeWidgetItems import GeometryIntersectionType, QGeometryPolygonTreeWidgetItem
+from SAGisXPlanung.gui.widgets.geometry_validation import ValidationResult, ValidationGeometryErrorTreeWidgetItem, \
+    GeometryIntersectionType
 
 
 @pytest.fixture()
@@ -138,9 +132,15 @@ class TestXPlanungDetailsDialog_GeometryValidation:
         assert len(spy) == 1  # 1 area with duplicate vertex
 
     def test_highlight_error(self, dialog: XPPlanDetailsDialog, plan):
-        item = QGeometryPolygonTreeWidgetItem(dialog.log, uid=str(plan.id), cls_type=plan.__class__,
-                                              polygon='MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))',
-                                              intersection_type=GeometryIntersectionType.Plan)
+        validation_result = ValidationResult(
+            xid=str(plan.id),
+            xtype=plan.__class__,
+            geom_wkt='MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))',
+            intersection_type=GeometryIntersectionType.Plan
+        )
+
+        item = ValidationGeometryErrorTreeWidgetItem(validation_result)
+        dialog.log.addTopLevelItem(item)
         item.setSelected(True)
 
         dialog.highlightGeometryError()

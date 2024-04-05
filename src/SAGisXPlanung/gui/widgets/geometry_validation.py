@@ -2,12 +2,10 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 
-from geoalchemy2 import Geometry
-from geoalchemy2.shape import to_shape
-
 from qgis.PyQt import QtWidgets, QtGui
-from qgis.gui import QgsGeometryRubberBand, QgsVertexMarker
-from qgis.core import QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon
+from qgis.gui import QgsGeometryRubberBand
+from qgis.core import (QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon,
+                    QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
 from qgis.utils import iface
 
 
@@ -27,6 +25,20 @@ class ValidationResult:
     error_msg: str = None
     geom_wkt: str = None
     intersection_type: GeometryIntersectionType = None
+    other_xid: str = None
+    other_xtype: type = None
+
+
+def _error_detail_message(error_msg: str, validation_result: ValidationResult) -> str:
+    detail_message = f'<qt>{error_msg}'
+    if validation_result.other_xid and validation_result.other_xtype:
+        detail_message += (f'<br><br>Betroffene Objekte: <ul>'
+                           f'<li>{validation_result.xtype.__name__}: {validation_result.xid}</li>'
+                           f'<li>{validation_result.other_xtype.__name__}: {validation_result.other_xid}</li>'
+                           f'</ul>')
+
+    detail_message += '</qt>'
+    return detail_message
 
 
 class ValidationBaseTreeWidgetItem(QtWidgets.QTreeWidgetItem):
@@ -39,6 +51,9 @@ class ValidationBaseTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         self.xplanung_type = validation_result.xtype
         self.setText(0, self.xplanung_type.__name__)
         self.setText(1, self.error_msg)
+        self.detail_error = _error_detail_message(self.error_msg, self.validation_result)
+        self.setToolTip(0, self.detail_error)
+        self.setToolTip(1, self.detail_error)
         self.isVisible = False
 
     def removeFromCanvas(self):
@@ -64,6 +79,10 @@ class ValidationGeometryErrorTreeWidgetItem(ValidationBaseTreeWidgetItem):
 
         super().__init__(validation_result)
 
+        # create geometry from wkt
+        # copy of QgsGeometryFactory::geomFromWkt because it's not available in python bindings
+        # QgsGeometry::fromWkt does not work here and crashes QGIS -> has something to do with the wkt cache
+        # but currently not able to figure the exact problem.
         wkt = self.validation_result.geom_wkt.strip()
         if re.match('LineString', wkt, re.I):
             self.geometry = QgsLineString()
@@ -73,6 +92,19 @@ class ValidationGeometryErrorTreeWidgetItem(ValidationBaseTreeWidgetItem):
             self.geometry = QgsPolygon()
         elif re.match('MultiPolygon', wkt, re.I):
             self.geometry = QgsMultiPolygon()
+        elif re.match('MultiSurface', wkt, re.I):
+            self.geometry = QgsMultiSurface()
+        elif re.match('MultiCurve', wkt, re.I):
+            self.geometry = QgsMultiCurve()
+        elif re.match('CurvePolygon', wkt, re.I):
+            self.geometry = QgsCurvePolygon()
+        elif re.match('CompoundCurve', wkt, re.I):
+            self.geometry = QgsCompoundCurve()
+        elif re.match('CircularString', wkt, re.I):
+            self.geometry = QgsCircularString()
+        else:
+            raise ValueError(f'No matching abstract geometry type for wkt: {wkt}')
+
         self.geometry.fromWkt(self.validation_result.geom_wkt)
         self.rubber_band = QgsGeometryRubberBand(iface.mapCanvas(), QgsWkbTypes.geometryType(self.geometry.wkbType()))
         self.rubber_band.setFillColor(QtGui.QColor(0, 0, 0, 0))

@@ -43,9 +43,9 @@ from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, Attri
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets import QParishEdit
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
-from SAGisXPlanung.gui.widgets.QCustomTreeWidgetItems import (ValidationBaseTreeWidgetItem,
-                                                              GeometryIntersectionType, ValidationResult,
-                                                              ValidationGeometryErrorTreeWidgetItem)
+from SAGisXPlanung.gui.widgets.geometry_validation import (ValidationBaseTreeWidgetItem,
+                                                           GeometryIntersectionType, ValidationResult,
+                                                           ValidationGeometryErrorTreeWidgetItem)
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.style.styles import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -102,7 +102,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.validation_finished.connect(self.on_validation_result)
         self.log.itemDoubleClicked.connect(self.onErrorDoubleClicked)
         self.log.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.log.customContextMenuRequested.connect(self.showGeometryValidationItemContextMenu)
+        self.log.customContextMenuRequested.connect(self.show_geometry_validation_contextmenu)
         self.log.setMouseTracking(True)
         self.log.setItemDelegate(TagStyledDelegate())
         self.log_proxy_style = HighlightRowProxyStyle('Fusion')
@@ -255,7 +255,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             obj = session.query(xplan_item.xtype).get(xplan_item.xid)
             self.iterateRelation(obj, node)
 
-    def showGeometryValidationItemContextMenu(self, point):
+    def show_geometry_validation_contextmenu(self, point):
         item = self.log.itemAt(point)
         if not item:
             return
@@ -761,12 +761,17 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             b_engine.prepareGeometry()
             # check that bereich is within bounds of plan
             difference = b_engine.difference(plan_geom_const)
+            if difference is None:
+                continue
+
             if not difference.isEmpty():
                 validation_result = ValidationResult(
                     xid=str(b.id),
                     xtype=b.__class__,
                     geom_wkt=difference.asWkt(),
-                    intersection_type=GeometryIntersectionType.Plan
+                    intersection_type=GeometryIntersectionType.Plan,
+                    other_xid=str(plan.id),
+                    other_xtype=plan.__class__
                 )
                 self.validation_finished.emit(validation_result)
 
@@ -792,12 +797,17 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
                 # check that geometries are within correct bounds of bereich
                 difference = fl_engine.difference(b_geom.constGet())
+                if difference is None:
+                    continue
+
                 if not difference.isEmpty():
                     validation_result = ValidationResult(
                         xid=str(fs_objekt.id),
                         xtype=fs_objekt.__class__,
                         geom_wkt=difference.asWkt(),
-                        intersection_type=GeometryIntersectionType.Bereich
+                        intersection_type=GeometryIntersectionType.Bereich,
+                        other_xid=str(b.id),
+                        other_xtype=b.__class__
                     )
                     self.validation_finished.emit(validation_result)
 
@@ -807,7 +817,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         with Session.begin() as session:
             stmt = f"""
                 SELECT ST_AsText(ST_CollectionExtract(ST_INTERSECTION(a.position, b.position))) AS wkt, 
-                    xp_a.id, xp_a.type, xp_plan.id
+                    xp_a.id AS a_xid, xp_a.type AS a_type, xp_b.id AS b_xid, xp_b.type AS b_type, xp_plan.id
                 FROM {p}_objekt a, {p}_objekt b, xp_objekt xp_a, xp_objekt xp_b, xp_plan, {p}_bereich
                 WHERE
                     a.ID < b.ID AND
@@ -824,10 +834,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             res = session.execute(stmt).all()
             for row in res:
                 validation_result = ValidationResult(
-                    xid=str(row.id),
-                    xtype=table_name_to_class(row.type),
+                    xid=str(row.a_xid),
+                    xtype=table_name_to_class(row.a_type),
                     geom_wkt=row.wkt,
-                    intersection_type=GeometryIntersectionType.Planinhalt
+                    intersection_type=GeometryIntersectionType.Planinhalt,
+                    other_xid=str(row.b_xid),
+                    other_xtype=table_name_to_class(row.b_type),
                 )
                 self.validation_finished.emit(validation_result)
 
