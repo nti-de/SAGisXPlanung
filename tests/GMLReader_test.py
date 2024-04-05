@@ -5,6 +5,7 @@ from lxml import etree
 from geoalchemy2 import WKTElement, WKBElement
 
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
+from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
 from SAGisXPlanung.GML.GMLReader import GMLReader
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PPO, XP_PTO, XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_VerbundenerPlan
@@ -33,8 +34,8 @@ class TestGMLReader_read_data_object:
     @pytest.mark.parametrize('gml_reader', ['bp_plan.gml'], indirect=True)
     def test_read_data_object(self, gml_reader):
         string = '<xplan:XP_Gemeinde xmlns:xplan="http://www.xplanung.de/xplangml/5/3">' \
-                    '<xplan:ags>4326436</xplan:ags>' \
-                    '<xplan:gemeindeName>Berlin</xplan:gemeindeName>' \
+                 '<xplan:ags>4326436</xplan:ags>' \
+                 '<xplan:gemeindeName>Berlin</xplan:gemeindeName>' \
                  '</xplan:XP_Gemeinde>'
         gml = etree.fromstring(string)
 
@@ -47,13 +48,13 @@ class TestGMLReader_read_data_object:
     @pytest.mark.parametrize('gml_reader', ['bp_plan.gml'], indirect=True)
     def test_read_data_object_enum(self, gml_reader):
         string = '<xplan:XP_SpezExterneReferenz xmlns:xplan="http://www.xplanung.de/xplangml/5/3">' \
-                  '<xplan:art>Dokument</xplan:art>' \
-                  '<xplan:referenzName>ref1</xplan:referenzName>' \
-                  r'<xplan:referenzURL>D:\Downloads\document.pdf</xplan:referenzURL>' \
-                  '<xplan:referenzMimeType>application/pdf</xplan:referenzMimeType>' \
-                  '<xplan:datum>2021-08-19</xplan:datum>' \
-                  '<xplan:typ>1000</xplan:typ>' \
-                '</xplan:XP_SpezExterneReferenz>'
+                 '<xplan:art>Dokument</xplan:art>' \
+                 '<xplan:referenzName>ref1</xplan:referenzName>' \
+                 r'<xplan:referenzURL>D:\Downloads\document.pdf</xplan:referenzURL>' \
+                 '<xplan:referenzMimeType>application/pdf</xplan:referenzMimeType>' \
+                 '<xplan:datum>2021-08-19</xplan:datum>' \
+                 '<xplan:typ>1000</xplan:typ>' \
+                 '</xplan:XP_SpezExterneReferenz>'
 
         gml = etree.fromstring(string)
 
@@ -87,6 +88,7 @@ class TestGMLReader_readPlan:
 
         baugebiet = plan.bereich[1].planinhalt[2]
         assert isinstance(baugebiet, BP_BaugebietsTeilFlaeche)
+        assert baugebiet.flaechenschluss is True
         assert len(baugebiet.wirdDargestelltDurch) == 3
         assert isinstance(baugebiet.wirdDargestelltDurch[0], XP_Nutzungsschablone)
         assert not baugebiet.wirdDargestelltDurch[0].hidden
@@ -94,6 +96,10 @@ class TestGMLReader_readPlan:
         assert baugebiet.wirdDargestelltDurch[1].drehwinkel == '4.20'
         assert isinstance(baugebiet.wirdDargestelltDurch[2], XP_PTO)
         assert baugebiet.wirdDargestelltDurch[2].schriftinhalt == '(B)'
+
+        wegerecht = next(p for p in plan.bereich[1].planinhalt if isinstance(p, BP_Wegerecht))
+        assert wegerecht.flaechenschluss is False
+
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan1.gml'], indirect=True)
     def test_readPlan_top_level_ns_issue24(self, gml_reader):
@@ -116,3 +122,17 @@ class TestGMLReader_readGeometries:
 
         assert isinstance(wkt_element, WKTElement)
         assert wkt_element.data == 'POINT (571665.1779 5940876.1455)'
+        assert wkt_element.srid == 25832
+
+    @pytest.mark.parametrize('gml_reader', ['bp_plan.gml'], indirect=True)
+    def test_readGeometry_srs_not_toplevel(self, gml_reader: GMLReader):
+        string = '<gml:Point xmlns:gml="http://www.opengis.net/gml/3.2" gml:id="GML_9e8e1182-5f37-4d1a-84be-3f9076d6a29f">' \
+                 '<gml:pos srsName="EPSG:25832" srsDimension="2">571665.1779 5940876.1455</gml:pos>' \
+                 '</gml:Point>'
+        gml = etree.fromstring(string)
+
+        wkt_element = gml_reader.readGeometry(gml)
+
+        assert isinstance(wkt_element, WKTElement)
+        assert wkt_element.data == 'POINT (571665.1779 5940876.1455)'
+        assert wkt_element.srid == 25832

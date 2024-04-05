@@ -128,8 +128,9 @@ class GMLReader:
                     linked_node_id = str(xlink_refs[0]).lstrip('#')
                     linked_node = self.root.xpath(f"(//*[@gml:id='{linked_node_id}'])[1]", namespaces=self.nsmap)
                     if not linked_node:
-                        self.exeptions.append(Exception(f'xlink verweist auf ein Objekt, das nicht in der XPlanGML-Datei'
-                                                        f' vorliegt. (ID: {linked_node_id}, Zeile: {node.sourceline})'))
+                        self.exeptions.append(
+                            Exception(f'xlink verweist auf ein Objekt, das nicht in der XPlanGML-Datei'
+                                      f' vorliegt. (ID: {linked_node_id}, Zeile: {node.sourceline})'))
                         continue
 
                     node.append(linked_node[0])
@@ -196,7 +197,7 @@ class GMLReader:
             except ValueError:
                 setattr(obj, node_name, col_type.enum_class(value))
         elif col_type.python_type == bool:
-            setattr(obj, node_name, bool(value))
+            setattr(obj, node_name, str(value).lower() == 'true')
         elif isinstance(col_type, ARRAY) and hasattr(col_type.item_type, 'enums'):
             try:
                 value = col_type.item_type.enum_class(int(value))
