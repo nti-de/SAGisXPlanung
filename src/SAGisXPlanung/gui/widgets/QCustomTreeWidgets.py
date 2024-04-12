@@ -7,6 +7,7 @@ from qgis.core import QgsWkbTypes, QgsSymbolLayerUtils
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
+from SAGisXPlanung.config import export_version
 from SAGisXPlanung.utils import CLASSES
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,8 @@ class QObjectTypeSelectionTreeWidget(QtWidgets.QTreeWidget):
                 continue
             if issubclass(derived, (LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry)):
                 if not issubclass(derived, MixedGeometry) and derived.__geometry_type__ != self.geometry_type:
+                    continue
+                if hasattr(derived, 'xp_versions') and export_version() not in derived.xp_versions:
                     continue
                 module_name = derived.__module__.split('.')[-2]
                 items = self.findItems(module_name, QtCore.Qt.MatchFixedString)
