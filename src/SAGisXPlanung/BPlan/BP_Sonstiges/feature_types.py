@@ -10,6 +10,7 @@ from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
 from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
+from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
     UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum
@@ -156,6 +157,43 @@ class BP_NutzungsartenGrenze(LineGeometry, BP_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(64, 64))
+
+
+class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
+    """ Flächen für Kennzeichnungen gemäß §9 Abs. 5 BauGB. """
+
+    __tablename__ = 'bp_kennzeichnung'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_kennzeichnung',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    zweckbestimmung = Column(XPEnum(XP_ZweckbestimmungKennzeichnung, include_default=True))
+    istVerdachtsflaeche = Column(Boolean)
+    nummer = Column(String)
+
+    def layer_fields(self):
+        return {
+            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'skalierung': self.skalierung if self.skalierung else '',
+            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
+        }
+
+    @classmethod
+    def attributes(cls):
+        return ['zweckbestimmung', 'skalierung', 'drehwinkel']
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
 
 
 class BP_GenerischesObjekt(MixedGeometry, BP_Objekt):

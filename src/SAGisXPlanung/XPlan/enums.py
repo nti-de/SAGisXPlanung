@@ -671,3 +671,17 @@ class XP_TechnVorkehrungenImmissionsschutz(XPlanungEnumMixin, Enum):
     Laermschutzwand = 10001
     Laermschutzwall = 10002
     SonstigeVorkehrung = 9999
+
+
+class XP_ZweckbestimmungKennzeichnung(XPlanungEnumMixin, Enum):
+    """ Zweckbestimmung der Kennzeichnungs-Fläche """
+
+    Naturgewalten = 1000
+    Abbauflaeche = 2000
+    AeussereEinwirkungen = 3000
+    SchadstoffBelastBoden = 4000
+    LaermBelastung = 5000
+    Bergbau = 6000
+    Bodenordnung = 7000
+    Vorhabensgebiet = 8000
+    AndereGesetzlVorschriften = 9999

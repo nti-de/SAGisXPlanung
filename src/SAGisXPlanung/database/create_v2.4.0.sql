@@ -1429,7 +1429,8 @@ CREATE OPERATOR = (
             procedure = new_old_equals
         );
 
-ALTER TABLE public.xp_spe_daten ALTER COLUMN "klassifizMassnahme" TYPE public.xp_spemassnahmentypen 
+ALTER TABLE public.xp_spe_daten 
+                ALTER COLUMN "klassifizMassnahme" TYPE public.xp_spemassnahmentypen 
                 USING CASE 
                 WHEN "klassifizMassnahme"::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::public.xp_spemassnahmentypen
 
@@ -2799,6 +2800,21 @@ ALTER TABLE so_strassenverkehr ALTER COLUMN "hatDarstellungMitBesondZweckbest" S
 ALTER TABLE xp_objekt ADD FOREIGN KEY("gesetzlicheGrundlage_id") REFERENCES xp_gesetzliche_grundlage (id);
 
 UPDATE alembic_version SET version_num='346f4a91caf3' WHERE alembic_version.version_num = 'ce95b86bc010';
+
+-- Running upgrade 346f4a91caf3 -> 1983d6b6e2c1
+
+CREATE TYPE xp_zweckbestimmungkennzeichnung AS ENUM ('Naturgewalten', 'Abbauflaeche', 'AeussereEinwirkungen', 'SchadstoffBelastBoden', 'LaermBelastung', 'Bergbau', 'Bodenordnung', 'Vorhabensgebiet', 'AndereGesetzlVorschriften');
+
+CREATE TABLE bp_kennzeichnung (
+    id UUID NOT NULL, 
+    zweckbestimmung xp_zweckbestimmungkennzeichnung, 
+    "istVerdachtsflaeche" BOOLEAN, 
+    nummer VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+);
+
+UPDATE alembic_version SET version_num='1983d6b6e2c1' WHERE alembic_version.version_num = '346f4a91caf3';
 
 COMMIT;
 
