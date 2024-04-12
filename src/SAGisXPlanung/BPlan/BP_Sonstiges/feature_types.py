@@ -169,13 +169,13 @@ class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    zweckbestimmung = Column(XPEnum(XP_ZweckbestimmungKennzeichnung, include_default=True))
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungKennzeichnung)))
     istVerdachtsflaeche = Column(Boolean)
     nummer = Column(String)
 
     def layer_fields(self):
         return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'zweckbestimmung': ','.join(str(e.value) for e in self.zweckbestimmung),
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }
