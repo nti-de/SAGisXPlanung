@@ -328,11 +328,11 @@ class XP_ZweckbestimmungVerEntsorgung(XPlanungEnumMixin, Enum):
     Recyclinghof = 22003
     Ablagerung = 2400
     Erdaushubdeponie = 24000
-    Bauschuttdeponie = 24000
-    Hausmuelldeponie = 24000
-    Sondermuelldeponie = 24000
-    StillgelegteDeponie = 24000
-    RekultivierteDeponie = 24000
+    Bauschuttdeponie = 24001
+    Hausmuelldeponie = 24002
+    Sondermuelldeponie = 24003
+    StillgelegteDeponie = 24004
+    RekultivierteDeponie = 24005
     Telekommunikation = 2600
     Fernmeldeanlage = 26000
     Mobilfunkanlage = 26001

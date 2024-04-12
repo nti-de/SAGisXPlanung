@@ -8,7 +8,7 @@ Create Date: 2024-04-12 08:43:03.779935
 import os
 import sys
 
-from alembic import op
+from alembic import op, context
 import sqlalchemy as sa
 
 from alembic_postgresql_enum import ColumnType
@@ -44,13 +44,73 @@ def upgrade():
                     sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
+
+    xp_zweck_versorgung_enum = postgresql.ENUM('Elektrizitaet', 'Hochspannungsleitung',
+                                               'TrafostationUmspannwerk',
+                                               'Solarkraftwerk', 'Windkraftwerk', 'Geothermiekraftwerk',
+                                               'Elektrizitaetswerk',
+                                               'Wasserkraftwerk', 'BiomasseKraftwerk', 'Kabelleitung',
+                                               'Niederspannungsleitung', 'Leitungsmast', 'Kernkraftwerk',
+                                               'Kohlekraftwerk',
+                                               'Gaskraftwerk', 'Gas', 'Ferngasleitung', 'Gaswerk', 'Gasbehaelter',
+                                               'Gasdruckregler', 'Gasstation', 'Gasleitung', 'Erdoel', 'Erdoelleitung',
+                                               'Bohrstelle', 'Erdoelpumpstation', 'Oeltank', 'Waermeversorgung',
+                                               'Blockheizkraftwerk', 'Fernwaermeleitung', 'Fernheizwerk', 'Wasser',
+                                               'Wasserwerk', 'Wasserleitung', 'Wasserspeicher', 'Brunnen', 'Pumpwerk',
+                                               'Quelle', 'Abwasser', 'Abwasserleitung', 'Abwasserrueckhaltebecken',
+                                               'Abwasserpumpwerk', 'Klaeranlage', 'AnlageKlaerschlamm',
+                                               'SonstigeAbwasserBehandlungsanlage', 'SalzOderSoleleitungen',
+                                               'Regenwasser',
+                                               'RegenwasserRueckhaltebecken', 'Niederschlagswasserleitung',
+                                               'Abfallentsorgung',
+                                               'Muellumladestation', 'Muellbeseitigungsanlage', 'Muellsortieranlage',
+                                               'Recyclinghof', 'Ablagerung', 'Erdaushubdeponie', 'Bauschuttdeponie',
+                                               'Hausmuelldeponie', 'Sondermuelldeponie', 'StillgelegteDeponie',
+                                               'RekultivierteDeponie', 'Telekommunikation', 'Fernmeldeanlage',
+                                               'Mobilfunkanlage', 'Fernmeldekabel', 'ErneuerbareEnergien',
+                                               'KraftWaermeKopplung', 'Sonstiges', 'Produktenleitung',
+                                               name='xp_zweckbestimmungverentsorgung', create_type=False)
+
+    if not context.is_offline_mode():
+        xp_zweck_versorgung_enum.create(op.get_bind(), checkfirst=True)
+
+    op.create_table('fp_versorgung',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('textlicheErgaenzung', sa.String(), nullable=True),
+                    sa.Column('zugunstenVon', sa.String(), nullable=True),
+                    sa.Column('zweckbestimmung', sa.ARRAY(xp_zweck_versorgung_enum), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
+    op.create_table('fp_zweckbestimmung_versorgung',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('allgemein', xp_zweck_versorgung_enum, nullable=False),
+                    sa.Column('detail_id', postgresql.UUID(), nullable=True),
+                    sa.Column('textlicheErgaenzung', sa.String(), nullable=True),
+                    sa.Column('aufschrift', sa.String(), nullable=True),
+                    sa.Column('versorgung_id', postgresql.UUID(as_uuid=True), nullable=True),
+                    sa.ForeignKeyConstraint(['versorgung_id'], ['fp_versorgung.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+    op.create_table('assoc_detail_zweckversorgung',
+                    sa.Column('codelist_user_id', postgresql.UUID(as_uuid=True), nullable=True),
+                    sa.Column('codelist_id', postgresql.UUID(as_uuid=True), nullable=True),
+                    sa.ForeignKeyConstraint(['codelist_id'], ['codelist_values.id'], ),
+                    sa.ForeignKeyConstraint(['codelist_user_id'], ['fp_zweckbestimmung_versorgung.id'],
+                                            ondelete='CASCADE')
+                    )
     # ### end Alembic commands ###
 
 
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
-    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_kennzeichnung');")
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('bp_kennzeichnung', 'fp_versorgung');")
 
     op.drop_table('bp_kennzeichnung')
     op.execute("DROP TYPE xp_zweckbestimmungkennzeichnung;")
+
+    op.drop_table('assoc_detail_zweckversorgung')
+    op.drop_table('fp_zweckbestimmung_versorgung')
+    op.drop_table('fp_versorgung')
     # ### end Alembic commands ###
