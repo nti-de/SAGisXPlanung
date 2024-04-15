@@ -1,5 +1,23 @@
 ## Changelog
 
+### [2.4.0] - 15.04.2024
+
+#### Neue Funktionen
+
+- Neue Objektklassen: 
+  - `BP_KennzeichnungsFlaeche`, `FP_VerEntsorgung`
+  
+#### Veränderungen
+
+- Überarbeitung der Geometreievalidierung: Verbesserte Fehlermeldungen, Tooltips, Thread-Safety
+- Ausblenden von Objektklassen, die nicht zur gewählten XPlanGML-Version passen
+
+#### Fehlerbehebungen
+
+- Fehler in Datenbank-Revision bzgl. UUID in sqlalchemy (6c797b1b)
+- Import von Boolean-Werten aus XPlanGML korrigiert (8208375c)
+- Fehler beim Wechseln des Plantyps im 'Planinhalte konfigurieren'-Dialog behoben (b365e72f)
+
 ### [2.3.0] - 19.03.2024
 
 #### Neue Funktionen
