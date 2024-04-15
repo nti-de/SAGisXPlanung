@@ -45,12 +45,9 @@ class QXPlanInputElement(ABC):
     def setInvalid(self, set_invalid):
         if set_invalid:
             self.insert_background_widget()
-            self.background_widget.setStyleSheet(
-                'QWidget#back {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')
             self.invalid = True
         else:
             self.remove_background_widget()
-            self.background_widget.setStyleSheet('')
             self.invalid = False
 
     def error_message_label(self) -> QLabel:
@@ -77,6 +74,8 @@ class QXPlanInputElement(ABC):
         self.background_widget.setObjectName("back")
         self.background_widget.setAttribute(Qt.WA_StyledBackground, True)
         self.background_widget.layout().setContentsMargins(5, 5, 5, 5)
+        self.background_widget.setStyleSheet(
+            'QWidget#back {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')
 
     def remove_background_widget(self):
         if not self.invalid:

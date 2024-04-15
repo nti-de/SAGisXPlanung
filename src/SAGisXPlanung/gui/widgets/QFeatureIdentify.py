@@ -1,4 +1,6 @@
 import logging
+import math
+import sys
 from typing import Union
 
 from geoalchemy2 import WKTElement
@@ -15,6 +17,8 @@ from SAGisXPlanung.Tools.IdentifyFeatureTool import IdentifyFeatureTool
 
 from SAGisXPlanung.gui.widgets import ElideLabel
 from SAGisXPlanung.gui.widgets.QXPlanInputElement import XPlanungInputMeta, QXPlanInputElement
+
+FETCH_LIMIT_WEB = 1000
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +62,12 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         self.label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         self.horizontalLayout.addWidget(self.label)
         self.cbFeature = QgsFeaturePickerWidget(self)
+        self.set_fetch_limit()
         self.cbFeature.setFetchGeometry(False)  # don't require to fetch geometry
         self.cbFeature.setMaximumWidth(self.cbFeature.sizeHint().width() + 40)
         self.cbFeature.setLayer(self.layer)
         self.cbFeature.featureChanged.connect(self.onFeatureChanged)
         self.cbFeature.setAllowNull(True)
-        self.set_fetch_limit()
         self.horizontalLayout.addWidget(self.cbFeature)
 
         self.bIdentify = QtWidgets.QPushButton(self)
@@ -119,7 +123,7 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
             wkt = WKTElement(self.geom().asWkt(), srid=self.srid)
             return wkt
         except AttributeError as e:
-            logger.warning(e)
+            logger.error(e)
 
     def setDefault(self, default):
         self.geometry = default
@@ -158,12 +162,14 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         self.layer.removeSelection() if self.layer is not None else 0
         self.layer = self.mMapLayerComboBox.currentLayer()
         self.mapTool.setLayer(self.layer)
-        self.cbFeature.setLayer(self.layer)
         self.set_fetch_limit()
+        self.cbFeature.setLayer(self.layer)
         self.setInvalid(False)
 
     def onFeatureChanged(self, feat: QgsFeature):
         self.layer.removeSelection()
+        if math.isclose(-sys.maxsize, feat.id()):
+            return
         self.layer.select([feat.id()])
         self.featureGeometry = geometry_drop_z(self.layer.getGeometry(feat.id()))
         self.setInvalid(False)
@@ -174,24 +180,22 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         if self.geometry and not self.edit_enabled.isChecked():
             return True
         feat_id = self.cbFeature.feature().id()
-        if feat_id >= 0:
+        if feat_id >= 0 and self.featureGeometry is not None:
             return True
+        if not self.featureGeometry:
+            self.error_message = f'Gewähltes Objekt konnte nicht geladen werden. '
+            source_uri = QgsDataSourceUri(self.layer.source())
+            if source_uri.hasParam('url'):
+                self.error_message += f'Es können nur {FETCH_LIMIT_WEB} von {self.layer.featureCount()} Geometrien abgerufen werden. '
         self.setInvalid(True)
         return False
-
-    def setInvalid(self, is_invalid):
-        if not is_invalid:
-            self.setStyleSheet('')
-            self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-            return
-        self.setAttribute(QtCore.Qt.WA_StyledBackground, True)
-        self.verticalLayout.setContentsMargins(5, 5, 5, 5)
-        self.setStyleSheet('QFeatureIdentify {background-color: #ffb0b0; border: 1px solid red; border-radius:5px;}')
 
     def set_fetch_limit(self):
         if not self.layer:
             return
 
         source_uri = QgsDataSourceUri(self.layer.source())
-        if not source_uri.hasParam('url'):
-            self.cbFeature.setFetchLimit(250)  # increase fetch limit if not it's a local layer, but fetched via web
+        if source_uri.hasParam('url'):
+            self.cbFeature.setFetchLimit(FETCH_LIMIT_WEB)  # low fetch limit for layers via web
+        else:
+            self.cbFeature.setFetchLimit(0)  # no fetch limit for local files, they are loading fast
