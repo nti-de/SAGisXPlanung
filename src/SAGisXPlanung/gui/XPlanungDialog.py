@@ -17,6 +17,8 @@ from SAGisXPlanung import compile_ui_file
 from SAGisXPlanung.ConverterTasks import export_plan, import_plan
 from SAGisXPlanung.Tools.ContextMenuTool import ContextMenuTool
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.gui.nexus_dialog import NexusDialog
+from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_color
 from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import XID_ROLE
 from SAGisXPlanung.utils import CLASSES
@@ -73,6 +75,13 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         self.fwImportPath.fileChanged.connect(lambda file_path: self.bImport.setEnabled(bool(file_path)))
 
+        self.button_show_all.clicked.connect(self.on_show_all_clicked)
+
+        with_color_palette(self, [
+            ApplicationColor.Secondary
+        ], class_='QPushButton')
+        apply_color(self.button_show_all, ApplicationColor.Secondary)
+
     def __del__(self):
         try:
             self.iface.mapCanvas().mapToolSet.disconnect(self.onMapToolChanged)
@@ -116,6 +125,10 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     def onMapToolChanged(self, new_tool, old_tool):
         if old_tool == self.identifyTool and self.bIdentify.isChecked():
             self.bIdentify.setChecked(False)
+
+    def on_show_all_clicked(self, checked: bool):
+        nexus = NexusDialog(self)
+        nexus.show()
 
     def showCreateForm(self):
         """

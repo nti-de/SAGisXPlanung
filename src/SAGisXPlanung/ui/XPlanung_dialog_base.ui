@@ -294,26 +294,41 @@ color: #374151;</string>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <layout class="QHBoxLayout" name="hl_export1">
-         <property name="spacing">
-          <number>5</number>
-         </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Planwerke</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="button_show_all">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="cursor">
+            <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="toolTip">
+            <string>Übersicht aller gespeicherten Pläne anzeigen</string>
+           </property>
            <property name="styleSheet">
-            <string notr="true">margin-right:10px;</string>
+            <string notr="true">QPushButton { border: 0px; border-radius: 3px; padding: 5px; font-weight: 400;}
+QPushButton:hover { background-color: #d1d5db; color: #172554;}</string>
            </property>
            <property name="text">
-            <string>Planwerk</string>
+            <string>ALLE ANZEIGEN</string>
            </property>
           </widget>
          </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="QPlanComboBox" name="cbPlaene">
            <property name="sizePolicy">
@@ -347,8 +362,15 @@ color: #374151;</string>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <bold>false</bold>
+           <kerning>true</kerning>
+          </font>
+         </property>
          <property name="title">
-          <string>Planwerk exportieren</string>
+          <string>Auswahl exportieren</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_7">
           <item>

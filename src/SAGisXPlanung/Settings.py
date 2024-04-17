@@ -36,7 +36,7 @@ class Settings(QDialog, FORM_CLASS):
 
         info_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/info-outline.svg'),
                                    color=ApplicationColor.Grey600))
-        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
+        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Tertiary)
         self.info_clean_geometry.setIcon(info_icon)
         self.info_preserve_topology.setIcon(info_icon)
         self.info_repeated_points.setIcon(info_icon)
