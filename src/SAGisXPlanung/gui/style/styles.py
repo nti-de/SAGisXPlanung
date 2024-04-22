@@ -82,3 +82,10 @@ class ClearIconProxyStyle(QProxyStyle):
         if standard_icon == QStyle.SP_LineEditClearButton:
             return QIcon(':/images/themes/default/mIconClearText.svg')
         return super().standardIcon(standard_icon, option, widget)
+
+
+class RemoveFrameFocusProxyStyle(QProxyStyle):
+    def drawPrimitive(self, element, option: QStyleOption, painter: QPainter, widget=None):
+        if element == QStyle.PE_FrameFocusRect:
+            return
+        super(RemoveFrameFocusProxyStyle, self).drawPrimitive(element, option, painter)

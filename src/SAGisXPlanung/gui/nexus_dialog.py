@@ -24,6 +24,7 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import QgsConfig
 from SAGisXPlanung.gui.style import ApplicationColor, SVGButtonEventFilter, load_svg, HighlightRowProxyStyle, \
     HighlightRowDelegate
+from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle
 from SAGisXPlanung.utils import PLAN_BASE_TYPES
 
 FORM_CLASS_NEXUS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/nexus_dialog.ui'))
@@ -158,8 +159,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.nexus_view.horizontalHeader().setStretchLastSection(True)
         self.nexus_view.horizontalHeader().setMaximumSectionSize(360)
         self.nexus_view.horizontalHeader().setDefaultSectionSize(180)
-
         self.nexus_view.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+
+        self.table_proxy_style = RemoveFrameFocusProxyStyle('Fusion')
+        self.table_proxy_style.setParent(self)
+        self.nexus_view.setStyle(self.table_proxy_style)
 
         self.nexus_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
