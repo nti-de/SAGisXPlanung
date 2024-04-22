@@ -35,6 +35,7 @@ class QgsConfig:
     CONNECTION = 'plugins/xplanung/connection'
     CORRECT_GEOMETRIES = 'plugins/xplanung/correct_geometries'
     CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
+    NEXUS_SETTINGS = 'plugins/xplanung/nexus/settings'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -121,4 +122,12 @@ class QgsConfig:
         qs.setValue(QgsConfig.CORRECT_GEOMETRIES, int(config.correct_geometries))
         qs.setValue(QgsConfig.CORRECT_GEOMETRIES_METHOD, config.correct_method.value)
 
+    @staticmethod
+    def nexus_settings() -> str:
+        qs = QSettings()
+        return qs.value(QgsConfig.NEXUS_SETTINGS, None)
 
+    @staticmethod
+    def set_nexus_settings(config_json: str):
+        qs = QSettings()
+        qs.setValue(QgsConfig.NEXUS_SETTINGS, config_json)
