@@ -1,7 +1,7 @@
 import datetime
 import logging
 import os
-from typing import List
+from typing import List, Tuple
 
 from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot
 from PyQt5.QtGui import QColor
@@ -12,7 +12,7 @@ from qgis.PyQt.QtWidgets import QDialog, QLineEdit
 from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
-from sqlalchemy import select, inspect
+from sqlalchemy import select, inspect, func
 from sqlalchemy.orm import selectin_polymorphic, defer, load_only
 
 from SAGisXPlanung import Session, BASE_DIR
@@ -91,6 +91,9 @@ QFrame[frameShape="5"] {{
 class NexusDialog(QDialog, FORM_CLASS):
     """ Dialog that provides an overview on all plans within the database and additional actions """
 
+    MAX_PAGE_ENTRIES = 10
+    PAGE_COUNT_LABEL_PATTERN = "{_start_index}-{_end_index} von {_total}"
+
     def __init__(self, parent=iface.mainWindow()):
         super(NexusDialog, self).__init__(parent)
         self.setupUi(self)
@@ -109,16 +112,34 @@ class NexusDialog(QDialog, FORM_CLASS):
                                             color=ApplicationColor.Tertiary))
         self.button_settings.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'),
                                               color=ApplicationColor.Tertiary))
+        self.button_before.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/before.svg'),
+                                            color=ApplicationColor.Tertiary))
+        self.button_next.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'),
+                                          color=ApplicationColor.Tertiary))
 
         self.button_reload.setCursor(Qt.PointingHandCursor)
         self.button_xplan_export.setCursor(Qt.PointingHandCursor)
         self.button_edit.setCursor(Qt.PointingHandCursor)
         self.button_delete.setCursor(Qt.PointingHandCursor)
         self.button_settings.setCursor(Qt.PointingHandCursor)
+        self.button_before.setCursor(Qt.PointingHandCursor)
+        self.button_next.setCursor(Qt.PointingHandCursor)
+
+        self.button_before.setDisabled(True)
+        self.button_next.setDisabled(True)
+        self.button_before.clicked.connect(self.on_pagination_backward)
+        self.button_next.clicked.connect(self.on_pagination_forward)
+
         self.enable_plan_actions(0)
 
         self.select_all_check.nextCheckState = self.next_check_state
         self.select_all_check.stateChanged.connect(self.on_select_all_check_state_changed)
+
+        self.combo_plan_type.addItems(["Alle Pläne", "BP_Plan", "FP_Plan", "LP_Plan", "RP_Plan"])
+
+        # ------------- LOGIC -----------------
+        self.current_page_index = 0
+        self.total_pages = None
 
         # ------------- MODEL -----------------
         self.model = None
@@ -134,6 +155,7 @@ class NexusDialog(QDialog, FORM_CLASS):
 
         self.nexus_view.selectionModel().selectionChanged.connect(self.on_selection_changed)
 
+        # ------------- STYLESHEET -----------------
         self.setStyleSheet(style.format(
             _grid_color=ApplicationColor.Grey400,
             _color=ApplicationColor.Grey600,
@@ -145,18 +167,31 @@ class NexusDialog(QDialog, FORM_CLASS):
         ))
 
     def setup_model(self):
+        count, data = self.fetch_database(self.current_page_index)
+
+        self.label_result_count.setText(self.PAGE_COUNT_LABEL_PATTERN.format(
+            _start_index=self.current_page_index + 1,
+            _end_index=self.MAX_PAGE_ENTRIES,
+            _total=count
+        ))
+
+        self.model = NexusTableModel(data)
+
+        self.enable_pagination_buttons()
+
+    def fetch_database(self, page: int = 0) -> (int, List[dict]):
         with Session.begin() as session:
+            count = session.execute(func.count(XP_Plan.id)).scalar_one()
+
             stmt = select(XP_Plan).options(
                 selectin_polymorphic(XP_Plan, PLAN_BASE_TYPES),
                 load_only(*[col.name for col in XP_Plan.__table__.c if not col.name.endswith('_id')]),
                 defer(XP_Plan.raeumlicherGeltungsbereich)
-            )
+            ).order_by(XP_Plan.id).offset(page*self.MAX_PAGE_ENTRIES).fetch(self.MAX_PAGE_ENTRIES)
             objects = session.scalars(stmt).all()
 
-            for o in objects:
-                logger.debug(object_as_dict(o).keys())
-
-            self.model = NexusTableModel([object_as_dict(o) for o in objects])
+            self.total_pages = (count // self.MAX_PAGE_ENTRIES) + 1
+            return count, [object_as_dict(o) for o in objects]
 
     @pyqtSlot(QItemSelection, QItemSelection)
     def on_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
@@ -178,6 +213,20 @@ class NexusDialog(QDialog, FORM_CLASS):
         else:
             self.nexus_view.selectAll()
 
+    @pyqtSlot()
+    def on_pagination_forward(self):
+        self.current_page_index += 1
+        count, data = self.fetch_database(self.current_page_index)
+        self.model.set_source_data(data)
+        self.enable_pagination_buttons()
+
+    @pyqtSlot()
+    def on_pagination_backward(self):
+        self.current_page_index -= 1
+        count, data = self.fetch_database(self.current_page_index)
+        self.model.set_source_data(data)
+        self.enable_pagination_buttons()
+
     def next_check_state(self):
         if self.select_all_check.checkState() == Qt.Unchecked:
             self.select_all_check.setCheckState(Qt.Checked)
@@ -198,14 +247,28 @@ class NexusDialog(QDialog, FORM_CLASS):
             self.button_edit.setEnabled(False)
             self.button_delete.setEnabled(True)
 
+    def enable_pagination_buttons(self):
+        self.button_next.setEnabled(self.current_page_index != self.total_pages - 1)
+        self.button_before.setEnabled(self.current_page_index > 0)
+
 
 class NexusTableModel(QAbstractTableModel):
     def __init__(self, data: List[dict]):
         super(NexusTableModel, self).__init__()
         self._data = data
 
-        unique_keys = list(set().union(*(d.keys() for d in self._data)))
-        self._horizontal_header = unique_keys
+        exclude_patterns = ['bereich', '_id']
+
+        filtered_keys = set()
+        for d in self._data:
+            filtered_keys.update(key for key in d.keys() if not any(pattern in key for pattern in exclude_patterns))
+
+        self._horizontal_header = list(filtered_keys)
+
+    def set_source_data(self, source_data: List[dict]):
+        self.beginResetModel()
+        self._data = source_data
+        self.endResetModel()
 
     @staticmethod
     def parser(value):
