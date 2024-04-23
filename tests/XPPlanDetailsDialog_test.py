@@ -13,7 +13,7 @@ from shapely.geometry import Polygon
 
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.gui.XPPlanDetailsDialog import createRasterLayer
+from SAGisXPlanung.core.canvas_display import create_raster_layer
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
@@ -158,7 +158,7 @@ class TestXPlanungDialog_createRasterLayer:
         with open(os.path.join(os.path.dirname(__file__), 'data/bp_plan.tif'), 'rb') as file:
             file_bytes = file.read()
 
-        createRasterLayer("Raster", file_bytes)
+        create_raster_layer("Raster", file_bytes)
 
         assert QgsProject.instance().mapLayersByName('Raster')
 
@@ -169,6 +169,6 @@ class TestXPlanungDialog_createRasterLayer:
         with open(os.path.join(os.path.dirname(__file__), 'data/bp_plan.tif'), 'rb') as file:
             file_bytes = file.read()
 
-        createRasterLayer("Raster", file_bytes, group=layer_group)
+        create_raster_layer("Raster", file_bytes, group=layer_group)
 
         assert QgsProject.instance().mapLayersByName('Raster')

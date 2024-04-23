@@ -1,20 +1,20 @@
 import asyncio
 import logging
 import os
-from pathlib import Path
 
 import qasync
+from PyQt5.QtCore import QUrl, QDir
 
 from qgis.core import Qgis
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon, QCursor, QKeySequence
-from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel, QSettings
-from qgis.PyQt.QtWidgets import QAbstractItemView, QApplication, QFileDialog
+from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel
+from qgis.PyQt.QtWidgets import QAbstractItemView, QApplication
 from qgis.gui import QgsDockWidget
 from qgis.utils import iface
 
 from SAGisXPlanung import compile_ui_file
-from SAGisXPlanung.ConverterTasks import export_plan, import_plan
+from SAGisXPlanung.core.converter_tasks import import_plan, export_action, ActionCanceledException
 from SAGisXPlanung.Tools.ContextMenuTool import ContextMenuTool
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.nexus_dialog import NexusDialog
@@ -25,7 +25,6 @@ from SAGisXPlanung.utils import CLASSES
 from SAGisXPlanung.gui.XPCreatePlanDialog import XPCreatePlanDialog
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
 # don't remove following dependency, it is needed for promoting a ComboBox to QPlanComboBox via qt designer
-from SAGisXPlanung.gui.widgets.QPlanComboBox import QPlanComboBox
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_dialog_base.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -162,26 +161,17 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.bExport.repaint()
 
         try:
-            plan_name = self.cbPlaene.currentText().rpartition(' (')[0]
-            display_name = plan_name.replace("/", "-").replace('"', '\'')
+            plan_xid = str(self.cbPlaene.currentPlanId())
             out_file_format = "gml" if self.rbGML.isChecked() else "zip"
 
-            qs = QSettings()
-            default_dir = qs.value('plugins/xplanung/last_export_dir', '')
+            file_name = await export_action(self, plan_xid, out_file_format)
 
-            export_filename = QFileDialog.getSaveFileName(self, 'Speicherort auswählen',
-                                                          directory=f'{default_dir}{display_name}.{out_file_format}',
-                                                          filter=f'*.{out_file_format}')
-
-            export_path = Path(export_filename[0])
-            qs.setValue('plugins/xplanung/last_export_dir', f'{export_path.parent}\\')
-
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, export_plan, out_file_format, export_filename[0], plan_name)
-
-            iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich exportiert!",
+            url = QUrl.fromLocalFile(file_name)
+            path = QDir.toNativeSeparators(file_name)
+            iface.messageBar().pushMessage("XPlanung", f"Planwerk erfolgreich exportiert! <a href=\"{url}\">{path}</a>",
                                            level=Qgis.Success)
-            os.startfile(export_filename[0])
+        except ActionCanceledException:
+            pass
         except Exception as e:
             logger.exception(e)
             iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht umgewandelt werden!",

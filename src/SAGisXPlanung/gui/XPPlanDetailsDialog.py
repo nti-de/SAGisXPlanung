@@ -4,7 +4,6 @@ import inspect
 import itertools
 import logging
 import os
-import tempfile
 import uuid
 from operator import attrgetter
 from typing import List, Tuple, Union
@@ -16,11 +15,9 @@ from qgis.PyQt import QtWidgets, QtGui
 from qgis.PyQt.QtWidgets import QTreeWidgetItem, QAbstractItemView
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSettings
 from qgis.gui import QgsDockWidget
-from qgis.core import (QgsRasterLayer, QgsProject, QgsGeometry, QgsVectorLayer,
-                       QgsLayerTreeGroup, QgsLayerTreeLayer, Qgis, QgsAnnotationLayer)
+from qgis.core import (QgsGeometry, Qgis)
 from qgis.utils import iface
 from sqlalchemy import select, exists
-from sqlalchemy.exc import InternalError
 from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
@@ -32,16 +29,15 @@ from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Plan
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, \
     XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
-from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, MixedGeometry, PointGeometry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version, table_name_to_class
+from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner
 from SAGisXPlanung.gui.actions import EnableBuldingTemplateAction, EditBuildingTemplateAction
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
-from SAGisXPlanung.gui.widgets import QParishEdit
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.gui.widgets.geometry_validation import (ValidationBaseTreeWidgetItem,
                                                            GeometryIntersectionType, ValidationResult,
@@ -49,7 +45,7 @@ from SAGisXPlanung.gui.widgets.geometry_validation import (ValidationBaseTreeWid
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.style.styles import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
-from SAGisXPlanung.utils import createXPlanungIndicators, OBJECT_BASE_TYPES, full_version_required_warning
+from SAGisXPlanung.utils import OBJECT_BASE_TYPES, full_version_required_warning
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -76,7 +72,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.deleteIcon = QtGui.QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
         self.bMap.setIcon(QtGui.QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/map.svg'))))
 
-        self.bMap.clicked.connect(lambda state: reloadPlan(self.plan_xid))
+        self.bMap.clicked.connect(lambda state: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
         self.bDelete.clicked.connect(self.deletePlanContent)
         self.bEdit.clicked.connect(self.showAttributesPage)
@@ -861,108 +857,3 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.lFinished.setVisible(False)
         self.reset_label.setVisible(False)
         self.lErrorCount.setText('')
-
-
-def createRasterLayer(layer_name, file, group=None):
-    """
-    Fügt dem aktuellen QGIS-Projekt ein neuen Rasterlayer hinzu
-
-    Parameters
-    ----------
-    layer_name: str
-        Name des Layers, wird im LayerTree angezeigt
-    file: bytes
-        Inhalt des Rasterbilds
-    group: QgsLayerTreeGroup, optional
-        Layer wird dieser Gruppe im LayerTree hinzugefügt
-    """
-
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(file)
-
-        layer = QgsRasterLayer(tmp.name, layer_name)
-        if group:
-            QgsProject.instance().addMapLayer(layer, False)
-            group.addLayer(layer)
-        else:
-            QgsProject.instance().addMapLayer(layer)
-
-
-def reloadPlan(plan_xid):
-    """
-    Ein bereits auf der Karte gerenderter Plan wird neu geladen. Sollte der Plan noch nicht auf der Karte bestehen,
-    wird er erstmals geladen.
-    """
-    layers = QgsProject.instance().layerTreeRoot().findGroups(recursive=True)
-    for group in layers:
-        if not isinstance(group, QgsLayerTreeGroup) or 'xplanung_id' not in group.customProperties():
-            continue
-
-        if group.customProperty('xplanung_id') == plan_xid:
-            displayPlanOnCanvas(plan_xid, layer_group=group)
-            return
-
-    displayPlanOnCanvas(plan_xid)
-
-
-def displayPlanOnCanvas(plan_xid, layer_group=None, existing_group=True):
-    """
-    Fügt den aktuell gewählten Plan als Layer zur Karte hinzu
-    """
-    iface.mainWindow().statusBar().showMessage('Planwerk wird geladen...')
-    with Session.begin() as session:
-        plan: XP_Plan = session.query(XP_Plan).get(plan_xid)
-        if plan is None:
-            raise Exception(f'plan with id {plan_xid} not found')
-
-        root = QgsProject.instance().layerTreeRoot()
-
-        if not layer_group:
-            existing_group = False
-            layer_group = root.insertGroup(0, plan.name)
-            layer_group.setCustomProperty('xplanung_id', str(plan.id))
-
-            xp_indicator, reload_indicator = createXPlanungIndicators()
-            reload_indicator.clicked.connect(lambda i, p=plan_xid: reloadPlan(p))
-
-            iface.layerTreeView().addIndicator(layer_group, xp_indicator)
-            iface.layerTreeView().addIndicator(layer_group, reload_indicator)
-        else:
-            for tree_layer in layer_group.findLayers():  # type: QgsLayerTreeLayer
-                map_layer = tree_layer.layer()
-                if isinstance(map_layer, QgsVectorLayer):
-                    truncate_success = map_layer.dataProvider().truncate()
-                    if not truncate_success:
-                        logger.warning(f'Could not truncate features of vector layer {map_layer.name()}')
-                elif isinstance(map_layer, QgsAnnotationLayer):
-                    map_layer.clear()
-                elif isinstance(map_layer, QgsRasterLayer):
-                    QgsProject.instance().removeMapLayer(map_layer)
-
-        plan.toCanvas(layer_group)
-
-        for b in [b for b in plan.bereich]:  # if b.geltungsbereich? only load if geltungsbereich has geom
-            for planinhalt in b.planinhalt:
-                planinhalt.toCanvas(layer_group, plan_xid=plan.id)
-
-            # display "free" annotations which are not bound to a 'planinhalt'
-            for po in b.praesentationsobjekt:
-                if po.dientZurDarstellungVon_id:
-                    continue
-                po.toCanvas(layer_group, plan_xid=plan.id)
-
-            for simple_object in b.simple_geometry:
-                simple_object.toCanvas(layer_group, plan_xid=plan.id)
-
-            if b.geltungsbereich:
-                b.toCanvas(layer_group, plan_xid=plan.id)
-
-            for refScan in b.refScan:
-                if refScan.art == XP_ExterneReferenzArt.PlanMitGeoreferenz and refScan.file is not None:
-                    createRasterLayer(refScan.referenzName, refScan.file, group=layer_group)
-
-        for ext_ref in plan.externeReferenz:
-            if ext_ref.art == XP_ExterneReferenzArt.PlanMitGeoreferenz and ext_ref.file is not None:
-                createRasterLayer(ext_ref.referenzName, ext_ref.file, group=layer_group)
-
-    iface.mainWindow().statusBar().showMessage('Planwerk auf der Karte geladen.')

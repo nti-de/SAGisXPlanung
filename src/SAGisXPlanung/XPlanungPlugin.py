@@ -19,7 +19,7 @@ from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.Settings import Settings
 from SAGisXPlanung.core.connection import attempt_connection, verify_db_connection
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
-from SAGisXPlanung.gui.XPPlanDetailsDialog import displayPlanOnCanvas, reloadPlan
+from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
 from SAGisXPlanung.processing.provider import SAGisProvider
 from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning, CLASSES
@@ -274,7 +274,7 @@ class XPlanung(QObject):
                         QgsProject().instance().removeMapLayer(tree_layer.layer())
                         continue
                     MapLayerRegistry().addLayer(tree_layer.layer(), add_to_legend=False)
-                displayPlanOnCanvas(group.customProperty('xplanung_id'), layer_group=group)
+                load_on_canvas(group.customProperty('xplanung_id'), layer_group=group)
             except Exception as e:
                 logger.exception(e)
 
@@ -289,7 +289,7 @@ class XPlanung(QObject):
         if not self.iface.layerTreeView().indicators(node):
             xp_indicator, reload_indicator = createXPlanungIndicators()
             plan_xid = node.customProperty('xplanung_id')
-            reload_indicator.clicked.connect(lambda i, p=plan_xid: reloadPlan(p))
+            reload_indicator.clicked.connect(lambda i, p=plan_xid: plan_to_map(p))
 
             self.iface.layerTreeView().addIndicator(node, xp_indicator)
             self.iface.layerTreeView().addIndicator(node, reload_indicator)

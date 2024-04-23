@@ -2,27 +2,27 @@ import datetime
 import json
 import logging
 import os
-from typing import List, Tuple
+from typing import List
 
-from PyQt5.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot
-from PyQt5.QtGui import QColor, QStandardItemModel, QStandardItem
-from PyQt5.QtSql import QSqlDatabase, QSqlTableModel
-from PyQt5.QtWidgets import QHeaderView, QAbstractItemView
+import qasync
+
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QDialog, QLineEdit
-from qgis.PyQt.QtCore import pyqtSignal
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QDialog, QLineEdit, QHeaderView, QAbstractItemView
+from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
+from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot
+from qgis.core import Qgis
 from qgis.utils import iface
 from sqlalchemy import select, inspect, func
 from sqlalchemy.orm import selectin_polymorphic, defer, load_only
 
 from SAGisXPlanung import Session, BASE_DIR
-from SAGisXPlanung.XPlan.codelists import CodeListValue
+from SAGisXPlanung.core.converter_tasks import export_action, ActionCanceledException
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.XPlan.mixins import XPlanungEnumMixin, ElementOrderMixin
-from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import QgsConfig
-from SAGisXPlanung.gui.style import ApplicationColor, SVGButtonEventFilter, load_svg, HighlightRowProxyStyle, \
+from SAGisXPlanung.core.canvas_display import plan_to_map
+from SAGisXPlanung.ext.spinner import loading_animation
+from SAGisXPlanung.ext.toast import Toaster
+from SAGisXPlanung.gui.style import ApplicationColor, load_svg, HighlightRowProxyStyle, \
     HighlightRowDelegate
 from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle
 from SAGisXPlanung.utils import PLAN_BASE_TYPES
@@ -30,6 +30,9 @@ from SAGisXPlanung.utils import PLAN_BASE_TYPES
 FORM_CLASS_NEXUS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/nexus_dialog.ui'))
 FORM_CLASS_NEXUS_SETTINGS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/nexus_settings_dialog.ui'))
 logger = logging.getLogger(__name__)
+
+
+XID_ROLE = Qt.UserRole + 1
 
 
 def object_as_dict(obj):
@@ -137,6 +140,8 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_next.clicked.connect(self.on_pagination_forward)
 
         self.button_settings.clicked.connect(self.on_settings_clicked)
+        self.button_map.clicked.connect(self.on_map_load_clicked)
+        self.button_xplan_export.clicked.connect(self.on_export_clicked)
 
         self.enable_plan_actions(0)
 
@@ -209,6 +214,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
         self.enable_pagination_buttons()
         self.select_all_check.setCheckState(Qt.Unchecked)
+        self.enable_plan_actions(0)
         max_per_page = self.table_settings.max_entries_per_page
         self.label_result_count.setText(self.PAGE_COUNT_LABEL_PATTERN.format(
             _start_index=self.current_page_index * max_per_page + 1,
@@ -269,6 +275,37 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
     def on_pagination_backward(self):
         self.current_page_index -= 1
         self.paginate()
+
+    @pyqtSlot()
+    def on_map_load_clicked(self):
+        selected_indices = self.nexus_view.selectionModel().selectedIndexes()
+        if not selected_indices:
+            return
+
+        plan_xid = selected_indices[0].data(XID_ROLE)
+        plan_to_map(plan_xid)
+
+    @qasync.asyncSlot()
+    async def on_export_clicked(self):
+        async with loading_animation(self):
+            selected_indices = self.nexus_view.selectionModel().selectedIndexes()
+            if not selected_indices:
+                return
+
+            plan_xid = selected_indices[0].data(XID_ROLE)
+
+            try:
+                await export_action(self, plan_xid)
+
+                Toaster.showMessage(self, message='Planwerk erfolgreich exportiert!', corner=Qt.BottomRightCorner,
+                                    margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
+                                    timeout=3000)
+            except ActionCanceledException:
+                pass
+            except Exception as e:
+                logger.error(e)
+                iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht exportiert werden!",
+                                               str(e), level=Qgis.Critical)
 
     @pyqtSlot()
     def on_settings_clicked(self):
@@ -357,6 +394,9 @@ class NexusTableModel(QAbstractTableModel):
             if isinstance(value, list):
                 return ", ".join(map(NexusTableModel.parser, value))
             return str(value)
+
+        if role == XID_ROLE:
+            return self._data[index.row()].get('id', None)
 
     def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
