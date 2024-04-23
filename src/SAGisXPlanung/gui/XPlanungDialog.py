@@ -3,12 +3,11 @@ import logging
 import os
 
 import qasync
-from PyQt5.QtCore import QUrl, QDir
 
 from qgis.core import Qgis
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon, QCursor, QKeySequence
-from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel
+from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel, QUrl, QDir
 from qgis.PyQt.QtWidgets import QAbstractItemView, QApplication
 from qgis.gui import QgsDockWidget
 from qgis.utils import iface
@@ -25,6 +24,7 @@ from SAGisXPlanung.utils import CLASSES
 from SAGisXPlanung.gui.XPCreatePlanDialog import XPCreatePlanDialog
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
 # don't remove following dependency, it is needed for promoting a ComboBox to QPlanComboBox via qt designer
+from SAGisXPlanung.gui.widgets.QPlanComboBox import QPlanComboBox
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_dialog_base.ui')
 FORM_CLASS = compile_ui_file(uifile)
