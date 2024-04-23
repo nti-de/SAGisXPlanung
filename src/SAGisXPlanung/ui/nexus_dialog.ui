@@ -104,6 +104,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="button_map">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="button_delete">
        <property name="text">
         <string>...</string>

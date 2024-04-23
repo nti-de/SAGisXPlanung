@@ -111,6 +111,8 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                                                   color=ApplicationColor.Tertiary))
         self.button_edit.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
                                           color=ApplicationColor.Tertiary))
+        self.button_map.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/map.svg'),
+                                         color=ApplicationColor.Tertiary))
         self.button_delete.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
                                             color=ApplicationColor.Tertiary))
         self.button_settings.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'),
@@ -123,6 +125,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_reload.setCursor(Qt.PointingHandCursor)
         self.button_xplan_export.setCursor(Qt.PointingHandCursor)
         self.button_edit.setCursor(Qt.PointingHandCursor)
+        self.button_map.setCursor(Qt.PointingHandCursor)
         self.button_delete.setCursor(Qt.PointingHandCursor)
         self.button_settings.setCursor(Qt.PointingHandCursor)
         self.button_before.setCursor(Qt.PointingHandCursor)
@@ -140,7 +143,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.select_all_check.nextCheckState = self.next_check_state
         self.select_all_check.stateChanged.connect(self.on_select_all_check_state_changed)
 
-        self.combo_plan_type.addItems(["Alle Pläne", "BP_Plan", "FP_Plan", "LP_Plan", "RP_Plan"])
+        self.combo_plan_type.addItem("Alle Pläne", PLAN_BASE_TYPES)
+        for plan_base_type in PLAN_BASE_TYPES:
+            self.combo_plan_type.addItem(plan_base_type.__name__, [plan_base_type])
+
+        self.combo_plan_type.currentIndexChanged.connect(self.on_plan_type_filter_changed)
 
         # ------------- LOGIC -----------------
         self.current_page_index = 0
@@ -204,21 +211,30 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.select_all_check.setCheckState(Qt.Unchecked)
         max_per_page = self.table_settings.max_entries_per_page
         self.label_result_count.setText(self.PAGE_COUNT_LABEL_PATTERN.format(
-            _start_index=self.current_page_index*max_per_page + 1,
-            _end_index=min(count, self.current_page_index*max_per_page + max_per_page),
+            _start_index=self.current_page_index * max_per_page + 1,
+            _end_index=min(count, self.current_page_index * max_per_page + max_per_page),
             _total=count
         ))
 
-    def fetch_database(self, page: int = 0) -> (int, List[dict]):
-        with Session.begin() as session:
-            count = session.execute(func.count(XP_Plan.id)).scalar_one()
+    def with_plan_type_filter(self, query):
+        filter_class = self.combo_plan_type.currentData()
+        if len(filter_class) == 1:  # filter for specific plan type
+            query = query.where(XP_Plan.type == str(filter_class[0].__name__).lower())
 
+        return query
+
+    def fetch_database(self, page: int = 0) -> (int, List[dict]):
+        with (Session.begin() as session):
+            count = session.execute(self.with_plan_type_filter(select(func.count(XP_Plan.id)))).scalar_one()
+
+            filter_class = self.combo_plan_type.currentData()
             max_per_page = self.table_settings.max_entries_per_page
-            stmt = select(XP_Plan).options(
-                selectin_polymorphic(XP_Plan, PLAN_BASE_TYPES),
+            stmt = self.with_plan_type_filter(select(XP_Plan).options(
+                selectin_polymorphic(XP_Plan, filter_class),
                 load_only(*[col.name for col in XP_Plan.__table__.c if not col.name.endswith('_id')]),
                 defer(XP_Plan.raeumlicherGeltungsbereich)
-            ).order_by(XP_Plan.id).offset(page*max_per_page).fetch(max_per_page)
+            ))
+            stmt = stmt.order_by(XP_Plan.id).offset(page * max_per_page).fetch(max_per_page)
             objects = session.scalars(stmt).all()
 
             self.total_pages = (count + max_per_page - 1) // max_per_page
@@ -269,6 +285,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
         QgsConfig.set_nexus_settings(self.table_settings.settings_json())
 
+    @pyqtSlot(int)
+    def on_plan_type_filter_changed(self, index: int):
+        self.current_page_index = 0
+        self.paginate()
+
     def next_check_state(self):
         if self.select_all_check.checkState() == Qt.Unchecked:
             self.select_all_check.setCheckState(Qt.Checked)
@@ -279,14 +300,17 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         if selection_count == 0:
             self.button_xplan_export.setEnabled(False)
             self.button_edit.setEnabled(False)
+            self.button_map.setEnabled(False)
             self.button_delete.setEnabled(False)
         elif selection_count == 1:
             self.button_xplan_export.setEnabled(True)
             self.button_edit.setEnabled(True)
+            self.button_map.setEnabled(True)
             self.button_delete.setEnabled(True)
         else:
             self.button_xplan_export.setEnabled(False)
             self.button_edit.setEnabled(False)
+            self.button_map.setEnabled(False)
             self.button_delete.setEnabled(True)
 
     def enable_pagination_buttons(self):
@@ -370,8 +394,8 @@ class TableSettings:
     def from_json(cls, json_config: str):
         config = json.loads(json_config)
         columns = []
-        for column_name, visible in config["columns"]:
-            columns.append(ColumnConfig(column_name, visible))
+        for column_name, column_idx, visible in config["columns"]:
+            columns.append(ColumnConfig(column_name, column_idx, visible))
         return cls(columns, config["max_entries_per_page"])
 
     def set_column_visibility(self, column_name, visibility):
@@ -388,7 +412,7 @@ class TableSettings:
 
     def settings_json(self) -> str:
         return json.dumps({
-            "columns": [(column.name, column.visible) for column in self.columns],
+            "columns": [(column.name, column.column_index, column.visible) for column in self.columns],
             "max_entries_per_page": self.max_entries_per_page
         })
 
