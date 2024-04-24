@@ -44,6 +44,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.iface = iface
         self.export_task = None
         self.import_task = None
+        self.nexus_dialog = None
 
         self.bCreate.clicked.connect(lambda: self.showCreateForm())
         self.bExport.clicked.connect(lambda: self.export())
@@ -126,8 +127,14 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             self.bIdentify.setChecked(False)
 
     def on_show_all_clicked(self, checked: bool):
-        nexus = NexusDialog(self)
-        nexus.show()
+        # Check if a NexusDialog instance is already created and visible
+        if self.nexus_dialog is not None and self.nexus_dialog.isVisible():
+            self.nexus_dialog.deleteLater()
+
+        self.nexus_dialog = NexusDialog(self)
+        self.nexus_dialog.accessAttributesRequested.connect(self.showObjectAttributes)
+        self.nexus_dialog.deletionOccurred.connect(self.cbPlaene.refresh)
+        self.nexus_dialog.show()
 
     def showCreateForm(self):
         """

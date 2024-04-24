@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import json
 import logging
@@ -7,15 +8,16 @@ from typing import List
 import qasync
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtWidgets import QDialog, QLineEdit, QHeaderView, QAbstractItemView
+from qgis.PyQt.QtWidgets import QDialog, QLineEdit, QHeaderView, QAbstractItemView, QMessageBox
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
-from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot
+from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot, pyqtSignal
 from qgis.core import Qgis
 from qgis.utils import iface
-from sqlalchemy import select, inspect, func
+from sqlalchemy import select, inspect, func, delete
 from sqlalchemy.orm import selectin_polymorphic, defer, load_only
 
-from SAGisXPlanung import Session, BASE_DIR
+from SAGisXPlanung import Session, BASE_DIR, SessionAsync
+from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.converter_tasks import export_action, ActionCanceledException
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.config import QgsConfig
@@ -33,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 
 XID_ROLE = Qt.UserRole + 1
+NAME_ROLE = Qt.UserRole + 2
 
 
 def object_as_dict(obj):
@@ -100,9 +103,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     PAGE_COUNT_LABEL_PATTERN = "{_start_index}-{_end_index} von {_total}"
 
+    accessAttributesRequested = pyqtSignal(XPlanungItem)
+    deletionOccurred = pyqtSignal()
+
     def __init__(self, parent=iface.mainWindow()):
         super(NexusDialog, self).__init__(parent)
         self.setupUi(self)
+
+        self.setWindowFlags(self.windowFlags() | Qt.WindowMinimizeButtonHint)
 
         self.nexus_search.setPlaceholderText('Suchen...')
         self.nexus_search.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
@@ -142,6 +150,9 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_settings.clicked.connect(self.on_settings_clicked)
         self.button_map.clicked.connect(self.on_map_load_clicked)
         self.button_xplan_export.clicked.connect(self.on_export_clicked)
+        self.button_edit.clicked.connect(self.on_edit_clicked)
+        self.button_reload.clicked.connect(self.on_reload_clicked)
+        self.button_delete.clicked.connect(self.on_delete_clicked)
 
         self.enable_plan_actions(0)
 
@@ -210,6 +221,10 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     def paginate(self):
         count, data = self.fetch_database(self.current_page_index)
+        if not data and self.current_page_index > 0:
+            self.current_page_index -= 1
+            self.paginate()
+            return
         self.model.set_source_data(data)
 
         self.enable_pagination_buttons()
@@ -278,7 +293,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     @pyqtSlot()
     def on_map_load_clicked(self):
-        selected_indices = self.nexus_view.selectionModel().selectedIndexes()
+        selected_indices = self.nexus_view.selectionModel().selectedRows()
         if not selected_indices:
             return
 
@@ -288,7 +303,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
     @qasync.asyncSlot()
     async def on_export_clicked(self):
         async with loading_animation(self):
-            selected_indices = self.nexus_view.selectionModel().selectedIndexes()
+            selected_indices = self.nexus_view.selectionModel().selectedRows()
             if not selected_indices:
                 return
 
@@ -306,6 +321,60 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                 logger.error(e)
                 iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht exportiert werden!",
                                                str(e), level=Qgis.Critical)
+
+    @qasync.asyncSlot()
+    async def on_delete_clicked(self):
+        def _delete():
+            with Session.begin() as session:
+                statement = select(XP_Plan).where(XP_Plan.id.in_(selected_xplan_indices))
+                objects = session.execute(statement).scalars().all()
+                for o in objects:
+                    session.delete(o)
+            # following would be more efficient, but does not cascade correctly,
+            # therefore it is required to load ORM-Instances first.
+            # ###
+            # statement = delete(XP_Plan).where(XP_Plan.id.in_(selected_xplan_indices))
+            # result = await session.execute(statement)
+            # print(result.rowcount)
+
+        async with loading_animation(self):
+            selected_indices = self.nexus_view.selectionModel().selectedRows()
+            if not selected_indices:
+                return
+
+            selected_xplan_indices = [str(i.data(XID_ROLE)) for i in selected_indices]
+            selected_plan_names = [i.data(NAME_ROLE) for i in selected_indices]
+
+            msg = QMessageBox()
+            msg.setWindowTitle("Löschvorgang bestätigen")
+            names_text = "\n".join(selected_plan_names)
+            msg.setText(f"Ausgewählte Pläne unwiderruflich löschen?\n\n{names_text}")
+            msg.setIcon(QMessageBox.Question)
+            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+
+            reply = msg.exec_()
+            if reply == QMessageBox.No:
+                return
+
+            loop = asyncio.get_event_loop()
+            await loop.run_in_executor(None, _delete)
+
+            self.paginate()  # refresh views
+            self.deletionOccurred.emit()  # notify other views
+
+    @pyqtSlot()
+    def on_reload_clicked(self):
+        self.paginate()
+
+    @pyqtSlot()
+    def on_edit_clicked(self):
+        selected_indices = self.nexus_view.selectionModel().selectedIndexes()
+        if not selected_indices:
+            return
+
+        plan_xid = str(selected_indices[0].data(XID_ROLE))
+        xplan_item = XPlanungItem(xid=plan_xid, xtype=XP_Plan, plan_xid=plan_xid)
+        self.accessAttributesRequested.emit(xplan_item)
 
     @pyqtSlot()
     def on_settings_clicked(self):
@@ -397,6 +466,8 @@ class NexusTableModel(QAbstractTableModel):
 
         if role == XID_ROLE:
             return self._data[index.row()].get('id', None)
+        if role == NAME_ROLE:
+            return self._data[index.row()].get('name', None)
 
     def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:

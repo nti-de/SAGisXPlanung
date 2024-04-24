@@ -587,9 +587,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
 
             if len(items_to_delete) <= 1:
-                msg.setText(f"Wollen Sie den Planinhalt unwideruflich löschen? (id: {items_to_delete[0].id})")
+                msg.setText(f"Wollen Sie den Planinhalt unwiderruflich löschen? (id: {items_to_delete[0].id})")
             else:
-                t = f"Wollen Sie die Planinhalte unwideruflich löschen? <ul>"
+                t = f"Wollen Sie die Planinhalte unwiderruflich löschen? <ul>"
                 for item in items_to_delete:
                     t += f'<li>{item.__class__.__name__}: {item.id}</li>'
                 t += '</ul>'
