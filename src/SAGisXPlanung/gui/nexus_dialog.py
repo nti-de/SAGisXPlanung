@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+from operator import attrgetter
 from typing import List
 
 import qasync
@@ -14,7 +15,7 @@ from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelectio
 from qgis.core import Qgis
 from qgis.utils import iface
 from sqlalchemy import select, inspect, func, delete
-from sqlalchemy.orm import selectin_polymorphic, defer, load_only
+from sqlalchemy.orm import selectin_polymorphic, defer, load_only, with_polymorphic
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -38,10 +39,14 @@ XID_ROLE = Qt.UserRole + 1
 NAME_ROLE = Qt.UserRole + 2
 
 
-def object_as_dict(obj):
+def object_as_dict(obj, exclude_patterns=None):
+    if exclude_patterns is None:
+        exclude_patterns = []
+
     return {
         c.key: getattr(obj, c.key)
         for c in inspect(obj).mapper.column_attrs
+        if not any(pattern in c.key for pattern in exclude_patterns)
     }
 
 
@@ -178,10 +183,13 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.setup_model()
         self.nexus_view.setModel(self.model)
         self.nexus_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.nexus_view.setSortingEnabled(True)
+        self.nexus_view.sortByColumn(self.table_settings.sort_column_index(), Qt.AscendingOrder)
 
         self.nexus_view.horizontalHeader().setStretchLastSection(True)
         self.nexus_view.horizontalHeader().setMaximumSectionSize(360)
         self.nexus_view.horizontalHeader().setDefaultSectionSize(180)
+        self.nexus_view.horizontalHeader().sortIndicatorChanged.connect(self.on_sort_changed)
         self.nexus_view.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
 
         self.table_proxy_style = RemoveFrameFocusProxyStyle('Fusion')
@@ -237,29 +245,39 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
             _total=count
         ))
 
-    def with_plan_type_filter(self, query):
+    def _with_plan_type_filter(self, query):
         filter_class = self.combo_plan_type.currentData()
         if len(filter_class) == 1:  # filter for specific plan type
             query = query.where(XP_Plan.type == str(filter_class[0].__name__).lower())
 
         return query
 
+    def _sort_attr(self, polymorphic, attr_name):
+        for class_type in PLAN_BASE_TYPES:
+            try:
+                attr = attrgetter(f'{class_type.__name__}.{attr_name}')(polymorphic)
+                return attr
+            except AttributeError:
+                pass
+
     def fetch_database(self, page: int = 0) -> (int, List[dict]):
         with (Session.begin() as session):
-            count = session.execute(self.with_plan_type_filter(select(func.count(XP_Plan.id)))).scalar_one()
+            count = session.execute(self._with_plan_type_filter(select(func.count(XP_Plan.id)))).scalar_one()
 
-            filter_class = self.combo_plan_type.currentData()
             max_per_page = self.table_settings.max_entries_per_page
-            stmt = self.with_plan_type_filter(select(XP_Plan).options(
-                selectin_polymorphic(XP_Plan, filter_class),
+            xp_plan_poly = with_polymorphic(XP_Plan, PLAN_BASE_TYPES)
+            stmt = self._with_plan_type_filter(select(xp_plan_poly).options(
                 load_only(*[col.name for col in XP_Plan.__table__.c if not col.name.endswith('_id')]),
-                defer(XP_Plan.raeumlicherGeltungsbereich)
+                defer(getattr(xp_plan_poly, 'raeumlicherGeltungsbereich'))
             ))
-            stmt = stmt.order_by(XP_Plan.id).offset(page * max_per_page).fetch(max_per_page)
+            sort_by, sort_dir = self.table_settings.sort_column, self.table_settings.sort_order
+            sort_attr = self._sort_attr(xp_plan_poly, sort_by)
+            _order_by = getattr(sort_attr, sort_dir)()
+            stmt = stmt.order_by(_order_by).offset(page * max_per_page).fetch(max_per_page)
             objects = session.scalars(stmt).all()
 
             self.total_pages = (count + max_per_page - 1) // max_per_page
-            return count, [object_as_dict(o) for o in objects]
+            return count, [object_as_dict(o, exclude_patterns=['bereich', '_id']) for o in objects]
 
     @pyqtSlot(QItemSelection, QItemSelection)
     def on_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
@@ -271,6 +289,12 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         else:
             self.select_all_check.setCheckState(Qt.Unchecked)
         self.enable_plan_actions(len(selected_rows))
+
+    @pyqtSlot(int, Qt.SortOrder)
+    def on_sort_changed(self, logical_index: int, order: Qt.SortOrder):
+        print(logical_index, order)
+        self.table_settings.set_sort(logical_index, order)
+        self.paginate()
 
     @pyqtSlot(int)
     def on_select_all_check_state_changed(self, state: int):
@@ -497,9 +521,14 @@ class ColumnConfig:
 
 
 class TableSettings:
-    def __init__(self, columns: List[ColumnConfig] = None, max_entries_per_page=50):
+    def __init__(self, columns: List[ColumnConfig] = None,
+                 max_entries_per_page=50,
+                 sort_column: str = 'id',
+                 sort_order: str = 'asc'):
         self.columns = columns
         self.max_entries_per_page = max_entries_per_page
+        self.sort_column = sort_column
+        self.sort_order = sort_order
 
     @classmethod
     def from_json(cls, json_config: str):
@@ -520,6 +549,16 @@ class TableSettings:
 
     def header_labels(self) -> List[str]:
         return [col.name for col in self.columns if col.visible]
+
+    def sort_column_index(self):
+        return self.header_labels().index(self.sort_column)
+
+    def set_sort(self, col: int, sort_order: Qt.SortOrder):
+        self.sort_column = self.header_labels()[col]
+        if sort_order == Qt.AscendingOrder:
+            self.sort_order = 'asc'
+        else:
+            self.sort_order = 'desc'
 
     def settings_json(self) -> str:
         return json.dumps({
