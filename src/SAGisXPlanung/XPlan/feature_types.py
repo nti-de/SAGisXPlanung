@@ -2,14 +2,16 @@ import logging
 from typing import List
 from uuid import uuid4
 
-from PyQt5.QtCore import QSize
+from qgis.PyQt.QtCore import QSize
+
 from geoalchemy2 import Geometry, WKTElement
-from qgis._core import QgsSymbolLayerUtils, QgsRuleBasedRenderer
+
 from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 
-from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest, edit
+from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest, edit,
+                       QgsSymbolLayerUtils, QgsRuleBasedRenderer)
 
 from .XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from .conversions import XP_Rechtscharakter_EnumType
@@ -66,6 +68,8 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
     externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
                                    passive_deletes=True)
 
+    _sa_search_col = Column(TSVECTOR)
+
     __mapper_args__ = {
         "polymorphic_identity": "xp_plan",
         "polymorphic_on": type,
@@ -82,7 +86,11 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
 
     @classmethod
     def avoid_export(cls):
-        return ['plangeber_id']
+        return ['plangeber_id', '_sa_search_col']
+
+    @classmethod
+    def hidden_inputs(cls):
+        return ['_sa_search_col']
 
     def displayName(self):
         return 'Geltungsbereich'

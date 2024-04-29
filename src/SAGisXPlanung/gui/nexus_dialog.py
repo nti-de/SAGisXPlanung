@@ -14,7 +14,7 @@ from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot, pyqtSignal
 from qgis.core import Qgis
 from qgis.utils import iface
-from sqlalchemy import select, inspect, func, delete
+from sqlalchemy import select, inspect, func, delete, text
 from sqlalchemy.orm import selectin_polymorphic, defer, load_only, with_polymorphic
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync
@@ -120,6 +120,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.nexus_search.setPlaceholderText('Suchen...')
         self.nexus_search.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
         self.nexus_search.setMaximumWidth(360)
+        self.nexus_search.editingFinished.connect(self.on_search_entered)
 
         self.button_reload.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'),
                                             color=ApplicationColor.Tertiary))
@@ -245,10 +246,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
             _total=count
         ))
 
-    def _with_plan_type_filter(self, query):
+    def _with_filter(self, query):
         filter_class = self.combo_plan_type.currentData()
         if len(filter_class) == 1:  # filter for specific plan type
             query = query.where(XP_Plan.type == str(filter_class[0].__name__).lower())
+
+        search_text = self.nexus_search.text()
+        if search_text:
+            query = query.where(text("_sa_search_col @@ to_tsquery('german', :s) ").bindparams(s=search_text))
 
         return query
 
@@ -262,12 +267,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     def fetch_database(self, page: int = 0) -> (int, List[dict]):
         with (Session.begin() as session):
-            count = session.execute(self._with_plan_type_filter(select(func.count(XP_Plan.id)))).scalar_one()
+            count = session.execute(self._with_filter(select(func.count(XP_Plan.id)))).scalar_one()
 
             max_per_page = self.table_settings.max_entries_per_page
             xp_plan_poly = with_polymorphic(XP_Plan, PLAN_BASE_TYPES)
-            stmt = self._with_plan_type_filter(select(xp_plan_poly).options(
-                load_only(*[col.name for col in XP_Plan.__table__.c if not col.name.endswith('_id')]),
+            stmt = self._with_filter(select(xp_plan_poly).options(
                 defer(getattr(xp_plan_poly, 'raeumlicherGeltungsbereich'))
             ))
             sort_by, sort_dir = self.table_settings.sort_column, self.table_settings.sort_order
@@ -292,8 +296,12 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     @pyqtSlot(int, Qt.SortOrder)
     def on_sort_changed(self, logical_index: int, order: Qt.SortOrder):
-        print(logical_index, order)
         self.table_settings.set_sort(logical_index, order)
+        self.paginate()
+
+    @pyqtSlot()
+    def on_search_entered(self):
+        self.current_page_index = 0
         self.paginate()
 
     @pyqtSlot(int)
