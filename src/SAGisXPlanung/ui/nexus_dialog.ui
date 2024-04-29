@@ -50,6 +50,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_settings">
+       <property name="toolTip">
+        <string>Einstellungen</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -77,6 +80,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_reload">
+       <property name="toolTip">
+        <string>Aktualisieren</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -91,6 +97,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_xplan_export">
+       <property name="toolTip">
+        <string>XPlanGML exportieren</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -98,6 +107,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_edit">
+       <property name="toolTip">
+        <string>Bearbeiten</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -105,6 +117,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_map">
+       <property name="toolTip">
+        <string>Kartenanzeige</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
@@ -112,6 +127,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="button_delete">
+       <property name="toolTip">
+        <string>Löschen</string>
+       </property>
        <property name="text">
         <string>...</string>
        </property>
