@@ -1,4 +1,5 @@
 import importlib
+import re
 
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QMessageBox, QLabel
@@ -9,8 +10,9 @@ def check(required_packages):
     """ Checks if required packages are correctly installed. """
     missing_packages = []
     for package in required_packages:
+        package_name = re.split(r'[<>=~]', package)[0].strip()
         try:
-            importlib.import_module(str(package.partition('==')[0]).lower())
+            importlib.import_module(package_name.lower())
         except ImportError:
             missing_packages.append(package)
 
