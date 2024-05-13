@@ -1,5 +1,5 @@
 import pytest
-
+from mock.mock import MagicMock, AsyncMock
 
 from qgis.PyQt.QtCore import QModelIndex, Qt
 from qgis.utils import iface
@@ -34,13 +34,28 @@ class TestXPlanungDialog_is_url:
 
 class TestXPlanungDialog:
 
-    def test_onIndexChanged(self, dialog, mocker):
-        mocker.patch(
-            'SAGisXPlanung.gui.XPlanungDialog.XPPlanDetailsDialog.initPlanData',
-            return_value=None
-        )
-        dialog.cbPlaene.addItems(['1', '2', '3'])
-        dialog.cbPlaene.setCurrentIndex(1)
+    @pytest.mark.asyncio
+    async def test_on_index_changed(self, dialog):
+        # Setup
+        details_dialog = dialog.details_dialog
+        details_dialog.initPlanData = AsyncMock()
+        export_button = dialog.bExport
+        info_button = dialog.bInfo
+
+        # index change to -1
+        await dialog.onIndexChanged(-1)
+
+        assert not export_button.isEnabled()
+        assert not info_button.isEnabled()
+        assert not details_dialog.isVisible()
+
+        # index change to valid index 0
+        await dialog.onIndexChanged(0)
+
+        assert export_button.isEnabled()
+        assert info_button.isEnabled()
+        details_dialog.initPlanData.assert_called_once()
+
 
     def test_onIdentifyClicked(self, dialog, qtbot):
         qtbot.mouseClick(dialog.bIdentify, Qt.LeftButton)
