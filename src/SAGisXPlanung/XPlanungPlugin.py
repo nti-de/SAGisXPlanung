@@ -1,7 +1,7 @@
 import logging
 import os.path
 
-from qgis.PyQt import QtWidgets
+from qgis.PyQt import QtWidgets, sip
 from qgis.PyQt.QtCore import Qt, pyqtSlot, QObject, QSizeF, QUrl, QDir
 from qgis.PyQt.QtGui import QIcon, QPageLayout, QPainter
 from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphicsItem, QToolBar, QMessageBox
@@ -143,7 +143,8 @@ class XPlanung(QObject):
         self.dockWidget.deleteLater()
 
         # unload processing
-        QgsApplication.processingRegistry().removeProvider(self.provider)
+        if not sip.isdeleted(self.provider):
+            QgsApplication.processingRegistry().removeProvider(self.provider)
 
     @pyqtSlot()
     def run(self):
