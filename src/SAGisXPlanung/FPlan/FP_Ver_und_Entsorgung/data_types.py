@@ -5,8 +5,6 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
-from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgungCodelistAssoc
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
 
