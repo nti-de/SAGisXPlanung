@@ -30,13 +30,15 @@ for file in "${files[@]}"; do
 done
 
 # Rename sql file for database setup
-# TODO: not only rename the file, but also generate new changes from alembic upgrade head
 old_sql_file="src/SAGisXPlanung/database/create_v$current_version.sql"
 new_sql_file="src/SAGisXPlanung/database/create_v$new_version.sql"
 
 if [ -f "$old_sql_file" ]; then
     git mv "$old_sql_file" "$new_sql_file"
     echo "File $old_sql_file renamed to $new_sql_file"
+
+    python3 generate_migrations.py $new_version "src/SAGisXPlanung/database"
+    echo "Generated alembic migrations"
 else
     echo "File $old_sql_file not found. No renaming performed."
     echo "Check if database create script is present."
