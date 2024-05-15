@@ -24,6 +24,42 @@ from .basepage import SettingsPage
 
 logger = logging.getLogger(__name__)
 
+style = '''
+QToolButton[objectName="connnection_test_status_icon"], 
+QToolButton[objectName="button_alert_icon"] {{
+    border: 0px;
+}}
+QTabWidget::pane {{
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    position: absolute;
+}}
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {{
+    border: none;
+    min-width: 20ex;
+    padding: 15px;
+    color: #4b5563;
+    cursor: pointer;
+}}
+
+QTabBar::tab:hover {{
+    background-color: #e5e7eb;
+    color: #111827;
+}}
+
+QTabBar::tab:selected {{
+    border-bottom: 2px solid #93C5FD;
+    background-color: #eff6ff;
+    color: #111827;
+}}
+
+QLabel[objectName="label_upgrade"] {{
+    color: {_label_color_mute};
+}}
+'''
+
 
 class DatabaseConfigPage(SettingsPage):
     def __init__(self, parent=None):
@@ -49,36 +85,15 @@ class DatabaseConfigPage(SettingsPage):
         # otherwise throws a lot of TypeError: invalid argument to sipBadCatcherResult()
         self.ui.connection_test_label.mousePressEvent = lambda e: asyncio.create_task(self.test_connection()) and None
 
-        self.ui.tab_database_actions.setStyleSheet('''
-            QToolButton {
-                border: 0px;
-            }
-            QTabWidget::pane {
-                border: none;
-                border-top: 1px solid #e5e7eb;
-                position: absolute;
-            }
-            /* Style the tab using the tab sub-control. Note that
-                it reads QTabBar _not_ QTabWidget */
-            QTabBar::tab {
-                border: none;
-                min-width: 20ex;
-                padding: 15px;
-                color: #4b5563;
-                cursor: pointer;
-            }
+        self.ui.button_alert_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/warning.svg'),
+                                                   color=ApplicationColor.Grey600))
+        self.ui.button_upgrade.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/upgrade.svg'),
+                                                color=ApplicationColor.Tertiary))
+        self.ui.button_upgrade.setCursor(Qt.PointingHandCursor)
 
-            QTabBar::tab:hover {
-                background-color: #e5e7eb;
-                color: #111827;
-            }
-
-            QTabBar::tab:selected {
-                border-bottom: 2px solid #93C5FD;
-                background-color: #eff6ff;
-                color: #111827;
-            }
-        ''')
+        self.ui.tab_database_actions.setStyleSheet(style.format(
+            _label_color_mute=ApplicationColor.Grey600
+        ))
         with_color_palette(self.ui.tab_database_actions, [
             ApplicationColor.Primary, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
         ], class_='QLabel')

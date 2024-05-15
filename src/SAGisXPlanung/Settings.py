@@ -15,6 +15,7 @@ from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCo
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
+from SAGisXPlanung.gui.widgets.settings.basepage import SettingsPage
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), 'ui/settings.ui'))
 logger = logging.getLogger(__name__)
@@ -61,6 +62,16 @@ class Settings(QDialog, FORM_CLASS):
                 border: 0px;
             }
         ''')
+
+    def navigate_to_page(self, page_type: type):
+        if not issubclass(page_type, SettingsPage):
+            return
+
+        for i in range(1, self.tabs.count()):
+            page = self.tabs.widget(i)
+            if isinstance(page, page_type):
+                self.tabs.setCurrentIndex(i)
+                return
 
     def showEvent(self, e: QShowEvent):
         super(Settings, self).showEvent(e)

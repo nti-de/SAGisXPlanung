@@ -21,6 +21,7 @@ from SAGisXPlanung.core.connection import attempt_connection, verify_db_connecti
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
 from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
+from SAGisXPlanung.gui.widgets import DatabaseConfigPage
 from SAGisXPlanung.processing.provider import SAGisProvider
 from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning, CLASSES
 
@@ -309,5 +310,6 @@ class XPlanung(QObject):
         msg_box.setEscapeButton(QMessageBox.Cancel)
         msg_box.exec()
         if msg_box.clickedButton() == settings_button:
+            self.settings.navigate_to_page(DatabaseConfigPage)
             self.settings.exec()
         return False
