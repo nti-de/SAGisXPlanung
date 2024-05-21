@@ -336,7 +336,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.addSeparator()
             menu.addMenu(data_class_menu)
 
-        menu.exec_(self.objectTree.mapToGlobal(point))
+        menu.exec_(self.objectTree.viewport().mapToGlobal(point))
 
     def highlightGeometryError(self):
         item: ValidationBaseTreeWidgetItem = self.log.selectedItems()[0]
