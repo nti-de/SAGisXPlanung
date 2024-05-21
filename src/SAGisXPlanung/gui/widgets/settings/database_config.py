@@ -2,6 +2,8 @@ import asyncio
 import functools
 import logging
 import os
+from dataclasses import dataclass
+from pathlib import Path
 
 import qasync
 from PyQt5.QtGui import QCloseEvent
@@ -17,12 +19,23 @@ from sqlalchemy.exc import DatabaseError, DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from SAGisXPlanung import BASE_DIR, VERSION, Session, SessionAsync
-from SAGisXPlanung.core.connection import verify_db_connection, establish_session
+from SAGisXPlanung.core.connection import verify_db_connection, establish_session, IncompatibleDatabaseVersion
 from SAGisXPlanung.ext.spinner import loading_animation
+from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, with_color_palette, apply_color
 from .basepage import SettingsPage
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RevisionMeta:
+    current_revision: str = None
+    expected_revision: str = None
+
+    def is_valid(self) -> bool:
+        return self.current_revision == self.expected_revision
+
 
 style = '''
 QToolButton[objectName="connnection_test_status_icon"], 
@@ -65,6 +78,7 @@ class DatabaseConfigPage(SettingsPage):
     def __init__(self, parent=None):
         super(DatabaseConfigPage, self).__init__(parent)
         self.ui = None
+        self.database_revision = RevisionMeta()
 
         self.check_icon_base = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                               color=ApplicationColor.Grey400))
@@ -90,6 +104,9 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.button_upgrade.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/upgrade.svg'),
                                                 color=ApplicationColor.Tertiary))
         self.ui.button_upgrade.setCursor(Qt.PointingHandCursor)
+
+        self.ui.database_version_frame.hide()
+        self.ui.button_upgrade.clicked.connect(self.on_revision_update_clicked)
 
         self.ui.tab_database_actions.setStyleSheet(style.format(
             _label_color_mute=ApplicationColor.Grey600
@@ -226,6 +243,7 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
         self.ui.connection_test_result_label.setText(f'Verbindungstatus unbekannt')
         apply_color(self.ui.connection_test_result_label, ApplicationColor.Grey600)
+        self.ui.database_version_frame.hide()
 
         conn_name = str(self.ui.cbConnections.currentText())
         qs = QSettings()
@@ -237,6 +255,61 @@ class DatabaseConfigPage(SettingsPage):
         qs.setValue(f"plugins/xplanung/connection", conn_name)
         establish_session(Session)
         establish_session(SessionAsync)
+
+    @qasync.asyncSlot()
+    async def on_revision_update_clicked(self):
+        async with loading_animation(self.ui.tab_database):
+            if self.database_revision.is_valid():
+                return
+
+            try:
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, self.upgrade_database_revision)
+
+                Toaster.showMessage(self, message='Datenbank erfolgreich aktualisiert!', corner=Qt.BottomRightCorner,
+                                    margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
+                                    timeout=3000)
+                self.ui.database_version_frame.hide()
+                self.database_revision.current_revision = self.database_revision.expected_revision
+
+            except Exception as e:
+                apply_color(self.ui.connection_test_result_label, ApplicationColor.Error)
+                self.ui.connection_test_result_label.setText(str(e))
+                logger.error(e)
+
+            await self.test_connection()
+
+    def upgrade_database_revision(self):
+        rev = self.database_revision.current_revision
+        target_rev = self.database_revision.expected_revision
+
+        sql_dir = Path(BASE_DIR) / Path('database')
+        migration_files = [f.stem for f in sql_dir.iterdir() if f.is_file() and '..' in f.stem]
+
+        engine = Session().get_bind()
+        with engine.connect() as connection:
+            revision_sequence = self._find_revision_sequence(migration_files, rev, target_rev)
+            for revision_file in revision_sequence:
+                with open(os.path.join(sql_dir, f'{revision_file}.sql'), 'r') as file:
+                    sql_content = file.read()
+                    connection.execute(sql_content)
+
+    def _find_revision_sequence(self, sequence, start, end):
+        result = []
+        current = start
+
+        # Create a dictionary to quickly look up the next revision in the sequence
+        lookup = {item.split('..')[0]: item for item in sequence}
+
+        # Continue adding items to the result until the end revision is reached
+        while current != end:
+            if current in lookup:
+                result.append(lookup[current])
+                current = lookup[current].split('..')[1]
+            else:
+                break  # if there's no matching string for the current revision, exit the loop
+
+        return result
 
     async def test_connection(self):
         self.save_settings()
@@ -269,3 +342,8 @@ class DatabaseConfigPage(SettingsPage):
                 apply_color(self.ui.connection_test_result_label, ApplicationColor.Error)
                 self.ui.connection_test_result_label.setText(str(e))
                 logger.error(e)
+
+                if isinstance(e, IncompatibleDatabaseVersion):
+                    self.database_revision.current_revision = e.current_revision
+                    self.database_revision.expected_revision = e.expected_revisions[0]
+                    self.ui.database_version_frame.show()

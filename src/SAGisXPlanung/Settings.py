@@ -2,6 +2,7 @@ import asyncio
 import functools
 import logging
 import os
+from typing import Union
 
 import qasync
 
@@ -63,7 +64,7 @@ class Settings(QDialog, FORM_CLASS):
             }
         ''')
 
-    def navigate_to_page(self, page_type: type):
+    def navigate_to_page(self, page_type: type) -> Union[None, SettingsPage]:
         if not issubclass(page_type, SettingsPage):
             return
 
@@ -71,7 +72,7 @@ class Settings(QDialog, FORM_CLASS):
             page = self.tabs.widget(i)
             if isinstance(page, page_type):
                 self.tabs.setCurrentIndex(i)
-                return
+                return page
 
     def showEvent(self, e: QShowEvent):
         super(Settings, self).showEvent(e)

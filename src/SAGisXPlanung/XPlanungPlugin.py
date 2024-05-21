@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os.path
 
@@ -310,6 +311,9 @@ class XPlanung(QObject):
         msg_box.setEscapeButton(QMessageBox.Cancel)
         msg_box.exec()
         if msg_box.clickedButton() == settings_button:
-            self.settings.navigate_to_page(DatabaseConfigPage)
+            db_page = self.settings.navigate_to_page(DatabaseConfigPage)
+            if db_page:
+                db_page.setupData()
+                asyncio.create_task(db_page.test_connection())
             self.settings.exec()
         return False

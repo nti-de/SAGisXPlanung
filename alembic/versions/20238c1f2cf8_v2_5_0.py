@@ -51,9 +51,9 @@ def upgrade():
             coalesce(xp_plan."internalId", '') || ' ' ||
             coalesce(xp_plan.beschreibung, '') || ' ' ||
             coalesce(xp_plan.kommentar, '') || ' ' ||
-            coalesce(immutable_to_char(xp_plan."technHerstellDatum"), '') || ' ' ||
-            coalesce(immutable_to_char(xp_plan."genehmigungsDatum"), '') || ' ' ||
-            coalesce(immutable_to_char(xp_plan."untergangsDatum"), '') || ' ' ||
+            coalesce(immutable_date_to_char(xp_plan."technHerstellDatum"), '') || ' ' ||
+            coalesce(immutable_date_to_char(xp_plan."genehmigungsDatum"), '') || ' ' ||
+            coalesce(immutable_date_to_char(xp_plan."untergangsDatum"), '') || ' ' ||
             coalesce(xp_plan."erstellungsMassstab"::text, '') || ' ' ||
             coalesce(xp_plan.bezugshoehe::text, '') || ' ' ||
             coalesce(xp_plan."technischerPlanersteller", '')
