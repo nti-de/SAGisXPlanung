@@ -15,17 +15,18 @@ Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen.
 > [!NOTE]  
 > Die hier bereitgestellte Version besitzt nicht den vollen Funktionsumfang. Bitte beachten Sie die folgende Tabelle zur Gegenüberstellung der Versionen.
 
-|                                                              | Community-Version  | Vollversion        |
-|--------------------------------------------------------------|--------------------|--------------------|
-| Teilvektorielle Erfassung                                    | :heavy_check_mark: | :heavy_check_mark: |
-| Speichern externer Referenzen                                | :heavy_check_mark: | :heavy_check_mark: |
-| Import von XPlanGML-Dokumenten                               | :heavy_check_mark: | :heavy_check_mark: |
-| Visualisierung gemäß PlanZV                                  | :heavy_check_mark: | :heavy_check_mark: |
-| Export von XPlanGML-Dokumenten                               | [^abbr1]           | :heavy_check_mark: |
-| Bearbeiten von XPlanung-Attributen                           | [^abbr1]           | :heavy_check_mark: |
-| Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                    | :heavy_check_mark: |
+|                                                             | Community-Version   | Vollversion        |
+|-------------------------------------------------------------|---------------------|--------------------|
+| Teilvektorielle Erfassung                                   | :heavy_check_mark:  | :heavy_check_mark: |
+| Speichern externer Referenzen                               | :heavy_check_mark:  | :heavy_check_mark: |
+| Import von XPlanGML-Dokumenten                              | :heavy_check_mark:  | :heavy_check_mark: |
+| Visualisierung gemäß PlanZV                                 | :heavy_check_mark:  | :heavy_check_mark: |
+| Export von XPlanGML-Dokumenten                              | [^abbr1]            | :heavy_check_mark: |
+| Bearbeiten von XPlanung-Attributen                          | [^abbr1]            | :heavy_check_mark: |
+| Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                     | :heavy_check_mark: |
 | Codelist-Attribute                                           |                    | :heavy_check_mark: |
-| Benutzerdefinierte Symbolisierung                            |                    | :heavy_check_mark: |
+| Benutzerdefinierte Symbolisierung                           |                     | :heavy_check_mark: |
+| Tabellen-Import (Excel)                                   |                     | :heavy_check_mark: |
 [^abbr1]: Nur für Basisobjekte möglich (teilvektorielle Erfassung)
 
 

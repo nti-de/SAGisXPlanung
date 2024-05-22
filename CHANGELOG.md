@@ -1,5 +1,18 @@
 ## Changelog
 
+### [2.5.0] - 22.05.2024
+
+#### Neue Funktionen
+
+- Neuer Dialog zur Übersicht der gespeicherten Pläne
+- Excel-Import für Sachdaten der Objektklassen XP/BP/FP/RP/LP_Plan
+- Funktion zum Upgrade des Datenbankschemas nach Plugin-Aktualisierung
+- Neue Objektklasse `BP_UeberbaubareGrundstuecksFlaeche`
+
+#### Veränderungen
+
+- Verbesserte Geometrieauswahl bei Layern mit vielen Features (8b83295b)
+
 ### [2.4.0] - 15.04.2024
 
 #### Neue Funktionen
@@ -17,6 +30,7 @@
 - Fehler in Datenbank-Revision bzgl. UUID in sqlalchemy (6c797b1b)
 - Import von Boolean-Werten aus XPlanGML korrigiert (8208375c)
 - Fehler beim Wechseln des Plantyps im 'Planinhalte konfigurieren'-Dialog behoben (b365e72f)
+
 
 ### [2.3.0] - 19.03.2024
 
