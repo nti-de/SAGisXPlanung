@@ -79,7 +79,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                         'veraenderungssperre']
+                         'veraenderungssperre', 'grundstueck_ueberbaubar']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -98,6 +98,9 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
 
     baugebiet_id = Column(UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
     baugebiet = relationship("BP_BaugebietsTeilFlaeche", back_populates="refGebaeudequerschnitt")
+
+    grundstueck_ueberbaubar_id = Column(UUID(as_uuid=True), ForeignKey('bp_grundstueck_ueberbaubar.id', ondelete='CASCADE'))
+    grundstueck_ueberbaubar = relationship("BP_UeberbaubareGrundstuecksFlaeche", back_populates="refGebaeudequerschnitt")
 
     bp_schutzflaeche_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche_massnahme = relationship("BP_SchutzPflegeEntwicklungsFlaeche",
@@ -131,7 +134,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['file', 'baugebiet_id', 'bereich_id', 'bereich', 'bp_schutzflaeche_massnahme_id',
-                'bp_schutzflaeche_plan_id', 'veraenderungssperre_id']
+                'bp_schutzflaeche_plan_id', 'veraenderungssperre_id', 'grundstueck_ueberbaubar_id']
 
 
 class XP_SpezExterneReferenz(XP_ExterneReferenz):

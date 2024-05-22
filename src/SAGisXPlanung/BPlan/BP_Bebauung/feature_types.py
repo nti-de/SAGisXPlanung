@@ -316,6 +316,96 @@ def receive_load(target, context):
     target.xplan_item = XPlanungItem(xid=str(target.id), xtype=BP_BaugebietsTeilFlaeche)
 
 
+class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festsetzung der überbaubaren Grundstücksfläche (§9, Abs. 1, Nr. 2 BauGB). """
+
+    __tablename__ = 'bp_grundstueck_ueberbaubar'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_grundstueck_ueberbaubar',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    dachgestaltung = relationship("BP_Dachgestaltung", back_populates="grundstueck_ueberbaubar", cascade="all, delete",
+                                  passive_deletes=True)
+
+    FR = Column(Angle)
+    # abweichungText [BP_TextAbschnitt]
+    MaxZahlWohnungen = Column(Integer)
+    MinGRWohneinheit = Column(Area)
+    Fmin = Column(Area)
+    Fmax = Column(Area)
+    Bmin = Column(Length)
+    Bmax = Column(Length)
+    Tmin = Column(Length)
+    Tmax = Column(Length)
+    GFZmin = Column(Float)
+    GFZmax = Column(Float)
+    GFZ = Column(Float)
+    GFZ_Ausn = Column(Float)
+    GFmin = Column(Area)
+    GFmax = Column(Area)
+    GF = Column(Area)
+    GF_Ausn = Column(Area)
+    BMZ = Column(Float)
+    BMZ_Ausn = Column(Float)
+    BM = Column(Volume)
+    BM_Ausn = Column(Volume)
+    GRZmin = Column(Float)
+    GRZmax = Column(Float)
+    GRZ = Column(Float)
+    GRZ_Ausn = Column(Float)
+    GRmin = Column(Area)
+    GRmax = Column(Area)
+    GR = Column(Area)
+    GR_Ausn = Column(Area)
+    Zmin = Column(Integer)
+    Zmax = Column(Integer)
+    Zzwingend = Column(Integer)
+    Z = Column(Integer)
+    Z_Ausn = Column(Integer)
+    Z_Staffel = Column(Integer)
+    Z_Dach = Column(Integer)
+    ZUmin = Column(Integer)
+    ZUmax = Column(Integer)
+    ZUzwingend = Column(Integer)
+    ZU = Column(Integer)
+    ZU_Ausn = Column(Integer)
+    wohnnutzungEGStrasse = Column(XPEnum(BP_Zulaessigkeit, include_default=True))
+    ZWohn = Column(Integer)
+    GFAntWohnen = Column(Scale)
+    GFWohnen = Column(Area)
+    GFAntGewerbe = Column(Scale)
+    GFGewerbe = Column(Area)
+    VF = Column(Area)
+    bauweise = Column(XPEnum(BP_Bauweise, include_default=True))
+    # BP_AbweichendeBauweise[0..1]
+    vertikaleDifferenzierung = Column(Boolean)
+    bebauungsArt = Column(XPEnum(BP_BebauungsArt, include_default=True))
+    bebauungVordereGrenze = Column(XPEnum(BP_GrenzBebauung, include_default=True))
+    bebauungRueckwaertigeGrenze = Column(XPEnum(BP_GrenzBebauung, include_default=True))
+    bebauungSeitlicheGrenze = Column(XPEnum(BP_GrenzBebauung, include_default=True))
+    refGebaeudequerschnitt = relationship("XP_ExterneReferenz", back_populates="grundstueck_ueberbaubar",
+                                          cascade="all, delete", passive_deletes=True)
+    geschossMin = Column(Integer)
+    geschossMax = Column(Integer)
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+        symbol.setOpacity(0.4)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#beb297'))
+        symbol.appendSymbolLayer(fill)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+
 class BP_BauGrenze(LineGeometry, BP_Objekt):
     """ Festsetzung einer Baugrenze (§9 Abs. 1 Nr. 2 BauGB, §22 und 23 BauNVO). """
 

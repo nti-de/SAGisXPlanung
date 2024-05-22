@@ -6,7 +6,7 @@ from qgis.PyQt.QtCore import QSize
 
 from geoalchemy2 import Geometry, WKTElement
 
-from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint
+from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 
@@ -68,7 +68,21 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
     externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
                                    passive_deletes=True)
 
-    _sa_search_col = Column(TSVECTOR)
+    _sa_search_col = Column(TSVECTOR, Computed("""to_tsvector('german',
+            xp_plan.id::text || ' ' ||
+            xp_plan.name || ' ' ||
+            coalesce(xp_plan.type, '') || ' ' ||
+            coalesce(xp_plan.nummer, '') || ' ' ||
+            coalesce(xp_plan."internalId", '') || ' ' ||
+            coalesce(xp_plan.beschreibung, '') || ' ' ||
+            coalesce(xp_plan.kommentar, '') || ' ' ||
+            coalesce(immutable_to_char(xp_plan."technHerstellDatum"), '') || ' ' ||
+            coalesce(immutable_to_char(xp_plan."genehmigungsDatum"), '') || ' ' ||
+            coalesce(immutable_to_char(xp_plan."untergangsDatum"), '') || ' ' ||
+            coalesce(xp_plan."erstellungsMassstab"::text, '') || ' ' ||
+            coalesce(xp_plan.bezugshoehe::text, '') || ' ' ||
+            coalesce(xp_plan."technischerPlanersteller", '')
+        )"""))
 
     __mapper_args__ = {
         "polymorphic_identity": "xp_plan",

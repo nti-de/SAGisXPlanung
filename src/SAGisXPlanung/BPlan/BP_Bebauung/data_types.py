@@ -18,7 +18,7 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation einer für die Aufstellung des Plans zuständigen Gemeinde. """
 
     __tablename__ = 'bp_dachgestaltung'
-    __avoidRelation__ = ['baugebiet', 'besondere_nutzung', 'gemeinbedarf']
+    __avoidRelation__ = ['baugebiet', 'besondere_nutzung', 'gemeinbedarf', 'grundstueck_ueberbaubar']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -39,6 +39,9 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
 
     gemeinbedarf_id = Column(UUID(as_uuid=True), ForeignKey('bp_gemeinbedarf.id', ondelete='CASCADE'))
     gemeinbedarf = relationship('BP_GemeinbedarfsFlaeche', back_populates='dachgestaltung')
+
+    grundstueck_ueberbaubar_id = Column(UUID(as_uuid=True), ForeignKey('bp_grundstueck_ueberbaubar.id', ondelete='CASCADE'))
+    grundstueck_ueberbaubar = relationship('BP_UeberbaubareGrundstuecksFlaeche', back_populates='dachgestaltung')
 
     def to_xplan_node(self, node=None, version=XPlanVersion.FIVE_THREE):
         from SAGisXPlanung.GML.GMLWriter import GMLWriter
@@ -66,7 +69,8 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['baugebiet_id', 'besondere_nutzung_id', 'gemeinbedarf_id']
+        return ['baugebiet_id', 'besondere_nutzung_id', 'gemeinbedarf_id', 'grundstueck_ueberbaubar_id',
+                'detaillierteDachform_id']
 
     @classmethod
     def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:

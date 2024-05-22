@@ -16,7 +16,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereic
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
     BP_KomplexeZweckbestNebenanlagen
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
-    BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche
+    BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -135,6 +135,7 @@ CLASSES = {
     'BP_AbgrabungsFlaeche': BP_AbgrabungsFlaeche,
     'BP_AufschuettungsFlaeche': BP_AufschuettungsFlaeche,
     'BP_KennzeichnungsFlaeche': BP_KennzeichnungsFlaeche,
+    'BP_UeberbaubareGrundstuecksFlaeche': BP_UeberbaubareGrundstuecksFlaeche,
 
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,
