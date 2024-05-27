@@ -2,9 +2,11 @@ import logging
 from dataclasses import dataclass
 from typing import Union, List
 
+from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt import QtCore
 from qgis.gui import QgsMapCanvasItem
-from qgis.core import QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer
+from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup, QgsLayerTreeNode,
+                       QgsLayerTreeLayer)
 from qgis.utils import iface
 
 from SAGisXPlanung import Session
@@ -91,6 +93,25 @@ class MapLayerRegistry(Singleton):
             layer.committedGeometriesChanges.connect(self.onGeometriesChanged)
 
         self._layers.append(layer)
+
+    @pyqtSlot(QgsLayerTreeLayer)
+    def on_layer_visibility_changed(self, tree_node: QgsLayerTreeLayer):
+        layer = tree_node.layer()
+        for key in layer.customPropertyKeys():
+            if 'xplanung/feat-' not in key:
+                continue
+            feat_id = layer.customProperty(key)
+            canvas_items = self.canvas_items_at_feat(feat_id)
+            for c_item in canvas_items:
+                c_item.setVisible(not c_item.isVisible())
+
+    @pyqtSlot(QgsLayerTreeNode)
+    def on_group_node_visibility_changed(self, tree_node: QgsLayerTreeNode):
+        if isinstance(tree_node, QgsLayerTreeGroup):
+            for child_node in tree_node.children():
+                self.on_layer_visibility_changed(child_node)
+        elif isinstance(tree_node, QgsLayerTreeLayer):
+            self.on_layer_visibility_changed(tree_node)
 
     def removeLayer(self, layer_id):
         layer = self.layerById(layer_id)

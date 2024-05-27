@@ -160,3 +160,39 @@ class TestMapLayerRegistry:
 
         assert len(registry._canvasItems) == 1
         assert registry.canvas_items_at_feat(feat_xid)[0] == canvas_item_mock
+
+    def test_on_layer_visibility_changed(self, registry):
+        mock_layer = MagicMock()
+        mock_layer.customPropertyKeys.return_value = ['xplanung/feat-1']
+        mock_layer.customProperty.return_value = 'feat1'
+        mock_node = MagicMock()
+        mock_node.layer.return_value = mock_layer
+        mock_canvas_item = MagicMock()
+        mock_canvas_item.isVisible.return_value = True
+        registry._canvasItems = [
+            CanvasItemRegistryItem(plan_xid='plan1', feat_xid='feat1', canvas_item=mock_canvas_item)
+        ]
+
+        registry.on_layer_visibility_changed(mock_node)
+
+        # Check if the visibility of the canvas item has changed
+        mock_canvas_item.setVisible.assert_called_with(False)
+
+    def test_on_group_node_visibility_changed(self, registry):
+        mock_layer = MagicMock()
+        mock_layer.customPropertyKeys.return_value = ['xplanung/feat-1']
+        mock_layer.customProperty.return_value = 'feat1'
+        mock_node = MagicMock()
+        mock_node.layer.return_value = mock_layer
+        mock_group = MagicMock(spec=QgsLayerTreeGroup)
+        mock_group.children.return_value = [mock_node]
+        mock_canvas_item = MagicMock()
+        mock_canvas_item.isVisible.return_value = True
+        registry._canvasItems = [
+            CanvasItemRegistryItem(plan_xid='plan1', feat_xid='feat1', canvas_item=mock_canvas_item)
+        ]
+
+        registry.on_group_node_visibility_changed(mock_group)
+
+        mock_node.layer.assert_called()
+        mock_canvas_item.setVisible.assert_called_with(False)
