@@ -206,7 +206,7 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
                                      parent=self.xplan_item, scale=scale, angle=angle)
         # connect to signal on event filter, because QGraphicsItems can't emit signals
         table.event_filter.positionUpdated.connect(lambda p: self.onTemplatePositionUpdated(p))
-        MapLayerRegistry().addCanvasItem(table, str(self.id))
+        MapLayerRegistry().add_canvas_item(table, str(self.id), self.xplan_item.plan_xid)
 
         return feat
 

@@ -47,7 +47,7 @@ class EnableBuldingTemplateAction(QAction):
             template.hidden = not checked
 
         if not checked:
-            MapLayerRegistry().removeCanvasItems(self.parent_item.xid)
+            MapLayerRegistry().remove_canvas_items(self.parent_item.xid)
         elif MapLayerRegistry().featureIsShown(self.parent_item.xid):
             # display template on canvas by reloading layer
             with Session.begin() as session:
@@ -107,7 +107,7 @@ class EditBuildingTemplateAction(QAction):
             setattr(template, attr, value)
 
             if not template.hidden and MapLayerRegistry().featureIsShown(self.parent_item.xid):
-                canvas_items = MapLayerRegistry().canvasItemsAtFeat(self.parent_item.xid)
+                canvas_items = MapLayerRegistry().canvas_items_at_feat(self.parent_item.xid)
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 if attr == 'drehwinkel':
@@ -125,7 +125,7 @@ class EditBuildingTemplateAction(QAction):
 
             # update map layer registry immediately if template is currently visible
             if not template.hidden and MapLayerRegistry().featureIsShown(self.parent_item.xid):
-                canvas_items = MapLayerRegistry().canvasItemsAtFeat(self.parent_item.xid)
+                canvas_items = MapLayerRegistry().canvas_items_at_feat(self.parent_item.xid)
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 bp_baugebiet = session.query(self.parent_item.xtype).get(self.parent_item.xid)
@@ -143,7 +143,7 @@ class EditBuildingTemplateAction(QAction):
 
             # update map layer registry immediately if template is currently visible
             if not template.hidden and MapLayerRegistry().featureIsShown(self.parent_item.xid):
-                canvas_items = MapLayerRegistry().canvasItemsAtFeat(self.parent_item.xid)
+                canvas_items = MapLayerRegistry().canvas_items_at_feat(self.parent_item.xid)
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 bp_baugebiet = session.query(self.parent_item.xtype).get(self.parent_item.xid)

@@ -1,10 +1,10 @@
 import logging
-from collections import defaultdict
-from typing import Union
+from dataclasses import dataclass
+from typing import Union, List
 
 from qgis.PyQt import QtCore
 from qgis.gui import QgsMapCanvasItem
-from qgis.core import QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsWkbTypes, Qgis
+from qgis.core import QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer
 from qgis.utils import iface
 
 from SAGisXPlanung import Session
@@ -27,9 +27,16 @@ class Singleton(QtCore.QObject):
         pass
 
 
+@dataclass
+class CanvasItemRegistryItem:
+    plan_xid: str
+    feat_xid: str
+    canvas_item: QgsMapCanvasItem
+
+
 class MapLayerRegistry(Singleton):
     _layers = []
-    _canvasItems = defaultdict(list)
+    _canvasItems: List[CanvasItemRegistryItem] = []
 
     def init(self):
         QgsProject.instance().layerStore().layerWillBeRemoved.connect(self.removeLayer)
@@ -44,20 +51,26 @@ class MapLayerRegistry(Singleton):
     def layers(self):
         return self._layers
 
-    def canvasItemsAtFeat(self, feat_xid: str):
-        return self._canvasItems.get(feat_xid, [])
+    def canvas_items_at_feat(self, feat_xid: str):
+        registry_items = list(filter(lambda r_item: r_item.feat_xid == feat_xid, self._canvasItems))
+        return [r.canvas_item for r in registry_items]
 
-    def addCanvasItem(self, item: QgsMapCanvasItem, feat_xid: str):
+    def add_canvas_item(self, item: QgsMapCanvasItem, feat_xid: str, plan_xid: str):
         # if building template already exists replace with new one
-        self.removeCanvasItems(feat_xid)
-        self._canvasItems[feat_xid].append(item)
+        canvas_registry_item = CanvasItemRegistryItem(
+            plan_xid=plan_xid,
+            feat_xid=feat_xid,
+            canvas_item=item
+        )
+        self.remove_canvas_items(feat_xid)
+        self._canvasItems.append(canvas_registry_item)
 
-    def removeCanvasItems(self, feat_xid: str):
-        items = self._canvasItems.pop(feat_xid, [])
-        for item in items:
-            iface.mapCanvas().scene().removeItem(item)
-            item.updateCanvas()
-            del item
+    def remove_canvas_items(self, feat_xid: str):
+        for registry_item in self._canvasItems:
+            if registry_item.feat_xid == feat_xid:
+                iface.mapCanvas().scene().removeItem(registry_item.canvas_item)
+                registry_item.canvas_item.updateCanvas()
+                del registry_item.canvas_item
 
     def addLayer(self, layer: QgsMapLayer, group=None, add_to_legend=True):
         if not (isinstance(layer, QgsVectorLayer) or isinstance(layer, QgsAnnotationLayer)):
@@ -65,8 +78,6 @@ class MapLayerRegistry(Singleton):
 
         if layer in self._layers:
             return
-
-        self._layers.append(layer)
 
         if add_to_legend:
             QgsProject.instance().addMapLayer(layer, False)
@@ -77,6 +88,8 @@ class MapLayerRegistry(Singleton):
 
         if isinstance(layer, QgsVectorLayer):
             layer.committedGeometriesChanges.connect(self.onGeometriesChanged)
+
+        self._layers.append(layer)
 
     def removeLayer(self, layer_id):
         layer = self.layerById(layer_id)
@@ -89,7 +102,7 @@ class MapLayerRegistry(Singleton):
                 if 'xplanung/feat-' not in key:
                     continue
                 feat_id = layer.customProperty(key)
-                self.removeCanvasItems(feat_id)
+                self.remove_canvas_items(feat_id)
 
         self._layers.remove(layer)
 

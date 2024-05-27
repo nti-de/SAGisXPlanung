@@ -119,7 +119,7 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
         self.raeumlicherGeltungsbereich = WKTElement(geom.asWkt(), srid=self.raeumlicherGeltungsbereich.srid)
 
     def toCanvas(self, layer_group, plan_xid=None):
-        MapLayerRegistry().removeCanvasItems(str(self.id))
+        MapLayerRegistry().remove_canvas_items(str(self.id))
 
         super(XP_Plan, self).toCanvas(layer_group, plan_xid)
 

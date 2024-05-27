@@ -2,12 +2,15 @@ import uuid
 
 import pytest
 from geoalchemy2 import WKTElement
+from mock.mock import MagicMock
+from qgis._core import QgsLayerTreeNode, QgsLayerTreeGroup
+from qgis._gui import QgsMapCanvasItem
 
 from qgis.core import QgsVectorLayer, QgsAnnotationLayer, QgsProject, QgsGeometry, QgsWkbTypes
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung
-from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry, CanvasItemRegistryItem
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PTO
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
@@ -153,7 +156,7 @@ class TestMapLayerRegistry:
     def test_add_canvas_item(self, mocker, registry):
         canvas_item_mock = mocker.patch("SAGisXPlanung.BuildingTemplateItem.BuildingTemplateItem").return_value
 
-        registry.addCanvasItem(canvas_item_mock, feat_xid)
+        registry.add_canvas_item(canvas_item_mock, feat_xid, plan_xid)
 
         assert len(registry._canvasItems) == 1
-        assert registry.canvasItemsAtFeat(feat_xid)[0] == canvas_item_mock
+        assert registry.canvas_items_at_feat(feat_xid)[0] == canvas_item_mock

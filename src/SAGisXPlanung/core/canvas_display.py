@@ -6,6 +6,7 @@ from qgis.core import QgsRasterLayer, QgsProject, QgsLayerTreeGroup, QgsLayerTre
 from qgis.utils import iface
 
 from SAGisXPlanung import Session
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.utils import createXPlanungIndicators
@@ -70,6 +71,7 @@ def load_on_canvas(plan_xid, layer_group=None):
         if not layer_group:
             layer_group = root.insertGroup(0, plan.name)
             layer_group.setCustomProperty('xplanung_id', str(plan.id))
+            layer_group.visibilityChanged.connect(MapLayerRegistry().on_group_node_visibility_changed)
 
             xp_indicator, reload_indicator = createXPlanungIndicators()
             reload_indicator.clicked.connect(lambda i, p=plan_xid: plan_to_map(p))
