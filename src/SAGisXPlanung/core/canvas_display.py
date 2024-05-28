@@ -85,6 +85,10 @@ def load_on_canvas(plan_xid, layer_group=None):
                     truncate_success = map_layer.dataProvider().truncate()
                     if not truncate_success:
                         logger.warning(f'Could not truncate features of vector layer {map_layer.name()}')
+                    else:
+                        for key in map_layer.customPropertyKeys():
+                            if 'xplanung/feat-' in key:
+                                map_layer.removeCustomProperty(key)
                 elif isinstance(map_layer, QgsAnnotationLayer):
                     map_layer.clear()
                 elif isinstance(map_layer, QgsRasterLayer):
