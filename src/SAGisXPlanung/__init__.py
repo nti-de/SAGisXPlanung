@@ -75,11 +75,11 @@ VERSION = '2.5.0'
 COMPATIBLE_DB_REVISIONS = ['20238c1f2cf8']
 DEPENDENCIES = [
     'lxml',
-    'SQLAlchemy==1.4.46',
+    'SQLAlchemy==1.4.49',
     'GeoAlchemy2==0.12.5',
     'shapely==2.0.0',
     'qasync==0.22.0',
-    'asyncpg==0.26.0'
+    'asyncpg==0.29.0'
 ]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
