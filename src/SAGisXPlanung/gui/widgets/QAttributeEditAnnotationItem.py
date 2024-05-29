@@ -1,8 +1,11 @@
 import logging
 import os
+from typing import Union
 
 import qasync
+from qgis.PyQt import sip
 from qgis.PyQt.QtCore import Qt, pyqtSlot
+from qgis._core import QgsAnnotationLayer, QgsAnnotationItem
 from qgis.core import QgsTextFormat
 from sqlalchemy import select
 from sqlalchemy.orm import load_only
@@ -27,14 +30,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
         self.styleGroup.setVisible(True)
 
         self._annotation_layer = MapLayerRegistry().layerByXid(self._xplanung_item)
-        if self._annotation_layer:
-            self.annotation_type = self._annotation_layer.customProperties().value(f'xplanung/type')
-            for item_id, item in self._annotation_layer.items().items():
-                id_prop = self._annotation_layer.customProperties().value(f'xplanung/feat-{item_id}')
-                if id_prop == self._xplanung_item.xid:
-                    self._annotation_item = item
-
-                    break
+        self.annotation_item()
 
         # set initial form values
         self.set_form_values()
@@ -55,14 +51,31 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
             symbol_widget.svg_selection_saved.connect(self.onSvgSelected)
             self.layout().addWidget(symbol_widget)
 
+    def annotation_item(self) -> Union[None, QgsAnnotationItem]:
+        if not self._annotation_layer or sip.isdeleted(self._annotation_layer):
+            self._annotation_layer = MapLayerRegistry().layerByXid(self._xplanung_item)
+            if not self._annotation_layer:
+                return None
+
+        for item_id, item in self._annotation_layer.items().items():
+            id_prop = self._annotation_layer.customProperties().value(f'xplanung/feat-{item_id}')
+            if id_prop == self._xplanung_item.xid:
+                self._annotation_item = item
+                return item
+
     @qasync.asyncSlot(str)
     async def onSvgSelected(self, path: str):
         self.onAttributeChanged(None, 'symbol_path', path)
+        if self.annotation_item():
+            text_format: QgsTextFormat = self._annotation_item.format()
+            text_format.background().setSvgFile(os.path.join(BASE_DIR, path))
+            self._annotation_item.setFormat(text_format)
+            self._annotation_layer.triggerRepaint()
 
     @pyqtSlot(int)
     def onSliderValueChanged(self, value: int):
         scale = (value - 1) / (99 - 1)
-        if self._annotation_item:
+        if self.annotation_item():
             text_format: QgsTextFormat = self._annotation_item.format()
             if self.annotation_type == 'XP_PTO':
                 text_format.setSize(self.TEXT_DEFAULT_SIZE * scale * 2.0)
@@ -79,7 +92,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
     @pyqtSlot(int)
     def onDialValueChanged(self, value: int):
         self.angleEdit.setText(f'{value}°')
-        if self._annotation_item:
+        if self.annotation_item():
             self._annotation_item.setAngle(value)
             self._annotation_layer.triggerRepaint()
 
