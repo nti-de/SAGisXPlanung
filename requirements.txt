@@ -4,3 +4,4 @@ shapely==2.0.0 --no-binary shapely
 SQLAlchemy==1.4.46
 qasync==0.22.0
 asyncpg==0.26.0
+packaging

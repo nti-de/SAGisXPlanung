@@ -1,6 +1,8 @@
-import importlib
 import re
+import importlib
+from importlib.metadata import version
 
+from packaging.version import Version
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QMessageBox, QLabel
 from qgis.utils import iface
@@ -9,11 +11,24 @@ from qgis.utils import iface
 def check(required_packages):
     """ Checks if required packages are correctly installed. """
     missing_packages = []
+    with_packaging = True
     for package in required_packages:
-        package_name = re.split(r'[<>=~]', package)[0].strip()
         try:
-            importlib.import_module(package_name.lower())
+            # fallback to use std importlib, when packaging is not installed
+            if not with_packaging:
+                package_name = re.split(r'[<>=~]', package)[0].strip()
+                importlib.import_module(package_name.lower())
+            else:
+                from packaging.requirements import Requirement
+
+                requirement = Requirement(package)
+                installed_version = Version(version(requirement.name))
+                if requirement.specifier:
+                    if installed_version not in requirement.specifier:
+                        missing_packages.append(package)
         except ImportError:
+            if 'packaging' in package:
+                with_packaging = False
             missing_packages.append(package)
 
     if not missing_packages:

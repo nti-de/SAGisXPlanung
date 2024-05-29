@@ -74,6 +74,7 @@ except Exception as e:
 VERSION = '2.5.0'
 COMPATIBLE_DB_REVISIONS = ['20238c1f2cf8']
 DEPENDENCIES = [
+    'packaging',
     'lxml',
     'SQLAlchemy==1.4.49',
     'GeoAlchemy2==0.12.5',
