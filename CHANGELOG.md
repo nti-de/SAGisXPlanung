@@ -1,5 +1,17 @@
 ## Changelog
 
+### [2.5.1] - 22.05.2024
+
+#### Veränderungen
+
+- Anpassungen zur Nutzung mit Python 3.12 (ab QGIS 3.34.6)
+- verbesserte Package-Verifizierung beim Starten des Plugins
+
+#### Fehlerbehebungen
+
+- Nutzungsschablonen werden mit Plan-Gruppe korrekt ausgeblendet (17fd4cee, b77f36c9)
+- Objekteigenschaften von Präsentationsobjekten nach Neuladen eines Plans (29310c48)
+
 ### [2.5.0] - 22.05.2024
 
 #### Neue Funktionen
