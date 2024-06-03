@@ -42,7 +42,6 @@ class XPlanung(QObject):
         self.snapshot_action = None
         self.processing_menu = None
         self.menu_name = 'SAGis XPlanung'
-        self.tool = None
         self.provider = None
 
         # Check if plugin was started the first time in current QGIS session
@@ -118,7 +117,6 @@ class XPlanung(QObject):
         self.snapshot_action.triggered.connect(self.onSnapshotActionTriggered)
         self.menu.addAction(self.snapshot_action)
 
-        self.add_config_content_action()
         QtWidgets.QApplication.restoreOverrideCursor()
 
         self.initProcessing()
@@ -135,7 +133,6 @@ class XPlanung(QObject):
 
         MapLayerRegistry().unload()
 
-        self.tool.identifyMenu().removeCustomActions()
         QgsProject.instance().homePathChanged.disconnect(self.onProjectLoaded)
         self.iface.layerTreeView().layerTreeModel().rowsInserted.disconnect(self.onRowsInserted)
 
@@ -242,27 +239,6 @@ class XPlanung(QObject):
         self.iface.messageBar().pushMessage("Als PDF Speichern",
                                             f"Kartenausschnitt erfolgreich unter <a href=\"{url}\">{path}</a> gespeichert",
                                             level=Qgis.Success)
-
-    def add_config_content_action(self):
-        """Add the new action to the identify menu"""
-
-        xp_icon = os.path.abspath(os.path.join(os.path.dirname(__file__), 'gui/resources/xplanung_icon.png'))
-        action = [a for a in self.iface.attributesToolBar().actions() if a.objectName() == 'mActionIdentify'][0]
-        # action.triggered.disconnect()
-
-        action.trigger()
-        self.tool = self.iface.mapCanvas().mapTool()
-
-        menu = self.tool.identifyMenu()
-        xp_action = QgsMapLayerAction("Als Planinhalt konfigurieren", menu, QgsMapLayerType.VectorLayer,
-                                      QgsMapLayerAction.SingleFeature, QIcon(xp_icon))
-        xp_action.triggeredForFeature.connect(self.onActionTriggered)
-        menu.addCustomAction(xp_action)
-
-        self.iface.actionPan().trigger()
-
-    def onActionTriggered(self, layer, feat):
-        full_version_required_warning()
 
     def onProjectLoaded(self):
         logger.debug('project loaded')
