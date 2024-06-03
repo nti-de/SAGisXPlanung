@@ -47,7 +47,7 @@ if __name__ == "__main__":
         with io.StringIO() as buf, redirect_stdout(buf):
             upgrade(config, f'{rev.down_revision}:{rev.revision}', sql=True)
 
-            sql_filename = f"{rev.down_revision}..{rev.revision}.sql"
+            sql_filename = f"{rev.down_revision}_{rev.revision}.sql"
             sql_filepath = os.path.join(output_directory, sql_filename)
 
             # Write SQL content to file

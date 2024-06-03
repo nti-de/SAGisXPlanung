@@ -284,7 +284,7 @@ class DatabaseConfigPage(SettingsPage):
         target_rev = self.database_revision.expected_revision
 
         sql_dir = Path(BASE_DIR) / Path('database')
-        migration_files = [f.stem for f in sql_dir.iterdir() if f.is_file() and '..' in f.stem]
+        migration_files = [f.stem for f in sql_dir.iterdir() if f.is_file() and '_' in f.stem]
 
         engine = Session().get_bind()
         with engine.connect() as connection:
@@ -299,13 +299,13 @@ class DatabaseConfigPage(SettingsPage):
         current = start
 
         # Create a dictionary to quickly look up the next revision in the sequence
-        lookup = {item.split('..')[0]: item for item in sequence}
+        lookup = {item.split('_')[0]: item for item in sequence}
 
         # Continue adding items to the result until the end revision is reached
         while current != end:
             if current in lookup:
                 result.append(lookup[current])
-                current = lookup[current].split('..')[1]
+                current = lookup[current].split('_')[1]
             else:
                 break  # if there's no matching string for the current revision, exit the loop
 
