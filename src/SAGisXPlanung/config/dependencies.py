@@ -2,7 +2,6 @@ import re
 import importlib
 from importlib.metadata import version
 
-from packaging.version import Version
 from qgis.core import Qgis
 from qgis.PyQt.QtWidgets import QMessageBox, QLabel
 from qgis.utils import iface
@@ -20,6 +19,7 @@ def check(required_packages):
                 importlib.import_module(package_name.lower())
             else:
                 from packaging.requirements import Requirement
+                from packaging.version import Version
 
                 requirement = Requirement(package)
                 installed_version = Version(version(requirement.name))

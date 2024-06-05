@@ -78,7 +78,7 @@ DEPENDENCIES = [
     'lxml',
     'SQLAlchemy==1.4.49',
     'GeoAlchemy2==0.12.5',
-    'shapely==2.0.0',
+    'shapely>=2.0.2',
     'qasync==0.22.0',
     'asyncpg==0.29.0'
 ]

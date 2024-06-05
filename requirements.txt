@@ -1,7 +1,7 @@
 GeoAlchemy2==0.12.5
 lxml==4.6.3
-shapely==2.0.0 --no-binary shapely
-SQLAlchemy==1.4.46
+shapely>=2.0.2 --no-binary shapely
+SQLAlchemy==1.4.49
 qasync==0.22.0
-asyncpg==0.26.0
+asyncpg==0.29.0
 packaging

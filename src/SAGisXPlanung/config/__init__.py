@@ -8,7 +8,10 @@ from SAGisXPlanung import XPlanVersion, Base
 
 from qgis.PyQt.QtCore import QSettings
 
-from .qgis_config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
+try:
+    from .qgis_config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
+except ImportError:
+    pass
 
 try:
     from functools import cache
