@@ -1,5 +1,17 @@
 ## Changelog
 
+### [2.5.2] - 05.06.2024
+
+#### Veränderungen
+
+- Kompatibilität mit Python 3.12 (ab QGIS 3.34.6)
+- Anpassungen für Plugin-Repository Validierung
+
+#### Fehlerbehebungen
+
+- fehlerhaftes Laden von Python-Modulen vor dem Dependency-Check
+
+
 ### [2.5.1] - 22.05.2024
 
 #### Veränderungen
