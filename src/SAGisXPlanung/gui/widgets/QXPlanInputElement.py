@@ -202,7 +202,7 @@ class QIntegerInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPla
 
     def validate_widget(self, required):
         try:
-            if not self.value() and required:
+            if required and self.value() is None:
                 return False
             return True
         except ValueError:

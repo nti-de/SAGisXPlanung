@@ -182,7 +182,9 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
         feat_id = self.cbFeature.feature().id()
         if feat_id >= 0 and self.featureGeometry is not None:
             return True
-        if not self.featureGeometry:
+        if self.layer is None:
+            self.error_message = 'Kein Layer gewählt...'
+        elif not self.featureGeometry:
             self.error_message = f'Gewähltes Objekt konnte nicht geladen werden. '
             source_uri = QgsDataSourceUri(self.layer.source())
             if source_uri.hasParam('url'):
