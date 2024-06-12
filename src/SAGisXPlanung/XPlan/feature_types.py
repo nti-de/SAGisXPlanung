@@ -23,6 +23,7 @@ from SAGisXPlanung.config import export_version
 from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
 from .types import LargeString, Angle, Length, GeometryType
 from ..MapLayerRegistry import MapLayerRegistry
+from ..XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
 
@@ -252,7 +253,7 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
         except:
             # when srs fails, plan content can't be displayed, therefore return early
             return
-        layer = MapLayerRegistry().layerByFeature(str(self.id))
+        layer = MapLayerRegistry().layer_by_display_name(self.displayName(), str(plan_xid))
         if not layer:
             layer = self.asLayer(srs, plan_xid, name=self.displayName(), geom_type=self.__geometry_type__)
 

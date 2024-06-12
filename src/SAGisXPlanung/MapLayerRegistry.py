@@ -160,6 +160,12 @@ class MapLayerRegistry(Singleton):
                     continue
                 return lyr
 
+    def layer_by_display_name(self, display_name: str, plan_xid: str) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
+        for lyr in self._layers:
+            xid = lyr.customProperty('xplanung/plan-xid')
+            if display_name == lyr.name() and xid == plan_xid:
+                return lyr
+
     def onGeometriesChanged(self, layer_id, changed_geometries):
         layer = self.layerById(layer_id)
         for feat_id, geometry in changed_geometries.items():

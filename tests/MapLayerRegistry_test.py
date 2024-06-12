@@ -4,7 +4,6 @@ import pytest
 from geoalchemy2 import WKTElement
 from mock.mock import MagicMock
 from qgis._core import QgsLayerTreeNode, QgsLayerTreeGroup
-from qgis._gui import QgsMapCanvasItem
 
 from qgis.core import QgsVectorLayer, QgsAnnotationLayer, QgsProject, QgsGeometry, QgsWkbTypes
 
@@ -27,9 +26,9 @@ def xitem() -> XPlanungItem:
 
 
 @pytest.fixture()
-def vl() -> QgsVectorLayer:
-    layer = QgsVectorLayer('polygon?crs=epsg:4326', "Scratch  layer", "memory")
-    layer.setCustomProperty('xplanung/type', 'BP_BaugebietsTeilFlaeche')
+def vl(request) -> QgsVectorLayer:
+    layer = QgsVectorLayer('polygon?crs=epsg:4326', request.param, "memory")
+    layer.setCustomProperty('xplanung/type', request.param)
     layer.setCustomProperty('xplanung/plan-xid', plan_xid)
     layer.setCustomProperty(f'xplanung/feat-1', feat_xid)
     return layer
@@ -78,6 +77,7 @@ def clear_registry_after_test(registry):
 
 class TestMapLayerRegistry:
 
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_add_layer(self, registry, vl, al):
         registry.addLayer(vl)
         registry.addLayer(al)
@@ -87,8 +87,9 @@ class TestMapLayerRegistry:
         assert vl in registry.layers
         # verify that duplicate isn't  added to registry
         assert len(registry.layers) == 2
-        assert len(QgsProject().instance().mapLayersByName("Scratch  layer")) == 1
+        assert len(QgsProject().instance().mapLayersByName("BP_BaugebietsTeilFlaeche")) == 1
 
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_add_layer_into_group(self, registry, vl, al):
         root = QgsProject.instance().layerTreeRoot()
         layer_group = root.addGroup("Test_Group")
@@ -100,6 +101,7 @@ class TestMapLayerRegistry:
         assert layer_group.children()[0].layerId() == al.id()
         assert layer_group.children()[1].layerId() == vl.id()
 
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_remove_layer(self, registry, vl, al):
         registry.addLayer(vl)
 
@@ -117,7 +119,7 @@ class TestMapLayerRegistry:
 
         assert isinstance(layer, QgsAnnotationLayer)
 
-    def test_get_layer_by_xid_with_type(self, registry, vl1, vl2):
+    def test_get_layer_by_xid_with_geomtype(self, registry, vl1, vl2):
         registry.addLayer(vl1)
         registry.addLayer(vl2)
 
@@ -127,18 +129,31 @@ class TestMapLayerRegistry:
         assert isinstance(layer, QgsVectorLayer)
         assert layer.geometryType() == QgsWkbTypes.PointGeometry
 
+    @pytest.mark.parametrize("vl", ['BP_Bereich'], indirect=True)
+    def test_get_layer_by_display_name(self, registry, vl):
+        registry.addLayer(vl)
+
+        layer = registry.layer_by_display_name('BP_Bereich', plan_xid)
+
+        assert isinstance(layer, QgsVectorLayer)
+        assert layer.geometryType() == QgsWkbTypes.PolygonGeometry
+        assert len(registry._layers) == 1
+
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_feature_is_shown(self, registry, vl):
         registry.addLayer(vl)
 
         assert registry.featureIsShown(feat_xid)
         assert not registry.featureIsShown(plan_xid)
 
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_layer_by_feature(self, registry, vl):
         registry.addLayer(vl)
 
         assert registry.layerByFeature(feat_xid)
         assert registry.layerByFeature(plan_xid) is None
 
+    @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_geometries_changed(self, mocker, registry, vl):
         mocker.patch("SAGisXPlanung.MapLayerRegistry.MapLayerRegistry.layerById").return_value = vl
 
