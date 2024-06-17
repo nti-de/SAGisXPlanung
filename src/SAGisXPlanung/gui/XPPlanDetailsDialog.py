@@ -355,6 +355,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             full_version_required_warning()
             return
         tab_widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
+
+        if self.bSave.receivers(self.bSave.clicked) > 0:
+            self.bSave.clicked.disconnect()
         self.bSave.clicked.connect(functools.partial(self.onSaveClicked, parent_item, attribute))
         self.stackedWidget.insertWidget(2, tab_widget)
         self.stackedWidget.setCurrentIndex(2)
