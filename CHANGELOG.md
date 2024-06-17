@@ -1,5 +1,18 @@
 ## Changelog
 
+### [2.5.3] - 17.06.2024
+
+#### Veränderungen
+
+- verbessertes Eingabe-Widget für Zahlenwerte und Geometrien (84e5e10c)
+- Layerauswahl wird nach Bestätigen des Konfigurationsdialog aufgehoben (fd1efb0e)
+
+#### Fehlerbehebungen
+
+- mehrfaches Auftreten des "Bereich"-Layers beim Refresh eins Plans (55645d89)
+- doppeltes Speichern von Datenobjekten und anschließendes Auftreten eines leeren Dialog-Fensters behoben (5ddef917)
+- Datenbank-Upgrade scheitert nicht mehr durch Anlegen eines fehlenden Foreign-Key-Constraint (1b8f0a6e)
+
 ### [2.5.2] - 05.06.2024
 
 #### Veränderungen

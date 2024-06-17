@@ -8,6 +8,7 @@ import sys
 import asyncio
 from enum import Enum
 from io import StringIO
+from pathlib import Path
 
 from qgis.PyQt.QtCore import QCoreApplication
 from qgis.core import Qgis
@@ -64,14 +65,14 @@ def compile_ui_file(ui_file):
 try:
     import pydevd_pycharm
 
-    pydevd_pycharm.settrace('localhost', port=51699, stdoutToServer=True, stderrToServer=True, suspend=False)
+    pydevd_pycharm.settrace('localhost', port=51599, stdoutToServer=True, stderrToServer=True, suspend=False)
 except Exception as e:
     logger.info('Python debug config failed')
     logger.error(e)
 
 # =========================================================
 
-VERSION = '2.5.2'
+VERSION = '2.5.3'
 COMPATIBLE_DB_REVISIONS = ['20238c1f2cf8']
 DEPENDENCIES = [
     'packaging',
@@ -169,6 +170,11 @@ def classFactory(iface):
 
     logger.info(system_info())
     logger.info(qgis_info())
+
+    dependency_dir39 = Path(BASE_DIR) / Path('dependencies/py39')
+    dependency_dir312 = Path(BASE_DIR) / Path('dependencies/py312')
+    sys.path.insert(0, str(dependency_dir39))
+    sys.path.insert(0, str(dependency_dir312))
 
     from SAGisXPlanung.config.dependencies import check
     re = check(DEPENDENCIES)
