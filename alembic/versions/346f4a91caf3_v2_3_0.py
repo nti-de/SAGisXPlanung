@@ -149,6 +149,10 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    # before adding foreign key, remove stale db rows that have not been deleted due to missing foreign key cascade
+    op.execute("DELETE FROM bp_einfahrtpunkt WHERE id NOT IN (SELECT id FROM bp_objekt)")
+    op.execute("DELETE FROM bp_keine_ein_ausfahrt WHERE id NOT IN (SELECT id FROM bp_objekt)")
+    op.execute("DELETE FROM bp_nutzungsgrenze WHERE id NOT IN (SELECT id FROM bp_objekt)")
     op.create_foreign_key(None, 'bp_einfahrtpunkt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_keine_ein_ausfahrt', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
     op.create_foreign_key(None, 'bp_nutzungsgrenze', 'bp_objekt', ['id'], ['id'], ondelete='CASCADE')
