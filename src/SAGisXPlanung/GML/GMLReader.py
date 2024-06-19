@@ -76,7 +76,9 @@ class GMLReader:
         try:
             srs_name = gml_node.attrib['srsName']
         except KeyError as e:
-            srs_name_list = gml_node.xpath('//*[@srsName]/@srsName[1]', namespaces=gml_node.nsmap)
+            ns = gml_node.nsmap
+            ns.pop(None, None) # remove invalid empty namespace
+            srs_name_list = gml_node.xpath('//*[@srsName]/@srsName[1]', namespaces=ns)
             if not srs_name_list:
                 raise Exception([e, Exception(f"Attribut 'srsName' in Zeile {gml_node.sourceline} erwartet")])
             srs_name = srs_name_list[0]
