@@ -24,7 +24,7 @@ from SAGisXPlanung.gui.widgets.geometry_validation import ValidationResult, Vali
 @pytest.fixture()
 def dialog(mocker):
     mocker.patch(
-        'SAGisXPlanung.gui.XPPlanDetailsDialog.XPPlanDetailsDialog.initPlanData',
+        'SAGisXPlanung.gui.XPPlanDetailsDialog.XPPlanDetailsDialog.initialize_data',
         return_value=None
     )
     dlg = XPPlanDetailsDialog("test")
@@ -101,7 +101,6 @@ def plan():
 
 class TestXPPlanDetailsDialog_constructExplorer:
 
-    @pytest.mark.asyncio
     async def test_constructExplorer(self, dialog):
         plan = BP_Plan()
         plan.id = uuid.uuid4()
@@ -110,7 +109,7 @@ class TestXPPlanDetailsDialog_constructExplorer:
         bereich.name = 'Test'
         plan.bereich.append(bereich)
 
-        await dialog.constructExplorer(plan)
+        dialog.construct_explorer(plan)
 
         model = dialog.objectTree.model
         index_list = model.match(model.index(0, 0), Qt.DisplayRole, 'BP_Plan', -1, QtCore.Qt.MatchFixedString)

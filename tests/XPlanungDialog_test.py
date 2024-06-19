@@ -1,5 +1,5 @@
 import pytest
-from mock.mock import MagicMock, AsyncMock
+from mock.mock import MagicMock, AsyncMock, Mock
 
 from qgis.PyQt.QtCore import QModelIndex, Qt
 from qgis.utils import iface
@@ -38,7 +38,7 @@ class TestXPlanungDialog:
     async def test_on_index_changed(self, dialog):
         # Setup
         details_dialog = dialog.details_dialog
-        details_dialog.initPlanData = AsyncMock()
+        details_dialog.initialize_data = AsyncMock()
         export_button = dialog.bExport
         info_button = dialog.bInfo
 
@@ -54,7 +54,7 @@ class TestXPlanungDialog:
 
         assert export_button.isEnabled()
         assert info_button.isEnabled()
-        details_dialog.initPlanData.assert_called_once()
+        details_dialog.initialize_data.assert_called_once()
 
 
     def test_onIdentifyClicked(self, dialog, qtbot):

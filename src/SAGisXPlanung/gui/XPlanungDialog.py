@@ -102,10 +102,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     @qasync.asyncSlot(int)
     async def onIndexChanged(self, i):
         self.bExport.setEnabled(False)
-        self.bInfo.setEnabled(False)
         if i != -1:
             xid = self.cbPlaene.currentPlanId()
-            await self.details_dialog.initPlanData(xid)
+            await self.details_dialog.initialize_data(xid)
         else:
             self.details_dialog.hide()
 
@@ -245,7 +244,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     async def selectTreeItem(self, xplan_item: XPlanungItem):
         # setup details page, if not already present
         if self.details_dialog.plan_xid != xplan_item.plan_xid:
-            await self.details_dialog.initPlanData(xplan_item.plan_xid)
+            await self.details_dialog.initialize_data(xplan_item.plan_xid)
 
         # find object
         proxy_model = self.details_dialog.objectTree.proxy

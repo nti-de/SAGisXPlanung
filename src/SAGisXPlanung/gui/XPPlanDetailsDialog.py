@@ -34,7 +34,7 @@ from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, MixedGeome
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version, table_name_to_class
 from SAGisXPlanung.core.canvas_display import plan_to_map
-from SAGisXPlanung.ext.spinner import WaitingSpinner
+from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
 from SAGisXPlanung.gui.actions import EnableBuldingTemplateAction, EditBuildingTemplateAction
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
@@ -159,36 +159,38 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         if event.type() == QEvent.ParentChange:
             self.updateButtons()
 
-    async def initPlanData(self, xid: str, keep_page=False):
-        self.init_spinner.start()
-        self.lFinished.setVisible(False)
-        self.reset_label.setVisible(False)
-        self.lErrorCount.setText('')
-        self.undo_stack.clear()
+    async def initialize_data(self, xid: str, keep_page=False):
+        def _init():
+            with Session.begin() as session:
+                plan = session.query(XP_Plan).get(xid)
+                self.plan_xid = xid
+                self.plan_type = plan.__class__
+                self.lTitle.setText(plan.name)
+                self.lPlanType.setText(self.plan_type.__name__)
+                if isinstance(plan, (BP_Plan, FP_Plan)):
+                    self.parish.setText('; '.join(str(g) for g in plan.gemeinde))
+                    self.parish.setActive(True)
+                    self.parishEdit.setup(plan.gemeinde)
+                elif isinstance(plan, (RP_Plan, LP_Plan)):
+                    self.parish.setText(f'Bundesland: {plan.bundesland}')
+                    self.parish.setActive(False)
 
-        self.log.clear()
-        self.objectTree.clear()
-        # self.attributeTree.clear()
-        if not keep_page:
-            self.stackedWidget.setCurrentIndex(0)
+                self.construct_explorer(plan)
 
-        with Session.begin() as session:
-            plan = session.query(XP_Plan).get(xid)
-            self.plan_xid = xid
-            self.plan_type = plan.__class__
-            self.lTitle.setText(plan.name)
-            self.lPlanType.setText(self.plan_type.__name__)
-            if isinstance(plan, (BP_Plan, FP_Plan)):
-                self.parish.setText('; '.join(str(g) for g in plan.gemeinde))
-                self.parish.setActive(True)
-                self.parishEdit.setup(plan.gemeinde)
-            elif isinstance(plan, (RP_Plan, LP_Plan)):
-                self.parish.setText(f'Bundesland: {plan.bundesland}')
-                self.parish.setActive(False)
+        async with loading_animation(self):
+            self.lFinished.setVisible(False)
+            self.reset_label.setVisible(False)
+            self.lErrorCount.setText('')
+            self.undo_stack.clear()
+            self.log.clear()
+            self.objectTree.clear()
 
-            await self.constructExplorer(plan)
-        self.objectTree.expandAll()
-        self.init_spinner.stop()
+            if not keep_page:
+                self.stackedWidget.setCurrentIndex(0)
+
+            await asyncio.to_thread(_init)
+
+            self.objectTree.expandAll()
 
     @pyqtSlot()
     def updateButtons(self):
@@ -234,14 +236,11 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             plan = session.query(XP_Plan).options(lazyload('*'), load_only('id')).get(self.plan_xid)
             setattr(plan, 'gemeinde', parish_list)
 
-    async def constructExplorer(self, plan):
+    def construct_explorer(self, plan):
         xplan_item = XPlanungItem(xid=str(plan.id), xtype=plan.__class__)
         node = ClassNode(xplan_item)
         self.objectTree.model.addChild(node)
-
-        loop = asyncio.get_running_loop()
-        await loop.run_in_executor(None, self.iterateRelation, plan, node)
-        # self.iterateRelation(plan, node)
+        self.iterateRelation(plan, node)
 
     async def addExplorerItem(self, parent_node: ClassNode, xplan_item: XPlanungItem, row=None):
         node = ClassNode(xplan_item, new=True)
@@ -382,7 +381,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
                 plan = await session.merge(edited_object)
 
-            await self.initPlanData(self.plan_xid, keep_page=True)
+            await self.initialize_data(self.plan_xid, keep_page=True)
 
             self.prevPage()
             self.bSave.clicked.disconnect()
