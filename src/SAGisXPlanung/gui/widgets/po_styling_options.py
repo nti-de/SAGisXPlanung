@@ -54,13 +54,13 @@ class QCommonStylingOptions(QWidget):
         self.sizeSlider.valueChanged.connect(self.onSizeSliderChanged)
 
     def setSize(self, scale: float):
-        self.sizeSlider.setValue(scale * (99 - 1) + 1)
+        self.sizeSlider.setValue(int(scale * (99 - 1) + 1))
 
     def setAngle(self, angle: int):
         if angle > 360 or angle < 0:
             raise ValueError('Angle has to be between 0 and 360')
         self.angleEdit.setText(f'{angle}°')
-        self.angleDial.setValue(angle)
+        self.angleDial.setValue(int(angle))
 
     @pyqtSlot()
     def onAngleTextEdited(self):

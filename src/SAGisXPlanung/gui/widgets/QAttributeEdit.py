@@ -83,10 +83,10 @@ class QAttributeEdit(CLS, FORM_CLASS):
         with Session.begin() as session:
             plan_content = session.query(self._xplanung_item.xtype).get(self._xplanung_item.xid)
             scale = getattr(plan_content, self.ATTRIBUTE_SIZE)
-            self.sizeSlider.setValue(scale * (99 - 1) + 1)
+            self.sizeSlider.setValue(int(scale * (99 - 1) + 1))
             angle = getattr(plan_content, self.ATTRIBUTE_ANGLE)
             self.angleEdit.setText(f'{angle}°')
-            self.angleDial.setValue(angle)
+            self.angleDial.setValue(int(angle))
 
     def initialize_listeners(self):
         self.sizeSlider.valueChanged.connect(self.onSliderValueChanged)
