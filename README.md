@@ -42,21 +42,33 @@ Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen.
 SAGis XPlanung kann über das QGIS-Plugin Repository heruntergeladen werden.
 
 Für eine erfolgreiche Ausführung des Programms müssen zudem folgende Python-Komponenten installiert werden:
+- lxml
+- packaging
 - SQLAlchemy==1.4.49 (:warning: Anwendung nicht kompatibel mit SQLAlchemy 2.0)
 - GeoAlchemy2==0.12.5
-- lxml==4.6.3
-- shapely==2.0.0
+- shapely>=2.0.2
 - qasync==0.22.0
-- asyncpg==0.26.0
+- asyncpg==0.29.0
 
 <details><summary><b>Anleitung anzeigen</b></summary>
 
+#### Automatische Installation 
+Beim Start des Plugins werden alle Python-Komponenten geprüft.
+Sollten bestimmte Pakete fehlen, oder in einer falschen Version vorliegen, können die 
+Module über einen Dialog im QGIS geladen werden.
+
+> [!WARNING]  
+> Wenn keine Berechtigung zum Schreiben im QGIS/Python-Installationsverzeichnis vorliegt, kann die 
+automatische Installation scheitern. Siehe [Installation über OSGeo4W-Kommandozeile](#installation-über-osgeo4w-kommandozeile), 
+um die benötigten Python-Module zu laden.
+
+#### Installation über OSGeo4W-Kommandozeile
 1. Suchen Sie das Installationsverzeichnis von QGIS (Zumeist `C:\OSGeo4W\` oder `C:\Program Files\QGIS 3.*'`)
 
-2. Im Verzeichnis befindet sich die _OSGeo4W-Shell_ (Datei mit dem Namen `OSGeo4W.bat`). Starten Sie die _OSGeo4W-Shell_ und führen Sie den folgenden Befehl im sich öffnenden Programm aus:
+2. Im Verzeichnis befindet sich die _OSGeo4W-Shell_ (Datei mit dem Namen `OSGeo4W.bat`). Starten Sie die _OSGeo4W-Shell_ (mit Administrator-Rechten, falls keine Berechtigung zum Schreiben im Verzeichnis besteht) und führen Sie den folgenden Befehl im sich öffnenden Programm aus:
 
     ```sh
-    o4w_env & python3 -m pip install sqlalchemy==1.4.46 GeoAlchemy2 qasync shapely==2.0.0 lxml asyncpg
+    o4w_env & python3 -m pip install lxml packaging sqlalchemy==1.4.49 GeoAlchemy2 shapely qasync asyncpg
     ```
 
 </details>
