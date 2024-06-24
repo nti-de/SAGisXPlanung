@@ -100,7 +100,7 @@ class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanung
             Korrekte Lösung wäre die Nutzung von SizePolicy's der zugrundeliegenden ComboBox, diese ist aber als
             privates Attribut `mComboBox` der Klasse `QgsFeaturePickerWidget` versteckt."""
         if event.type() == QEvent.Resize:
-            self.cbFeature.setMaximumWidth(self.mMapLayerComboBox.width() / 2)
+            self.cbFeature.setMaximumWidth(int(self.mMapLayerComboBox.width() / 2))
             return True
         return False
 

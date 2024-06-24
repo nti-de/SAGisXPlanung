@@ -37,5 +37,5 @@ class ElideLabel(QLabel):
             m = self.fontMetrics().horizontalAdvance('x') / 2 - margin
         except:
             m = self.fontMetrics().width('x') / 2 - margin
-        r = self.contentsRect().adjusted(margin + m, margin, -(margin + m), -margin)
+        r = self.contentsRect().adjusted(int(margin + m), margin, int(-(margin + m)), -margin)
         qp.drawText(r, self.alignment(), self.fontMetrics().elidedText(self.text(), self.elideMode(), r.width()))
