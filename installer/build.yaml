@@ -1,0 +1,19 @@
+pool:
+  vmImage: ubuntu-latest
+
+trigger:
+ tags:
+   include:
+     - v2.*
+
+steps:
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: 'src/SAGisXPlanung'
+    includeRootFolder: true
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGixXPlanung-$(Build.SourceBranchName).zip'
+    replaceExistingArchive: true
+
+- task: PublishBuildArtifacts@1
