@@ -2,7 +2,7 @@ from typing import Union
 
 from geoalchemy2 import WKBElement, WKTElement
 from qgis.core import QgsGeometry, QgsWkbTypes
-from sqlalchemy import func
+from sqlalchemy import func, select
 
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.config import QgsConfig, GeometryCorrectionMethod
@@ -59,11 +59,13 @@ def correct_geometry(connection, qgs_geom: QgsGeometry, geom_element: Union[WKBE
     if QgsWkbTypes.isCurvedType(qgs_geom.wkbType()):
         # if curved type is found, don't apply DP simplification
         return connection.scalar(
-            func.ST_ForcePolygonCCW(
-                func.ST_RemoveRepeatedPoints(
-                    geom_element
+            select(
+                func.ST_ForcePolygonCCW(
+                    func.ST_RemoveRepeatedPoints(
+                        geom_element
+                    )
                 )
-            )
+            ).where(func.ST_Dimension(geom_element) == 2)
         )
 
     else:
@@ -75,9 +77,11 @@ def correct_geometry(connection, qgs_geom: QgsGeometry, geom_element: Union[WKBE
             simplify_func = func.ST_Simplify
 
         return connection.scalar(
-            func.ST_ForcePolygonCCW(
-                func.ST_RemoveRepeatedPoints(
-                    simplify_func(geom_element, 0)
+            select(
+                func.ST_ForcePolygonCCW(
+                    func.ST_RemoveRepeatedPoints(
+                        simplify_func(geom_element, 0)
+                    )
                 )
-            )
+            ).where(func.ST_Dimension(geom_element) == 2)
         )
