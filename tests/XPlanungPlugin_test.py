@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from qgis.PyQt.QtWidgets import QMenu, QToolBar
@@ -7,7 +9,7 @@ from SAGisXPlanung.XPlanungPlugin import XPlanung
 
 
 class TestXPlanungPlugin_installation:
-
+    @pytest.mark.skipif('CI' in os.environ, reason="stubs not available in pytest-qgis")
     def test_is_installed(self, mocker):
         mocker.patch(
             'SAGisXPlanung.gui.XPlanungDialog.QPlanComboBox.refresh',
@@ -18,6 +20,7 @@ class TestXPlanungPlugin_installation:
         assert iface.mainWindow().findChild(QMenu, 'sagis_menu')
         assert iface.mainWindow().findChild(QToolBar, 'sagis_toolbar')
 
+    @pytest.mark.skipif('CI' in os.environ, reason="stubs not available in pytest-qgis")
     def test_unload(self, mocker):
         mocker.patch(
             'SAGisXPlanung.gui.XPlanungDialog.QPlanComboBox.refresh',
