@@ -1,3 +1,5 @@
+import sys
+
 import pytest
 from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsWkbTypes
 

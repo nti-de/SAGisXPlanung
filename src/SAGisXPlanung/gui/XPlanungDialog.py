@@ -5,7 +5,7 @@ import os
 import qasync
 
 from qgis.core import Qgis
-from qgis.PyQt import QtWidgets
+from qgis.PyQt import QtWidgets, sip
 from qgis.PyQt.QtGui import QIcon, QCursor, QKeySequence
 from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel, QUrl, QDir
 from qgis.PyQt.QtWidgets import QAbstractItemView, QApplication
@@ -84,7 +84,8 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
     def __del__(self):
         try:
-            self.iface.mapCanvas().mapToolSet.disconnect(self.onMapToolChanged)
+            if not sip.isdeleted(self.iface.mapCanvas()):
+                self.iface.mapCanvas().mapToolSet.disconnect(self.onMapToolChanged)
         except TypeError:
             pass
 

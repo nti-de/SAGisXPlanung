@@ -14,3 +14,4 @@ pythonpath = [
   "src"
 ]
 asyncio_mode = "auto"
+qt_api= "pyqt5"

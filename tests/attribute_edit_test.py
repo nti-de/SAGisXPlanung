@@ -64,7 +64,7 @@ def widget(mocker, xplan_item, registry, ppo):
 
 class TestAttributeEditAnnotationItem:
 
-    @pytest.mark.skipif('GITHUB_ACTION' in os.environ, reason="does not run on qgis_testrunner.sh")
+    @pytest.mark.skipif('GITHUB_ACTION' in os.environ or 'AZURE_CI' in os.environ, reason="does not run on CI")
     @pytest.mark.asyncio
     async def test_annotation_item_svg_selected(self, mocker, widget):
         mocker.patch("SAGisXPlanung.gui.widgets.QAttributeEdit.QAttributeEdit.onAttributeChanged")

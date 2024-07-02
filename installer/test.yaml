@@ -1,0 +1,30 @@
+trigger:
+  branches:
+    include:
+    - '*'
+
+pool:
+  vmImage: ubuntu-latest
+
+strategy:
+  matrix:
+    qgis34:
+      containerImage: qgis/qgis:release-3_34
+
+container: $[ variables['containerImage'] ]
+
+steps:
+
+- script: |
+    python3 -m pip install --upgrade pip
+    pip install numpy==1.26.4 pytest pytest-azurepipelines pytest-cov pytest-qt pytest-mock pytest-asyncio pytest-qgis nest-asyncio
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+
+- script: |
+    python3 -m pytest -p no:cacheprovider --cov=src --cov-report=xml
+  displayName: 'Tests'
+  env:
+    QT_QPA_PLATFORM: "offscreen"
+    CI: 1
+    AZURE_CI: 1
