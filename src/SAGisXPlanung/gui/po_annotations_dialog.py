@@ -10,7 +10,7 @@ from qgis.PyQt.QtWidgets import QLabel, QVBoxLayout, QDialog
 from qgis.PyQt.QtCore import pyqtSignal, Qt
 from qgis.gui import QgsSvgSelectorWidget
 from qgis.utils import iface
-from qgis.core import QgsProject, QgsApplication
+from qgis.core import QgsProject, QgsApplication, Qgis
 
 from geoalchemy2 import WKBElement
 from sqlalchemy.orm import load_only
@@ -199,8 +199,14 @@ class CreateAnnotateDialog(QDialog, FORM_CLASS):
             )
 
             po_obj = xp_pto
+        try:
+            save_to_db(po_obj, expire_on_commit=False)
+        except Exception as e:
+            logger.exception(e)
+            self.iface.messageBar().pushMessage("XPlanung Fehler", "Datensatz konnte nicht gespeichert werden!",
+                                                str(e), level=Qgis.Critical)
+            return
 
-        save_to_db(po_obj, expire_on_commit=False)
         self.annotationSaved.emit(xplan_item)
 
         # find parent layer to access plan group

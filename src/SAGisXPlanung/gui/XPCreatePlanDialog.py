@@ -7,7 +7,7 @@ from qgis.PyQt import QtGui, QtCore, QtWidgets, uic
 from qgis.core import Qgis
 
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
-from SAGisXPlanung.utils import save_to_db
+from SAGisXPlanung.utils import save_to_db_async
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/XPlanung_create.ui'))
 logger = logging.getLogger(__name__)
@@ -51,8 +51,7 @@ class XPCreatePlanDialog(QtWidgets.QDialog, FORM_CLASS):
             if not self.content:
                 return
 
-            loop = asyncio.get_running_loop()
-            await loop.run_in_executor(None, save_to_db, self.content)
+            await save_to_db_async(self.content)
 
             self.iface.messageBar().pushMessage("XPlanung", "Datensatz wurde gespeichert", level=Qgis.Success)
             self.contentSaved.emit()

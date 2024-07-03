@@ -186,12 +186,9 @@ PLAN_BASE_TYPES = [
 
 def save_to_db(obj, expire_on_commit=True):
     """ Fügt ein Objekt der Datenbank hinzu """
-    try:
-        with Session.begin() as session:
-            session.expire_on_commit = expire_on_commit
-            session.add(obj)
-    except Exception as e:
-        logger.exception(e)
+    with Session.begin() as session:
+        session.expire_on_commit = expire_on_commit
+        session.add(obj)
 
 
 async def save_to_db_async(obj):
