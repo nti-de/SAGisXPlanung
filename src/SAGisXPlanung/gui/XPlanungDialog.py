@@ -125,6 +125,8 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     def onMapToolChanged(self, new_tool, old_tool):
         if old_tool == self.identifyTool and self.bIdentify.isChecked():
             self.bIdentify.setChecked(False)
+        elif new_tool == self.identifyTool:
+            self.bIdentify.setChecked(True)
 
     def on_show_all_clicked(self, checked: bool):
         # Check if a NexusDialog instance is already created and visible

@@ -1,14 +1,20 @@
 import logging
+import os
+from typing import List
 
 import qasync
+from PyQt5.QtCore import pyqtSlot, QPoint, pyqtSignal
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QMenu, QAbstractItemView
 
-from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtGui import QColor, QAction
 from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSize)
 from qgis.PyQt.QtWidgets import (QTreeView)
 from qgis.gui import QgsHighlight
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
 
+from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.GML.geometry import geometry_drop_z
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle
 
@@ -16,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class QSelectedGeometriesView(QTreeView):
+
+    selected_features_removed = pyqtSignal()
 
     def __init__(self, data, layer: QgsVectorLayer, parent=None):
         super(QSelectedGeometriesView, self).__init__(parent)
@@ -33,6 +41,10 @@ class QSelectedGeometriesView(QTreeView):
 
         self.entered.connect(self.onItemHovered)
 
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.context_menu)
+
     def sizeHint(self):
         size = super(QSelectedGeometriesView, self).sizeHint()
         return QSize(size.width(), 80)
@@ -49,6 +61,28 @@ class QSelectedGeometriesView(QTreeView):
 
     def itemCount(self) -> int:
         return self.model.rowCount(QModelIndex())
+
+    @pyqtSlot(QPoint)
+    def context_menu(self, pos: QPoint):
+        selected_indices = self.selectionModel().selectedIndexes()
+        if not selected_indices:
+            return
+
+        menu = QMenu()
+        icon = QIcon(os.path.join(BASE_DIR, 'gui/resources/delete.svg'))
+        delete_action = QAction(icon, 'Markierte Zeilen löschen')
+        delete_action.triggered.connect(lambda state, indices=selected_indices: self.remove_selected_features(indices))
+        menu.addAction(delete_action)
+        menu.exec_(self.mapToGlobal(pos))
+
+    def remove_selected_features(self, indices: List[QModelIndex]):
+        indices.sort(key=lambda x: x.row(), reverse=True)
+
+        for index in indices:
+            self.layer.deselect(index.data())
+            self.model.removeRows(index.row(), 1)
+
+        self.selected_features_removed.emit()
 
     @qasync.asyncSlot(QModelIndex)
     async def onItemHovered(self, index: QModelIndex):
@@ -84,6 +118,20 @@ class SelectedGeometriesTableModel(QAbstractItemModel):
         self.beginInsertRows(_parent, row, row)
         self._data.append(data)
         self.endInsertRows()
+
+    def addChildren(self, data, _parent=QModelIndex()):
+        row = self.rowCount(_parent)
+        insert_count = len(data)
+        logger.debug(f'inserted at {row} until {row+insert_count-1}')
+        self.beginInsertRows(_parent, row, row+insert_count-1)
+        self._data.extend(data)
+        logger.debug(self._data)
+        self.endInsertRows()
+
+    def clear(self):
+        self.beginResetModel()
+        self._data = []
+        self.endResetModel()
 
     def removeRows(self, row: int, count: int, parent=QModelIndex()) -> bool:
         self.beginRemoveRows(parent, row, row + count - 1)
