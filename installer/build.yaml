@@ -13,7 +13,7 @@ steps:
     rootFolderOrFile: 'src/SAGisXPlanung'
     includeRootFolder: true
     archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGixXPlanung-$(Build.SourceBranchName).zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
     replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
