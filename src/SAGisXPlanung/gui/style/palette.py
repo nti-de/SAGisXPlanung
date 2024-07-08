@@ -1,11 +1,19 @@
 import logging
-from enum import Enum
+import sys
 from typing import List
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info >= (3, 11):
+    from enum import StrEnum as StrEnumCompat
+else:
+    from enum import Enum
 
-class ApplicationColor(str, Enum):
+    class StrEnumCompat(str, Enum):
+        pass
+
+
+class ApplicationColor(StrEnumCompat):
     Primary = '#000000'
     Secondary = '#1e3a8a'
     SecondaryLight = '#a5b4fc'
