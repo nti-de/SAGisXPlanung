@@ -60,6 +60,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     nameChanged = pyqtSignal(str, str)  # xid, new plan name
     validation_finished = pyqtSignal(ValidationResult)
 
+    _init_lock = asyncio.Lock()
+
     def __init__(self, parent=None):
         super(XPPlanDetailsDialog, self).__init__(parent)
 
@@ -178,19 +180,20 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 self.construct_explorer(plan)
 
         async with loading_animation(self):
-            self.lFinished.setVisible(False)
-            self.reset_label.setVisible(False)
-            self.lErrorCount.setText('')
-            self.undo_stack.clear()
-            self.log.clear()
-            self.objectTree.clear()
+            async with self._init_lock:
+                self.lFinished.setVisible(False)
+                self.reset_label.setVisible(False)
+                self.lErrorCount.setText('')
+                self.undo_stack.clear()
+                self.log.clear()
+                self.objectTree.clear()
 
-            if not keep_page:
-                self.stackedWidget.setCurrentIndex(0)
+                if not keep_page:
+                    self.stackedWidget.setCurrentIndex(0)
 
-            await asyncio.to_thread(_init)
+                await asyncio.to_thread(_init)
 
-            self.objectTree.expandAll()
+                self.objectTree.expandAll()
 
     @pyqtSlot()
     def updateButtons(self):

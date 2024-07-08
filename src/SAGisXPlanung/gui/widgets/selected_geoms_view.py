@@ -3,13 +3,11 @@ import os
 from typing import List
 
 import qasync
-from PyQt5.QtCore import pyqtSlot, QPoint, pyqtSignal
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMenu, QAbstractItemView
 
-from qgis.PyQt.QtGui import QColor, QAction
-from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSize)
-from qgis.PyQt.QtWidgets import (QTreeView)
+from qgis.PyQt.QtGui import QColor, QAction, QIcon
+from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSize, pyqtSlot, QPoint, pyqtSignal)
+from qgis.PyQt.QtWidgets import (QTreeView, QMenu, QAbstractItemView)
+
 from qgis.gui import QgsHighlight
 from qgis.core import QgsVectorLayer
 from qgis.utils import iface
@@ -122,10 +120,8 @@ class SelectedGeometriesTableModel(QAbstractItemModel):
     def addChildren(self, data, _parent=QModelIndex()):
         row = self.rowCount(_parent)
         insert_count = len(data)
-        logger.debug(f'inserted at {row} until {row+insert_count-1}')
         self.beginInsertRows(_parent, row, row+insert_count-1)
         self._data.extend(data)
-        logger.debug(self._data)
         self.endInsertRows()
 
     def clear(self):
