@@ -3,7 +3,7 @@
 #define MyAppURL "https://www.nti-group.com/de/produkte/sagis-loesungen/"
 
 #ifndef SAGIS_VERSION
-  #define SAGIS_VERSION "2.5.3-dev"
+  #define SAGIS_VERSION "2.5.4-dev"
 #endif
 
 [Setup]

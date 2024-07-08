@@ -1,5 +1,21 @@
 ## Changelog
 
+### [2.5.4] - 08.07.2024
+
+#### Veränderungen
+
+- verbesserte Layer-Auswahl beim Konfigurieren von Planinhalten (5a8f9a62)
+- verbessertes initiales Laden des Objektbaum (Thread-Safety)
+
+#### Fehlerbehebungen
+
+- Kompatibilität mit Python 3.12 (ab QGIS 3.34.6):
+  - Öffnen der Sachdatendialoge für Objektklassen mit Symbol und Nutzungschablone (58fa49f8, fb58baba)
+  - Fehlende Stylesheet-Stilisierung der Dialoge (29eb6897)
+- Fehler beim import von XPlanGML mit top-level namespace Elementen (fb603a60)
+- Geometriebereinigung: Fehler bei der Darstellung von Liniengeomtrien durch veränderte Stützpunktreihenfolge (d8108f56)
+- fehlende Fehlermeldung beim Speichern von ungültigen Geomtrien (17f3d1c3)
+
 ### [2.5.3] - 17.06.2024
 
 #### Veränderungen
