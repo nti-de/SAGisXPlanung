@@ -42,7 +42,7 @@ class SO_Objekt(XP_Objekt):
     def setGeometry(self, geom: QgsGeometry, srid: int = None):
         if srid is None and self.position is None:
             raise Exception('geometry needs a srid')
-        self.position = WKBElement(geom.asWkb(), srid=srid or self.position.srid)
+        self.position = WKBElement(geom.asWkb().data(), srid=srid or self.position.srid)
 
     def geomType(self) -> GeometryType:
         return self.geometry().type()
