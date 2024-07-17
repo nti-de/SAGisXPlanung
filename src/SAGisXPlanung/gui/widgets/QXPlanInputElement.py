@@ -523,16 +523,12 @@ class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMe
         self.include_default = include_default
         self.setFocusPolicy(Qt.StrongFocus)
 
+        if self.include_default:
+            self.addItem('')
+            self.setCurrentIndex(0)
+
         if items is not None:
             self.addItems(items)
-
-        if self.include_default:
-            # TODO: `setPlaceHolderText` is not working from Qt 5.15.2 upwards. (and was only introduced with 5.15.0)
-            #  verify that it does work when QGIS moves to higher Qt version 5.15.9 or 6.0.1?
-            #  https://bugreports.qt.io/browse/QTBUG-90595
-            if QVersionNumber.fromString(qVersion()) > QVersionNumber.fromString('5.15.0'):
-                self.setPlaceholderText('-- Keine Auswahl --')
-            self.setCurrentIndex(-1)
 
     def wheelEvent(self, *args, **kwargs):
         if self.hasFocus() or self.scrollWidget is None:
@@ -541,7 +537,7 @@ class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMe
         return self.scrollWidget.wheelEvent(*args, **kwargs)
 
     def value(self):
-        if self.currentIndex() == -1:
+        if self.include_default and self.currentIndex() == 0:
             return None
         return self.currentText()
 

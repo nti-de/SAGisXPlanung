@@ -39,7 +39,7 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     BMZ = Column(Float)
     GRZ = Column(Float)
     allgArtDerBaulNutzung = Column(Enum(XP_AllgArtDerBaulNutzung))
-    besondereArtDerBaulNutzung = Column(Enum(XP_BesondereArtDerBaulNutzung))
+    besondereArtDerBaulNutzung = Column(XPEnum(XP_BesondereArtDerBaulNutzung, include_default=True))
 
     @declared_attr
     def sonderNutzung(cls):
