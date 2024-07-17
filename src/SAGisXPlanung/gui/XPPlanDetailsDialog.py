@@ -17,8 +17,8 @@ from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSet
 from qgis.gui import QgsDockWidget
 from qgis.core import (QgsGeometry, Qgis)
 from qgis.utils import iface
-from sqlalchemy import select, exists
-from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic
+from sqlalchemy import select, exists, inspect as sqla_inspect
+from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic, joinedload
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
@@ -161,10 +161,38 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         if event.type() == QEvent.ParentChange:
             self.updateButtons()
 
+    def generate_joinedload_options(self, model, depth=3):
+        def _recursive_joinedload(_class, relationship, current_depth):
+            if current_depth > depth:
+                return joinedload('*')
+            rel = getattr(_class, relationship)
+            sub_options = []
+            for sub_rel in sqla_inspect(rel.property.mapper.class_).relationships:
+                if next(iter(sub_rel.remote_side)).primary_key or sub_rel.secondary is not None:
+                    continue
+                if not _class.relation_fits_version(sub_rel.key, export_version()):
+                    continue
+                sub_options.append(_recursive_joinedload(rel.property.mapper.class_, sub_rel.key, current_depth + 1))
+            return joinedload(relationship).options(load_only('id'), *sub_options)
+
+        options = []
+        for relation in sqla_inspect(model).relationships:
+            if next(iter(relation.remote_side)).primary_key or relation.secondary is not None:
+                continue
+            if not model.relation_fits_version(relation.key, export_version()):
+                continue
+            options.append(_recursive_joinedload(model, relation.key, 1))
+        return options
+
     async def initialize_data(self, xid: str, keep_page=False):
         def _init():
             with Session.begin() as session:
-                plan = session.query(XP_Plan).get(xid)
+                plan = session.get(XP_Plan, xid, [load_only('id')])
+                self.plan_type = plan.__class__
+                load_options = self.generate_joinedload_options(self.plan_type, depth=5)
+
+                plan = session.get(self.plan_type, xid, load_options)
+
                 self.plan_xid = xid
                 self.plan_type = plan.__class__
                 self.lTitle.setText(plan.name)
@@ -242,8 +270,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def construct_explorer(self, plan):
         xplan_item = XPlanungItem(xid=str(plan.id), xtype=plan.__class__)
         node = ClassNode(xplan_item)
-        self.objectTree.model.addChild(node)
+
         self.iterateRelation(plan, node)
+        self.objectTree.model.addChild(node)
 
     async def addExplorerItem(self, parent_node: ClassNode, xplan_item: XPlanungItem, row=None):
         node = ClassNode(xplan_item, new=True)
@@ -445,16 +474,17 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     if rel_item.__class__ == XP_Nutzungsschablone:
                         continue
                     # only show PO objects as child node of their parent object (if they have any)
-                    if rel_item.dientZurDarstellungVon_id and str(rel_item.dientZurDarstellungVon_id) != str(
-                            obj.id):
-                        continue
+                    # TODO 2024-07-17: is this condition ever hit? it causes a lot of additional sql...
+                    # if rel_item.dientZurDarstellungVon_id and str(rel_item.dientZurDarstellungVon_id) != str(
+                    #         obj.id):
+                    #     continue
                 xplan_item = XPlanungItem(
                     xid=str(rel_item.id),
                     xtype=rel_item.__class__,
                     parent_xid=root_node.xplanItem().xid
                 )
                 node = ClassNode(xplan_item, new=root_node.flag_new)
-                self.objectTree.model.addChild(node, root_node)
+                root_node.addChild(node)
 
                 self.iterateRelation(rel_item, node)
         except Exception as e:

@@ -12,7 +12,7 @@ from qgis.PyQt.QtGui import QShowEvent, QCloseEvent, QIcon
 from qgis.PyQt.QtWidgets import QDialog
 
 from SAGisXPlanung import VERSION, XPlanVersion, BASE_DIR
-from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
+from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, export_version
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
@@ -101,6 +101,9 @@ class Settings(QDialog, FORM_CLASS):
         # refresh attribute config when version changed
         self.tabs.widget(1).setupData()
 
+        # invalidate cache of export_version
+        export_version.cache_clear()
+
     @qasync.asyncSlot(int)
     async def checkbox_clean_geometry_state_changed(self, state):
         for row in range(1, 3):
@@ -126,7 +129,6 @@ class Settings(QDialog, FORM_CLASS):
 
     def saveSettings(self):
         qs = QSettings()
-        qs.setValue(f"plugins/xplanung/export_version", self.cbXPlanVersion.currentText())
         if self.checkPath.isChecked():
             qs.setValue(f"plugins/xplanung/export_path", '')
         else:

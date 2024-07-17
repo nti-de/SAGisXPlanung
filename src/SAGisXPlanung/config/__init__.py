@@ -61,6 +61,7 @@ def xplan_tooltip(xtype: type, attribute_name: str, plain=False) -> Union[None, 
         logger.warning(f'Could not find tooltip in config: {e} for super class {xtype.__name__}')
 
 
+@cache
 def export_version():
     qs = QSettings()
     version = qs.value(f"plugins/xplanung/export_version", None)
