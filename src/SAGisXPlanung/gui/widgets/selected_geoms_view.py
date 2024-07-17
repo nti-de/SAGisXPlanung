@@ -4,9 +4,9 @@ from typing import List
 
 import qasync
 
-from qgis.PyQt.QtGui import QColor, QAction, QIcon
+from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QSize, pyqtSlot, QPoint, pyqtSignal)
-from qgis.PyQt.QtWidgets import (QTreeView, QMenu, QAbstractItemView)
+from qgis.PyQt.QtWidgets import (QTreeView, QMenu, QAbstractItemView, QAction)
 
 from qgis.gui import QgsHighlight
 from qgis.core import QgsVectorLayer
