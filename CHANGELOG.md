@@ -1,5 +1,19 @@
 ## Changelog
 
+### [2.5.5] - 22.07.2024
+
+#### Veränderungen
+
+- verbesserte Ladezeiten beim Aufbau des Objektbaums (988eb0e0)
+- verbesserte Performacnce bei Auswahl von Objekten über Abfrage-Editor (560ba5e6)
+- Attribut `besondereArtDerBaulNutzung` ist nun optional (df63d6d9)
+
+#### Fehlerbehebungen
+
+- Bearbeiten von Geometrien von Objekten, die abgeleitet von SO_Objekt sind (d5b5445a)
+- Fehler beim Erstellen einer neuen Datenbank durch falschen Dateinamen (c8f2932a)
+- Button-Navigation beim Zuweisen von Planinhalten nach Auswahl mit Abfrage-Editor (62108c8e)
+
 ### [2.5.4] - 08.07.2024
 
 #### Veränderungen
