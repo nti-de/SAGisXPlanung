@@ -8,6 +8,8 @@ Create Date: 2024-07-22 13:11:40.729774
 import os
 import sys
 
+from sqlalchemy.dialects import postgresql
+
 from alembic import op
 import sqlalchemy as sa
 
@@ -114,6 +116,20 @@ def upgrade():
         end $$;
         """)
 
+    op.create_table('fp_abgrabung',
+                    sa.Column('id', postgresql.UUID(), nullable=False),
+                    sa.Column('abbaugut', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+    op.create_table('fp_aufschuettung',
+                    sa.Column('id', postgresql.UUID(), nullable=False),
+                    sa.Column('aufschuettungsmaterial', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
 
 def downgrade():
-    pass
+    op.drop_table('fp_aufschuettung')
+    op.drop_table('fp_abgrabung')

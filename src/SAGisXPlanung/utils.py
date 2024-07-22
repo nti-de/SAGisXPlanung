@@ -35,6 +35,7 @@ from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsor
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
     BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt
 from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche
+from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import FP_Abgrabung, FP_Aufschuettung
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt
 from SAGisXPlanung.FPlan.FP_Bebauung.data_types import FP_KomplexeSondernutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
@@ -149,6 +150,8 @@ CLASSES = {
     'FP_Strassenverkehr': FP_Strassenverkehr,
     'FP_Gewaesser': FP_Gewaesser,
     'FP_VerEntsorgung': FP_VerEntsorgung,
+    'FP_Abgrabung': FP_Abgrabung,
+    'FP_Aufschuettung': FP_Aufschuettung,
     'FP_KomplexeZweckbestGemeinbedarf': FP_KomplexeZweckbestGemeinbedarf,
     'FP_KomplexeZweckbestSpielSportanlage': FP_KomplexeZweckbestSpielSportanlage,
     'FP_KomplexeZweckbestGruen': FP_KomplexeZweckbestGruen,

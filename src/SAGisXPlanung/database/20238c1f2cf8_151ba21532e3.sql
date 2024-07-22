@@ -82,6 +82,20 @@ create or replace function bp_baugebiet_sync_attr_sondernutzung() returns trigge
             RETURN NEW;
         end $$;;
 
+CREATE TABLE fp_abgrabung (
+    id UUID NOT NULL, 
+    abbaugut VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TABLE fp_aufschuettung (
+    id UUID NOT NULL, 
+    aufschuettungsmaterial VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+);
+
 UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8';
 
 COMMIT;
