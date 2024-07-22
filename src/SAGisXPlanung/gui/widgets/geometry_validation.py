@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 
-from qgis.PyQt import QtWidgets, QtGui
+from qgis.PyQt import QtWidgets, QtGui, sip
 from qgis.gui import QgsGeometryRubberBand
 from qgis.core import (QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon,
                     QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
@@ -113,7 +113,8 @@ class ValidationGeometryErrorTreeWidgetItem(ValidationBaseTreeWidgetItem):
         self.removeFromCanvas()
 
     def __del__(self):
-        iface.mapCanvas().scene().removeItem(self.rubber_band)
+        if not sip.isdeleted(iface.mapCanvas()):
+            iface.mapCanvas().scene().removeItem(self.rubber_band)
 
     def removeFromCanvas(self):
         self.rubber_band.hide()

@@ -12,12 +12,13 @@ from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 
 
 @pytest.fixture
-def dialog(mocker):
+def dialog(mocker, qtbot):
     mocker.patch(
         'SAGisXPlanung.gui.XPlanungDialog.QPlanComboBox.refresh',
         return_value=None
     )
     dialog = XPlanungDialog()
+    qtbot.addWidget(dialog)
     return dialog
 
 

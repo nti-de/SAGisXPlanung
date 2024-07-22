@@ -22,7 +22,7 @@ steps:
   displayName: 'Install dependencies'
 
 - script: |
-    python3 -m pytest -p no:cacheprovider --cov=src --cov-report=xml
+    python3 -m pytest --cache-clear --cov=src --cov-report=xml
   displayName: 'Tests'
   env:
     QT_QPA_PLATFORM: "offscreen"

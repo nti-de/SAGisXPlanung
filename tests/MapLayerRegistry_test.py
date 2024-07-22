@@ -72,6 +72,7 @@ def clear_registry_after_test(registry):
     yield
 
     registry._layers = []
+    registry._canvasItems = []
     QgsProject().instance().removeAllMapLayers()
 
 
