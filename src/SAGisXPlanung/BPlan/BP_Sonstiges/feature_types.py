@@ -181,10 +181,6 @@ class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         }
 
     @classmethod
-    def attributes(cls):
-        return ['zweckbestimmung', 'skalierung', 'drehwinkel']
-
-    @classmethod
     def symbol(cls):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)

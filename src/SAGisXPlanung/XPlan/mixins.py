@@ -273,9 +273,22 @@ class MapCanvasMixin:
         feat = QgsFeature()
         feat.setGeometry(self.geometry())
         feat.setFields(fields)
+
+        legacy_fields = None
         if hasattr(self, 'layer_fields'):
-            for field, value in self.layer_fields().items():
-                feat[field] = value
+            legacy_fields = self.layer_fields().items()
+
+        for field_name in self.__class__.element_order(only_columns=True, include_base=True, version=export_version()):
+            try:
+                if legacy_fields and field_name in legacy_fields:
+                    value = legacy_fields[field_name]
+                else:
+                    value = getattr(self, field_name)
+
+                feat[field_name] = str(value) if value is not None else None
+            except KeyError as e:
+                pass
+
         return feat
 
     def addFeatureToLayer(self, layer, feat):
@@ -306,21 +319,14 @@ class MapCanvasMixin:
             else:
                 layer.setRenderer(cls.renderer())
 
-        if hasattr(cls, 'attributes'):
-            setup = QgsEditorWidgetSetup('Hidden', {})
+        field_names = cls.element_order(only_columns=True, include_base=True, version=export_version())
+        fields = [QgsField(name, QVariant.String, 'string') for name in field_names]
+        layer.dataProvider().addAttributes(fields)
+        layer.updateFields()
 
-            for field in cls.attributes():
-                layer.dataProvider().addAttributes([QgsField(field, QVariant.String, 'string')])
-                layer.updateFields()
-
-                # hide field in editor widget
-                i = layer.fields().indexFromName(field)
-                layer.setEditorWidgetSetup(i, setup)
-
-            # hide all fields in attribute table
-            cfg = layer.attributeTableConfig()
-            for i in range(cfg.size()):
-                cfg.setColumnHidden(i, True)
-            layer.setAttributeTableConfig(cfg)
+        edit_config = layer.editFormConfig()
+        for i in range(len(field_names)):
+            edit_config.setReadOnly(i, True)
+        layer.setEditFormConfig(edit_config)
 
         return layer

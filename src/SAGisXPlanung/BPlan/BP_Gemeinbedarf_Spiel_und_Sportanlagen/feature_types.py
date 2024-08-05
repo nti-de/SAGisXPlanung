@@ -126,10 +126,6 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
         ]
 
     @classmethod
-    def attributes(cls):
-        return ['zweckbestimmung', 'skalierung', 'drehwinkel']
-
-    @classmethod
     def symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
@@ -237,10 +233,6 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
             XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
                                    allowed_version=XPlanVersion.SIX)
         ]
-
-    @classmethod
-    def attributes(cls):
-        return ['zweckbestimmung', 'skalierung', 'drehwinkel']
 
     @classmethod
     def symbol(cls) -> QgsSymbol:

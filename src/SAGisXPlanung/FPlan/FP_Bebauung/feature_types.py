@@ -110,10 +110,6 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     def previewIcon(cls):
         return QIcon(os.path.join(BASE_DIR, 'symbole/BP_BesondererNutzungszweckFlaeche/Allgemeine_Wohngebiete.svg'))
 
-    @classmethod
-    def attributes(cls):
-        return ['allgArtDerBaulNutzung']
-
     def validate(self):
         if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kleinsiedlungsgebiet.name or
             self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.ReinesWohngebiet.name or

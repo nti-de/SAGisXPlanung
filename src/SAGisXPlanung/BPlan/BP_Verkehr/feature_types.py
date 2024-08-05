@@ -202,10 +202,6 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
         }
 
     @classmethod
-    def attributes(cls):
-        return ['zweckbestimmung', 'skalierung', 'drehwinkel']
-
-    @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)

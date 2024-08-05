@@ -175,10 +175,6 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         return QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                   '../../symbole/BP_Bebauung/BP_BaugebietsTeilFlaeche.svg')))
 
-    @classmethod
-    def attributes(cls):
-        return ['allgArtDerBaulNutzung']
-
     def toCanvas(self, layer_group, plan_xid=None):
         self.xplan_item.plan_xid = str(plan_xid)
         super(BP_BaugebietsTeilFlaeche, self).toCanvas(layer_group, plan_xid)
@@ -617,10 +613,6 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
             XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
                                    allowed_version=XPlanVersion.SIX)
         ]
-
-    @classmethod
-    def attributes(cls):
-        return ['zweckbestimmung']
 
     @classmethod
     def symbol(cls):

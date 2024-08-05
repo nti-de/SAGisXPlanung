@@ -3,6 +3,7 @@ from typing import List
 from uuid import uuid4
 
 from qgis.PyQt.QtCore import QSize
+from qgis.PyQt.QtGui import QIcon
 
 from geoalchemy2 import Geometry, WKTElement
 
@@ -364,6 +365,12 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
         renderer = cls.renderer(geom_type)
         if isinstance(renderer, QgsRuleBasedRenderer):
             symbol = renderer.rootRule().children()[0].symbol()
+            if symbol is None:
+                child_symbols = renderer.rootRule().children()[0].symbols()
+                if child_symbols:
+                    symbol = child_symbols[0]
+                else:
+                    return QIcon()
         else:
             symbol = renderer.symbol()
 

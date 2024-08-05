@@ -59,10 +59,6 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         }
 
     @classmethod
-    def attributes(cls):
-        return ['massnahme', 'gegenstand', 'skalierung', 'drehwinkel']
-
-    @classmethod
     def point_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
         return symbol

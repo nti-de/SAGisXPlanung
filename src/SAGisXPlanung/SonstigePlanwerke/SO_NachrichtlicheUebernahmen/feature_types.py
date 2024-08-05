@@ -276,10 +276,6 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         }
 
     @classmethod
-    def attributes(cls):
-        return ['artDerFestlegung', 'skalierung', 'drehwinkel']
-
-    @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
@@ -342,10 +338,6 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }
-
-    @classmethod
-    def attributes(cls):
-        return ['artDerFestlegung', 'skalierung', 'drehwinkel']
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

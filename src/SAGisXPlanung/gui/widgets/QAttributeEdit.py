@@ -11,10 +11,14 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
 from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon, QRegExpValidator
+from qgis._core import Qgis
+from qgis.core import edit, QgsFeatureRequest
+from qgis.utils import iface
 from sqlalchemy import update
 
 from SAGisXPlanung import BASE_DIR, Session, Base
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
@@ -157,10 +161,28 @@ class QAttributeEdit(CLS, FORM_CLASS):
     def onChangeApplied(self, index, attr, value):
         if index is not None:
             self.model.setData(index, value)
+            self.update_layer_field_value(attr, value)
 
         # send name changes to update other ui components
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
+
+    def update_layer_field_value(self, attr, value):
+        layer = MapLayerRegistry().layerByXid(self._xplanung_item)
+        if not layer:
+            logger.warning(f"QAttributeEdit::update_layer_field_value: layer is None")
+            return
+
+        cp = layer.customProperties()
+        for feat in layer.getFeatures(QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry).setNoAttributes()):
+            id_prop = cp.value(f'xplanung/feat-{feat.id()}')
+            if id_prop == self._xplanung_item.xid:
+                layer.commitChanges(True)
+                with edit(layer):
+                    feat[attr] = str(value)
+                    layer.updateFeature(feat)
+
+                return
 
     def onAttributeChanged(self, index, attr, value):
         with Session.begin() as session:
