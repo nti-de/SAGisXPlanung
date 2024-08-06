@@ -131,9 +131,14 @@ def upgrade():
 
     spe_ziele_enum = postgresql.ENUM('SchutzPflege', 'Entwicklung', 'Anlage', 'SchutzPflegeEntwicklung',
                                      'Sonstiges', name='xp_speziele', create_type=False)
+    xp_kennzeichnung_enum = postgresql.ENUM('Naturgewalten', 'Abbauflaeche', 'AeussereEinwirkungen',
+                                'SchadstoffBelastBoden', 'LaermBelastung', 'Bergbau', 'Bodenordnung',
+                                'Vorhabensgebiet', 'AndereGesetzlVorschriften',
+                                name='xp_zweckbestimmungkennzeichnung', create_type=False)
 
     if not context.is_offline_mode():
         spe_ziele_enum.create(op.get_bind(), checkfirst=True)
+        xp_kennzeichnung_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table('fp_schutzflaeche',
                     sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -148,10 +153,22 @@ def upgrade():
     op.create_foreign_key('fk_spe_daten_schutzflaeche', 'xp_spe_daten', 'fp_schutzflaeche', ['fp_schutzflaeche_id'],
                           ['id'], ondelete='CASCADE')
 
+    op.create_table('fp_kennzeichnung',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('zweckbestimmung', sa.ARRAY(xp_kennzeichnung_enum), nullable=True),
+                    sa.Column('istVerdachtsflaeche', sa.Boolean(), nullable=True),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
 
 def downgrade():
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('fp_aufschuettung', 'fp_abgrabung', 'fp_kennzeichnung', 'fp_schutzflaeche');")
+
     op.drop_table('fp_aufschuettung')
     op.drop_table('fp_abgrabung')
+    op.drop_table('fp_kennzeichnung')
 
     op.drop_constraint('fk_spe_daten_schutzflaeche', 'xp_spe_daten', type_='foreignkey')
     op.drop_column('xp_spe_daten', 'fp_schutzflaeche_id')

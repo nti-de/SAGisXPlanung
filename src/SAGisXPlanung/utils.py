@@ -46,7 +46,7 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.data_types import FP_K
     FP_KomplexeZweckbestLandwirtschaft, FP_KomplexeZweckbestWald
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_Gruen, FP_Landwirtschaft, FP_WaldFlaeche
 from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung
-from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt
+from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
@@ -154,6 +154,7 @@ CLASSES = {
     'FP_Abgrabung': FP_Abgrabung,
     'FP_Aufschuettung': FP_Aufschuettung,
     'FP_SchutzPflegeEntwicklung': FP_SchutzPflegeEntwicklung,
+    'FP_Kennzeichnung': FP_Kennzeichnung,
     'FP_KomplexeZweckbestGemeinbedarf': FP_KomplexeZweckbestGemeinbedarf,
     'FP_KomplexeZweckbestSpielSportanlage': FP_KomplexeZweckbestSpielSportanlage,
     'FP_KomplexeZweckbestGruen': FP_KomplexeZweckbestGruen,

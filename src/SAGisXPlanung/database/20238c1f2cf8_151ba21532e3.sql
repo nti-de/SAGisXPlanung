@@ -109,6 +109,15 @@ ALTER TABLE xp_spe_daten ADD COLUMN fp_schutzflaeche_id UUID;
 
 ALTER TABLE xp_spe_daten ADD CONSTRAINT fk_spe_daten_schutzflaeche FOREIGN KEY(fp_schutzflaeche_id) REFERENCES fp_schutzflaeche (id) ON DELETE CASCADE;
 
+CREATE TABLE fp_kennzeichnung (
+    id UUID NOT NULL, 
+    zweckbestimmung xp_zweckbestimmungkennzeichnung[], 
+    "istVerdachtsflaeche" BOOLEAN, 
+    nummer VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+);
+
 UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8';
 
 COMMIT;
