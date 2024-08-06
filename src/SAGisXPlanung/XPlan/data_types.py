@@ -212,7 +212,7 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Attribute für einer Schutz-, Pflege- oder Entwicklungsmaßnahme """
 
     __tablename__ = 'xp_spe_daten'
-    __avoidRelation__ = ['bp_schutzflaeche']
+    __avoidRelation__ = ['bp_schutzflaeche', 'fp_schutzflaeche']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -222,6 +222,9 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
 
     bp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche = relationship('BP_SchutzPflegeEntwicklungsFlaeche', back_populates='massnahme')
+
+    fp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('fp_schutzflaeche.id', ondelete='CASCADE'))
+    fp_schutzflaeche = relationship('FP_SchutzPflegeEntwicklung', back_populates='massnahme')
 
     @classmethod
     def avoid_export(cls):

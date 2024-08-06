@@ -10,7 +10,7 @@ import sys
 
 from sqlalchemy.dialects import postgresql
 
-from alembic import op
+from alembic import op, context
 import sqlalchemy as sa
 
 
@@ -129,7 +129,30 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    spe_ziele_enum = postgresql.ENUM('SchutzPflege', 'Entwicklung', 'Anlage', 'SchutzPflegeEntwicklung',
+                                     'Sonstiges', name='xp_speziele', create_type=False)
+
+    if not context.is_offline_mode():
+        spe_ziele_enum.create(op.get_bind(), checkfirst=True)
+
+    op.create_table('fp_schutzflaeche',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('ziel', spe_ziele_enum, nullable=True),
+                    sa.Column('sonstZiel', sa.String(), nullable=True),
+                    sa.Column('istAusgleich', sa.Boolean(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
+    op.add_column('xp_spe_daten', sa.Column('fp_schutzflaeche_id', postgresql.UUID(as_uuid=True), nullable=True))
+    op.create_foreign_key('fk_spe_daten_schutzflaeche', 'xp_spe_daten', 'fp_schutzflaeche', ['fp_schutzflaeche_id'],
+                          ['id'], ondelete='CASCADE')
+
 
 def downgrade():
     op.drop_table('fp_aufschuettung')
     op.drop_table('fp_abgrabung')
+
+    op.drop_constraint('fk_spe_daten_schutzflaeche', 'xp_spe_daten', type_='foreignkey')
+    op.drop_column('xp_spe_daten', 'fp_schutzflaeche_id')
+    op.drop_table('fp_schutzflaeche')
