@@ -29,12 +29,17 @@ class ConnectionMeta:
 def establish_session(session_maker: sessionmaker):
     try:
         conn = QgsConfig.connection_params()
+        if conn["service"]:
+            conn_arguments = f"/?service={conn['service']}"
+        else:
+            conn_arguments = f"{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+
         if session_maker.class_._is_asyncio:
-            async_db_str = f"postgresql+asyncpg://{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+            async_db_str = f"postgresql+asyncpg://{conn_arguments}"
             async_engine = create_async_engine(async_db_str)
             session_maker.configure(bind=async_engine)
         else:
-            db_str = f"postgresql://{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+            db_str = f"postgresql://{conn_arguments}"
             engine = create_engine(db_str)
             session_maker.configure(bind=engine)
 
@@ -46,7 +51,11 @@ def establish_session(session_maker: sessionmaker):
 
 def attempt_connection():
     conn = QgsConfig.connection_params()
-    db_str = f"postgresql://{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+    if conn["service"]:
+        conn_arguments = f"/?service={conn['service']}"
+    else:
+        conn_arguments = f"{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+    db_str = f"postgresql://{conn_arguments}"
     ngn = create_engine(db_str)
     ngn.connect()
 

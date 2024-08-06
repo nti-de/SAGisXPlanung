@@ -106,7 +106,8 @@ class QgsConfig:
             "password": qs.value(f"PostgreSQL/connections/{conn_name}/password"),
             "host": qs.value(f"PostgreSQL/connections/{conn_name}/host"),
             "port": qs.value(f"PostgreSQL/connections/{conn_name}/port"),
-            "db": qs.value(f"PostgreSQL/connections/{conn_name}/database")
+            "db": qs.value(f"PostgreSQL/connections/{conn_name}/database"),
+            "service": qs.value(f"PostgreSQL/connections/{conn_name}/service")
         }
 
     @staticmethod

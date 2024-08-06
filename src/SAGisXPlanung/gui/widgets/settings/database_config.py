@@ -108,6 +108,8 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.database_version_frame.hide()
         self.ui.button_upgrade.clicked.connect(self.on_revision_update_clicked)
 
+        self.ui.label_extra_info.hide()
+
         self.ui.tab_database_actions.setStyleSheet(style.format(
             _label_color_mute=ApplicationColor.Grey600
         ))
@@ -249,8 +251,13 @@ class DatabaseConfigPage(SettingsPage):
         qs = QSettings()
         username = qs.value(f"PostgreSQL/connections/{conn_name}/username", '')
         password = qs.value(f"PostgreSQL/connections/{conn_name}/password", '')
+        service = qs.value(f"PostgreSQL/connections/{conn_name}/service", '')
         self.ui.tbUsername.setText(username)
         self.ui.tbPassword.setText(password)
+        self.ui.label_extra_info.setVisible(service != '')
+        if service:
+            t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Secondary};">{service}</span> angewendet...'
+            self.ui.label_extra_info.setText(t)
 
         qs.setValue(f"plugins/xplanung/connection", conn_name)
         establish_session(Session)
