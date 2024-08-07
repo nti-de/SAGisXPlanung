@@ -1,5 +1,18 @@
 ## Changelog
 
+### [2.6.0] - 07.08.2024
+
+#### Neue Funktionen
+
+- Option zur Nutzung von PostgreSQL Service Configuration Files für die Datenbankverbindung
+- Objektklassen für FNP: `FP_Aufschüttung`, `FP_Abgrabung`, `FP_Kennzeichnung`, `FP_SchutzPflegeEntwicklung`
+
+#### Veränderungen
+
+- verbesserte Linienstilisierungen für Straßenbahn und Versorgungsleitungen
+- Präsentation aller XPlan-Attribute in der QGIS-Attributtabelle
+- automatisches Update der Layer-Attribute nach Änderungen im XPlan-Dialog
+
 ### [2.5.5] - 22.07.2024
 
 #### Veränderungen
