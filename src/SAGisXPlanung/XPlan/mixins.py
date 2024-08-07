@@ -276,7 +276,7 @@ class MapCanvasMixin:
 
         legacy_fields = None
         if hasattr(self, 'layer_fields'):
-            legacy_fields = self.layer_fields().items()
+            legacy_fields = self.layer_fields()
 
         for field_name in self.__class__.element_order(only_columns=True, include_base=True, version=export_version()):
             try:
