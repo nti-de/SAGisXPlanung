@@ -17,6 +17,7 @@ class ApplicationColor(StrEnumCompat):
     Primary = '#000000'
     Secondary = '#1e3a8a'
     SecondaryLight = '#a5b4fc'
+    SecondaryDark = '#172554'
     Tertiary = '#111827'
 
     Error = '#be123c'

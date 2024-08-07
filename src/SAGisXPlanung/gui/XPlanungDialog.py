@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+import threading
+from asyncio import CancelledError
 
 import qasync
 
@@ -12,12 +14,12 @@ from qgis.PyQt.QtWidgets import QAbstractItemView, QApplication
 from qgis.gui import QgsDockWidget
 from qgis.utils import iface
 
-from SAGisXPlanung import compile_ui_file
+from SAGisXPlanung import compile_ui_file, BASE_DIR
 from SAGisXPlanung.core.converter_tasks import import_plan, export_action, ActionCanceledException
 from SAGisXPlanung.Tools.ContextMenuTool import ContextMenuTool
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.nexus_dialog import NexusDialog
-from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_color
+from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_color, load_svg, SVGButtonEventFilter
 from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import XID_ROLE
 from SAGisXPlanung.utils import CLASSES
@@ -30,6 +32,18 @@ uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_dialog_base.ui'
 FORM_CLASS = compile_ui_file(uifile)
 
 logger = logging.getLogger(__name__)
+
+style = """
+QToolButton {{
+    background: palette(window); 
+    border: 0px;
+    padding: 5px;
+    border-radius: 5px;
+}}
+QToolButton:hover {{
+    background-color: {_button_hover_bg};
+}}
+"""
 
 
 class XPlanungDialog(QgsDockWidget, FORM_CLASS):
@@ -45,12 +59,19 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.export_task = None
         self.import_task = None
         self.nexus_dialog = None
+        self.cancellation_token = threading.Event()
 
         self.bCreate.clicked.connect(lambda: self.showCreateForm())
         self.bExport.clicked.connect(lambda: self.export())
         self.bImport.clicked.connect(lambda: self.importGML())
-        self.bInfo.setIcon(QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/info.svg'))))
+        self.bInfo.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/info.svg')))
         self.bInfo.clicked.connect(self.openDetails)
+        self.button_cancel_import.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/cancel.svg'),
+                                                   color=ApplicationColor.Tertiary))
+        self.button_cancel_import.setCursor(Qt.PointingHandCursor)
+        self.hover_filter = SVGButtonEventFilter(ApplicationColor.Tertiary, ApplicationColor.Primary)
+        self.button_cancel_import.installEventFilter(self.hover_filter)
+        self.button_cancel_import.clicked.connect(self.on_cancel_import)
 
         self.identifyTool = ContextMenuTool(self.iface.mapCanvas(), self)
         self.identifyTool.accessAttributesRequested.connect(self.showObjectAttributes)
@@ -76,6 +97,11 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.fwImportPath.fileChanged.connect(lambda file_path: self.bImport.setEnabled(bool(file_path)))
 
         self.button_show_all.clicked.connect(self.on_show_all_clicked)
+
+        # ------------- STYLESHEET -----------------
+        self.progress_widget.setStyleSheet(style.format(
+            _button_hover_bg=ApplicationColor.Grey300
+        ))
 
         with_color_palette(self, [
             ApplicationColor.Secondary
@@ -203,19 +229,23 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             return
 
         self.bImport.setEnabled(False)
-        QtWidgets.QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        prev_cursor = self.cursor()
+        self.setCursor(Qt.BusyCursor)
         self.bImport.repaint()
         self.progress_widget.setVisible(True)
 
         try:
-            loop = asyncio.get_running_loop()
-            plan_name = await loop.run_in_executor(None, import_plan, filepath, self.import_progress)
+            coro = asyncio.to_thread(import_plan, filepath, self.import_progress)
+            self.import_task = asyncio.create_task(coro)
+            plan_name = await self.import_task
 
             self.fwImportPath.setFilePath("")
             self.cbPlaene.refresh()
             iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich importiert!",
                                            level=Qgis.Success)
 
+        except CancelledError:
+            self.cancellation_token.set()
         except Exception as e:
             logger.exception(e)
             iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht importiert werden!",
@@ -223,11 +253,18 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         finally:
             self.bImport.setEnabled(True)
-            QtWidgets.QApplication.restoreOverrideCursor()
+            self.setCursor(prev_cursor)
             self.progress_widget.setVisible(False)
 
     def import_progress(self, progress):
+        if self.cancellation_token.is_set():
+            self.cancellation_token.clear()
+            raise CancelledError()
         self.progress_label.setText(f'{progress[0]}/{progress[1]}')
+
+    def on_cancel_import(self):
+        if self.import_task and not self.import_task.cancelled():
+            self.import_task.cancel()
 
     @pyqtSlot()
     def openDetails(self):
