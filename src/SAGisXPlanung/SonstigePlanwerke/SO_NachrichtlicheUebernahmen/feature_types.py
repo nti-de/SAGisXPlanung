@@ -268,13 +268,6 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
     ]
 
-    def layer_fields(self):
-        return {
-            'artDerFestlegung': self.artDerFestlegung.name if self.artDerFestlegung else '',
-            'skalierung': self.skalierung if self.skalierung else '',
-            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
-        }
-
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)

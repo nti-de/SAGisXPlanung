@@ -177,9 +177,19 @@ class QAttributeEdit(CLS, FORM_CLASS):
         for feat in layer.getFeatures(QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry).setNoAttributes()):
             id_prop = cp.value(f'xplanung/feat-{feat.id()}')
             if id_prop == self._xplanung_item.xid:
+
+                _self = self._xplanung_item.xtype()
+                setattr(_self, attr, value)
+                value = getattr(_self, attr)
+
+                if hasattr(_self, 'layer_fields'):
+                    legacy_fields = _self.layer_fields()
+                    if attr in legacy_fields:
+                        value = legacy_fields[attr]
+
                 layer.commitChanges(True)
                 with edit(layer):
-                    feat[attr] = str(value)
+                    feat[attr] = str(value) if value is not None else None
                     layer.updateFeature(feat)
 
                 return

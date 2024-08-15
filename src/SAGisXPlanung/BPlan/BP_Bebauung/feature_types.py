@@ -242,11 +242,6 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
         return [f(cell_type, *cell_mapping[cell_type]) for cell_type in cells]
 
-    def layer_fields(self):
-        return {
-            'allgArtDerBaulNutzung': self.allgArtDerBaulNutzung.name if self.allgArtDerBaulNutzung else ''
-        }
-
     def validate(self):
         if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kleinsiedlungsgebiet.name or
             self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.ReinesWohngebiet.name or

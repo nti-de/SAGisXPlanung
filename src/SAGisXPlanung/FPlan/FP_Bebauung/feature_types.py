@@ -52,11 +52,6 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     nutzungText = XPCol(String, version=XPlanVersion.FIVE_THREE)
     abweichungBauNVO = XPCol(XPEnum(XP_AbweichungBauNVOTypen, include_default=True), version=XPlanVersion.SIX)
 
-    def layer_fields(self):
-        return {
-            'allgArtDerBaulNutzung': self.allgArtDerBaulNutzung.name if self.allgArtDerBaulNutzung else ''
-        }
-
     @classmethod
     def import_sondernutzung_attr(cls, version):
         if version == XPlanVersion.FIVE_THREE:

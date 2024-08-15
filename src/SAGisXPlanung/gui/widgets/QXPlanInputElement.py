@@ -105,7 +105,8 @@ class QXPlanInputElement(ABC):
                 enum_values = [e for e in field_type.enums if field_type.enum_class[e].version in [None, version]]
             else:
                 enum_values = field_type.enums
-            return QComboBoxNoScroll(parent, items=enum_values, include_default=should_include_default)
+            return QComboBoxNoScroll(parent, items=enum_values, include_default=should_include_default,
+                                     enum_type=field_type.enum_class)
         if isinstance(field_type, RefURL):
             return QFileInput()
         if isinstance(field_type, LargeString):
@@ -517,10 +518,11 @@ class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclas
 
 
 class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMeta):
-    def __init__(self, scroll_widget=None, items=None, include_default=None, *args, **kwargs):
+    def __init__(self, scroll_widget=None, items=None, include_default=None, enum_type=None, *args, **kwargs):
         super(QComboBoxNoScroll, self).__init__(*args, **kwargs)
         self.scrollWidget = scroll_widget
         self.include_default = include_default
+        self.enum_type = enum_type
         self.setFocusPolicy(Qt.StrongFocus)
 
         if self.include_default:
@@ -539,6 +541,8 @@ class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMe
     def value(self):
         if self.include_default and self.currentIndex() == 0:
             return None
+        if self.enum_type:
+            return self.enum_type[self.currentText()]
         return self.currentText()
 
     def setDefault(self, default):

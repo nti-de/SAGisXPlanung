@@ -151,6 +151,10 @@ class MapLayerRegistry(Singleton):
                     return lyr
 
     def layerByXid(self, xplan_item: XPlanungItem, geom_type: GeometryType = None) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
+        # if not already defined, try if geom type is available on the given xplan item
+        if geom_type is None:
+            geom_type = xplan_item.geom_type
+
         for lyr in self._layers:
             xtype = lyr.customProperty('xplanung/type')
             xid = lyr.customProperty('xplanung/plan-xid')

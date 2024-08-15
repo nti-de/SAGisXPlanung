@@ -213,13 +213,6 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
         ('Gemischt/Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
     ]
 
-    def layer_fields(self):
-        return {
-            'zweckbestimmung': self.zweckbestimmung.name if self.zweckbestimmung else '',
-            'skalierung': self.skalierung if self.skalierung else '',
-            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
-        }
-
     @classmethod
     def import_zweckbestimmung_attr(cls, version):
         if version == XPlanVersion.FIVE_THREE:
