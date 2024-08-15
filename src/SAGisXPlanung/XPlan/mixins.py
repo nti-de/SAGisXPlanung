@@ -285,6 +285,9 @@ class MapCanvasMixin:
                 else:
                     value = getattr(self, field_name)
 
+                if type(value) is list:
+                    value = ', '.join(str(v) for v in value)
+
                 feat[field_name] = str(value) if value is not None else None
             except KeyError as e:
                 pass

@@ -187,6 +187,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
                     if attr in legacy_fields:
                         value = legacy_fields[attr]
 
+                if type(value) is list:
+                    value = ', '.join(str(v) for v in value)
+
                 layer.commitChanges(True)
                 with edit(layer):
                     feat[attr] = str(value) if value is not None else None
