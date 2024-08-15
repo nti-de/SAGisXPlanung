@@ -1,5 +1,20 @@
 ## Changelog
 
+### [2.6.1] - 15.08.2024
+
+#### Neue Funktionen
+
+- Funktion zum Abbrechen des XPlanGML-Import
+
+#### Fehlerbehebungen
+
+- [ce] fehlendes Icon hinzugefügt (ae3c6db5)
+- mehrere Probleme bei der Synchronisation der XPlan-Daten mit der Attributtabelle behoben:
+  - Feldwerte mit Enum-Werten, statt Namen werden korrekt angezeigt (481be71f)
+  - Änderungen von Enum-Attributen werden korrekt mit der Spalte in der Attributtabelle synchornisiert (b8054be7)
+  - fehlerhafte Anzeige von Array-Attributen mit Enum-Werten korrigiert (3b02cb3a)
+
+
 ### [2.6.0] - 07.08.2024
 
 #### Neue Funktionen
