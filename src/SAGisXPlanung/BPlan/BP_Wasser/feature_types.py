@@ -9,7 +9,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGewaesser
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import GeometryType
 
 

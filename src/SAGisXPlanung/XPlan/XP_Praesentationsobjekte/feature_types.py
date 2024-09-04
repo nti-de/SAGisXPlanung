@@ -1,7 +1,7 @@
 import os
 from uuid import uuid4
 
-from geoalchemy2 import Geometry, WKBElement, WKTElement
+from geoalchemy2 import Geometry, WKTElement
 from geoalchemy2.shape import to_shape
 from sqlalchemy import Column, ForeignKey, String, Integer, Boolean, ARRAY, Enum, Float, event, inspect
 from sqlalchemy.dialects.postgresql import UUID
@@ -14,7 +14,7 @@ from SAGisXPlanung import Base, BASE_DIR
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
-from SAGisXPlanung.XPlan.mixins import ElementOrderMixin, RelationshipMixin, MapCanvasMixin, PointGeometry
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, RelationshipMixin, MapCanvasMixin, PointGeometry
 from SAGisXPlanung.XPlan.types import Angle
 
 

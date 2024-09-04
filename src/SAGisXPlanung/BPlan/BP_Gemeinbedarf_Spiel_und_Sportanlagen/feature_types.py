@@ -1,8 +1,7 @@
 from typing import List
 
-from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsMarkerLineSymbolLayer, QgsCentroidFillSymbolLayer,
-                       QgsSvgMarkerSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsMapUnitScale, QgsRuleBasedRenderer)
+from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSymbolLayerUtils,
+                       QgsSimpleLineSymbolLayer, QgsMarkerLineSymbolLayer)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
@@ -16,7 +15,7 @@ from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungSpielSportanlage, XP_ZweckbestimmungGemeinbedarf, \
     XP_Traegerschaft
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import Area, Volume, Length, Angle, GeometryType, XPEnum
 
 

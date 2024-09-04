@@ -14,7 +14,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
-from SAGisXPlanung.XPlan.mixins import PointGeometry, PolygonGeometry, MixedGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType
 
 

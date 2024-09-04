@@ -21,10 +21,9 @@ from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
-from .mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
 from .types import LargeString, Angle, Length, GeometryType
 from ..MapLayerRegistry import MapLayerRegistry
-from ..XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGruen, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
 
 class FP_KomplexeZweckbestGruen(RelationshipMixin, ElementOrderMixin, Base):

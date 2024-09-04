@@ -1,7 +1,7 @@
 import logging
 
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpleFillSymbolLayer, QgsSymbolLayerUtils,
-                       QgsSvgMarkerSymbolLayer, QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes,
+                       QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes,
                        QgsSimpleLineSymbolLayer, QgsSimpleMarkerSymbolLayer, Qgis, QgsSimpleMarkerSymbolLayerBase)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt, QSize
@@ -11,7 +11,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
 from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
     UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum
 

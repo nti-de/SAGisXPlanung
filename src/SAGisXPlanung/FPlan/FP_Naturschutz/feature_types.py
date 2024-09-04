@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_SPEZiele
-from SAGisXPlanung.XPlan.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)

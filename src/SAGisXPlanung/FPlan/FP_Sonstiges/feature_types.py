@@ -1,14 +1,11 @@
 import logging
 
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsUnitTypes)
-from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import Qt
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
-from SAGisXPlanung.XPlan.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 
 logger = logging.getLogger(__name__)

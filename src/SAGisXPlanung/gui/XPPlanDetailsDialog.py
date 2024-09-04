@@ -30,7 +30,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzun
     XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, MixedGeometry, PointGeometry
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, LineGeometry, MixedGeometry, PointGeometry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version, table_name_to_class
 from SAGisXPlanung.core.canvas_display import plan_to_map

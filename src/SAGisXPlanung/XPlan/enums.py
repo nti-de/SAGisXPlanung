@@ -3,7 +3,7 @@ from enum import Enum
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter
-from SAGisXPlanung.XPlan.mixins import XPlanungEnumMixin
+from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 
 logger = logging.getLogger(__name__)
 

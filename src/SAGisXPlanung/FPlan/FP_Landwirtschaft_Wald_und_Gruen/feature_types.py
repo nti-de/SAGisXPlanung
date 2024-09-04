@@ -1,8 +1,7 @@
 from typing import List
 
 from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsMarkerLineSymbolLayer, QgsCentroidFillSymbolLayer,
-                       QgsSvgMarkerSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsMapUnitScale, QgsRuleBasedRenderer)
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
@@ -14,7 +13,7 @@ from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGruen, XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, \
     XP_ZweckbestimmungWald, XP_EigentumsartWald, XP_WaldbetretungTyp
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt, MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 

@@ -4,16 +4,13 @@ import logging
 import os
 from collections import namedtuple
 
-import qasync
 from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
 from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon, QRegExpValidator
-from qgis._core import Qgis
 from qgis.core import edit, QgsFeatureRequest
-from qgis.utils import iface
 from sqlalchemy import update
 
 from SAGisXPlanung import BASE_DIR, Session, Base
@@ -22,7 +19,8 @@ from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
-from SAGisXPlanung.XPlan.mixins import XPlanungEnumMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin
+from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
@@ -139,8 +137,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
             dlg = XPEditAttributeDialog(attribute_name, field_type, index.data(role=ObjectRole),
                                         self._xplanung_item.xtype, parent=self)
 
-        dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
-                                     self.onAttributeChanged(i, a, value))
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.pushAttributeChangedCommand(original, value, a, i))
         dlg.fileChanged.connect(lambda value: self.onAttributeChanged(None, 'file', value))

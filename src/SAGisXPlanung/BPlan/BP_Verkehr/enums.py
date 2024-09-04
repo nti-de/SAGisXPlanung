@@ -1,6 +1,6 @@
 from enum import Enum
 
-from SAGisXPlanung.XPlan.mixins import XPlanungEnumMixin
+from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 
 
 class BP_ZweckbestimmungStrassenverkehr(XPlanungEnumMixin, Enum):

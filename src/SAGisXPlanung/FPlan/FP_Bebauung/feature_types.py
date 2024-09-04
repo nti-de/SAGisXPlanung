@@ -2,9 +2,8 @@ import logging
 import os
 from typing import List
 
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingleSymbolRenderer,
-                       QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleFillSymbolLayer, QgsUnitTypes)
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer,
+                       QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt
 
@@ -16,7 +15,7 @@ from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_Sondernutzungen,
                                        XP_AbweichungBauNVOTypen)
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import ConformityException, GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)

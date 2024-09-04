@@ -1,5 +1,4 @@
 import logging
-import itertools
 from enum import Enum
 from io import BytesIO
 from pathlib import PurePath
@@ -16,7 +15,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Abstra
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
-from SAGisXPlanung.XPlan.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt
+from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt
 from SAGisXPlanung.utils import is_url
 
 logger = logging.getLogger(__name__)

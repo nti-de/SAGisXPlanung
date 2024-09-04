@@ -11,7 +11,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich
 from SAGisXPlanung.XPlan.core import fallback_renderer, XPCol
 from SAGisXPlanung.XPlan.enums import XP_ImmissionsschutzTypen, XP_TechnVorkehrungenImmissionsschutz
-from SAGisXPlanung.XPlan.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum, Sound
 
 

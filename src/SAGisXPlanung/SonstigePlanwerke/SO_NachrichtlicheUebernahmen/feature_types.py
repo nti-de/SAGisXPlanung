@@ -4,7 +4,7 @@ from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolL
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase)
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float, ARRAY
+from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -12,12 +12,11 @@ from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_KlassifizNachSchienenverkehrsrecht,
                                                                           SO_KlassifizNachDenkmalschutzrecht)
-from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr, \
-    SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
+from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht
 from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
 
 

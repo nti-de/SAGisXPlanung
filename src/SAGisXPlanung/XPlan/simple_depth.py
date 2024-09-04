@@ -2,7 +2,6 @@ from enum import Enum
 from uuid import uuid4
 
 from geoalchemy2 import Geometry
-from geoalchemy2.shape import to_shape
 from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -11,7 +10,7 @@ from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
 
 from SAGisXPlanung import Base
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, MapCanvasMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, MapCanvasMixin
 from SAGisXPlanung.XPlan.types import GeometryType
 
 

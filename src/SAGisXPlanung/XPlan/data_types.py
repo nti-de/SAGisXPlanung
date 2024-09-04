@@ -11,7 +11,7 @@ from SAGisXPlanung.XPlan.codelists import CodeList
 from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt, XP_ExterneReferenzTyp, XP_SPEMassnahmenTypen, \
     XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt, XP_RechtscharakterPlanaenderung, XP_Aenderungsarten
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import RefURL, RegExString, ConformityException, LargeString, Length
 
 XP_PlanXP_GemeindeAssoc = Table('xp_plan_gemeinde', Base.metadata,

@@ -1,16 +1,15 @@
 from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsMarkerLineSymbolLayer, QgsCentroidFillSymbolLayer,
-                       QgsSvgMarkerSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsMapUnitScale, QgsRuleBasedRenderer)
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
-from sqlalchemy import Column, ForeignKey, Enum, ARRAY
+from sqlalchemy import Column, ForeignKey, Enum
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGewaesser
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 
 

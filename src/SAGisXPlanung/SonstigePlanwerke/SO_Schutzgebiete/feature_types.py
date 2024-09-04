@@ -1,15 +1,14 @@
-from qgis.PyQt.QtCore import Qt, QSize
+from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QColor
-from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes,
-                       QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
-                       QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase)
+from qgis.core import (QgsSymbol, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes,
+                       QgsSingleSymbolRenderer, QgsSymbolLayerUtils)
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Boolean
+from sqlalchemy import Column, ForeignKey, Enum, String
 
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzgebietWasserrecht, SO_SchutzzonenWasserrecht
 from SAGisXPlanung.XPlan.core import fallback_renderer
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 
 

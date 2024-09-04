@@ -5,17 +5,16 @@ from typing import Tuple, Union, Any, Iterator, Iterable
 from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsEditorWidgetSetup, QgsAnnotationLayer,
                        QgsWkbTypes)
 from qgis.PyQt.QtCore import QVariant
-from sqlalchemy import inspect
-from sqlalchemy.orm import class_mapper, RelationshipProperty
+from sqlalchemy.orm import RelationshipProperty
 
 from SAGisXPlanung import XPlanVersion
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPRelationshipProperty
 from SAGisXPlanung.GML.geometry import geom_type_as_layer_url
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
-from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
+from SAGisXPlanung.core.helper import get_field_type
 
 logger = logging.getLogger(__name__)
 
@@ -153,7 +152,13 @@ class ElementOrderMixin:
         Deklaration aller Basisklassen immer zuerst stehen, damit die Methode element_order korrekt funktioniert. """
 
     @classmethod
-    def element_order(cls, include_base=True, only_columns=False, export=True, version=XPlanVersion.FIVE_THREE):
+    def element_order(cls,
+                      include_base=True,
+                      only_columns=False,
+                      export=True,
+                      with_geometry=True,
+                      geometry_column_name='',
+                      version=XPlanVersion.FIVE_THREE):
         if only_columns:
             order = inspect(cls).columns.keys()
             order = [cls.normalize_column_name(x) for x in order if cls.attr_is_treated_as_column(x)]
@@ -173,12 +178,19 @@ class ElementOrderMixin:
         elif export and hasattr(cls, 'avoid_export'):
             order = [x for x in order if x not in cls.avoid_export()]
 
-        # remove sqlalchemy utility attributes
-        order = [x for x in order if x not in ['type', 'id']]
+        # remove sqlalchemy utility attributes and geometry column
+        exclude = ['type', 'id']
+        if not with_geometry:
+            if hasattr(cls, '__geometry_column_name__'):
+                geometry_column_name = cls.__geometry_column_name__
+            exclude.append(geometry_column_name)
+        order = [x for x in order if x not in exclude]
 
         try:
             bases = cls.__bases__[-1]
-            base_order = bases.element_order(only_columns=only_columns, export=export, version=version)
+            base_order = bases.element_order(only_columns=only_columns, export=export, with_geometry=with_geometry,
+                                             geometry_column_name=geometry_column_name, version=version)
+
             if not include_base and not hasattr(cls, 'is_declarative_base'):
                 return [x for x in order if x not in base_order]
             # why was this check even introduced?
@@ -227,11 +239,6 @@ class ElementOrderMixin:
         if hasattr(attr, "version") and hasattr(attr, 'attribute'):
             return attr.attribute or attr_name
         return attr_name
-
-
-class XPlanungEnumMixin:
-    def __str__(self):
-        return str(self.name)
 
 
 class MapCanvasMixin:
@@ -304,6 +311,8 @@ class MapCanvasMixin:
 
     @classmethod
     def asLayer(cls, srid, plan_xid, name=None, geom_type=None) -> QgsVectorLayer:
+        from SAGisXPlanung.gui.attributetable.editor_widget import EditorWidgetBridge
+
         geom_type = geom_type if geom_type is not None else cls.__geometry_type__
         layer = QgsVectorLayer(f"{geom_type_as_layer_url(geom_type)}?crs=EPSG:{srid}",
                                cls.__name__ if not name else name, "memory")
@@ -322,14 +331,27 @@ class MapCanvasMixin:
             else:
                 layer.setRenderer(cls.renderer())
 
-        field_names = cls.element_order(only_columns=True, include_base=True, version=export_version())
+        field_names = cls.element_order(only_columns=True, include_base=True,
+                                        with_geometry=False, version=export_version())
         fields = [QgsField(name, QVariant.String, 'string') for name in field_names]
+
         layer.dataProvider().addAttributes(fields)
         layer.updateFields()
 
-        edit_config = layer.editFormConfig()
-        for i in range(len(field_names)):
-            edit_config.setReadOnly(i, True)
-        layer.setEditFormConfig(edit_config)
+        for i, field_name in enumerate(field_names):
+            # exclude relationship columns
+            if (rel := next((r for r in cls.relationships() if r[0] == field_name), None)) is not None:
+                continue
+
+            field_type = get_field_type(cls, field_name)
+
+            field_config = EditorWidgetBridge.create(field_type, layer)
+            widget_setup = field_config.get_editor_widget()
+
+            # Apply the widget setup to the field
+            if isinstance(widget_setup, QgsEditorWidgetSetup):
+                layer.setEditorWidgetSetup(i, widget_setup)
+
+        layer.committedAttributeValuesChanges.connect(EditorWidgetBridge.on_attribute_values_changed)
 
         return layer

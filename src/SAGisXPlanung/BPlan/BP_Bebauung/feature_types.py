@@ -7,7 +7,7 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingl
                        QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer, QgsSymbolLayerUtils,
                        QgsSimpleFillSymbolLayer)
 from qgis.PyQt.QtGui import QColor, QIcon
-from qgis.PyQt.QtCore import Qt, QSize, pyqtSlot
+from qgis.PyQt.QtCore import Qt, QSize
 from qgis.utils import iface
 
 from geoalchemy2 import WKBElement
@@ -17,7 +17,6 @@ from sqlalchemy.orm import relationship, load_only, joinedload, declared_attr
 
 from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
                                                    BP_ZweckbestimmungNebenanlagen)
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateData, BuildingTemplateCellDataType, BuildingTemplateItem
@@ -26,7 +25,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzun
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
-from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt
+from SAGisXPlanung.core.mixins.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Angle, Area, Length, Volume, Scale, ConformityException, GeometryType, XPEnum
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 

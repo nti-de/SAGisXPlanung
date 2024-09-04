@@ -14,7 +14,7 @@ from SAGisXPlanung.BPlan.BP_Verkehr.enums import BP_ZweckbestimmungStrassenverke
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry, \
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry, \
     MixedGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType, XPEnum
 

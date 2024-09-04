@@ -1,11 +1,10 @@
 import logging
 
-from qgis.PyQt.QtCore import QSize
 from qgis.PyQt import QtWidgets, QtCore
-from qgis.core import QgsWkbTypes, QgsSymbolLayerUtils
+from qgis.core import QgsWkbTypes
 
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
-from SAGisXPlanung.XPlan.mixins import LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import LineGeometry, PolygonGeometry, PointGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.utils import CLASSES

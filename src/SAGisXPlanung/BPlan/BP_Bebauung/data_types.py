@@ -10,7 +10,7 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import Angle, ConformityException
 
 

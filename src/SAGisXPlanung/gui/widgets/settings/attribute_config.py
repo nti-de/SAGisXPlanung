@@ -11,7 +11,7 @@ from qgis.PyQt.QtWidgets import (QTreeView, QHeaderView, QAbstractItemView, QToo
 from sqlalchemy import inspect
 
 from SAGisXPlanung.config import export_version
-from SAGisXPlanung.XPlan.mixins import ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin
 from SAGisXPlanung.config import xplan_tooltip
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.utils import CLASSES

@@ -1,12 +1,12 @@
 from uuid import uuid4
 
-from sqlalchemy import Column, Date, Enum, String, ForeignKey
+from sqlalchemy import Column, Date, Enum, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_VerlaengerungVeraenderungssperre
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
 
 class BP_VeraenderungssperreDaten(RelationshipMixin, ElementOrderMixin, Base):

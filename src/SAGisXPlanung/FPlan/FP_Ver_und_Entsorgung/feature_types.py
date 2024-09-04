@@ -1,10 +1,7 @@
 from typing import List
 
-from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsMarkerLineSymbolLayer, QgsCentroidFillSymbolLayer,
-                       QgsSvgMarkerSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsMapUnitScale, QgsRuleBasedRenderer)
+from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer)
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import QSize, Qt
 
 from sqlalchemy import Column, ForeignKey, Enum, ARRAY, String
 from sqlalchemy.orm import declared_attr, relationship
@@ -12,10 +9,9 @@ from sqlalchemy.orm import declared_attr, relationship
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
-from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGemeinbedarf, XP_ZweckbestimmungSpielSportanlage, \
-    XP_Traegerschaft, XP_ZweckbestimmungVerEntsorgung
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, MixedGeometry
-from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
+from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.XPlan.types import GeometryType
 
 
 class FP_VerEntsorgung(MixedGeometry, FP_Objekt):

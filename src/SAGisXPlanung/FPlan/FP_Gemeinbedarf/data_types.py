@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGemeinbedarf, XP_ZweckbestimmungSpielSportanlage
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
 
 class FP_KomplexeZweckbestGemeinbedarf(RelationshipMixin, ElementOrderMixin, Base):

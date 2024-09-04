@@ -10,7 +10,7 @@ from qgis.PyQt.QtPrintSupport import QPrinter
 
 from qgis.core import (QgsMapLayerType, QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
                        QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication, QgsVectorLayer)
-from qgis.gui import QgsMapLayerAction
+from qgis.gui import QgsGui
 from qgis import processing
 
 import qasync
@@ -22,6 +22,7 @@ from SAGisXPlanung.core.connection import attempt_connection, verify_db_connecti
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
 from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
+from SAGisXPlanung.gui.attributetable.editor_widget import CheckableEnumWidgetWrapperFactory
 from SAGisXPlanung.gui.widgets import DatabaseConfigPage
 from SAGisXPlanung.processing.provider import SAGisProvider
 from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning, CLASSES
@@ -74,6 +75,8 @@ class XPlanung(QObject):
         self.dockWidget.details_dialog.hide()
 
         self.settings = Settings()
+
+        QgsGui.editorWidgetRegistry().registerWidget('CheckableEnum', CheckableEnumWidgetWrapperFactory())
 
         # TODO: hackish solution, because there currently is no signal on project loaded:
         # see https://github.com/qgis/QGIS/issues/40483

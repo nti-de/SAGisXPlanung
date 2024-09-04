@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import Base
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr, \
     SO_KlassifizGewaesser
-from SAGisXPlanung.XPlan.mixins import RelationshipMixin, ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
 
 class SO_KomplexeZweckbestStrassenverkehr(RelationshipMixin, ElementOrderMixin, Base):

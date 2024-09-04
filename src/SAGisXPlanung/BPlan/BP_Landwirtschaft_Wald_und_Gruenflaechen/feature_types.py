@@ -5,7 +5,6 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbo
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
-from lxml import etree
 from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String
 from sqlalchemy.orm import relationship, declared_attr
 
@@ -15,7 +14,7 @@ from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald, \
     XP_EigentumsartWald, XP_WaldbetretungTyp, XP_ZweckbestimmungGruen
-from SAGisXPlanung.XPlan.mixins import PolygonGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType, XPEnum
 
 
