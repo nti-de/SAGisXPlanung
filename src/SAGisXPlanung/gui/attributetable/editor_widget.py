@@ -162,7 +162,7 @@ class FieldType:
         self.field_type = field_type
 
     def get_editor_widget(self):
-        return None
+        return QgsEditorWidgetSetup('Text', {})
 
     def coerce_value(self, variant):
         return str(variant)

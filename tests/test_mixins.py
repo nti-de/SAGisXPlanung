@@ -10,3 +10,8 @@ class TestElementOrderMixin:
         _class = BP_GemeinbedarfsFlaeche()
         attribute_names = _class.element_order(with_geometry=False)
         assert 'position' not in attribute_names
+
+    def test_element_order_with_base_include(self):
+        _class = BP_Plan()
+        attribute_names = _class.element_order(include_base=False)
+        assert 'uuid' not in attribute_names
