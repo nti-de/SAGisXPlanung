@@ -311,8 +311,6 @@ class MapCanvasMixin:
 
     @classmethod
     def asLayer(cls, srid, plan_xid, name=None, geom_type=None) -> QgsVectorLayer:
-        from SAGisXPlanung.gui.attributetable.editor_widget import EditorWidgetBridge
-
         geom_type = geom_type if geom_type is not None else cls.__geometry_type__
         layer = QgsVectorLayer(f"{geom_type_as_layer_url(geom_type)}?crs=EPSG:{srid}",
                                cls.__name__ if not name else name, "memory")
@@ -343,15 +341,7 @@ class MapCanvasMixin:
             if (rel := next((r for r in cls.relationships() if r[0] == field_name), None)) is not None:
                 continue
 
-            field_type = get_field_type(cls, field_name)
-
-            field_config = EditorWidgetBridge.create(field_type, layer)
-            widget_setup = field_config.get_editor_widget()
-
-            # Apply the widget setup to the field
-            if isinstance(widget_setup, QgsEditorWidgetSetup):
-                layer.setEditorWidgetSetup(i, widget_setup)
-
-        layer.committedAttributeValuesChanges.connect(EditorWidgetBridge.on_attribute_values_changed)
+            widget_setup = QgsEditorWidgetSetup('Hidden', {})
+            layer.setEditorWidgetSetup(i, widget_setup)
 
         return layer
