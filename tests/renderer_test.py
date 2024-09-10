@@ -52,7 +52,7 @@ class TestRenderer:
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_gruenflaeche_renderer(self):
-        r = BP_GruenFlaeche.renderer()
+        r = BP_GruenFlaeche.renderer(QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
         assert len(r.rootRule().children()) == 8
@@ -66,7 +66,7 @@ class TestRenderer:
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_gemeinbedarf_renderer(self):
-        r = BP_GemeinbedarfsFlaeche.renderer()
+        r = BP_GemeinbedarfsFlaeche.renderer(QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
         assert len(r.rootRule().children()) == 12
