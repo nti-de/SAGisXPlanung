@@ -10,7 +10,8 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGruen, XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, \
     XP_ZweckbestimmungWald, XP_EigentumsartWald, XP_WaldbetretungTyp
 from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, MixedGeometry
@@ -36,6 +37,13 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
                                        cascade="all, delete", passive_deletes=True)
 
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
+
+    def layer_fields(self):
+        return {
+            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'skalierung': self.skalierung if self.skalierung else '',
+            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
+        }
 
     @classmethod
     def import_zweckbestimmung_attr(cls, version):
@@ -73,6 +81,10 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.PointGeometry:
+            return icon_renderer('Gruen', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Landwirtschaft_Wald_und_Gruenflaechen', geometry_type=geom_type,
+                                 symbol_size=30)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

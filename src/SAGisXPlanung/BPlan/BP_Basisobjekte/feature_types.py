@@ -16,7 +16,8 @@ from qgis.PyQt.QtCore import Qt
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import enforce_wkb_constraints, geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import BP_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt

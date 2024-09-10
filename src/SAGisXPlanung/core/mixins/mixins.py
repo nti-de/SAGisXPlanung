@@ -14,7 +14,6 @@ from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
-from SAGisXPlanung.core.helper import get_field_type
 
 logger = logging.getLogger(__name__)
 

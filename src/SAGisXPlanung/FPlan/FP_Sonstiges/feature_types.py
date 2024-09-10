@@ -3,7 +3,7 @@ import logging
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType

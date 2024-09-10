@@ -10,7 +10,6 @@ from qgis.PyQt.QtPrintSupport import QPrinter
 
 from qgis.core import (QgsMapLayerType, QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
                        QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication, QgsVectorLayer)
-from qgis.gui import QgsGui
 from qgis import processing
 
 import qasync
@@ -24,7 +23,7 @@ from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
 from SAGisXPlanung.gui.widgets import DatabaseConfigPage
 from SAGisXPlanung.processing.provider import SAGisProvider
-from SAGisXPlanung.utils import createXPlanungIndicators, full_version_required_warning, CLASSES
+from SAGisXPlanung.utils import createXPlanungIndicators
 
 logger = logging.getLogger(__name__)
 

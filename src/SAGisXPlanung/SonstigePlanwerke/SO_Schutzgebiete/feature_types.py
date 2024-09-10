@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey, Enum, String
 
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzgebietWasserrecht, SO_SchutzzonenWasserrecht
-from SAGisXPlanung.XPlan.core import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
 

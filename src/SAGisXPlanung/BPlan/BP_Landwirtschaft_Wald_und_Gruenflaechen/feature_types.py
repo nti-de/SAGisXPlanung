@@ -11,7 +11,8 @@ from sqlalchemy.orm import relationship, declared_attr
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald, \
     XP_EigentumsartWald, XP_WaldbetretungTyp, XP_ZweckbestimmungGruen
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
@@ -83,17 +84,6 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     zugunstenVon = Column(String)
 
-    __icon_map__ = [
-        ('Parkanlage', '"zweckbestimmung" LIKE \'10%\'', 'Parkanlage.svg'),
-        ('Dauerkleingärten', '"zweckbestimmung" LIKE \'12%\'', 'Dauerkleingärten.svg'),
-        ('Sportanlage', '"zweckbestimmung" LIKE \'14%\'', 'Sportplatz.svg'),
-        ('Spielplatz', '"zweckbestimmung" LIKE \'16%\'', 'Spielplatz.svg'),
-        ('Zeltplatz', '"zweckbestimmung" LIKE \'18%\'', 'Zeltplatz.svg'),
-        ('Badeplatz', '"zweckbestimmung" LIKE \'20%\'', 'Badeplatz.svg'),
-        ('Friedhof', '"zweckbestimmung" LIKE \'26%\'', 'Friedhof.svg'),
-        ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
-    ]
-
     def layer_fields(self):
         return {
             'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
@@ -128,8 +118,8 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Landwirtschaft_Wald_und_Gruenflaechen')
-        return renderer
+        return icon_renderer('Gruen', cls.symbol(),
+                             'BP_Landwirtschaft_Wald_und_Gruenflaechen', geometry_type=geom_type)
 
     @classmethod
     def previewIcon(cls):

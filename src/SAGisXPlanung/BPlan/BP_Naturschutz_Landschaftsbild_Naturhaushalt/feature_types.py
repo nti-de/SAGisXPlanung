@@ -12,7 +12,8 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType

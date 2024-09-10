@@ -9,7 +9,8 @@ from sqlalchemy import Column, ForeignKey, String
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich
-from SAGisXPlanung.XPlan.core import fallback_renderer, XPCol
+from SAGisXPlanung.XPlan.core import XPCol
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ImmissionsschutzTypen, XP_TechnVorkehrungenImmissionsschutz
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum, Sound

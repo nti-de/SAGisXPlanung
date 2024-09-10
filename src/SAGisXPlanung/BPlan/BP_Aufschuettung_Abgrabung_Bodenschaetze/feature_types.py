@@ -7,7 +7,7 @@ from qgis.PyQt.QtCore import Qt
 from sqlalchemy import Column, ForeignKey, String
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.XPlan.core import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import GeometryType
 

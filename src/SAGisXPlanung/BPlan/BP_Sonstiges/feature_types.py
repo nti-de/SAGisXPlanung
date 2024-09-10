@@ -9,7 +9,7 @@ from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
-from SAGisXPlanung.XPlan.core import fallback_renderer, generic_objects_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
     UeberlagerungsObjekt

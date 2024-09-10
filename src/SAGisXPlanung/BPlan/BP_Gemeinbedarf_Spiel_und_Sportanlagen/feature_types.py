@@ -12,7 +12,8 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_BebauungsArt, BP_Bauweise
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungSpielSportanlage, XP_ZweckbestimmungGemeinbedarf, \
     XP_Traegerschaft
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt
@@ -88,21 +89,6 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
     traeger = XPCol(XPEnum(XP_Traegerschaft, include_default=True), version=XPlanVersion.SIX)
     zugunstenVon = Column(String)
 
-    __icon_map__ = [
-        ('Öffentliche Verwaltung', '"zweckbestimmung" LIKE \'10%\'', 'Oeffentliche_Verwaltung.svg'),
-        ('Bildung und Forschung', '"zweckbestimmung" LIKE \'12%\'', 'Bildung_Forschung.svg'),
-        ('Kirchliche Einrichtung', '"zweckbestimmung" LIKE \'14%\'', 'Kirchliche_Einrichtung.svg'),
-        ('Soziale Einrichtung', '"zweckbestimmung" LIKE \'16%\'', 'Einrichtung_Soziales.svg'),
-        ('Gesundheit', '"zweckbestimmung" LIKE \'18%\'', 'Krankenhaus.svg'),
-        ('Kulturelle Einrichtung', '"zweckbestimmung" LIKE \'20%\'', 'Einrichtung_Kultur.svg'),
-        ('Sicherheit/Ordnung', '"zweckbestimmung" LIKE \'2400\'', 'Polizei.svg'),
-        ('Feuerwehr', '"zweckbestimmung" LIKE \'24000\'', 'Feuerwehr.svg'),
-        ('Schutzbauwerk', '"zweckbestimmung" LIKE \'24001\'', 'Schutzbauwerk.svg'),
-        ('Justiz', '"zweckbestimmung" LIKE \'24002\'', 'Justizvollzug.svg'),
-        ('Post', '"zweckbestimmung" LIKE \'26000\'', 'Post.svg'),
-        ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
-    ]
-
     def layer_fields(self):
         return {
             'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
@@ -137,7 +123,8 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Gemeinbedarf_Spiel_und_Sportanlagen')
+        renderer = icon_renderer('Gemeinbedarf', cls.symbol(),
+                                 'BP_Gemeinbedarf_Spiel_und_Sportanlagen', geometry_type=geom_type)
         return renderer
 
     @classmethod

@@ -22,7 +22,8 @@ from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateData, BuildingTemplateCellDataType, BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
 from SAGisXPlanung.core.mixins.mixins import LineGeometry, PolygonGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt

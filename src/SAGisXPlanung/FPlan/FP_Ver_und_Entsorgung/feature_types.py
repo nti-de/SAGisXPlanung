@@ -8,7 +8,8 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -35,6 +36,13 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
 
     textlicheErgaenzung = XPCol(String, version=XPlanVersion.FIVE_THREE)
     zugunstenVon = Column(String)
+
+    def layer_fields(self):
+        return {
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
+            'skalierung': self.skalierung if self.skalierung else '',
+            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
+        }
 
     @classmethod
     def import_zweckbestimmung_attr(cls, version):
@@ -65,6 +73,10 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.PointGeometry:
+            return icon_renderer('Versorgung', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Ver_und_Entsorgung', geometry_type=geom_type,
+                                 symbol_size=30)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

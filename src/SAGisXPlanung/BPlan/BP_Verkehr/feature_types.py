@@ -12,7 +12,8 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Verkehr.enums import BP_ZweckbestimmungStrassenverkehr, BP_BereichOhneEinAusfahrtTypen, \
     BP_EinfahrtTypen
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import xp_version, fallback_renderer
+from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry, \
     MixedGeometry

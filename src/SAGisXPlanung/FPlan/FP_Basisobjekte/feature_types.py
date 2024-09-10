@@ -13,7 +13,8 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_PlanArt, FP_Verfahren, FP_Rechtsstand, FP_Rechtscharakter
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import FP_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Rechtscharakter
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt

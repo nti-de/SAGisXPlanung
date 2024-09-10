@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung.RPlan.RP_Basisobjekte.enums import RP_Art, RP_Rechtsstand, RP_Verfahren
-from SAGisXPlanung.XPlan.core import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.XPlan.types import GeometryType

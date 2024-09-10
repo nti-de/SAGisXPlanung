@@ -10,7 +10,8 @@ from sqlalchemy.orm import relationship, declared_attr
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType
@@ -79,19 +80,6 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     textlicheErgaenzung = XPCol(String, version=XPlanVersion.FIVE_THREE)
     zugunstenVon = Column(String)
 
-    __icon_map__ = [
-        ('Elektrizität', '"zweckbestimmung" LIKE \'10%\'', 'Elektrizitaet.svg'),
-        ('Gas', '"zweckbestimmung" LIKE \'12%\'', 'Gas.svg'),
-        ('Waermeversorgung', '"zweckbestimmung" LIKE \'14%\'', 'Fernwaerme.svg'),
-        ('Wasser', '"zweckbestimmung" LIKE \'16%\'', 'Wasser.svg'),
-        ('Abwasser', '"zweckbestimmung" LIKE \'18%\'', 'Abwasser.svg'),
-        ('Abfallentsorgung', '"zweckbestimmung" LIKE \'22%\'', 'Abfall.svg'),
-        ('Ablagerung', '"zweckbestimmung" LIKE \'24%\'', 'Ablagerung.svg'),
-        ('Erneuerbare Energien', '"zweckbestimmung" LIKE \'2800\'', 'Erneuerbare_Energien.svg'),
-        ('Kraft-Wärme-Kopplung', '"zweckbestimmung" LIKE \'3000\'', 'Kraft_Waerme_Kopplung.svg'),
-        ('Sonstiges', '', ''),
-    ]
-
     def layer_fields(self):
         return {
             'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
@@ -127,8 +115,8 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
-            renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Ver_und_Entsorgung')
-            return renderer
+            return icon_renderer('Versorgung', cls.polygon_symbol(),
+                                 'BP_Ver_und_Entsorgung', geometry_type=geom_type)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

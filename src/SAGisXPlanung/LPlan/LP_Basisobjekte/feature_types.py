@@ -10,7 +10,8 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty, fallback_renderer
+from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
