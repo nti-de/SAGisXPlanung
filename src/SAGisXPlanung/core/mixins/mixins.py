@@ -331,6 +331,8 @@ class MapCanvasMixin:
         field_names = cls.element_order(only_columns=True, include_base=True,
                                         with_geometry=False, version=export_version())
         fields = [QgsField(name, QVariant.String, 'string') for name in field_names]
+        fields.extend([QgsField('drehwinkel', QVariant.String, 'string'),
+                       QgsField('skalierung', QVariant.String, 'string')])
 
         layer.dataProvider().addAttributes(fields)
         layer.updateFields()
