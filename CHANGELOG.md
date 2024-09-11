@@ -1,5 +1,21 @@
 ## Changelog
 
+### [2.6.2] - 11.09.2024
+
+#### Neue Funktionen
+
+- Funktion zur Mehrfachbearbeitung von XPlan-Objekten
+
+#### Veränderungen
+
+- verbesserte Standard-Darstellungsreihenfolge bei Anzeige eines Plans auf der Karte
+- standardmäßige Darstellung von SVG-Symbolen auf Punktobjekten im FNP
+
+#### Fehlerbehebungen
+
+- manuelle Anpassung einzelner Symbolgrößen korrigert (f9621fe0)
+- fehlerhafte Anzeige des Planwerk-Fensters beim Weschsel zwischen Plänen (d4295951)
+
 ### [2.6.1] - 15.08.2024
 
 #### Neue Funktionen
