@@ -159,7 +159,7 @@ class ElementOrderMixin:
                       geometry_column_name='',
                       version=XPlanVersion.FIVE_THREE):
         if only_columns:
-            order = inspect(cls).columns.keys()
+            order = cls.__table__.columns.keys()
             order = [cls.normalize_column_name(x) for x in order if cls.attr_is_treated_as_column(x)]
 
             # remove duplicates

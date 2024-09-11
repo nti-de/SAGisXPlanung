@@ -14,8 +14,8 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht
-from SAGisXPlanung.XPlan.core import XPCol, fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
 
