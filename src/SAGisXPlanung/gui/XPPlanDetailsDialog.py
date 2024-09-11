@@ -207,8 +207,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
                 self.construct_explorer(plan)
 
-        async with loading_animation(self):
-            async with self._init_lock:
+        async with self._init_lock:
+            async with loading_animation(self):
                 self.lFinished.setVisible(False)
                 self.reset_label.setVisible(False)
                 self.lErrorCount.setText('')
