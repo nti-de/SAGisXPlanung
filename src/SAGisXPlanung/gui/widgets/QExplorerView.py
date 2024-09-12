@@ -34,6 +34,7 @@ class QExplorerView(QTreeView):
         self.proxy_style.setParent(self)
         self.setStyle(self.proxy_style)
         self.setMouseTracking(True)
+        self.setUniformRowHeights(True)
 
         self.sorting = SortOptions.SortHierarchy
 

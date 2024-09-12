@@ -18,6 +18,7 @@ from SAGisXPlanung import compile_ui_file, BASE_DIR
 from SAGisXPlanung.core.converter_tasks import import_plan, export_action, ActionCanceledException
 from SAGisXPlanung.Tools.ContextMenuTool import ContextMenuTool
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.nexus_dialog import NexusDialog
 from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_color, load_svg, SVGButtonEventFilter
 from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
@@ -288,7 +289,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         # find object
         proxy_model = self.details_dialog.objectTree.proxy
-        index_list = proxy_model.match(proxy_model.index(0, 0), XID_ROLE, xplan_item.xid, -1,
+        index_list = proxy_model.match(proxy_model.index(0, 0), XID_ROLE, xplan_item.xid, 1,
                                        Qt.MatchWildcard | Qt.MatchRecursive)
         if not index_list:
             return
