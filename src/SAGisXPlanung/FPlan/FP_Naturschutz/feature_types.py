@@ -4,6 +4,7 @@ from sqlalchemy import Column, ForeignKey, String, Boolean
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_SPEZiele
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
@@ -20,6 +21,7 @@ class FP_SchutzPflegeEntwicklung(MixedGeometry, FP_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': 'fp_schutzflaeche',
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 

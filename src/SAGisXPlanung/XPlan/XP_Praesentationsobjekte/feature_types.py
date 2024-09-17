@@ -14,6 +14,7 @@ from SAGisXPlanung import Base, BASE_DIR
 from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, RelationshipMixin, MapCanvasMixin, PointGeometry
 from SAGisXPlanung.XPlan.types import Angle
 
@@ -28,6 +29,8 @@ class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Ba
         der Datenbank. (bspw. durch 4-fache Vererbung: PO -> TPO -> PTO -> Nutzungschablone)"""
 
     __tablename__ = 'xp_po'
+
+    __LAYER_PRIORITY__ = LayerPriorityType.Top
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 

@@ -16,7 +16,7 @@ from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer
 
 from .XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from .conversions import XP_Rechtscharakter_EnumType
-from .core import XPCol, XPRelationshipProperty
+from .core import XPCol, LayerPriorityType, XPRelationshipProperty
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
@@ -35,6 +35,7 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
 
     __readonly_columns__ = ['raeumlicherGeltungsbereich']
 
+    __LAYER_PRIORITY__ = LayerPriorityType.Top
     __geometry_column_name__ = 'raeumlicherGeltungsbereich'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -191,6 +192,7 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
     __avoidRelation__ = ['planinhalt', 'praesentationsobjekt', 'simple_geometry']
     __readonly_columns__ = ['geltungsbereich']
 
+    __LAYER_PRIORITY__ = LayerPriorityType.Bottom
     __geometry_column_name__ = 'geltungsbereich'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -284,6 +286,8 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
 
     __tablename__ = 'xp_objekt'
     __avoidRelation__ = ['wirdDargestelltDurch']
+
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder
 
     hidden = False  # if class should be hidden in GUI forms
     annotation_delete_queue = []  # stores all annotation items that should be removed from canvas after a delete

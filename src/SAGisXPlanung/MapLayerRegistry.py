@@ -12,6 +12,7 @@ from qgis.utils import iface
 from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.config import QgsConfig
 
 logger = logging.getLogger(__name__)
 
@@ -85,7 +86,29 @@ class MapLayerRegistry(Singleton):
         if add_to_legend:
             QgsProject.instance().addMapLayer(layer, False)
             if group and isinstance(layer, QgsVectorLayer):
-                group.addLayer(layer)
+                # respect layer order from config
+                xplan_class = layer.customProperty('xplanung/type')
+                layer_priority = QgsConfig.layer_priority(xplan_class, layer.geometryType())
+
+                layer.setCustomProperty('xplanung/custom-layer-priority', 0 if not layer_priority else int(layer_priority))
+
+                if layer_priority is None:
+                    group.addLayer(layer)
+                else:
+                    # find index that corresponds to the layer-priority following the priority of the layer that is
+                    # to be inserted.
+                    next_index = next((i for i, group_layer in enumerate(group.children())
+                                       if group_layer.layer().customProperty('xplanung/plan-xid') == layer.customProperty('xplanung/plan-xid')
+                                       and not (cp := group_layer.layer().customProperty('xplanung/custom-layer-priority')) is None
+                                       and cp > int(layer_priority)), None)
+
+                    # if no following index could be found, insert layer at the end
+                    # otherwise insert layer before (next_index is the i-th layer -> insertLayer(i, lyr) inserts before)
+                    if next_index is None:
+                        group.addLayer(layer)
+                    else:
+                        group.insertLayer(next_index, layer)
+
             elif group and isinstance(layer, QgsAnnotationLayer):
                 group.insertLayer(0, layer)
 

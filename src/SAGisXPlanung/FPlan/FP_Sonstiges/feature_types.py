@@ -3,6 +3,7 @@ import logging
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
@@ -35,6 +36,7 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': 'fp_kennzeichnung',
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 

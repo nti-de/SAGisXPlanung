@@ -14,8 +14,9 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht
-from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
 
@@ -72,6 +73,7 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': 'so_denkmalschutz',
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import Flag, auto
 from typing import List
 
 from sqlalchemy import Column
@@ -21,6 +22,15 @@ class XPRelationshipProperty:
     rel_name: str
     xplan_attribute: str
     allowed_version: XPlanVersion
+
+
+class LayerPriorityType(Flag):
+    """ Enum to configure the layer priority of XPlanung layers when adding to the layer tree """
+
+    Top = auto()  # Layer prefers to stay at top
+    Bottom = auto()  # Layer prefers to stay at the bottom
+    CustomLayerOrder = auto()  # Layer is affected by the custom layer order from Settings/QgsConfig
+    OutlineStyle = auto()  # Layer has a style that only affects the outline, and should therefore stay above others
 
 
 def xp_version(versions: List[XPlanVersion]):

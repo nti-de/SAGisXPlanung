@@ -8,7 +8,7 @@ from qgis.PyQt.QtCore import QVariant
 from sqlalchemy.orm import RelationshipProperty
 
 from SAGisXPlanung import XPlanVersion
-from SAGisXPlanung.XPlan.core import XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPRelationshipProperty, LayerPriorityType
 from SAGisXPlanung.GML.geometry import geom_type_as_layer_url
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -244,6 +244,8 @@ class MapCanvasMixin:
     """ Mixin, dass Methoden zum Darstellen von Planinhalten auf dem MapCanvas bietet.
         Kann nur in Kombination mit einem GeometryMixin verwendet werden!
         Implementierende Klasse muss über die `geometry()`-Methode verfügen! """
+
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder
 
     def toCanvas(self, layer_group, plan_xid=None):
         from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry

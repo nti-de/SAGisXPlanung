@@ -13,6 +13,7 @@ from qgis.PyQt.QtWidgets import QDialog
 
 from SAGisXPlanung import VERSION, XPlanVersion, BASE_DIR
 from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, export_version
+from SAGisXPlanung.config.layer_symbology import load_symbol_defaults
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
@@ -56,8 +57,11 @@ class Settings(QDialog, FORM_CLASS):
         for i in range(1, self.tabs.count()):
             self.tabs.widget(i).setupUi(self)
 
-        self.tabs.setCurrentIndex(0)
+        # additional settings setup
+        coro = asyncio.to_thread(load_symbol_defaults)
+        asyncio.create_task(coro)
 
+        self.tabs.setCurrentIndex(0)
         self.validation_options_group.setStyleSheet('''
             QToolButton {
                 border: 0px;
