@@ -1,5 +1,12 @@
 ## Changelog
 
+### [2.6.3] - 17.09.2024
+
+#### Veränderungen
+
+- verbesserte Ladezeiten beim Abfragen von Sachdaten und Starten der Mehrfachbearbeitung (c746eb00)
+- verbesserte Default-Layerreihenfolge auch in Community-Edition
+
 ### [2.6.2] - 11.09.2024
 
 #### Neue Funktionen
