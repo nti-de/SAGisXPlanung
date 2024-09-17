@@ -95,7 +95,7 @@ jobs:
 
     - name: Upload SQL Scripts
       if: ${{ !env.ACT }} # skip during local actions testing
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: SAGis.XPlanung.sql-scripts@${{ needs.commit-sha.outputs.commit_sha }}
         path: '*.sql'
