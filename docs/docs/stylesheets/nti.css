@@ -1,0 +1,56 @@
+[data-md-color-scheme="nti"] {
+  --md-primary-fg-color:        #fff;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+  --md-primary-bg-color:        #424242;
+  --md-primary-bg-color--light: #939393;
+
+  --md-accent-fg-color:         #de0200;
+
+  --md-typeset-a-color:         #de0200;
+
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:        #303033;
+  --md-primary-fg-color--light: #ECB7B7;
+  --md-primary-fg-color--dark:  #90030C;
+  --md-primary-bg-color:        #fff;
+
+  --md-accent-fg-color:         #de0200;
+
+  --md-typeset-a-color:         #de0200;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Ubuntu', sans-serif;
+}
+
+.md-typeset {
+  font-size: 0.75rem;
+}
+
+article a:hover {
+  text-decoration: underline;
+}
+
+.full-label {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: var(--md-accent-fg-color);
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 400;
+  font-size: smaller;
+}
+
+.procedure {
+  padding: 16px;
+  border : 1px solid var(--md-primary-bg-color--light);
+  transition: border-color linear 300ms;
+  margin-bottom: 12px;
+
+  & h4 {
+    margin-top: 0;
+  }
+}

@@ -1,0 +1,68 @@
+# yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
+
+site_name: SAGis XPlanung Dokumentation
+site_url: https://mydomain.org/
+theme:
+  name: material
+  features:
+    - search.suggest
+    - search.highlight
+    - navigation.expand
+  font:
+    text: Overpass
+  logo: assets/NTI_primary.png
+  palette:
+    # Palette toggle for light mode
+    - scheme: nti
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+extra_css:
+  - stylesheets/nti.css
+extra:
+  homepage: https://nti-group.com/de
+  tags:
+    Vollversion: full
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - def_list
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.keys
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tabbed:
+      alternate_style: true
+
+plugins:
+  - tags
+  - search
+
+nav:
+  - Home: index.md
+  - Anwendungsfälle:
+      - new-plan.md
+      - add-plancontent.md
+      - plan-import.md
+      - plan-export.md
+  - Elemente der Oberfläche:
+      - elements/main-dialog.md
+      - elements/plan-details.md
+      - elements/plan-overview.md
