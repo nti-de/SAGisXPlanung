@@ -43,6 +43,15 @@ article a:hover {
   font-weight: 400;
   font-size: smaller;
 }
+.ce-label {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #087cfa;
+  border-radius: 4px;
+  color: #fff;
+  font-weight: 400;
+  font-size: smaller;
+}
 
 .procedure {
   padding: 16px;

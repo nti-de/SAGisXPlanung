@@ -1,4 +1,4 @@
-# SAGis XPlanung
+# Anwendungsdokumentation SAGis XPlanung
 
 SAGis XPlanung ist eine Erweiterung für die GIS-Software QGIS, die eine Erfassung und
 Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermöglicht
@@ -15,13 +15,6 @@ Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermög
 
     [:octicons-arrow-right-24: Installation](#)
 
--   :material-lan-connect:{ .lg .middle } __Aufbau der Anwendung__
-
-    ---
-
-    Überblick zur Architektur der Anwendung, Softwarekomponenten, ...
-
-    [:octicons-arrow-right-24: Architektur](#)
 
 -   :map:{ .lg .middle } __Ersten XPlan erfassen__
 
@@ -44,29 +37,50 @@ Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermög
 ## Weitere Funktionen
 
 <div class="grid cards" markdown>
--   __Planinhalte hinzufügen__
+-   [__Planinhalte hinzufügen__](add-plancontent.md)
 
     ---
 
     Erfassen von raumbezogenen Festsetzungen in einem Plan
 
--   __Geometrieprüfung__
+-   [__Geometrieprüfung__](elements/plan-details.md#geometrieprufung)
 
     ---
 
     Validieren der Anforderungen an erfasste Geometrien im Standard XPlanung
 
--   __Export von XPlanGML-Dokumenten__
+-   [__Export von XPlanGML-Dokumenten__](plan-export.md)
 
     ---
 
     Erstellen von XPlanGML-Dateien aus erfassten XPlan-Datensätzen
 
-- __Planinhalte bearbeiten__
+- [__Planinhalte bearbeiten__](elements/plan-details.md#bearbeiten-von-sachdaten)
 
     ---
 
     Anpassen von Geometrie und Sachdaten bestehender Planinhalte
 </div>
 
+## Programmversionen
 
+Die Anwendung wird in zwei verschiedenen Versionen zur Verfügung gestellt. 
+Zum Überblick über die Funktionsunterschiede dient die folgende Tabelle:
+
+|                                                             | Community-Version   | Vollversion        |
+|-------------------------------------------------------------|---------------------|--------------------|
+| Teilvektorielle Erfassung                                   | :heavy_check_mark:  | :heavy_check_mark: |
+| Speichern externer Referenzen                               | :heavy_check_mark:  | :heavy_check_mark: |
+| Import von XPlanGML-Dokumenten                              | :heavy_check_mark:  | :heavy_check_mark: |
+| Visualisierung gemäß PlanZV                                 | :heavy_check_mark:  | :heavy_check_mark: |
+| Export von XPlanGML-Dokumenten                              | [^abbr1]            | :heavy_check_mark: |
+| Bearbeiten von XPlanung-Attributen                          | [^abbr1]            | :heavy_check_mark: |
+| Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                     | :heavy_check_mark: |
+| Benutzerdefinierte Symbolisierung                           |                     | :heavy_check_mark: |
+| Tabellen-Import (Excel)                                   |                     | :heavy_check_mark: |
+
+Die Community-Version ist unter einer Open-Source Lizenz im Plugin-Verzeichnis vom QGIS zum 
+[Download](setup/install.md#installation-aus-qgis-plugin-repository) verfügbar.
+
+
+[^abbr1]: Nur für Basisobjekte möglich (teilvektorielle Erfassung)

@@ -5,7 +5,7 @@ vom Geometrietyp (Multi)Polygon, der den Geltungsbereich des zu erfassenden
 Plans beschreibt. Sollte der Plan nur teilvektoriell erfasst werden, wird 
 zusätzlich ein georeferenziertes Rasterbild der Planzeichnung benötigt.
 
-1. Im Hauptdialog der Anwendung im Abschnitt **Neuen Plan erfassen** die entsprechende Art des zu erfassenden Plans#
+1. Im Hauptdialog der Anwendung im Abschnitt **Neuen Plan erfassen** die entsprechende Art des zu erfassenden Plans
    auswählen
 
 2. Mit dem Button **Planwerk erfassen** öffnet sich ein Sachdatendialog zur Konfiguration der Sachdaten für den zu 

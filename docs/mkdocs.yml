@@ -8,6 +8,7 @@ theme:
     - search.suggest
     - search.highlight
     - navigation.expand
+    - navigation.indexes
   font:
     text: Overpass
   logo: assets/NTI_primary.png
@@ -34,12 +35,16 @@ extra:
   homepage: https://nti-group.com/de
   tags:
     Vollversion: full
+  social:
+    - icon: material/email
+      link: mailto:qgis-de@nti.biz
 
 markdown_extensions:
   - attr_list
   - md_in_html
   - def_list
   - admonition
+  - footnotes
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.keys
@@ -54,15 +59,29 @@ markdown_extensions:
 plugins:
   - tags
   - search
+  - offline
 
 nav:
-  - Home: index.md
+  - Start: index.md
+  - Installation und Einrichtung:
+      - setup/index.md
+      - Installation: setup/install.md
+      - Einrichtung einer Datenquelle: setup/database-setup.md
   - Anwendungsfälle:
       - new-plan.md
       - add-plancontent.md
       - plan-import.md
       - plan-export.md
+      - multi-edit.md
   - Elemente der Oberfläche:
       - elements/main-dialog.md
       - elements/plan-details.md
       - elements/plan-overview.md
+  - Einstellungen:
+      - settings/index.md
+      - Formulare: settings/forms.md
+      - Datenbank: settings/database.md
+      - Codelisten: settings/codelists.md
+      - Darstellung: settings/symbology.md
+
+copyright: Copyright &copy; 2024 NTI Deutschland GmbH

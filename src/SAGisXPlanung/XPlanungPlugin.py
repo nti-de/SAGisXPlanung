@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os.path
+import webbrowser
 
 from qgis.PyQt import QtWidgets, sip
 from qgis.PyQt.QtCore import Qt, pyqtSlot, QObject, QSizeF, QUrl, QDir
@@ -23,7 +24,14 @@ from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
 from SAGisXPlanung.gui.widgets import DatabaseConfigPage
 from SAGisXPlanung.processing.provider import SAGisProvider
-from SAGisXPlanung.utils import createXPlanungIndicators
+from SAGisXPlanung.utils import createXPlanungIndicators, caller_name
+
+try:
+    # __init.py__ may not be reloaded when upgrading through QGIS plugin manager
+    # therefore only import when possible
+    from SAGisXPlanung import ALLOW_UPGRADE_FROM_QGIS, BASE_DIR
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -106,6 +114,12 @@ class XPlanung(QObject):
         settings_action.triggered.connect(self.showSettings)
         self.menu.addAction(settings_action)
 
+        docs_action = QAction(QIcon(':/images/themes/default/mActionHelpContents.svg'),
+                              'Hilfe öffnen...', self.iface.mainWindow())
+        docs_action.setToolTip('SAGis XPlanung konfigurieren')
+        docs_action.triggered.connect(self.on_help_menu_clicked)
+        self.menu.addAction(docs_action)
+
         self.menu.addSeparator()
 
         self.data_action = QAction('Allgemeine Daten bearbeiten...', self.iface.mainWindow())
@@ -164,6 +178,11 @@ class XPlanung(QObject):
             self.dockWidget.hide()
 
         self.dockWidget.cbPlaene.refresh()
+
+    @pyqtSlot()
+    def on_help_menu_clicked(self):
+        url = f'file:///{BASE_DIR}/docs/index.html'
+        launch_succeeded = webbrowser.open_new_tab(url)
 
     @pyqtSlot(bool)
     def showEditPreFilledObjects(self, checked):

@@ -9,14 +9,14 @@ Das Fenster **Planwerk Details** besteht aus den beiden Sektionen **Geometriepr�
 dem **Objektbaum**. Im oberen Bereich finden sich allgemeine Aktionen zum 
 Anzeigen, Bearbeiten und Löschen des vorliegenden Plans.
 
-<div class="procedure">
+<div class="procedure" markdown="span">
     <h4>Detailansicht für ein Planwerk öffnen</h4>
     <ol>
-        <li>Gewünschtes Planwerk aus Liste im <a href="main-dialog.md">Hauptdialog</a> wählen</li>
+        <li>Gewünschtes Planwerk aus Liste im [Hauptdialog](main-dialog.md) wählen</li>
         <li>Neben der Liste der Planwerke auf das Info-Symbol klicken</li>
     </ol>
     <figure>
-        <img src="../../assets/open-plan-details.png" alt="Plan Details öffnen"/>
+        <img src="../assets/open-plan-details.png" alt="Plan Details öffnen"/>
     </figure>
 </div>
 
@@ -24,7 +24,7 @@ Anzeigen, Bearbeiten und Löschen des vorliegenden Plans.
 
 Jeder in der Datenbank erfasste Datensatz kann auf der QGIS-Karte visualisiert werden. Dabei wird eine standardmäßig 
 konfigurierte Stilvorgabe und Layerreihenfolge des SAGis XPlanung angewendet. Eine Anpassung der individuelle Stile ist
-in den [Einstellungen](#) möglich.
+in den [Einstellungen](../settings/symbology.md) möglich.
 
 <div class="procedure">
     <h4>Plan auf Karte anzeigen</h4>
@@ -32,7 +32,7 @@ in den [Einstellungen](#) möglich.
         <li>Mit dem Kartensymbol lässt sich der aktuell gewählte Plan auf der QGIS-Karte anzeigen</li>
     </ul>
     <figure>
-        <img src="../../assets/display-map.png" alt="Plan Details öffnen"/>
+        <img src="../assets/display-map.png" alt="Plan Details öffnen"/>
     </figure>
 </div>
 
@@ -68,7 +68,7 @@ Dies betrifft die folgenden Bedingungen:
             visualisiert werden.
         </li>
         <figure>
-            <img src="../../assets/geometry-validation.png" alt="Geometrieprüfung"/>
+            <img src="../assets/geometry-validation.png" alt="Geometrieprüfung"/>
         </figure>
         <li>
             Zum Beheben von Geometriefehlern können die <a href="https://docs.qgis.org/3.34/de/docs/user_manual/working_with_vector/editing_geometry_attributes.html">
@@ -100,7 +100,7 @@ zugeordnet. Dabei können einzelne Planinhalte wiederum anderen Inhalte zugeordn
 
 - <a href="#filtern-und-sortieren"> Filtern und Sortieren der Planinhalte</a>
 - <a href="#bearbeiten-von-sachdaten" summary="">Bearbeiten von Sachdaten</a>
-- <a href="../../add-plancontent/#datenobjekte-hinzufugen">Hinzufügen neuer Datenobjekte</a>
+- [Hinzufügen neuer Datenobjekte](../add-plancontent.md#datenobjekte-hinzufugen)
 - <a href="#loschen-von-inhalten">Löschen von einzelnen Inhalten</a>
 
 
@@ -115,7 +115,7 @@ Mit dem Lupen-Symbol öffnet sich ein Suchfeld, das zum **Filtern** der angezeig
 _XPlanung-ID_ genutzt werden kann.
 
 <figure markdown="span">
-    ![Filtern und Sortieren](../../assets/filter-plancontents.png)
+    ![Filtern und Sortieren](../assets/filter-plancontents.png)
 </figure>
 
 
@@ -131,7 +131,7 @@ _XPlanung-ID_ genutzt werden kann.
 2. Doppel-Klick in eine Zelle der Spalte **Wert** öffnet einen Dialog zum Bearbeiten des gewählten Attributs
 3. Gewünschte Anpassung am Attributwert eintragen und mit **Speichern** bestätigen 
     <figure markdown="span">
-        ![Attribut bearbeiten](../../assets/edit-attribute.png)
+        ![Attribut bearbeiten](../assets/edit-attribute.png)
     </figure>
 
 !!! tip
@@ -139,8 +139,12 @@ _XPlanung-ID_ genutzt werden kann.
     Mit der Rückgängig-Funktion können letzte Änderungen an Attributen wieder gelöscht werden um den Datensatz in einen
     früheren Zustand zu versetzen.
     <figure markdown="span">
-        ![Attributänderung zurücksetzen](../../assets/edit-undo.png)
+        ![Attributänderung zurücksetzen](../assets/edit-undo.png)
     </figure>
+
+!!! tip
+
+    Funktion [_Mehrfachbearbeitung_](../multi-edit.md) für Änderungen an mehreren gleichen Planinhalten.
 
 ### Löschen von Inhalten
 
@@ -148,7 +152,7 @@ _XPlanung-ID_ genutzt werden kann.
 
     * Mit dem Mülleimer-Symbol im oberen Abschnitt des Fensters wird der gesamte Plan gelöscht
         <figure markdown="span">
-            ![Attribut bearbeiten](../../assets/delete-plan.png)
+            ![Plan löschen](../assets/delete-plan.png)
         </figure>
         
 === "Planinhalte löschen"
@@ -158,7 +162,7 @@ _XPlanung-ID_ genutzt werden kann.
     2. Mit der rechten Masustaste das Kontextmenü aufrufen
     3. Mit **Planinhalt Löschen** werden gewählte Inhalte entfernt.
         <figure markdown="span">
-            ![Attribut bearbeiten](../../assets/delete-plan-content.png)
+            ![Planinhalt löschen](../assets/delete-plan-content.png)
         </figure>
    
 
@@ -170,11 +174,11 @@ ausgeführt werden.
 
 1. Aufruf der Planinhalt-Aktionen über das Kontextmenü der Einträge im Objektbaum (Rechtsklick)
     <figure markdown="span">
-       ![Planinhalt-Aktionen](../../assets/plan-content-actions.png)
+       ![Planinhalt-Aktionen](../assets/plan-content-actions.png)
     </figure>
 
-<table>
-   <tr>
+<table markdown="span">
+   <tr markdown="span">
       <th>Planinhalte</th>
       <td>
          <ul>
@@ -187,17 +191,17 @@ ausgeführt werden.
                ist, wird die Geometrie auf der Karte aufleuchten
             </li>
             <li>
-               <i><a href="../../add-plancontent/#datenobjekte-hinzufugen">Datenobjekt hinzufügen</a></i>
+               <i>[Datenobjekt hinzufügen](../add-plancontent.md#datenobjekte-hinzufugen)</i>
             </li>
             <br>
             Bei Mehrfachauswahl: 
             <li>
-               <i><a href="">Gewählte Objekte bearbeiten</a></i>
+               <i>[Gewählte Objekte bearbeiten](../multi-edit.md)</i>
             </li>
          </ul>
       </td>
    </tr>
-   <tr>
+   <tr markdown="span">
       <th><code>BP_BaugebietsTeilFlaeche</code></th>
       <td>
          <ul>

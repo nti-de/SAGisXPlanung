@@ -8,17 +8,17 @@ Weitere Aktionen im Dialog der Planübersicht:
 3. [Tabellenimport](#)
 4. Navigationswerkzeuge zum Wechseln zwischen den Seiten
 
-<div class="procedure">
+<div class="procedure" markdown="span">
     <h4>Planübersicht öffnen</h4>
     <ol>
         <li>
-            <a href="main-dialog.md">Hauptdialog</a> der Anwendung aufrufen
+            [Hauptdialog](main-dialog.md) der Anwendung aufrufen
         </li>
         <li>
             Mit der Schaltfläche <b>ALLE ANZEIGEN</b> oberhalb der Planwerk-Auswahl wird die Planübersicht aufgerufen
         </li>
     </ol>
-    <img src="../../assets/nexus.png" alt="Planübersicht"/>
+    <img src="../assets/nexus.png" alt="Planübersicht"/>
 </div>
 
 

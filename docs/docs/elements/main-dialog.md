@@ -4,26 +4,26 @@ Der **Hauptdialog** ist der zentrale Einstiegspunkt der Anwendung.
 Das Fenster bietet Zugriff auf die meistgenutzten Funktionen des SAGis XPlanung und ist
 untergliedert in die folgenden vier Sektionen:
 
-<table>
+<table markdown="span">
     <tr>
         <th>Werkzeuge</th>
-        <td>Zugriff auf das XPlanung-Werkzeug zum <a href="../../add-plancontent">Zuweisen neuer Planinhalte</a> und 
-            zur <a href="">Abfrage von XPlan-Daten</a> auf der Karte</td>
+        <td>Zugriff auf das XPlanung-Werkzeug zum [Zuweisen neuer Planinhalte](../add-plancontent.md) und 
+            zur [Abfrage von XPlan-Daten]() auf der Karte</td>
     </tr>
     <tr>
         <th>Neuen Plan erfassen</th>
-        <td>Funktion zum <a href="../../new-plan">Erstellen eines neuen XPlan</a></td>
+        <td>Funktion zum [Erstellen eines neuen XPlan](../new-plan.md)</td>
     </tr>
     <tr>
         <th>XPlanGML Import</th>
-        <td>Funktion zum <a href="../../plan-import">Import bestehender XPlanGML-Dokumente</a> in die Datenbank</td>
+        <td>Funktion zum [Import bestehender XPlanGML-Dokumente](../plan-import.md) in die Datenbank</td>
     </tr>
     <tr>
         <th>Planwerk-Auswahl</th>
         <td>Funktion zur Auswahl eines erfassten Planwerks aus der Datenbank.
             Der im Dropdown-Menü gewählte Plan wird im Arbeitsbereich des Planwerk-Detail Fenster geladen und 
             kann mit der Option <control>Auswahl exportieren</control> in ein 
-            <a href="../../plan-import">XPlanGML-Dokument exportiert</a> werden</td>
+            [XPlanGML-Dokument exportiert](../plan-export.md) werden</td>
     </tr>
 </table>
 
