@@ -74,11 +74,11 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         color_map = [
-            ('Wohngebiet', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#fb6868')),
-            ('Gemischtes Gebiet', '"allgArtDerBaulNutzung" LIKE \'GemischteBauflaeche\'', QColor('#e48700')),
-            ('Gewerbliches Gebiet', '"allgArtDerBaulNutzung" LIKE \'GewerblicheBauflaeche\'', QColor('#cfcbcb')),
-            ('Sondergebiet', '"allgArtDerBaulNutzung" LIKE \'SonderBauflaeche\'', QColor('#f8c85c')),
-            ('keine Nutzung', '"allgArtDerBaulNutzung" LIKE \'\'', QgsLimitedRandomColorRamp.randomColors(1)[0])
+            ('Wohnbaufläche', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#fb6868')),
+            ('Gemischte Baufläche', '"allgArtDerBaulNutzung" LIKE \'GemischteBauflaeche\'', QColor('#e48700')),
+            ('Gewerbliche Baufläche', '"allgArtDerBaulNutzung" LIKE \'GewerblicheBauflaeche\'', QColor('#cfcbcb')),
+            ('Sonderbaufläche', '"allgArtDerBaulNutzung" LIKE \'SonderBauflaeche\'', QColor('#f8c85c')),
+            ('keine Nutzungsangabe', '"allgArtDerBaulNutzung" LIKE \'\'', QgsLimitedRandomColorRamp.randomColors(1)[0])
         ]
 
         renderer = QgsRuleBasedRenderer(cls.symbol())
