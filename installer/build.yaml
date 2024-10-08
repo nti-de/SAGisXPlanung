@@ -8,6 +8,22 @@ trigger:
 
 steps:
 
+- script: |
+    python3 -m pip install --upgrade pip
+    python3 -m pip install mkdocs
+  displayName: 'Install mkdocs'
+
+- script: |
+    python3 -m mkdocs build
+  displayName: 'Build Documentation with mkdocs'
+  workingDirectory: docs
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)/docs/site'
+    Contents: '**'
+    TargetFolder: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
+
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: 'src/SAGisXPlanung'
