@@ -33,7 +33,7 @@ class EnableBuldingTemplateAction(QAction):
                 # but in practice it seems that the join query takes longer than two simple selects
                 # joinedload(XP_Objekt.wirdDargestelltDurch.of_type(XP_Nutzungsschablone)).load_only('id', 'hidden')
             ).get(item.xid)
-            template: XP_Nutzungsschablone = bp_baugebiet.wirdDargestelltDurch[0]
+            template: XP_Nutzungsschablone = bp_baugebiet.template()
             self.template_id = template.id
             self.setChecked(not template.hidden)
 
@@ -77,7 +77,7 @@ class EditBuildingTemplateAction(QAction):
                 load_only('id'),
                 joinedload('wirdDargestelltDurch').load_only('id')
             ).get(item.xid)
-            template: XP_Nutzungsschablone = bp_baugebiet.wirdDargestelltDurch[0]
+            template: XP_Nutzungsschablone = bp_baugebiet.template()
             self.template_id = template.id
 
         self.triggered.connect(self.onActionToggled)

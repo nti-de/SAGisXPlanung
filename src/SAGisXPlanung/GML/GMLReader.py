@@ -142,7 +142,7 @@ class GMLReader:
                         value.hidden = False
                         if value.zeilenAnz is not None:
                             value.set_defaults(int(value.zeilenAnz))
-                        getattr(obj, node_name)[0] = value
+                        getattr(obj, node_name).append(value)
                         continue
                 else:
                     value = self.read_data_object(node[0], files=self.files)
