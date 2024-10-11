@@ -1,5 +1,12 @@
+import abc
+import logging
 from enum import Enum
+from operator import attrgetter
+from typing import List
 
+from PyQt5.QtCore import QMarginsF
+from PyQt5.QtGui import QFont
+from qgis._core import Qgis
 from qgis.gui import QgsMapCanvasItem, QgsMapCanvas
 from qgis.PyQt.QtWidgets import QGraphicsItem
 from qgis.PyQt.QtGui import QPen, QBrush, QPainterPath, QColor, QTransform, QPainter
@@ -11,6 +18,44 @@ from SAGisXPlanung.XPlan.enums import XP_AllgArtDerBaulNutzung, XP_BesondereArtD
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.ext.roman import to_roman
 
+logger = logging.getLogger(__name__)
+
+
+def stroke_circle(rect: QRectF, context: QgsRenderContext):
+    painter: QPainter = context.painter()
+    painter.save()
+
+    inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
+    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderMapUnits)
+    radius = (rect.height() / 2) - inset
+    path = QPainterPath()
+    path.addEllipse(rect.center(), radius, radius)
+    pen: QPen = painter.pen()
+    pen.setWidthF(pen_width)
+    painter.strokePath(path, pen)
+
+    painter.restore()
+
+
+def stroke_triangle(rect: QRectF, context: QgsRenderContext):
+    painter: QPainter = context.painter()
+    painter.save()
+
+    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderMapUnits)
+
+    path = QPainterPath()
+    path.moveTo(rect.left() + (rect.width() / 2), rect.top())
+    path.lineTo(rect.bottomLeft())
+    path.lineTo(rect.bottomRight())
+    path.lineTo(rect.left() + (rect.width() / 2), rect.top())
+
+    pen: QPen = painter.pen()
+    pen.setWidthF(pen_width)
+    painter.strokePath(path, pen)
+    painter.fillPath(path, QBrush(QColor("white")))
+
+    painter.restore()
+
 
 class BuildingTemplateItem(QgsMapCanvasItem):
     """ Dekoriert Punkt mit Nutzungsschablone """
@@ -21,8 +66,8 @@ class BuildingTemplateItem(QgsMapCanvasItem):
     _color = QColor('black')
     _center = None
 
-    def __init__(self, canvas: QgsMapCanvas, center: QgsPointXY, rows: int, data, parent: XPlanungItem,
-                 scale=0.5, angle=0):
+    def __init__(self, canvas: QgsMapCanvas, center: QgsPointXY, rows: int, data: List['TableCell'],
+                 parent: XPlanungItem, scale=0.5, angle=0):
         super().__init__(canvas)
         self.canvas = canvas
         self.data = data
@@ -38,8 +83,8 @@ class BuildingTemplateItem(QgsMapCanvasItem):
 
         self.columns = 2
         self.rows = rows
-        self.cell_width = 30
-        self.cell_height = 16
+        self.cell_width = 10
+        self.cell_height = 5
         self.width = self.cell_width * 2
         self.height = self.cell_height * self.rows
 
@@ -60,32 +105,30 @@ class BuildingTemplateItem(QgsMapCanvasItem):
 
         painter.setRenderHint(QPainter.Antialiasing)
 
-        pen = QPen(self._color)
-        pen.setWidth(1)
         brush = QBrush(self._color)
         painter.setBrush(brush)
 
         self.updatePath()
         painter.strokePath(self._path, painter.pen())
 
-        self.paintTextCells()
+        self.paint_cell_content(painter)
 
-    def paintTextCells(self):
-        width = self.context.convertFromMapUnits(self.width, QgsUnitTypes.RenderMillimeters)
-        height = self.context.convertFromMapUnits(self.height, QgsUnitTypes.RenderMillimeters)
-        cell_width = self.context.convertFromMapUnits(self.cell_width, QgsUnitTypes.RenderMillimeters)
-        cell_height = self.context.convertFromMapUnits(self.cell_height, QgsUnitTypes.RenderMillimeters)
+    def paint_cell_content(self, painter: QPainter):
+        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
+        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderMapUnits)
+        cell_height = self.context.convertToPainterUnits(self.cell_height, QgsUnitTypes.RenderMapUnits)
+        cell_width = self.context.convertToPainterUnits(self.cell_width, QgsUnitTypes.RenderMapUnits)
 
         for i in range(self.rows):
             for j in range(self.columns):
                 rect = QRectF((j-1)*cell_width, -height / 2 + i*cell_height, cell_width, cell_height)
 
-                index = i * self.columns + j % self.columns
-                data = self.data[index]
-                data.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
-                data.text_format.setSize(cell_height * 0.15)
-                QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [data.text], self.context,
-                                           data.text_format, True, QgsTextRenderer.AlignVCenter)
+                data = self.cell_data(i, j)
+                data.paint(rect, self.context)
+
+    def cell_data(self, row: int, col: int) -> 'TableCell':
+        index = row * self.columns + col % self.columns
+        return self.data[index]
 
     def beginMove(self):
         self.canvas.viewport().installEventFilter(self.event_filter)
@@ -116,8 +159,8 @@ class BuildingTemplateItem(QgsMapCanvasItem):
     def updatePath(self):
         self._path = QPainterPath()
 
-        height = self.context.convertFromMapUnits(self.height, QgsUnitTypes.RenderMillimeters)
-        width = self.context.convertFromMapUnits(self.width, QgsUnitTypes.RenderMillimeters)
+        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
+        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderMapUnits)
 
         top_left = QPointF(-width/2, -height/2)
 
@@ -166,32 +209,43 @@ class CanvasEventFilter(QObject):
         return False
 
 
-class BuildingTemplateCellFormat(Enum):
-    Text = 1
-    Symbol = 2
+class TableCellFactory:
+
+    @staticmethod
+    def create_cell(cell_datatype: 'BuildingTemplateCellDataType', xplan_objekt) -> 'TableCell':
+        cell_type = cell_datatype.value
+
+        attributes = {}
+
+        for affected_col in cell_type.affected_columns:
+            attr_name, value = xplan_objekt.get_attr(affected_col)
+            attributes[attr_name] = value
+
+        return cell_type(attributes)
 
 
-class BuildingTemplateCellDataType(Enum):
-    ArtDerBaulNutzung = 'Art d. baulichen Nutzung'
-    ZahlVollgeschosse = 'Anzahl der Vollgeschosse'
-    GRZ = 'Grundflächenzahl'
-    GFZ = 'Geschossflächenzahl'
-    BebauungsArt = 'Art der Bebauung'
-    Bauweise = 'Bauweise'
-    Dachneigung = 'Dachneigung'
-    Dachform = 'zulässige Dachform'
+class TableCell(abc.ABC):
+    # mysterious scaling parameter for drawing inside rect using QgsTextRenderer
+    # no clue why that is even needed and why 0.1 works as a value
+    FONT_SCALE = 0.1
 
-    @classmethod
-    def as_default(cls, rows=3):
-        default = [cls.ArtDerBaulNutzung, cls.ZahlVollgeschosse, cls.GRZ, cls.GFZ, cls.BebauungsArt, cls.Bauweise]
+    def __init__(self, attributes: dict, text: str = ''):
+        self.text = text
+        self.attributes = attributes
 
-        if rows == 4:
-            default += [cls.Dachneigung, cls.Dachform]
+    @abc.abstractmethod
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        pass
 
-        return default
+    @property
+    @abc.abstractmethod
+    def name(self):
+        pass
 
 
-class BuildingTemplateData:
+class ArtDerBaulNutzungCell(TableCell):
+    name = 'Art d. baulichen Nutzung'
+    affected_columns = ['allgArtDerBaulNutzung', 'besondereArtDerBaulNutzung', 'MaxZahlWohnungen']
 
     nutzungsArten = {
         XP_AllgArtDerBaulNutzung.WohnBauflaeche: 'W',
@@ -218,6 +272,176 @@ class BuildingTemplateData:
         XP_BesondereArtDerBaulNutzung.SonstigesGebiet: ''
     }
 
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text = self.nutzungsArten[attributes['allgArtDerBaulNutzung']]
+        self.MaxZahlWohnungen = ''
+        if isinstance(attributes['besondereArtDerBaulNutzung'], XP_BesondereArtDerBaulNutzung):
+            self.text += self.spezNutzungsArten[attributes['besondereArtDerBaulNutzung']]
+        if a := attributes.get('MaxZahlWohnungen', ''):
+            self.MaxZahlWohnungen = f'{a} Wo'
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        text_format = QgsTextFormat()
+        text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+        text_format.setSize(rect.height() * self.FONT_SCALE)
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter,
+                                   [self.text, self.MaxZahlWohnungen] if self.MaxZahlWohnungen else [self.text],
+                                   context, text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class ZahlVollgeschosseCell(TableCell):
+    name = 'Anzahl der Vollgeschosse'
+    affected_columns = ['Z', 'Zzwingend', 'Zmin', 'Zmax', 'Z_Ausn', 'Z_Staffel', 'Z_Dach']
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = ""
+        self.zwingend = False
+        if (Zmin := attributes.get('Zmin')) and (Zmax := attributes.get('Zmax')):
+            self.text = f"{to_roman(Zmin)}-{to_roman(Zmax)}"
+        elif Zzwingend := attributes.get('Zzwingend'):
+            self.text = f"{to_roman(Zzwingend)}"
+            self.zwingend = True
+        elif Z := attributes.get('Z'):
+            self.text = f"{to_roman(Z)}"
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+        if self.zwingend:
+            stroke_circle(rect, context)
+
+
+class GrundflaechenzahlCell(TableCell):
+    name = 'Grundflächenzahl'
+    affected_columns = ['GRZ', 'GRZmin', 'GRZmax', 'GRZ_Ausn']
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = ""
+        self.zwingend = False
+        if (GRZmin := attributes.get('GRZmin')) and (GRZmax := attributes.get('GRZmax')):
+            self.text = f"{GRZmin} - {GRZmax}"
+        elif GRZ := attributes.get('GRZ'):
+            self.text = f"{GRZ}"
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class GeschossflaechenzahlCell(TableCell):
+    name = 'Geschossflächenzahl'
+    affected_columns = ['GFZ', 'GFZmin', 'GFZmax', 'GFZ_Ausn']
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = ""
+        self.range = False
+        if (GFZmin := attributes.get('GFZmin')) and (GFZmax := attributes.get('GFZmax')):
+            self.text = [f"{GFZmin}", f"{GFZmax}"]
+            self.range = True
+        elif GFZ := attributes.get('GFZ'):
+            self.text = f"{GFZ}"
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+
+        if not self.range:
+            QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
+                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                       Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                       Qgis.TextLayoutMode.Rectangle)
+
+            stroke_circle(rect, context)
+        else:
+            rect_left = QRectF(rect.left(), rect.top(), rect.height(), rect.height())
+            stroke_circle(rect_left, context)
+            QgsTextRenderer().drawText(rect_left, 0, QgsTextRenderer.AlignCenter, [self.text[0]], context,
+                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                       Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                       Qgis.TextLayoutMode.Rectangle)
+
+            rect_right = QRectF(rect.right()-rect.height(), rect.top(), rect.height(), rect.height())
+            stroke_circle(rect_right, context)
+            QgsTextRenderer().drawText(rect_right, 0, QgsTextRenderer.AlignCenter, [self.text[1]], context,
+                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                       Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                       Qgis.TextLayoutMode.Rectangle)
+
+
+class BebauungsArtCell(TableCell):
+    name = 'Art der Bebauung'
+    affected_columns = ['bebauungsArt']
+
+    bebauungsart = {
+        BP_BebauungsArt.Einzelhaeuser: 'E',
+        BP_BebauungsArt.EinzelDoppelhaeuser: 'ED',
+        BP_BebauungsArt.EinzelhaeuserHausgruppen: 'EG',
+        BP_BebauungsArt.Doppelhaeuser: 'D',
+        BP_BebauungsArt.DoppelhaeuserHausgruppen: 'DG',
+        BP_BebauungsArt.Hausgruppen: 'G',
+        BP_BebauungsArt.Reihenhaeuser: 'R',
+        BP_BebauungsArt.EinzelhaeuserDoppelhaeuserHausgruppen: 'EDG'
+    }
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = ""
+        if a := attributes.get('bebauungsArt'):
+            self.text = self.bebauungsart[a]
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+
+        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
+        width_offset = rect.width() / 6
+        triangle_rect = rect.marginsRemoved(QMarginsF(inset + width_offset, inset, inset + width_offset, inset))
+        stroke_triangle(triangle_rect, context)
+
+        QgsTextRenderer().drawText(triangle_rect, 0, QgsTextRenderer.AlignCenter, ['', self.text], context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class BauweiseCell(TableCell):
+    name = 'Bauweise'
+    affected_columns = ['bauweise']
+
     bauweise = {
         BP_Bauweise.OffeneBauweise: 'o',
         BP_Bauweise.GeschlosseneBauweise: 'g',
@@ -225,16 +449,31 @@ class BuildingTemplateData:
         BP_Bauweise.KeineAngabe: '',
     }
 
-    bebauungsart = {
-        BP_BebauungsArt.Einzelhaeuser: 'E',
-        BP_BebauungsArt.EinzelDoppelhaeuser: 'E, D',
-        BP_BebauungsArt.EinzelhaeuserHausgruppen: 'E, G',
-        BP_BebauungsArt.Doppelhaeuser: 'D',
-        BP_BebauungsArt.DoppelhaeuserHausgruppen: 'D, G',
-        BP_BebauungsArt.Hausgruppen: 'G',
-        BP_BebauungsArt.Reihenhaeuser: 'R',
-        BP_BebauungsArt.EinzelhaeuserDoppelhaeuserHausgruppen: 'E, D, G'
-    }
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = ""
+        if a := attributes.get('bauweise'):
+            self.text = self.bauweise[a]
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class DachformCell(TableCell):
+    name = 'Dachform'
+    affected_columns = ['dachgestaltung.dachform']
 
     dachform = {
         BP_Dachform.Flachdach: 'FD',
@@ -256,65 +495,82 @@ class BuildingTemplateData:
         BP_Dachform.Sonstiges: 'SDF',
     }
 
-    def __init__(self, cell_type: BuildingTemplateCellFormat, text: str = '',
-                 text_format: QgsTextFormat = QgsTextFormat()):
-        self.cell_type = cell_type
-        self.text = text
-        self.text_format = text_format
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
 
-    @staticmethod
-    def fromAttribute(item, cell_type, item2=None):
-        if not item:
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text)
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
 
-        if cell_type == BuildingTemplateCellDataType.ArtDerBaulNutzung:
-            text = BuildingTemplateData.nutzungsArten[item]
-            if isinstance(item2, XP_BesondereArtDerBaulNutzung):
-                text += BuildingTemplateData.spezNutzungsArten[item2]
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text)
+        self.text = []
+        if dachform := attributes.get('dachform'):
+            all_items = [self.dachform[df] for df in dachform]
+            midpoint = len(all_items) // 2
+            self.text = [' '.join(all_items[:midpoint]), ' '.join(all_items[midpoint:])]
 
-        if cell_type == BuildingTemplateCellDataType.ZahlVollgeschosse:
-            text = to_roman(int(item))
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text)
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
 
-        if cell_type == BuildingTemplateCellDataType.GRZ:
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, str(item))
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
-        if cell_type == BuildingTemplateCellDataType.GFZ:
-            text = str(item)
-            text_format = QgsTextFormat()
-            # background = QgsTextBackgroundSettings()
-            # background.setEnabled(True)
-            # background.setType(QgsTextBackgroundSettings.ShapeCircle)
-            #
-            # # fill_symbol = background.fillSymbol()
-            # fill_symbol = QgsFillSymbol()
-            # print(fill_symbol.dump())
-            # fill_symbol.deleteSymbolLayer(0)
-            # line = QgsSimpleLineSymbolLayer(QColor(0, 0, 0), 0.1)
-            # fill_symbol.appendSymbolLayer(line)
-            # print(fill_symbol.dump())
-            # background.setFillSymbol(fill_symbol)
-            #
-            # text_format.setBackground(background)
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text, text_format)
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, filter(None, self.text), context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
 
-        if cell_type == BuildingTemplateCellDataType.BebauungsArt:
-            text = BuildingTemplateData.bebauungsart[item]
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text)
 
-        if cell_type == BuildingTemplateCellDataType.Bauweise:
-            text = BuildingTemplateData.bauweise[item]
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text)
+class DachneigungCell(TableCell):
+    name = 'Dachneigung'
+    affected_columns = ['dachgestaltung.DN', 'dachgestaltung.DNmin', 'dachgestaltung.DNmax', 'dachgestaltung.DNZwingend']
 
-        if cell_type == BuildingTemplateCellDataType.Dachneigung:
-            if item is not None:
-                return BuildingTemplateData(BuildingTemplateCellFormat.Text, f'{item}°')
-            elif isinstance(item2, tuple) and item2[0] is not None and item2[1] is not None:
-                return BuildingTemplateData(BuildingTemplateCellFormat.Text, f'{item2[0]}-{item2[1]}°')
-            else:
-                return BuildingTemplateData(BuildingTemplateCellFormat.Text, '')
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
 
-        if cell_type == BuildingTemplateCellDataType.Dachform:
-            text = BuildingTemplateData.dachform[item]
-            return BuildingTemplateData(BuildingTemplateCellFormat.Text, text)
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
+        self.text = []
+        items_dict = {}
+        if (DNmin := attributes.get('DNmin')) and (DNmax := attributes.get('DNmax')):
+            for i, (low, high) in enumerate(zip(DNmin, DNmax)):
+                if low and high:
+                    items_dict[i] = f'{low}° - {high}°'
+        if DN := attributes.get('DN'):
+            for i, dn in enumerate(DN):
+                if dn:
+                    items_dict[i] = f'{dn}°'
+
+        item_list = [items_dict[key] for key in sorted(items_dict.keys())]
+        midpoint = len(item_list) // 2
+        self.text = [' '.join(item_list[:midpoint]), ' '.join(item_list[midpoint:])]
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
+        self.text_format.setSize(rect.height() * self.FONT_SCALE)
+
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, filter(None, self.text), context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class BuildingTemplateCellDataType(Enum):
+    ArtDerBaulNutzung = ArtDerBaulNutzungCell
+    ZahlVollgeschosse = ZahlVollgeschosseCell
+    GRZ = GrundflaechenzahlCell
+    GFZ = GeschossflaechenzahlCell
+    BebauungsArt = BebauungsArtCell
+    Bauweise = BauweiseCell
+    Dachneigung = DachneigungCell
+    Dachform = DachformCell
+
+    @classmethod
+    def as_default(cls, rows=3):
+        default = [cls.ArtDerBaulNutzung, cls.ZahlVollgeschosse, cls.GRZ, cls.GFZ, cls.BebauungsArt, cls.Bauweise]
+
+        if rows == 4:
+            default += [cls.Dachneigung, cls.Dachform]
+
+        return default

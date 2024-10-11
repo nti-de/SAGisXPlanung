@@ -90,12 +90,12 @@ class TestGMLReader_readPlan:
         assert isinstance(baugebiet, BP_BaugebietsTeilFlaeche)
         assert baugebiet.flaechenschluss is True
         assert len(baugebiet.wirdDargestelltDurch) == 3
-        assert isinstance(baugebiet.wirdDargestelltDurch[0], XP_Nutzungsschablone)
-        assert not baugebiet.wirdDargestelltDurch[0].hidden
-        assert isinstance(baugebiet.wirdDargestelltDurch[1], XP_PPO)
-        assert baugebiet.wirdDargestelltDurch[1].drehwinkel == '4.20'
-        assert isinstance(baugebiet.wirdDargestelltDurch[2], XP_PTO)
-        assert baugebiet.wirdDargestelltDurch[2].schriftinhalt == '(B)'
+        assert isinstance(baugebiet.template(), XP_Nutzungsschablone)
+        assert not baugebiet.template().hidden
+        assert isinstance(baugebiet.wirdDargestelltDurch[0], XP_PPO)
+        assert baugebiet.wirdDargestelltDurch[0].drehwinkel == '4.20'
+        assert isinstance(baugebiet.wirdDargestelltDurch[1], XP_PTO)
+        assert baugebiet.wirdDargestelltDurch[1].schriftinhalt == '(B)'
 
         wegerecht = next(p for p in plan.bereich[1].planinhalt if isinstance(p, BP_Wegerecht))
         assert wegerecht.flaechenschluss is False

@@ -5,11 +5,9 @@ import inspect
 from geoalchemy2 import Geometry, WKTElement
 from lxml import etree
 from osgeo import ogr
-from sqlalchemy import inspect as s_insp, ARRAY
-from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import ARRAY
 
 from SAGisXPlanung import Base, XPlanVersion
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.types import RefURL
 from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES

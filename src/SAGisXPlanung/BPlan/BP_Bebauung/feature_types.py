@@ -19,7 +19,8 @@ from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
                                                    BP_ZweckbestimmungNebenanlagen)
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateData, BuildingTemplateCellDataType, BuildingTemplateItem
+from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType, BuildingTemplateItem, \
+    TableCellFactory, TableCell
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
@@ -40,10 +41,6 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         super(BP_BaugebietsTeilFlaeche, self).__init__()
 
         self.id = uuid.uuid4()
-        template = XP_Nutzungsschablone()
-        template.dientZurDarstellungVon_id = self.id
-        self.wirdDargestelltDurch.append(template)
-
         self.xplan_item = XPlanungItem(xid=str(self.id), xtype=BP_BaugebietsTeilFlaeche)
 
     __tablename__ = 'bp_baugebiet'
@@ -194,11 +191,11 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         else:
             point = template.geometry().asPoint()
 
-        cells = template.data_attributes
+        cell_data = self.usage_cell_data(template.data_attributes)
         rows = template.zeilenAnz
         scale = template.skalierung
         angle = template.drehwinkel
-        table = BuildingTemplateItem(iface.mapCanvas(), point, rows, self.usageTemplateData(cells),
+        table = BuildingTemplateItem(iface.mapCanvas(), point, rows, cell_data,
                                      parent=self.xplan_item, scale=scale, angle=angle)
         # connect to signal on event filter, because QGraphicsItems can't emit signals
         table.event_filter.positionUpdated.connect(lambda p: self.onTemplatePositionUpdated(p))
@@ -215,32 +212,21 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
             geom = QgsGeometry.fromPointXY(pos)
             _self.template().position = WKBElement(geom.asWkb(), srid=_self.position.srid)
 
-    def template(self):
-        return next((x for x in self.wirdDargestelltDurch if isinstance(x, XP_Nutzungsschablone)), None)
+    def template(self) -> XP_Nutzungsschablone:
+        template = next((x for x in self.wirdDargestelltDurch if isinstance(x, XP_Nutzungsschablone)), None)
+        if template is None:
+            template = XP_Nutzungsschablone()
+            template.dientZurDarstellungVon_id = self.id
+            self.wirdDargestelltDurch.append(template)
 
-    def usageTemplateData(self, cells=None):
+        return template
 
-        def f(cell_type, item, additional_data=None):
-            return BuildingTemplateData.fromAttribute(item, cell_type, additional_data)
-
-        cell_mapping = {
-            BuildingTemplateCellDataType.ArtDerBaulNutzung: (self.allgArtDerBaulNutzung, self.besondereArtDerBaulNutzung),
-            BuildingTemplateCellDataType.ZahlVollgeschosse: (self.Z,),
-            BuildingTemplateCellDataType.GRZ: (self.GRZ,),
-            BuildingTemplateCellDataType.GFZ: (self.GFZ,),
-            BuildingTemplateCellDataType.BebauungsArt: (self.bebauungsArt,),
-            BuildingTemplateCellDataType.Bauweise: (self.bauweise,),
-            BuildingTemplateCellDataType.Dachneigung:
-                ('',) if not self.dachgestaltung else (self.dachgestaltung[0].DN,
-                                                    (self.dachgestaltung[0].DNmin, self.dachgestaltung[0].DNmax)),
-            BuildingTemplateCellDataType.Dachform:
-                ('',) if not self.dachgestaltung else (self.dachgestaltung[0].dachform, )
-        }
-
+    def usage_cell_data(self, cells: List[BuildingTemplateCellDataType] = None) -> List[TableCell]:
         if cells is None:
             cells = BuildingTemplateCellDataType.as_default()
 
-        return [f(cell_type, *cell_mapping[cell_type]) for cell_type in cells]
+        cell_data = [TableCellFactory.create_cell(cell_type, self) for cell_type in cells]
+        return cell_data
 
     def validate(self):
         if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kleinsiedlungsgebiet.name or

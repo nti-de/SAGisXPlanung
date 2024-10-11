@@ -239,6 +239,20 @@ class ElementOrderMixin:
             return attr.attribute or attr_name
         return attr_name
 
+    def get_attr(self, attr_name: str) -> tuple[str, list]:
+        def _getattr_recursive(current_obj, attr_chain):
+            for attr in attr_chain:
+                if isinstance(current_obj, list):
+                    # If the current object is a list, get the attribute for each item in the list
+                    current_obj = [getattr(item, attr) for item in current_obj]
+                else:
+                    # Otherwise, just get the attribute for the current object
+                    current_obj = getattr(current_obj, attr)
+            return current_obj
+
+        attributes = attr_name.split('.')
+        return attributes[-1], _getattr_recursive(self, attributes)
+
 
 class MapCanvasMixin:
     """ Mixin, dass Methoden zum Darstellen von Planinhalten auf dem MapCanvas bietet.

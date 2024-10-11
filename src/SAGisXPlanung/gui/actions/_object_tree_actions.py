@@ -129,7 +129,7 @@ class EditBuildingTemplateAction(QAction):
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 bp_baugebiet = session.query(self.parent_item.xtype).get(self.parent_item.xid)
-                template_canvas_item.setItemData(bp_baugebiet.usageTemplateData(template.data_attributes))
+                template_canvas_item.setItemData(bp_baugebiet.usage_cell_data(template.data_attributes))
                 template_canvas_item.updateCanvas()
 
     @pyqtSlot(int, list)
@@ -147,5 +147,5 @@ class EditBuildingTemplateAction(QAction):
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 bp_baugebiet = session.query(self.parent_item.xtype).get(self.parent_item.xid)
-                template_canvas_item.setItemData(bp_baugebiet.usageTemplateData(template.data_attributes))
+                template_canvas_item.setItemData(bp_baugebiet.usage_cell_data(template.data_attributes))
                 template_canvas_item.setRowCount(row_count)

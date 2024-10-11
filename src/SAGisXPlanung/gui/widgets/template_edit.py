@@ -31,7 +31,7 @@ class QBuildingTemplateEdit(QWidget):
 
         self.template_grid_container = QGroupBox('Zellwerte der Nutzungschablone')
         self.template_grid = QGridLayout()
-        self.buildTemplateGrid()
+        self.build_template()
         self._layout.addWidget(self.template_grid_container)
 
         self.common_style_container = QGroupBox('Allgemeine Darstellungsoptionen')
@@ -47,7 +47,7 @@ class QBuildingTemplateEdit(QWidget):
 
         self.setLayout(self._layout)
 
-    def buildTemplateGrid(self):
+    def build_template(self):
         # hackish solution to clear layout, transfer to new widget which will be destroyed automatically
         # when out it goes of scope: https://stackoverflow.com/a/7082920/12690772
         QWidget().setLayout(self.template_grid)
@@ -60,7 +60,7 @@ class QBuildingTemplateEdit(QWidget):
                 cb = QComboBox()
                 cb.setProperty('template-index', index)
                 for x in BuildingTemplateCellDataType:
-                    cb.addItem(x.value, x.name)
+                    cb.addItem(x.value.name, x.name)
                 index = cb.findData(self.cells[index].name)
                 if index >= 0:
                     cb.setCurrentIndex(index)
@@ -91,7 +91,7 @@ class QBuildingTemplateEdit(QWidget):
         self.rows = row_count
         self.rowCountChanged.emit(self.rows, self.cells)
 
-        self.buildTemplateGrid()
+        self.build_template()
 
 
 class SelectTemplateFormWidget(QGroupBox):

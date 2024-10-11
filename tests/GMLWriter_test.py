@@ -70,9 +70,19 @@ def gml_writer():
     bereich.refScan.append(ref1)
 
     bp_objekt_poly = BP_BaugebietsTeilFlaeche()
+    bp_objekt_poly.id = uuid.uuid4()
     bp_objekt_poly.position = WKBElement(to_shape(bereich.geltungsbereich).wkb, srid=4326)
     bp_objekt_poly.GRZ = 0.4
-    bp_objekt_poly.wirdDargestelltDurch[0].position = from_shape(Point(0, 0))
+
+    nutzungschablone = XP_Nutzungsschablone()
+    nutzungschablone.id = uuid.uuid4()
+    nutzungschablone.dientZurDarstellungVon_id = bp_objekt_poly.id
+    nutzungschablone.position = from_shape(Point(0, 0))
+    nutzungschablone.hidden = False
+    nutzungschablone.zeilenAnz = 3
+    nutzungschablone.spaltenAnz = 2
+    bp_objekt_poly.wirdDargestelltDurch.append(nutzungschablone)
+
     bp_dach = BP_Dachgestaltung()
     bp_dach.dachform = BP_Dachform.Walmdach
     bp_dach.DN = 20
