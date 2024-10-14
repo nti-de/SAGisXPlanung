@@ -5,7 +5,7 @@ from operator import attrgetter
 from typing import List
 
 from PyQt5.QtCore import QMarginsF
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontMetrics
 from qgis._core import Qgis
 from qgis.gui import QgsMapCanvasItem, QgsMapCanvas
 from qgis.PyQt.QtWidgets import QGraphicsItem
@@ -14,7 +14,8 @@ from qgis.PyQt.QtCore import QPointF, QRectF, QRect, pyqtSlot, QEvent, QObject, 
 from qgis.core import (QgsPointXY, QgsRenderContext, QgsUnitTypes, QgsTextRenderer, QgsTextFormat)
 
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Bauweise, BP_BebauungsArt, BP_Dachform
-from SAGisXPlanung.XPlan.enums import XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung
+from SAGisXPlanung.XPlan.enums import XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_ArtHoehenbezug, \
+    XP_ArtHoehenbezugspunkt
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.ext.roman import to_roman
 
@@ -233,6 +234,9 @@ class TableCell(abc.ABC):
         self.text = text
         self.attributes = attributes
 
+        self.text_format = QgsTextFormat()
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+
     @abc.abstractmethod
     def paint(self, rect: QRectF, context: QgsRenderContext):
         pass
@@ -323,6 +327,61 @@ class ZahlVollgeschosseCell(TableCell):
         if self.zwingend:
             stroke_circle(rect, context)
 
+class BaumasseCell(TableCell):
+    name = 'Baumasse / Baumassenzahl'
+    affected_columns = ['BM', 'BMZ', 'BM_Ausn', 'BMZ_Ausn']
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.BMZ = attributes.get('BMZ')
+        self.BM = attributes.get('BM')
+        self.text = [
+            f'BM {self.BM:.0f} m\N{SUPERSCRIPT THREE}' if self.BM else None,
+            f'BMZ {self.BMZ:.2f}' if self.BMZ else None,
+        ]
+        self.text = list(filter(None, self.text))
+        print(self.text)
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
+class GrundGeschossflaecheCell(TableCell):
+    name = 'Grundfläche / Geschossfläche'
+    affected_columns = ['GF', 'GFmin', 'GFmax', 'GR', 'GR_Ausn']
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.GR = attributes.get('GR')
+        self.GF = attributes.get('GF')
+        self.GFmin = attributes.get('GFmin')
+        self.GFmax = attributes.get('GFmax')
+        gf_text = (
+            f'GF {self._num_format(self.GFmin)}-{self._num_format(self.GFmax)} m\N{SUPERSCRIPT TWO}'
+            if self.GFmin is not None and self.GFmax is not None
+            else f'GF {self._num_format(self.GF)} m\N{SUPERSCRIPT TWO}' if self.GF else None
+        )
+        self.text = [
+            f'GR {self._num_format(self.GR)} m\N{SUPERSCRIPT TWO}' if self.GR else None,
+            gf_text
+        ]
+        self.text = list(filter(None, self.text))
+
+    def _num_format(self, val):
+        return f'{val:.2f}' if val % 1 else f'{int(val)}'
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
 
 class GrundflaechenzahlCell(TableCell):
     name = 'Grundflächenzahl'
@@ -330,9 +389,6 @@ class GrundflaechenzahlCell(TableCell):
 
     def __init__(self, attributes: dict):
         super().__init__(attributes)
-
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
 
         self.text = ""
         self.zwingend = False
@@ -355,9 +411,6 @@ class GeschossflaechenzahlCell(TableCell):
 
     def __init__(self, attributes: dict):
         super().__init__(attributes)
-
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
 
         self.text = ""
         self.range = False
@@ -414,9 +467,6 @@ class BebauungsArtCell(TableCell):
     def __init__(self, attributes: dict):
         super().__init__(attributes)
 
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
-
         self.text = ""
         if a := attributes.get('bebauungsArt'):
             self.text = self.bebauungsart[a]
@@ -451,9 +501,6 @@ class BauweiseCell(TableCell):
 
     def __init__(self, attributes: dict):
         super().__init__(attributes)
-
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
 
         self.text = ""
         if a := attributes.get('bauweise'):
@@ -498,9 +545,6 @@ class DachformCell(TableCell):
     def __init__(self, attributes: dict):
         super().__init__(attributes)
 
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
-
         self.text = []
         if dachform := attributes.get('dachform'):
             all_items = [self.dachform[df] for df in dachform]
@@ -525,9 +569,6 @@ class DachneigungCell(TableCell):
 
     def __init__(self, attributes: dict):
         super().__init__(attributes)
-
-        self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
 
         self.text = []
         items_dict = {}
@@ -556,6 +597,64 @@ class DachneigungCell(TableCell):
                                    Qgis.TextLayoutMode.Rectangle)
 
 
+class BauHoeheCell(TableCell):
+    name = 'Höhe baulicher Anlagen'
+    affected_columns = [
+        'hoehenangabe.hoehenbezug',
+        'hoehenangabe.bezugspunkt',
+        'hoehenangabe.hMin',
+        'hoehenangabe.hMax',
+        'hoehenangabe.hZwingend',
+        'hoehenangabe.h'
+    ]
+
+    hoehenbezug_map = {
+        XP_ArtHoehenbezug.absolutNHN: 'NHN',
+        XP_ArtHoehenbezug.absolutNN: 'NN',
+        XP_ArtHoehenbezug.absolutDHHN: 'DHHN',
+        XP_ArtHoehenbezug.relativGelaendeoberkante: 'GOK',
+        XP_ArtHoehenbezug.relativGehwegOberkante: 'Gehweg',
+        XP_ArtHoehenbezug.relativBezugshoehe: '',
+        XP_ArtHoehenbezug.relativStrasse: 'Straße',
+        XP_ArtHoehenbezug.relativEFH: 'EFH'
+    }
+
+    def __init__(self, attributes: dict):
+        super().__init__(attributes)
+
+        self.text = []
+        self.bezugspunkt = attributes.get('bezugspunkt')
+        self.hoehenbezug = attributes.get('hoehenbezug')
+        items_dict = {}
+        if (hMin := attributes.get('hMin')) and (hMax := attributes.get('hMax')):
+            for i, (bezug, low, high) in enumerate(zip(self.bezugspunkt, hMin, hMax)):
+                if low and high:
+                    items_dict[i] = f'{bezug.name or ""} {low}m - {high}m'
+        if h := attributes.get('h'):
+            for i, dn in enumerate(h):
+                if dn:
+                    items_dict[i] = f'{self.bezugspunkt[i].name or ""} {dn}m'
+
+        for i in items_dict.keys():
+            items_dict[i] += f' ü. {self.hoehenbezug_map[self.hoehenbezug[i]]}'
+
+        self.text = [items_dict[key] for key in sorted(items_dict.keys())]
+        self.text = list(filter(None, self.text))
+
+    def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
+        self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
+
+        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
+        rect = rect.marginsRemoved(QMarginsF(inset, inset, inset, inset))
+        QgsTextRenderer().drawText(rect, 0, Qgis.TextHorizontalAlignment.Left, self.text, context,
+                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
+                                   Qgis.TextLayoutMode.Rectangle)
+
+
 class BuildingTemplateCellDataType(Enum):
     ArtDerBaulNutzung = ArtDerBaulNutzungCell
     ZahlVollgeschosse = ZahlVollgeschosseCell
@@ -565,6 +664,9 @@ class BuildingTemplateCellDataType(Enum):
     Bauweise = BauweiseCell
     Dachneigung = DachneigungCell
     Dachform = DachformCell
+    BauHoehe = BauHoeheCell
+    BauMasse = BaumasseCell
+    GrundGeschossflaeche = GrundGeschossflaecheCell
 
     @classmethod
     def as_default(cls, rows=3):
