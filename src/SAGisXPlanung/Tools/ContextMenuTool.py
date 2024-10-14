@@ -1,4 +1,3 @@
-import functools
 import logging
 import os
 from enum import Enum
@@ -14,7 +13,7 @@ from qgis.PyQt.QtCore import pyqtSignal, QPoint
 from qgis.PyQt.QtGui import QIcon, QColor, QTransform
 
 from SAGisXPlanung import BASE_DIR
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateItem
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateItem
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
 from SAGisXPlanung.XPlanungItem import XPlanungItem

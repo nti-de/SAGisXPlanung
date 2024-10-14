@@ -9,13 +9,13 @@ from qgis.PyQt.QtGui import QIcon, QPageLayout, QPainter
 from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphicsItem, QToolBar, QMessageBox
 from qgis.PyQt.QtPrintSupport import QPrinter
 
-from qgis.core import (QgsMapLayerType, QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
+from qgis.core import (QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
                        QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication, QgsVectorLayer)
 from qgis import processing
 
 import qasync
 
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateItem
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateItem
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.Settings import Settings
 from SAGisXPlanung.core.connection import attempt_connection, verify_db_connection
@@ -24,7 +24,7 @@ from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
 from SAGisXPlanung.gui.XPlanungDialog import XPlanungDialog
 from SAGisXPlanung.gui.widgets import DatabaseConfigPage
 from SAGisXPlanung.processing.provider import SAGisProvider
-from SAGisXPlanung.utils import createXPlanungIndicators, caller_name
+from SAGisXPlanung.utils import createXPlanungIndicators
 
 try:
     # __init.py__ may not be reloaded when upgrading through QGIS plugin manager

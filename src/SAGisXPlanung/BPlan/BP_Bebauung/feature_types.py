@@ -19,8 +19,9 @@ from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
                                                    BP_ZweckbestimmungNebenanlagen)
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType, BuildingTemplateItem, \
-    TableCellFactory, TableCell
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, BuildingTemplateItem, \
+    TableCellFactory
+from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty

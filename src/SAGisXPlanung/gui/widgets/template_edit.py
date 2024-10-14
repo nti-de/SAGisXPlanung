@@ -1,12 +1,12 @@
 import os
 
 from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QGridLayout, QComboBox, QGroupBox, QHBoxLayout, QToolButton,
-                                 QSizePolicy, QSpacerItem, QButtonGroup, QLabel)
+                                 QSizePolicy, QSpacerItem, QLabel)
 from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, Qt
 from qgis.PyQt.QtGui import QIcon, QMouseEvent
 
 from SAGisXPlanung import BASE_DIR
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType
 from .po_styling_options import QCommonStylingOptions
 
 

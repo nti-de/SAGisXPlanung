@@ -11,7 +11,7 @@ from qgis.core import (QgsGeometry, QgsAnnotationPointTextItem, QgsAnnotationLay
                        QgsTextBackgroundSettings, QgsPointXY, QgsCoordinateReferenceSystem, QgsProject)
 
 from SAGisXPlanung import Base, BASE_DIR
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.core import LayerPriorityType

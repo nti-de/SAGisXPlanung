@@ -4,7 +4,8 @@ from sqlalchemy.orm import load_only, joinedload
 from sqlalchemy.orm.attributes import flag_modified
 
 from SAGisXPlanung import Session
-from SAGisXPlanung.BuildingTemplateItem import BuildingTemplateCellDataType, BuildingTemplateItem
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, BuildingTemplateItem, \
+    TableCellFactory
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -116,10 +117,10 @@ class EditBuildingTemplateAction(QAction):
                     template_canvas_item.setScale(value)
 
     @pyqtSlot(BuildingTemplateCellDataType, int)
-    def onTemplateCellDataChanged(self, cell: BuildingTemplateCellDataType, cell_index: int):
+    def onTemplateCellDataChanged(self, cell_type: BuildingTemplateCellDataType, cell_index: int):
         with Session.begin() as session:
             template: XP_Nutzungsschablone = session.query(XP_Nutzungsschablone).get(self.template_id)
-            template.data_attributes[cell_index] = cell
+            template.data_attributes[cell_index] = cell_type
             # workaround for updating array element in database. arrays are not mutable in general
             flag_modified(template, 'data_attributes')
 
@@ -129,7 +130,8 @@ class EditBuildingTemplateAction(QAction):
                 template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
 
                 bp_baugebiet = session.query(self.parent_item.xtype).get(self.parent_item.xid)
-                template_canvas_item.setItemData(bp_baugebiet.usage_cell_data(template.data_attributes))
+                new_cell = TableCellFactory.create_cell(cell_type, bp_baugebiet)
+                template_canvas_item.set_cell_data(cell_index, new_cell)
                 template_canvas_item.updateCanvas()
 
     @pyqtSlot(int, list)

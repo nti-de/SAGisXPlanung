@@ -170,7 +170,7 @@ class TestMapLayerRegistry:
         obj_mock.setGeometry.assert_not_called()
 
     def test_add_canvas_item(self, mocker, registry):
-        canvas_item_mock = mocker.patch("SAGisXPlanung.BuildingTemplateItem.BuildingTemplateItem").return_value
+        canvas_item_mock = mocker.patch("SAGisXPlanung.core.buildingtemplate.template_item.BuildingTemplateItem").return_value
 
         registry.add_canvas_item(canvas_item_mock, feat_xid, plan_xid)
 
