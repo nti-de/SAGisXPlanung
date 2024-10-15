@@ -116,6 +116,11 @@ class BuildingTemplateItem(QgsMapCanvasItem):
     def set_cell_data(self, cell_index: int, new_cell: TableCell):
         self.data[cell_index] = new_cell
 
+    def replace_cells_of_type(self, new_cell: TableCell):
+        for i, cell in enumerate(self.data):
+            if type(cell) is type(new_cell):
+                self.data[i] = new_cell
+
     def beginMove(self):
         self.canvas.viewport().installEventFilter(self.event_filter)
 

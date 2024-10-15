@@ -162,7 +162,6 @@ class BaumasseCell(TableCell):
             f'BMZ {self.BMZ:.2f}' if self.BMZ else None,
         ]
         self.text = list(filter(None, self.text))
-        print(self.text)
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))

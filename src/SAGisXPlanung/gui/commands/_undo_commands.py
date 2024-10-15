@@ -9,6 +9,7 @@ from sqlalchemy.orm import make_transient, selectinload
 from SAGisXPlanung import Session, Base
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
+from SAGisXPlanung.core.callback_registry import CallbackRegistry
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 
 
@@ -45,6 +46,8 @@ class AttributeChangedCommand(QUndoCommand):
                 cls.__table__.c.id == self.xplan_item.xid
             ).values({self.attribute: value})
             session.execute(stmt)
+
+        CallbackRegistry().run_callbacks(self.xplan_item, attr, update_value)
 
     def undo(self):
         self.applyValue(self.previous_value)

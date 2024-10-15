@@ -239,6 +239,22 @@ class ElementOrderMixin:
             return attr.attribute or attr_name
         return attr_name
 
+    @classmethod
+    def find_attr_class(cls, attr_chain: str) -> tuple[type, str]:
+        """ find sqlalchemy model class where an attribute is defined from chained notation,
+            e.g. bereich.planinhalt.text -> (XP_Objekt, "text") """
+        attributes = attr_chain.split('.')
+        current_class = cls
+        for attr in attributes:
+            relation = getattr(current_class, attr, None)
+            if relation is None:
+                raise AttributeError(f"Attribute '{attr}' not found in the chain.")
+            if not hasattr(relation, 'mapper') or attr == attributes[-1]:
+                return current_class, attributes[-1]
+            current_class = relation.mapper.class_
+
+        raise ValueError()
+
     def get_attr(self, attr_name: str) -> tuple[str, list]:
         def _getattr_recursive(current_obj, attr_chain):
             for attr in attr_chain:
