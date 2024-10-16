@@ -33,6 +33,8 @@ def upgrade():
     op.execute("ALTER TYPE buildingtemplatecelldatatype ADD VALUE IF NOT EXISTS 'BauMasse';")
     op.execute("ALTER TYPE buildingtemplatecelldatatype ADD VALUE IF NOT EXISTS 'GrundGeschossflaeche';")
 
+    op.execute("ALTER TABLE so_strassenverkehr ALTER COLUMN nutzungsform DROP NOT NULL;")
+
 
 def downgrade():
     # downgrade not useful as values might be used. what to replace with?

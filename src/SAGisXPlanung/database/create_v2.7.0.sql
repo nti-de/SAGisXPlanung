@@ -3077,6 +3077,8 @@ ALTER TYPE buildingtemplatecelldatatype ADD VALUE IF NOT EXISTS 'BauMasse';;
 
 ALTER TYPE buildingtemplatecelldatatype ADD VALUE IF NOT EXISTS 'GrundGeschossflaeche';;
 
+ALTER TABLE so_strassenverkehr ALTER COLUMN nutzungsform DROP NOT NULL;;
+
 UPDATE alembic_version SET version_num='5b93f2301608' WHERE alembic_version.version_num = '151ba21532e3';
 
 COMMIT;

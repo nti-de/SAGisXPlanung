@@ -180,7 +180,7 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
     name = Column(String)
     nummer = Column(String)
     istOrtsdurchfahrt = Column(Boolean)
-    nutzungsform = Column(Enum(XP_Nutzungsform), nullable=False)
+    nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     zugunstenVon = Column(String)
     hatDarstellungMitBesondZweckbest = Column(Boolean, nullable=False)
 
