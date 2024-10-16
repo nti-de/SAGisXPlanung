@@ -238,12 +238,19 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         try:
             coro = asyncio.to_thread(import_plan, filepath, self.import_progress)
             self.import_task = asyncio.create_task(coro)
-            plan_name = await self.import_task
+            import_result = await self.import_task
 
             self.fwImportPath.setFilePath("")
             self.cbPlaene.refresh()
-            iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich importiert!",
-                                           level=Qgis.Success)
+            plan_name = import_result.plan_name
+            if import_result.warnings:
+                warn_info_text = '\n\n '.join(w for w in import_result.warnings)
+                iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} importiert! "
+                                                           f"({len(import_result.warnings)} Warnungen)",
+                                               warn_info_text, level=Qgis.Warning)
+            else:
+                iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich importiert!",
+                                               level=Qgis.Success)
 
         except CancelledError:
             self.cancellation_token.set()

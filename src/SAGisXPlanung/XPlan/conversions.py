@@ -13,11 +13,16 @@ class BP_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
-        if value == "FestsetzungBPlan" or (isinstance(value, XP_Rechtscharakter) and value == XP_Rechtscharakter.FestsetzungBPlan):
-            return "Festsetzung"
         if isinstance(value, XP_Rechtscharakter):
-            return value.name
-        return value
+            value = value.name
+        if value == "FestsetzungBPlan":
+            return "Festsetzung"
+
+        from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Rechtscharakter
+        for bp_enum_item in BP_Rechtscharakter:
+            if bp_enum_item.name == value:
+                return value
+        return BP_Rechtscharakter.Unbekannt
 
     process_literal_param = process_bind_param
 
@@ -29,11 +34,16 @@ class FP_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
-        if value == "DarstellungFPlan" or (isinstance(value, XP_Rechtscharakter) and value == XP_Rechtscharakter.DarstellungFPlan):
-            return "Darstellung"
         if isinstance(value, XP_Rechtscharakter):
-            return value.name
-        return value
+            value = value.name
+        if value == "DarstellungFPlan":
+            return "Darstellung"
+
+        from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter
+        for fp_enum_item in FP_Rechtscharakter:
+            if fp_enum_item.name == value:
+                return value
+        return FP_Rechtscharakter.Unbekannt
 
     process_literal_param = process_bind_param
 
@@ -45,11 +55,16 @@ class SO_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
-        if value == "FestsetzungImLP" or (isinstance(value, XP_Rechtscharakter) and value == XP_Rechtscharakter.FestsetzungImLP):
-            return "InhaltLPlan"
         if isinstance(value, XP_Rechtscharakter):
-            return value.name
-        return value
+            value = value.name
+        if value == "FestsetzungImLP":
+            return "InhaltLPlan"
+
+        from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte.enums import SO_Rechtscharakter
+        for so_enum_item in SO_Rechtscharakter:
+            if so_enum_item.name == value:
+                return value
+        return SO_Rechtscharakter.Unbekannt
 
     process_literal_param = process_bind_param
 

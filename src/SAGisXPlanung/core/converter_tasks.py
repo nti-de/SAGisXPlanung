@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from collections import namedtuple
 from pathlib import PurePath, Path
 from typing import Callable, Tuple
 from zipfile import ZipFile
@@ -16,6 +17,10 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.config import export_version, QgsConfig
 
 logger = logging.getLogger(__name__)
+
+
+ImportResult = namedtuple('ImportResult', ['plan_name', 'warnings'])
+
 
 class ActionCanceledException(Exception):
     pass
@@ -59,7 +64,7 @@ def export_plan(out_file_format: str, export_filepath: str, plan_xid: str = None
                 f.write(archive.getvalue())
 
 
-def import_plan(filepath: str, progress_callback: Callable[[Tuple[int, int]], None]) -> str:
+def import_plan(filepath: str, progress_callback: Callable[[Tuple[int, int]], None]) -> ImportResult:
     extension = PurePath(filepath).suffix
     files = {}
 
@@ -83,15 +88,11 @@ def import_plan(filepath: str, progress_callback: Callable[[Tuple[int, int]], No
         raise ValueError('Dateipfad muss mit .gml oder .zip enden.')
 
     reader = GMLReader(gml_file_content, files=files, progress_callback=progress_callback)
-
-    if reader.exeptions:
-        raise Exception('\n\n '.join([str(exc) for exc in reader.exeptions]))
-
-    plan_name = reader.plan.name
+    result = ImportResult(reader.plan.name, reader.warnings)
 
     save_plan(reader.plan)
 
-    return plan_name
+    return result
 
 
 def save_plan(plan):

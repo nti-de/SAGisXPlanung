@@ -10,7 +10,7 @@ from sqlalchemy import ARRAY
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.types import RefURL
-from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES
+from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES, OBJECT_BASE_TYPES
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +25,7 @@ class GMLReader:
 
         from timeit import default_timer as timer
 
-        start = timer()
-
-        self.exeptions = []
+        self.warnings = []
         self.files = files if files else {}
 
         parser = etree.XMLParser(remove_blank_text=True)
@@ -47,10 +45,6 @@ class GMLReader:
         type_name = etree.QName(plan_element).localname
         self.type = CLASSES[type_name]
         self.plan = self.read_xp_object(plan_element)
-
-        # ...
-        end = timer()
-        logger.debug(f'elapsed time {end - start}')
 
     def setProgress(self, progress):
         if not self.progress_callback:
@@ -101,8 +95,12 @@ class GMLReader:
         if type_name not in CLASSES.keys():
             return
         object_type = CLASSES[type_name]
-        obj = object_type()
+        if object_type in OBJECT_BASE_TYPES:
+            self.warnings.append(f'Basisklasse vom Typ {object_type.__name__} ignoriert... Bitte ein spezifisches '
+                                 f'Fachobjekt oder generisches Objekt verwenden (Zeile: {gml.sourceline})')
+            return
 
+        obj = object_type()
         obj_id = gml.xpath('@gml:id', namespaces=self.nsmap)[0]
         obj.id = obj_id[obj_id.find('_') + 1:]
 
@@ -128,9 +126,8 @@ class GMLReader:
                     linked_node_id = str(xlink_refs[0]).lstrip('#')
                     linked_node = self.root.xpath(f"(//*[@gml:id='{linked_node_id}'])[1]", namespaces=self.nsmap)
                     if not linked_node:
-                        self.exeptions.append(
-                            Exception(f'xlink verweist auf ein Objekt, das nicht in der XPlanGML-Datei'
-                                      f' vorliegt. (ID: {linked_node_id}, Zeile: {node.sourceline})'))
+                        self.warnings.append(f'xlink verweist auf ein Objekt, das nicht in der XPlanGML-Datei'
+                                             f' vorliegt. (ID: {linked_node_id}, Zeile: {node.sourceline})')
                         continue
 
                     node.append(linked_node[0])
