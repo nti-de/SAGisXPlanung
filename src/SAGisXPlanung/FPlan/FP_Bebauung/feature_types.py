@@ -74,10 +74,22 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         color_map = [
-            ('Wohnbaufläche', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#fb6868')),
-            ('Gemischte Baufläche', '"allgArtDerBaulNutzung" LIKE \'GemischteBauflaeche\'', QColor('#e48700')),
-            ('Gewerbliche Baufläche', '"allgArtDerBaulNutzung" LIKE \'GewerblicheBauflaeche\'', QColor('#cfcbcb')),
-            ('Sonderbaufläche', '"allgArtDerBaulNutzung" LIKE \'SonderBauflaeche\'', QColor('#f8c85c')),
+            (
+                'Wohnbaufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Kleinsiedlungsgebiet', 'ReinesWohngebiet', 'AllgWohngebiet', 'BesonderesWohngebiet') OR \"allgArtDerBaulNutzung\" = 'WohnBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#f4c3b4')),
+            (
+                'Gemischte Baufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Dorfgebiet', 'DoerflichesWohngebiet', 'Mischgebiet', 'UrbanesGebiet', 'Kerngebiet') OR \"allgArtDerBaulNutzung\" = 'GemischteBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#d5a744')),
+            (
+                'Gewerbliche Baufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Gewerbegebiet', 'Industriegebiet') OR \"allgArtDerBaulNutzung\" = 'GewerblicheBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#a6a596')),
+            (
+                'Sonderbaufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('SondergebietErholung', 'SondergebietSonst', 'Wochenendhausgebiet', 'Sondergebiet') OR \"allgArtDerBaulNutzung\" = 'SonderBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#fbad03')),
             ('keine Nutzungsangabe', '"allgArtDerBaulNutzung" LIKE \'\'', QgsLimitedRandomColorRamp.randomColors(1)[0])
         ]
 

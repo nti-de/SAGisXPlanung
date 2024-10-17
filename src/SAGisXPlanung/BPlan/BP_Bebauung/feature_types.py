@@ -148,11 +148,23 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         color_map = [
-            ('Wohngebiet', '"allgArtDerBaulNutzung" LIKE \'WohnBauflaeche\'', QColor('#f4c3b4')),
-            ('Gemischtes Gebiet', '"allgArtDerBaulNutzung" LIKE \'GemischteBauflaeche\'', QColor('#ddc885')),
-            ('Gewerbliches Gebiet', '"allgArtDerBaulNutzung" LIKE \'GewerblicheBauflaeche\'', QColor('#aeb5ad')),
-            ('Sondergebiet', '"allgArtDerBaulNutzung" LIKE \'SonderBauflaeche\'', QColor('#fbad03')),
-            ('keine Nutzung', '"allgArtDerBaulNutzung" LIKE \'\'', QgsLimitedRandomColorRamp.randomColors(1)[0])
+            (
+                'Wohnbaufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Kleinsiedlungsgebiet', 'ReinesWohngebiet', 'AllgWohngebiet', 'BesonderesWohngebiet') OR \"allgArtDerBaulNutzung\" = 'WohnBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#f4c3b4')),
+            (
+                'Gemischte Baufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Dorfgebiet', 'DoerflichesWohngebiet', 'Mischgebiet', 'UrbanesGebiet', 'Kerngebiet') OR \"allgArtDerBaulNutzung\" = 'GemischteBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#d5a744')),
+            (
+                'Gewerbliche Baufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('Gewerbegebiet', 'Industriegebiet') OR \"allgArtDerBaulNutzung\" = 'GewerblicheBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#a6a596')),
+            (
+                'Sonderbaufläche',
+                "(\"besondereArtDerBaulNutzung\" IN ('SondergebietErholung', 'SondergebietSonst', 'Wochenendhausgebiet', 'Sondergebiet') OR \"allgArtDerBaulNutzung\" = 'SonderBauflaeche') AND (\"flaechenschluss\" = 'True' OR \"flaechenschluss\" IS NULL)",
+                QColor('#fbad03')),
+            ('keine Nutzungsangabe', '"allgArtDerBaulNutzung" LIKE \'\'', QgsLimitedRandomColorRamp.randomColors(1)[0])
         ]
 
         renderer = QgsRuleBasedRenderer(cls.symbol())
