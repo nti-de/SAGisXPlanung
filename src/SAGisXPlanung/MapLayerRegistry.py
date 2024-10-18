@@ -69,12 +69,14 @@ class MapLayerRegistry(Singleton):
         self._canvasItems.append(canvas_registry_item)
 
     def remove_canvas_items(self, feat_xid: str):
-        for registry_item in self._canvasItems[:]:
+        def _should_keep_item(registry_item):
             if registry_item.feat_xid == feat_xid:
                 iface.mapCanvas().scene().removeItem(registry_item.canvas_item)
                 registry_item.canvas_item.updateCanvas()
-                del registry_item.canvas_item
-                self._canvasItems.remove(registry_item)
+                return False  # canvas item should be removed
+            return True  # canvas item should be kept
+
+        self._canvasItems = list(filter(_should_keep_item, self._canvasItems))
 
     def addLayer(self, layer: QgsMapLayer, group=None, add_to_legend=True):
         if not (isinstance(layer, QgsVectorLayer) or isinstance(layer, QgsAnnotationLayer)):
