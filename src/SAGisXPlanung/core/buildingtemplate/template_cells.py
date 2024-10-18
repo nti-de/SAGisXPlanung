@@ -164,6 +164,9 @@ class BaumasseCell(TableCell):
         self.text = list(filter(None, self.text))
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
         QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
                                    self.text_format, True, QgsTextRenderer.AlignVCenter,
@@ -197,6 +200,9 @@ class GrundGeschossflaecheCell(TableCell):
         return f'{val:.2f}' if val % 1 else f'{int(val)}'
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
+        if not self.text:
+            return
+
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
         QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
                                    self.text_format, True, QgsTextRenderer.AlignVCenter,
