@@ -2,11 +2,11 @@
 
 SAGis XPlanung enthält eine Sammlung an Standard-Darstellungsvorschriften zur Visualisierung von Planwerken nach 
 den Vorlagen der Planzeichenverordnung. Eine Anpassung der individuelle Stile ist
-in den [Einstellungen](../settings/symbology.md) möglich.
+in den [Einstellungen](settings/symbology.md) möglich.
 
 !!! tip
 
-    Die Darstellungskonfiguration aus den [Einstellungen](../settings/symbology.md) wird auf alle Planwerke bei der 
+    Die Darstellungskonfiguration aus den [Einstellungen](settings/symbology.md) wird auf alle Planwerke bei der 
     Kartenanzeige angewendet. Für die Anpassung der Darstellung einzelner Planwerke, können die üblichen QGIS-Darstellungseigenschaften
     projektbasiert verwendet werden. 
 
@@ -25,7 +25,7 @@ Die Nutzungsschablone kann für alle Bauflächen innerhalb eines Bebauungsplans 
 (Objektklasse <code>BP_BaugebietsTeilFlaeche</code>). Die angezeigten Daten der Tabelle werden aus den Sachdaten des
 entsprechenden XPlan-Objekts verwendet.
 <figure markdown="span">
-    ![Beispiel Nutzungschablone](../assets/template-example.png)
+    ![Beispiel Nutzungschablone](assets/template-example.png)
 </figure>
 
 
@@ -41,7 +41,7 @@ entsprechenden XPlan-Objekts verwendet.
             werden
         </li>
         <figure>
-            <img src="../assets/show-template.png" alt="Nutzungschablone Aktionen"/>
+            <img src="assets/show-template.png" alt="Nutzungschablone Aktionen"/>
         </figure>
     </ul>
 </div>
@@ -58,7 +58,7 @@ entsprechenden XPlan-Objekts verwendet.
             findet sich ebenfalls die Option <i>Nutzungsschablone bearbeiten</i>
         </li>
         <figure>
-            <img src="../assets/edit-template.png" alt="Nutzungschablone Kartenwerkzeug"/>
+            <img src="assets/edit-template.png" alt="Nutzungschablone Kartenwerkzeug"/>
         </figure>
     </ul>
     Im Dialog <i>Nutzungsschablone bearbeiten</i> besteht die Möglichkeit die Form und Inhalte anzupassen:
@@ -93,6 +93,6 @@ entsprechenden XPlan-Objekts verwendet.
         </tr>
     </table>
     <figure>
-        <img src="../assets/edit-template-dialog.png" alt="Nutzungschablone Kartenwerkzeug"/>
+        <img src="assets/edit-template-dialog.png" alt="Nutzungschablone Kartenwerkzeug"/>
     </figure>
 </div>
