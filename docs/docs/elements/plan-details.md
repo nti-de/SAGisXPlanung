@@ -210,7 +210,7 @@ ausgeführt werden.
                angezeigt werden soll
             </li>
             <li>
-               <i><a href="">Nutzungsschablone bearbeiten</a></i>: Öffnet einen Dialog zur Konfiguration der Nutzungschablone
+               <i>[Nutzungsschablone bearbeiten](../map-display.md#nutzungschablone-edit)</i>: Öffnet einen Dialog zur Konfiguration der Nutzungschablone
             </li>
          </ul>
       </td>

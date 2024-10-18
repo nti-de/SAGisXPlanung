@@ -73,6 +73,7 @@ nav:
       - plan-import.md
       - plan-export.md
       - multi-edit.md
+      - map-display.md
   - Elemente der Oberfläche:
       - elements/main-dialog.md
       - elements/plan-details.md
