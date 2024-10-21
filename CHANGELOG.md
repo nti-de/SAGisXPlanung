@@ -1,5 +1,22 @@
 ## Changelog
 
+### [2.7.0] - 21.10.2024
+
+#### Veränderungen
+
+- Verbesserte Funktionalität der Nutzungschablone
+  - erweiterte Auswahl von Darstellungsoptionen
+  - verbesserte Symbolisierung nach PlanZV 
+  - automatisches Aktualisieren der Darstellung bei Attributänderungen
+- bessere Warnungen bei nicht-kritischen Fehlern beim XPlanGML-Import (bfaacd93)
+
+#### Fehlerbehebungen
+
+- Fehler beim Import bestimmter Rechtscharakter-Werten in der XPlanung-Version 6.0  (bfaacd93)
+- fehlerhafter Not-Null Constraint auf Spalte `nutzungsform` in Objektklasse `SO_Strassenverkehr` (d4295951)
+- fehlende Darstellungsregeln für Bauflächen, falls nur Attribut `besondereArtDerBaulNutzung` belegt ist (64c470e9)
+
+
 ### [2.6.3] - 17.09.2024
 
 #### Veränderungen
