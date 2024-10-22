@@ -27,7 +27,7 @@ class XP_Gemeinde(RelationshipMixin, ElementOrderMixin, Base):
 
     __tablename__ = 'xp_gemeinde'
     __accessColumn__ = 'gemeindeName'  # column to access by name/string representation
-    __avoidRelation__ = ['bp_plans', 'fp_plans']
+    __avoidRelation__ = ['bp_plans', 'fp_plans', 'lp_plans']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     bp_plans = relationship("BP_Plan", back_populates="gemeinde", secondary=XP_PlanXP_GemeindeAssoc)
