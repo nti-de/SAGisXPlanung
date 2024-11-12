@@ -1,7 +1,7 @@
 # Darstellung
 
 Zur Symbolisierung erfasster Planinhalte auf der QGIS-Karte wird durch die Anwendung eine Stilvorgabe für viele 
-XPlan-Objektklassen bereitgestellt. Zusätzlich wird 
+XPlan-Objektklassen bereitgestellt.
 
 In den _Darstellung_-Einstellungen kann sowohl die Darstellungsreihenfolge als auch die einzelnen Stilvorgaben angepasst
 werden. Die Darstellungsreihenfolge leitet sich dabei aus der Position der Einträge in der Liste ab. Eine höhere
@@ -43,3 +43,25 @@ Karte in den Hintergrund rücken.
     </tr>
 </table>
 </div>
+
+## Benutzerdefinierte Stildateien
+
+Neben der Option einzelne Stile anzupassen, besteht die Möglichkeit, in einem Verzeichnis für benutzerdefinierte Stile
+übliche QGIS-Stildefinitionen (QML-Dateien) abzulegen.
+
+Das Verzeichnis kann mit dem Button **Öffnen** im Dateiexplorer geöffnet werden.
+
+Alle hinterlegten Stildateien, müssen einem vorgegebenen Schema bei der Bezeichnung der Dateinamen folgen:
+
+<table>
+    <tr>
+        <th>{XPlan-Objektart}-{Geometriedimension}.qml</th>
+        <td>
+            <ul>
+                <li><b>XPlan-Objektart:</b> exakte Bezeichnung der XPlan-Objektklasse aus dem Katalog der Objektarten</li>
+                <li><b>Geometriedimension:</b> 0 - Punktgeometrien, 1 - Liniengeometrien, 2 - Polygongeometrien</li>
+            </ul>
+            Beispielsweise <i>FP_BebauungsFlaeche-2.qml</i> für alle Flächengeometrien die eine Bebauungsfläche darstellen.
+        </td>
+    </tr>
+</table>
