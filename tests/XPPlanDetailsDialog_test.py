@@ -147,9 +147,6 @@ class TestXPlanungDetailsDialog_GeometryValidation:
         assert item.isVisible
 
 
-class TestXPlanungDetailsDialog_displayOnMapCanvas:
-    pass  # TODO: test map display
-
 
 class TestXPlanungDialog_createRasterLayer:
 

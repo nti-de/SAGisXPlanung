@@ -129,7 +129,7 @@ class XP_PPO(PointGeometry, MapCanvasMixin, XP_AbstraktesPraesentationsobjekt):
         layer.setCustomProperty("skipMemoryLayersCheck", 1)
         layer.setCustomProperty('xplanung/type', cls.__name__)
         layer.setCustomProperty('xplanung/plan-xid', str(plan_xid))
-        # TODO: properties are not persistent, see: https://github.com/qgis/QGIS/issues/47463
+        layer.setCustomProperty('xplanung/layer-priority', cls.__LAYER_PRIORITY__)
         return layer
 
     @classmethod
@@ -203,7 +203,7 @@ class XP_PTO(PointGeometry, MapCanvasMixin, XP_AbstraktesPraesentationsobjekt):
         layer.setCustomProperty("skipMemoryLayersCheck", 1)
         layer.setCustomProperty('xplanung/type', cls.__name__)
         layer.setCustomProperty('xplanung/plan-xid', str(plan_xid))
-        # TODO: properties are not persistent, see: https://github.com/qgis/QGIS/issues/47463
+        layer.setCustomProperty('xplanung/layer-priority', cls.__LAYER_PRIORITY__)
         return layer
 
 

@@ -92,21 +92,30 @@ Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_30.svg:
   category: BP_Bebauung
   name: Zahl der Wohnungen 30
 
-Dorfgebiet.svg:
+Wohnbauflaechen.svg:
   category: BP_Bebauung
-  name: Dorfgebiet
+  name: Wohnbauflächen
 Gewerbegebiet.svg:
   category: BP_Bebauung
   name: Gewerbegebiet
-GewerblicheBauflaeche.svg:
+GewerblicheBauflaechen.svg:
   category: BP_Bebauung
   name: Gewerbliche Baufläche
+GemischteBauflaechen.svg:
+  category: BP_Bebauung
+  name: Gemischte Bauflächen
+Dorfgebiet.svg:
+  category: BP_Bebauung
+  name: Dorfgebiet
 Kerngebiet.svg:
   category: BP_Bebauung
   name: Kerngebiet
 Mischgebiet.svg:
   category: BP_Bebauung
   name: Mischgebiet
+Sonderbauflaechen.svg:
+    category: BP_Bebauung
+    name: Sondergebiet
 Sondergebiet_Camping.svg:
   category: BP_Bebauung
   name: Sondergebiet Camping
