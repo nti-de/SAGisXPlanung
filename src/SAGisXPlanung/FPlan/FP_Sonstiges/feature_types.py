@@ -2,9 +2,11 @@ import logging
 
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
+from qgis.core import QgsWkbTypes, QgsSymbol
+
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import LayerPriorityType
-from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -47,4 +49,8 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PointGeometry:
+            return icon_renderer('Kennzeichnung', QgsSymbol.defaultSymbol(geom_type),
+                                 'Sonstiges', geometry_type=geom_type,
+                                 symbol_size=30)
         return generic_objects_renderer(geom_type)

@@ -57,6 +57,7 @@ _renderer_expressions = {
         ('Soziale Einrichtung', '"zweckbestimmung" LIKE \'16%\'', 'Einrichtung_Soziales.svg'),
         ('Gesundheit', '"zweckbestimmung" LIKE \'18%\'', 'Krankenhaus.svg'),
         ('Kulturelle Einrichtung', '"zweckbestimmung" LIKE \'20%\'', 'Einrichtung_Kultur.svg'),
+        ('Sportanlage', '"zweckbestimmung" LIKE \'22%\'', 'Anlage_Sportanlage.svg'),
         ('Sicherheit/Ordnung', '"zweckbestimmung" LIKE \'2400\'', 'Polizei.svg'),
         ('Feuerwehr', '"zweckbestimmung" LIKE \'24000\'', 'Feuerwehr.svg'),
         ('Schutzbauwerk', '"zweckbestimmung" LIKE \'24001\'', 'Schutzbauwerk.svg'),
@@ -85,7 +86,16 @@ _renderer_expressions = {
         ('Badeplatz', '"zweckbestimmung" LIKE \'20%\'', 'Badeplatz.svg'),
         ('Friedhof', '"zweckbestimmung" LIKE \'26%\'', 'Friedhof.svg'),
         ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
-    ]
+    ],
+    'Denkmalschutz': [
+        ('Ensemble', '"artDerFestlegung" = \'DenkmalschutzEnsemble\'', 'Denkmalschutz_Ensemble.svg'),
+        ('Einzelanlage', '"artDerFestlegung" = \'DenkmalschutzEinzelanlage\'', 'Denkmalschutz_Einzelanlagen.svg'),
+        ('Sonstiges', '"artDerFestlegung" LIKE \'\'', ''),
+    ],
+    'Kennzeichnung': [
+        ('Schadstoffbelasteter Boden', '"zweckbestimmung" = \'SchadstoffBelastBoden\'', 'Kennzeichnung_Schadstoffe.svg'),
+        ('Sonstiges', '"artDerFestlegung" LIKE \'\'', ''),
+    ],
 }
 
 

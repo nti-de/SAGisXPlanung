@@ -512,15 +512,18 @@ Ueberschwaemmungsgebiet.svg:
 # endregion
 
 # region SO_SonstigeGebiete
-Einzelanlagen_die_dem_Denkmalschutz_unterliegen_SW.svg:
+Denkmalschutz_Einzelanlagen.svg:
   category: SO_SonstigeGebiete
   name: Denkmalschutz Einzelanlage
+Denkmalschutz_Ensemble.svg:
+  category: SO_SonstigeGebiete
+  name: Denkmalschutz Ensemble
 # endregion
 
 # region Sonstiges
-Kennzeichnung_derLage_ohne_Flaechendarstellung.svg:
+Kennzeichnung_Schadstoffe.svg:
   category: Sonstiges
-  name: Lage ohne Flächendarstellung
+  name: Schadsfoffbelasteter Boden
 Hoehenlage_SW.svg:
   category: Sonstiges
   name: Höhenlage bei Festsetzungen

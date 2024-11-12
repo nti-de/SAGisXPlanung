@@ -15,7 +15,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht
 from SAGisXPlanung.XPlan.core import LayerPriorityType
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
@@ -110,6 +110,10 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.PointGeometry:
+            return icon_renderer('Denkmalschutz', QgsSymbol.defaultSymbol(geom_type),
+                                 'SO_SonstigeGebiete', geometry_type=geom_type,
+                                 symbol_size=30)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

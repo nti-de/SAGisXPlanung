@@ -69,7 +69,7 @@ class TestRenderer:
         r = BP_GemeinbedarfsFlaeche.renderer(QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
-        assert len(r.rootRule().children()) == 12
+        assert len(r.rootRule().children()) == 13
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_besonderer_verkehr_renderer(self):
