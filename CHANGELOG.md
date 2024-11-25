@@ -1,5 +1,14 @@
 ## Changelog
 
+### [2.7.1] - 25.11.2024
+
+#### Veränderungen
+
+- neues Verzeichnis für Benutzerstile im QML-Format (b54dbe8e)
+- Aktualisieren einzelner Einträge in den Darstellungs-Einstellungen (af871904)
+- verbesserte Stile und Symbole, bspw. Objektklassen `BP/FP_VerEntsorgung`, `FP_Kennzeichnung`, `SO_Denkmalschutzrecht`, `FP_Gemeinbedarf`
+
+
 ### [2.7.0] - 21.10.2024
 
 #### Veränderungen
