@@ -228,6 +228,9 @@ class BP_Bereich(XP_Bereich):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+        simple_line = QgsSimpleLineSymbolLayer.create({})
+        symbol.appendSymbolLayer(simple_line)
         return QgsSingleSymbolRenderer(symbol)
 
 
