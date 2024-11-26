@@ -223,7 +223,7 @@ class ElementOrderMixin:
             return [ins.key for ins in result_order]
 
     @classmethod
-    def attr_fits_version(cls, attr: str | MapperProperty, version: XPlanVersion) -> bool:
+    def attr_fits_version(cls, attr: Union[str, MapperProperty], version: XPlanVersion) -> bool:
         """ Überprüft, ob ein XPlanung-Attribut zur gegebenen Version des Standards gehört"""
         if isinstance(attr, MapperProperty):
             attr_name = attr.key
