@@ -25,8 +25,8 @@ class SO_Objekt(XP_Objekt):
 
     id = Column(ForeignKey("xp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    rechtscharakter = XPCol(SO_Rechtscharakter_EnumType(SO_Rechtscharakter), nullable=False, doc='Rechtscharakter',
-                            version=XPlanVersion.FIVE_THREE)
+    rechtscharakter = Column(SO_Rechtscharakter_EnumType(SO_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     position = Column(Geometry())
     flaechenschluss = Column(Boolean, doc='Flächenschluss')

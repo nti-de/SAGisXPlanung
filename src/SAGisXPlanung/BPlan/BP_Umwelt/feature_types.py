@@ -33,8 +33,8 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
 
     nutzung = Column(String)
     laermpegelbereich = Column(XPEnum(BP_Laermpegelbereich, include_default=True))
-    massgeblAussenLaermpegelTag = XPCol(Sound, version=XPlanVersion.SIX)
-    massgeblAussenLaermpegelNacht = XPCol(Sound, version=XPlanVersion.SIX)
+    massgeblAussenLaermpegelTag = Column(Sound, info={'xplan_version': XPlanVersion.SIX})
+    massgeblAussenLaermpegelNacht = Column(Sound, info={'xplan_version': XPlanVersion.SIX})
 
     typ = Column(XPEnum(XP_ImmissionsschutzTypen, include_default=True))
     technVorkehrung = Column(XPEnum(XP_TechnVorkehrungenImmissionsschutz, include_default=True))

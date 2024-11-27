@@ -60,21 +60,26 @@ class FP_Plan(XP_Plan):
     planbeschlussDatum = Column(Date(), doc='Datum des Planbeschlusses')
     wirksamkeitsDatum = Column(Date(), doc='Datum der Wirksamkeit')
 
-    versionBauNVODatum = XPCol(Date(), doc='Datum der BauNVO', version=XPlanVersion.FIVE_THREE)
-    versionBauNVOText = XPCol(String(), doc='Textl. Spezifikation der BauNVO', version=XPlanVersion.FIVE_THREE)
-    versionBauGBDatum = XPCol(Date(), doc='Datum des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionBauGBText = XPCol(String(), doc='Textl. Spezifikation des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageDatum = XPCol(Date(), doc='Datum sonst. Rechtsgrundlage', version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageText = XPCol(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage', version=XPlanVersion.FIVE_THREE)
+    versionBauNVODatum = Column(Date(), doc='Datum der BauNVO', info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauNVOText = Column(String(), doc='Textl. Spezifikation der BauNVO',
+                               info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauGBDatum = Column(Date(), doc='Datum des BauGB',
+                               info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauGBText = Column(String(), doc='Textl. Spezifikation des BauGB',
+                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageDatum = Column(Date(), doc='Datum sonst. Rechtsgrundlage',
+                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageText = Column(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage',
+                                             info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     versionBauNVO_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                             version=XPlanVersion.SIX, attribute='versionBauNVO')
+                             info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauNVO')
     versionBauNVO = relationship("XP_GesetzlicheGrundlage", back_populates="fp_bau_nvo", foreign_keys=[versionBauNVO_id])
     versionBauGB_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                            version=XPlanVersion.SIX, attribute='versionBauGB')
+                            info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauGB')
     versionBauGB = relationship("XP_GesetzlicheGrundlage", back_populates="fp_bau_gb", foreign_keys=[versionBauGB_id])
     versionSonstRechtsgrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                           version=XPlanVersion.SIX, attribute='versionSonstRechtsgrundlage')
+                                           info={'xplan_version': XPlanVersion.SIX}, attribute='versionSonstRechtsgrundlage')
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="fp_bau_sonst",
                                                foreign_keys=[versionSonstRechtsgrundlage_id])
 
@@ -142,8 +147,8 @@ class FP_Objekt(XP_Objekt):
 
     id = Column(ForeignKey("xp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    rechtscharakter = XPCol(FP_Rechtscharakter_EnumType(FP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
-                            version=XPlanVersion.FIVE_THREE)
+    rechtscharakter = Column(FP_Rechtscharakter_EnumType(FP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
     vonGenehmigungAusgenommen = Column(Boolean)
 
     position = Column(Geometry())

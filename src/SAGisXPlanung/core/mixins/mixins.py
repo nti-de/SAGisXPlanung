@@ -5,10 +5,10 @@ from typing import Tuple, Union, Any, Iterator, Iterable
 from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsEditorWidgetSetup, QgsAnnotationLayer,
                        QgsWkbTypes)
 from qgis.PyQt.QtCore import QVariant
-from sqlalchemy.orm import RelationshipProperty, MapperProperty, interfaces, ColumnProperty
+from sqlalchemy.orm import RelationshipProperty, interfaces, ColumnProperty
 
 from SAGisXPlanung import XPlanVersion
-from SAGisXPlanung.XPlan.core import XPRelationshipProperty, LayerPriorityType
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.GML.geometry import geom_type_as_layer_url
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -44,7 +44,7 @@ class RelationshipMixin:
         for rel in self.__class__.relationships():
             if next(iter(rel[1].remote_side)).primary_key or rel[1].secondary is not None:
                 continue
-            if not self.__class__.relation_fits_version(rel[0], export_version()):
+            if not self.__class__.attr_fits_version(rel[0], export_version()):
                 continue
             rel_items = getattr(self, rel[0])
             if rel_items is None:
@@ -65,17 +65,15 @@ class RelationshipMixin:
         str, str:
             Displayname, Tooltip
         """
-        if not hasattr(cls, 'xp_relationship_properties') or not next((p for p in cls.xp_relationship_properties() if p.rel_name == rel[0]), None):
+        attr_name, rel_property = rel
+        xplan_attribute_name = rel_property.info.get('xplan_attribute')
+        if xplan_attribute_name is None:
             if rel[1].doc:
                 return rel[1].doc, f'XPlanung-Attribut: {rel[0]}'
             else:
                 return rel[0], xplan_tooltip(cls, rel[0])
 
-        for relationship_property in cls.xp_relationship_properties():  # type: XPRelationshipProperty
-            if relationship_property.rel_name == rel[0]:
-                return relationship_property.xplan_attribute, xplan_tooltip(cls, relationship_property.xplan_attribute)
-
-        raise Exception(f'Could not determine display parameters for relation {rel[0]} {rel[1]}')
+        return xplan_attribute_name, xplan_tooltip(cls, xplan_attribute_name)
 
 
 class GeometryObject:
@@ -164,33 +162,25 @@ class ElementOrderMixin:
                       version=XPlanVersion.FIVE_THREE,
                       ret_fmt=''):
 
-        # when include_base=False we can directly use the first item in mro (the class itself)
-        # otherwise start in reverse order, because xplan needs base attributes first
-        # [0:-1] removes last element, which is always sqlalchemy base
-        mro = reversed(cls.__mro__[0:-1]) if include_base else cls.__mro__
-
         order = []
-        for supercls in mro:
+        for supercls in reversed(cls.__mro__[0:-1]):
             if not issubclass(supercls, ElementOrderMixin):
                 continue
 
-            inherits = supercls.__mro__[1]
             for key in supercls.__dict__:
                 val = supercls.__dict__[key]
                 if (
                         isinstance(val, interfaces.InspectionAttr)
                         and val.is_attribute
-                        and val.class_.attr_fits_version(val.property, version)
+                        and val.property.parent.class_.attr_fits_version(val.property.key, version)
                 ):
                     if only_columns and not isinstance(val.property, ColumnProperty):
-                        continue
-                    if not include_base and key in inherits.__dict__:
                         continue
 
                     order.append(val)
 
-            if not include_base:
-                break
+        if not include_base:
+            order = [x for x in order if x.property.parent.class_ == cls]
 
         seen = set()
         exclude = set()
@@ -223,48 +213,13 @@ class ElementOrderMixin:
             return [ins.key for ins in result_order]
 
     @classmethod
-    def attr_fits_version(cls, attr: Union[str, MapperProperty], version: XPlanVersion) -> bool:
+    def attr_fits_version(cls, attr_name: str, version: XPlanVersion) -> bool:
         """ Überprüft, ob ein XPlanung-Attribut zur gegebenen Version des Standards gehört"""
-        if isinstance(attr, MapperProperty):
-            attr_name = attr.key
-        else:
-            attr_name = attr
-            attr = getattr(cls, attr_name)
-        if hasattr(attr, "version") and attr.version != version:
+        attr = getattr(cls, attr_name)
+        allowed_xplan_version = attr.info.get('xplan_version')
+        if allowed_xplan_version is not None and allowed_xplan_version != version:
             return False
-        if hasattr(cls, 'xp_relationship_properties'):
-            for relationship_property in cls.xp_relationship_properties():  # type: XPRelationshipProperty
-                if relationship_property.rel_name == attr_name and relationship_property.allowed_version != version:
-                    return False
         return True
-
-    @classmethod
-    def relation_fits_version(cls, rel_name: str, version: XPlanVersion) -> bool:
-        """ Überprüft, ob eine XPlanung-Relation zur gegebenen Version des Standards gehört"""
-        if hasattr(cls, 'xp_relationship_properties'):
-            for relationship_property in cls.xp_relationship_properties():  # type: XPRelationshipProperty
-                if relationship_property.rel_name == rel_name and relationship_property.allowed_version != version:
-                    return False
-        return True
-
-    @classmethod
-    def attr_is_treated_as_column(cls, attr_name: str, consider_suffix=True) -> bool:
-        """ Überprüft ob ein gegebenes Attribut, als Column (statt Relationship) gehandhabt wird."""
-        attr = getattr(cls, attr_name)
-        if hasattr(attr, "version") and hasattr(attr, 'attribute') and attr.attribute is not None:
-            return True
-        if consider_suffix:
-            return not attr_name.endswith('_id')
-        return False
-
-    @classmethod
-    def normalize_column_name(cls, attr_name: str) -> str:
-        """ Gibt den 'echten' XPlanung-Namen züruck, wenn das Python-Attribut nicht korrekt bennant werden kann.
-            XPCol muss dafür mit Parameter `attribute` verwendet werden."""
-        attr = getattr(cls, attr_name)
-        if hasattr(attr, "version") and hasattr(attr, 'attribute'):
-            return attr.attribute or attr_name
-        return attr_name
 
     @classmethod
     def find_attr_class(cls, attr_chain: str) -> tuple[type, str]:

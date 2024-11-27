@@ -37,8 +37,8 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
     kronendurchmesser = Column(Length)
     pflanztiefe = Column(Length)
     istAusgleich = Column(Boolean)
-    baumArt = XPCol(String, version=XPlanVersion.FIVE_THREE)
-    pflanzenArt = XPCol(String, version=XPlanVersion.SIX)
+    baumArt = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
+    pflanzenArt = Column(String, info={'xplan_version': XPlanVersion.SIX})
     mindesthoehe = Column(Length)
     anzahl = Column(Integer)
 

@@ -17,13 +17,6 @@ class XPCol(Column):
         super(XPCol, self).__init__(*args, **kwargs)
 
 
-@dataclass
-class XPRelationshipProperty:
-    rel_name: str
-    xplan_attribute: str
-    allowed_version: XPlanVersion
-
-
 class LayerPriorityType(Flag):
     """ Enum to configure the layer priority of XPlanung layers when adding to the layer tree """
 

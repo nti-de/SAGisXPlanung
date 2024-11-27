@@ -10,8 +10,7 @@ from sqlalchemy.orm import relationship, declared_attr
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald, \
     XP_EigentumsartWald, XP_WaldbetretungTyp, XP_ZweckbestimmungGruen
@@ -75,11 +74,14 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungGruen), version=XPlanVersion.FIVE_THREE,
+        return XPCol(Enum(XP_ZweckbestimmungGruen), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGruen", back_populates="gruenflaeche",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     zugunstenVon = Column(String)
@@ -97,13 +99,6 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
@@ -138,11 +133,14 @@ class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungLandwirtschaft), version=XPlanVersion.FIVE_THREE,
+        return XPCol(Enum(XP_ZweckbestimmungLandwirtschaft), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestLandwirtschaft", back_populates="landwirtschaft",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
     @classmethod
     def import_zweckbestimmung_attr(cls, version):
@@ -150,13 +148,6 @@ class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
@@ -190,11 +181,14 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungWald), version=XPlanVersion.FIVE_THREE,
+        return XPCol(Enum(XP_ZweckbestimmungWald), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestWald", back_populates="waldflaeche",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
     eigentumsart = Column(Enum(XP_EigentumsartWald))
     betreten = Column(Enum(XP_WaldbetretungTyp))
@@ -205,13 +199,6 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls) -> QgsSymbol:

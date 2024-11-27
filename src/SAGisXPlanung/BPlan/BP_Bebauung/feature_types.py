@@ -24,7 +24,7 @@ from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCe
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
@@ -108,13 +108,16 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
     @declared_attr
     def sondernutzung(cls):
-        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), version=XPlanVersion.FIVE_THREE,
+        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_sondernutzung_attr)
 
     rel_sondernutzung = relationship("BP_KomplexeSondernutzung", back_populates="baugebiet",
-                                     cascade="all, delete", passive_deletes=True)
+                                     cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'sondernutzung'
+                                       })
 
-    nutzungText = XPCol(String, version=XPlanVersion.FIVE_THREE)
+    nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     abweichungBauNVO = Column(Enum(XP_AbweichungBauNVOTypen))
     bauweise = Column(XPEnum(BP_Bauweise, include_default=True))
     vertikaleDifferenzierung = Column(Boolean)
@@ -132,13 +135,6 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
             return 'sondernutzung'
         else:
             return 'rel_sondernutzung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_sondernutzung', xplan_attribute='sondernutzung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls):
@@ -581,11 +577,14 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(ARRAY(Enum(BP_ZweckbestimmungNebenanlagen)), version=XPlanVersion.FIVE_THREE,
+        return XPCol(ARRAY(Enum(BP_ZweckbestimmungNebenanlagen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestNebenanlagen", back_populates="nebenanlage",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
     Zmax = Column(Integer)
 
@@ -600,13 +599,6 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls):

@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
@@ -39,8 +39,8 @@ class LP_Plan(XP_Plan):
     rechtlicheAussenwirkung = Column(Boolean, nullable=False)
     planArt = Column(ARRAY(Enum(LP_PlanArt)), nullable=False)
 
-    planungstraegerGKZ = XPCol(String(), version=XPlanVersion.FIVE_THREE)
-    planungstraeger = XPCol(String(), version=XPlanVersion.FIVE_THREE)
+    planungstraegerGKZ = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    planungstraeger = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     gemeinde = relationship("XP_Gemeinde", back_populates="lp_plans", secondary=XP_PlanXP_GemeindeAssoc, doc='Gemeinde')
 
@@ -50,27 +50,27 @@ class LP_Plan(XP_Plan):
     rechtsstand = Column(Enum(LP_Rechtsstand))
     aufstellungsbeschlussDatum = Column(Date())
 
-    auslegungsDatum = XPCol(ARRAY(Date), version=XPlanVersion.FIVE_THREE)
-    tOeBbeteiligungsDatum = XPCol(ARRAY(Date), version=XPlanVersion.FIVE_THREE)
-    oeffentlichkeitsbeteiligungDatum = XPCol(ARRAY(Date), version=XPlanVersion.FIVE_THREE)
+    auslegungsDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    tOeBbeteiligungsDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    oeffentlichkeitsbeteiligungDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
-    auslegungsStartDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
-    auslegungsEndDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
-    tOeBbeteiligungsStartDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
-    tOeBbeteiligungsEndDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
-    oeffentlichkeitsBetStartDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
-    oeffentlichkeitsBetEndDatum = XPCol(ARRAY(Date), version=XPlanVersion.SIX)
+    auslegungsStartDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
+    auslegungsEndDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
+    tOeBbeteiligungsStartDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
+    tOeBbeteiligungsEndDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
+    oeffentlichkeitsBetStartDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
+    oeffentlichkeitsBetEndDatum = Column(ARRAY(Date), info={'xplan_version': XPlanVersion.SIX})
 
     aenderungenBisDatum = Column(Date())
     entwurfsbeschlussDatum = Column(Date())
     planbeschlussDatum = Column(Date())
     inkrafttretenDatum = Column(Date())
-    veroeffentlichungsDatum = XPCol(Date(), version=XPlanVersion.SIX)
+    veroeffentlichungsDatum = Column(Date(), info={'xplan_version': XPlanVersion.SIX})
     sonstVerfahrensDatum = Column(Date())
 
-    sonstVerfahrensText = XPCol(String(), version=XPlanVersion.SIX)
-    startBedingungen = XPCol(String(), version=XPlanVersion.SIX)
-    endeBedingungen = XPCol(String(), version=XPlanVersion.SIX)
+    sonstVerfahrensText = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    startBedingungen = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    endeBedingungen = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     bereich = relationship("LP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 

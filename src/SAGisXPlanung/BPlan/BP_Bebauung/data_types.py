@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import Angle, ConformityException
@@ -29,7 +29,8 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     dachform = Column(Enum(BP_Dachform), doc='Dachform')
 
     hoehenangabe = relationship("XP_Hoehenangabe", back_populates="dachgestaltung",
-                                cascade="all, delete", passive_deletes=True, uselist=False)
+                                cascade="all, delete", passive_deletes=True, uselist=False,
+                                info={'xplan_version': XPlanVersion.SIX})
 
     baugebiet_id = Column(UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
     baugebiet = relationship('BP_BaugebietsTeilFlaeche', back_populates='dachgestaltung')
@@ -71,13 +72,6 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     def avoid_export(cls):
         return ['baugebiet_id', 'besondere_nutzung_id', 'gemeinbedarf_id', 'grundstueck_ueberbaubar_id',
                 'detaillierteDachform_id']
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='hoehenangabe', xplan_attribute='hoehenangabe',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     def validate(self):
         if self.DNmin and (not self.DNmax and not self.DN and not self.DNZwingend):

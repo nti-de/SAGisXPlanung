@@ -12,7 +12,7 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_Sondernutzungen,
                                        XP_AbweichungBauNVOTypen)
@@ -35,7 +35,7 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     GFZ = Column(Float)
     GFZmin = Column(Float)
     GFZmax = Column(Float)
-    GFZdurchschnittlich = XPCol(Float, version=XPlanVersion.SIX)
+    GFZdurchschnittlich = Column(Float, info={'xplan_version': XPlanVersion.SIX})
     BMZ = Column(Float)
     GRZ = Column(Float)
     allgArtDerBaulNutzung = Column(Enum(XP_AllgArtDerBaulNutzung))
@@ -43,14 +43,18 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
 
     @declared_attr
     def sonderNutzung(cls):
-        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), version=XPlanVersion.FIVE_THREE,
+        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_sondernutzung_attr)
 
     rel_sondernutzung = relationship("FP_KomplexeSondernutzung", back_populates="baugebiet",
-                                     cascade="all, delete", passive_deletes=True)
+                                     cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'sondernutzung'
+                                       })
 
-    nutzungText = XPCol(String, version=XPlanVersion.FIVE_THREE)
-    abweichungBauNVO = XPCol(XPEnum(XP_AbweichungBauNVOTypen, include_default=True), version=XPlanVersion.SIX)
+    nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
+    abweichungBauNVO = Column(XPEnum(XP_AbweichungBauNVOTypen, include_default=True),
+                              info={'xplan_version': XPlanVersion.SIX})
 
     @classmethod
     def import_sondernutzung_attr(cls, version):
@@ -58,13 +62,6 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
             return 'sonderNutzung'
         else:
             return 'rel_sondernutzung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_sondernutzung', xplan_attribute='sondernutzung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls):

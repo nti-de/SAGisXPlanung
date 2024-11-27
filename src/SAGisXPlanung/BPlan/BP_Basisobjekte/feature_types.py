@@ -1,12 +1,11 @@
 import logging
 import uuid
-from typing import List
 
-from geoalchemy2 import Geometry, WKBElement, WKTElement
-from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event, func
+from geoalchemy2 import Geometry, WKTElement
+from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import relationship, column_property, declared_attr, object_session
+from sqlalchemy.orm import relationship, declared_attr
 
 from qgis.core import (QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer, QgsSymbol, QgsWkbTypes, QgsGeometry,
                        QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes)
@@ -14,9 +13,9 @@ from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt
 
 from SAGisXPlanung import XPlanVersion
-from SAGisXPlanung.GML.geometry import enforce_wkb_constraints, geometry_from_spatial_element
+from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import BP_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
@@ -24,7 +23,6 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Verfahren, BP_Rechtsstand, BP_PlanArt, BP_Rechtscharakter
 from SAGisXPlanung.XPlan.types import XPEnum, GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
-from SAGisXPlanung.config import QgsConfig, GeometryCorrectionMethod
 
 logger = logging.getLogger(__name__)
 
@@ -53,25 +51,29 @@ class BP_Plan(XP_Plan):
 
     planArt = Column(Enum(BP_PlanArt), nullable=False, doc='Art des Planwerks')
     # sonstPlanArt: BP_SonstPlanArt[0..1]
-    verfahren = XPCol(Enum(BP_Verfahren), doc='Verfahren', version=XPlanVersion.FIVE_THREE)
+    verfahren = Column(Enum(BP_Verfahren), doc='Verfahren', info={'xplan_version': XPlanVersion.FIVE_THREE})
     rechtsstand = Column(Enum(BP_Rechtsstand), doc='Rechtsstand')
     # status: BP_Status[0..1]
-    hoehenbezug = XPCol(String(), doc='Höhenbezug', version=XPlanVersion.FIVE_THREE)
+    hoehenbezug = Column(String(), doc='Höhenbezug', info={'xplan_version': XPlanVersion.FIVE_THREE})
     aenderungenBisDatum = Column(Date(), doc='Änderungen bis')
     aufstellungsbeschlussDatum = Column(Date(), doc='Aufstellungsbeschlussdatum')
 
-    veraenderungssperreBeschlussDatum = XPCol(Date(), doc='Beschlussdatum der Veränderungssperre',
-                                              version=XPlanVersion.FIVE_THREE)
-    veraenderungssperreDatum = XPCol(Date(), doc='Beginn der Veränderungssperre',
-                                     version=XPlanVersion.FIVE_THREE)
-    veraenderungssperreEndDatum = XPCol(Date(), doc='Ende der Veränderungssperre',
-                                        version=XPlanVersion.FIVE_THREE)
-    verlaengerungVeraenderungssperre = XPCol(XPEnum(XP_VerlaengerungVeraenderungssperre, include_default=True),
-                                             doc='Verlängerung der Veränderungssperre',
-                                             version=XPlanVersion.FIVE_THREE)
+    veraenderungssperreBeschlussDatum = Column(Date(), doc='Beschlussdatum der Veränderungssperre',
+                                               info={'xplan_version': XPlanVersion.FIVE_THREE})
+    veraenderungssperreDatum = Column(Date(), doc='Beginn der Veränderungssperre',
+                                      info={'xplan_version': XPlanVersion.FIVE_THREE})
+    veraenderungssperreEndDatum = Column(Date(), doc='Ende der Veränderungssperre',
+                                         info={'xplan_version': XPlanVersion.FIVE_THREE})
+    verlaengerungVeraenderungssperre = Column(XPEnum(XP_VerlaengerungVeraenderungssperre, include_default=True),
+                                              doc='Verlängerung der Veränderungssperre',
+                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_veraenderungssperre = relationship("BP_VeraenderungssperreDaten", back_populates="plan",
-                                           cascade="all, delete", passive_deletes=True, uselist=False)
+                                           cascade="all, delete", passive_deletes=True, uselist=False,
+                                           info={
+                                               'xplan_version': XPlanVersion.SIX,
+                                               'xplan_attribute': 'veraenderungssperre'
+                                           })
 
     auslegungsStartDatum = Column(ARRAY(Date), doc='Startdatum des Auslegungszeitraums')
     auslegungsEndDatum = Column(ARRAY(Date), doc='Enddatum des Auslegungszeitraums')
@@ -84,7 +86,7 @@ class BP_Plan(XP_Plan):
 
     @declared_attr
     def veraenderungssperre(cls):
-        return XPCol(Boolean, doc='Veränderungssperre?', version=XPlanVersion.FIVE_THREE,
+        return XPCol(Boolean, doc='Veränderungssperre?', info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_veraenderungssperre_attr)
 
     staedtebaulicherVertrag = Column(Boolean, doc='städtebaulicher Vertrag?')
@@ -92,24 +94,33 @@ class BP_Plan(XP_Plan):
     durchfuehrungsVertrag = Column(Boolean, doc='Durchführungsvertrag?')
     gruenordnungsplan = Column(Boolean, doc='Grünordnungsplan?')
 
-    versionBauNVODatum = XPCol(Date(), doc='Datum der BauNVO', version=XPlanVersion.FIVE_THREE)
-    versionBauNVOText = XPCol(String(), doc='Textl. Spezifikation der BauNVO', version=XPlanVersion.FIVE_THREE)
-    versionBauGBDatum = XPCol(Date(), doc='Datum des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionBauGBText = XPCol(String(), doc='Textl. Spezifikation des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageDatum = XPCol(Date(), doc='Datum sonst. Rechtsgrundlage', version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageText = XPCol(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage', version=XPlanVersion.FIVE_THREE)
+    versionBauNVODatum = Column(Date(), doc='Datum der BauNVO',
+                                info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauNVOText = Column(String(), doc='Textl. Spezifikation der BauNVO',
+                               info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauGBDatum = Column(Date(), doc='Datum des BauGB',
+                               info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauGBText = Column(String(), doc='Textl. Spezifikation des BauGB',
+                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageDatum = Column(Date(), doc='Datum sonst. Rechtsgrundlage',
+                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageText = Column(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage',
+                                             info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     versionBauNVO_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                             version=XPlanVersion.SIX, attribute='versionBauNVO')
+                             info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauNVO')
     versionBauNVO = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_nvo",
-                                 foreign_keys=[versionBauNVO_id])
+                                 foreign_keys=[versionBauNVO_id], info={'xplan_version': XPlanVersion.SIX})
     versionBauGB_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                            version=XPlanVersion.SIX, attribute='versionBauGB')
-    versionBauGB = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_gb", foreign_keys=[versionBauGB_id])
+                            info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauGB')
+    versionBauGB = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_gb", foreign_keys=[versionBauGB_id],
+                                info={'xplan_version': XPlanVersion.SIX})
     versionSonstRechtsgrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                           version=XPlanVersion.SIX, attribute='versionSonstRechtsgrundlage')
+                                           info={'xplan_version': XPlanVersion.SIX},
+                                           attribute='versionSonstRechtsgrundlage')
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_sonst",
-                                               foreign_keys=[versionSonstRechtsgrundlage_id])
+                                               foreign_keys=[versionSonstRechtsgrundlage_id],
+                                               info={'xplan_version': XPlanVersion.SIX})
 
     bereich = relationship("BP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 
@@ -124,20 +135,6 @@ class BP_Plan(XP_Plan):
             return 'veraenderungssperre'
         else:
             return 'rel_veraenderungssperre'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        s = super().xp_relationship_properties()
-        return s + [
-            XPRelationshipProperty(rel_name='rel_veraenderungssperre', xplan_attribute='veraenderungssperre',
-                                   allowed_version=XPlanVersion.SIX),
-            XPRelationshipProperty(rel_name='versionBauNVO', xplan_attribute='versionBauNVO',
-                                   allowed_version=XPlanVersion.SIX),
-            XPRelationshipProperty(rel_name='versionBauGB', xplan_attribute='versionBauGB',
-                                   allowed_version=XPlanVersion.SIX),
-            XPRelationshipProperty(rel_name='versionSonstRechtsgrundlage', xplan_attribute='versionSonstRechtsgrundlage',
-                                   allowed_version=XPlanVersion.SIX),
-        ]
 
     @classmethod
     @fallback_renderer
@@ -213,14 +210,15 @@ class BP_Bereich(XP_Bereich):
 
     id = Column(ForeignKey("xp_bereich.id", ondelete='CASCADE'), primary_key=True)
 
-    verfahren = XPCol(Enum(BP_Verfahren), doc='Verfahren', version=XPlanVersion.SIX)
+    verfahren = Column(Enum(BP_Verfahren), doc='Verfahren', info={'xplan_version': XPlanVersion.SIX})
 
-    versionBauGBDatum = XPCol(Date(), doc='Datum des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionBauGBText = XPCol(String(), doc='Textl. Spezifikation des BauGB', version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageDatum = XPCol(Date(), doc='Datum sonst. Rechtsgrundlage',
-                                             version=XPlanVersion.FIVE_THREE)
-    versionSonstRechtsgrundlageText = XPCol(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage',
-                                            version=XPlanVersion.FIVE_THREE)
+    versionBauGBDatum = Column(Date(), doc='Datum des BauGB', info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionBauGBText = Column(String(), doc='Textl. Spezifikation des BauGB',
+                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageDatum = Column(Date(), doc='Datum sonst. Rechtsgrundlage',
+                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+    versionSonstRechtsgrundlageText = Column(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage',
+                                             info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE'))
     gehoertZuPlan = relationship('BP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
@@ -246,8 +244,8 @@ class BP_Objekt(XP_Objekt):
 
     id = Column(ForeignKey("xp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    rechtscharakter = XPCol(BP_Rechtscharakter_EnumType(BP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
-                            version=XPlanVersion.FIVE_THREE)
+    rechtscharakter = Column(BP_Rechtscharakter_EnumType(BP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     position = Column(Geometry())
     flaechenschluss = Column(Boolean, doc='Flächenschluss')

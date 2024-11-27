@@ -128,11 +128,7 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                 class_type = rel[1].mapper.class_
 
                 # don't show if relationship property does not fit export version
-                if not cls.relation_fits_version(rel[0], export_version()):
-                    continue
-
-                # don't show, if relationship is treated as column
-                if hasattr(cls, f'{rel[0]}_id') and cls.attr_is_treated_as_column(f'{rel[0]}_id', consider_suffix=False):
+                if not cls.attr_fits_version(rel[0], export_version()):
                     continue
 
                 # disallow specifically declared relations
@@ -151,7 +147,6 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                 # avoid references to XP_Objekt's. They are set via the 'Planinhalt konfigurieren' Dialog.
                 if class_type == XP_Objekt:
                     continue
-
 
                 label_name, tooltip = cls.relation_prop_display(rel)
                 label = QtWidgets.QLabel(label_name)
@@ -187,7 +182,6 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
             col_skip = 0
             for i, (key, prop) in enumerate(cls.element_order(include_base=False, only_columns=True, export=False,
                                                               ret_fmt='sqla', version=export_version())):
-                print(key, type(prop))
                 if key in self.hidden_inputs:
                     col_skip += 1
                     continue
@@ -231,7 +225,6 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
 
             return label, control
 
-        print(cls)
         # base_classes = [c for c in list(getmro(cls)) if issubclass(c, Base)]
         # cls = next(c for c in base_classes if
         #            hasattr(c, label_name) and c.attr_fits_version(label_name, export_version()))

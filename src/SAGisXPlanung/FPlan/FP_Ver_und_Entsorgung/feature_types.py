@@ -8,7 +8,7 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
@@ -28,13 +28,16 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(ARRAY(Enum(XP_ZweckbestimmungVerEntsorgung)), version=XPlanVersion.FIVE_THREE,
+        return XPCol(ARRAY(Enum(XP_ZweckbestimmungVerEntsorgung)), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("FP_KomplexeZweckbestVerEntsorgung", back_populates="versorgung",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
-    textlicheErgaenzung = XPCol(String, version=XPlanVersion.FIVE_THREE)
+    textlicheErgaenzung = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     zugunstenVon = Column(String)
 
     def layer_fields(self):
@@ -50,13 +53,6 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

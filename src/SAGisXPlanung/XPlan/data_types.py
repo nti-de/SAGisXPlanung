@@ -323,11 +323,11 @@ class XP_VerbundenerPlan(RelationshipMixin, ElementOrderMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     planName = Column(String)
-    rechtscharakter = XPCol(Enum(XP_RechtscharakterPlanaenderung), version=XPlanVersion.FIVE_THREE)
-    aenderungsArt = XPCol(Enum(XP_Aenderungsarten), version=XPlanVersion.SIX)
+    rechtscharakter = Column(Enum(XP_RechtscharakterPlanaenderung), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    aenderungsArt = Column(Enum(XP_Aenderungsarten), info={'xplan_version': XPlanVersion.SIX})
 
     nummer = Column(String)
-    aenderungsdatum = XPCol(Date, version=XPlanVersion.SIX)
+    aenderungsdatum = Column(Date, info={'xplan_version': XPlanVersion.SIX})
 
     aendert_verbundenerPlan_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'),
                                        version=XPlanVersion.FIVE_THREE)

@@ -12,7 +12,7 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_BebauungsArt, BP_Bauweise
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
-from SAGisXPlanung.XPlan.core import XPCol, XPRelationshipProperty
+from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungSpielSportanlage, XP_ZweckbestimmungGemeinbedarf, \
     XP_Traegerschaft
@@ -78,15 +78,19 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungGemeinbedarf), version=XPlanVersion.FIVE_THREE,
+        return XPCol(Enum(XP_ZweckbestimmungGemeinbedarf), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGemeinbedarf", back_populates="gemeinbedarf",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
 
     bauweise = Column(XPEnum(BP_Bauweise, include_default=True))
     bebauungsArt = Column(XPEnum(BP_BebauungsArt, include_default=True))
-    traeger = XPCol(XPEnum(XP_Traegerschaft, include_default=True), version=XPlanVersion.SIX)
+    traeger = Column(XPEnum(XP_Traegerschaft, include_default=True),
+                     info={'xplan_version': XPlanVersion.SIX})
     zugunstenVon = Column(String)
 
     def layer_fields(self):
@@ -102,13 +106,6 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
@@ -186,11 +183,14 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
 
     @declared_attr
     def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungSpielSportanlage), version=XPlanVersion.FIVE_THREE,
+        return XPCol(Enum(XP_ZweckbestimmungSpielSportanlage), info={'xplan_version': XPlanVersion.FIVE_THREE},
                      import_attr=cls.import_zweckbestimmung_attr)
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestSpielSportanlage", back_populates="spiel_sportanlage",
-                                       cascade="all, delete", passive_deletes=True)
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
     zugunstenVon = Column(String)
 
     __icon_map__ = [
@@ -205,13 +205,6 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
             return 'zweckbestimmung'
         else:
             return 'rel_zweckbestimmung'
-
-    @classmethod
-    def xp_relationship_properties(cls) -> List[XPRelationshipProperty]:
-        return [
-            XPRelationshipProperty(rel_name='rel_zweckbestimmung', xplan_attribute='zweckbestimmung',
-                                   allowed_version=XPlanVersion.SIX)
-        ]
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
