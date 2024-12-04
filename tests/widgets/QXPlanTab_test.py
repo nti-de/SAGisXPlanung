@@ -5,24 +5,24 @@ from qgis.PyQt import QtWidgets, QtCore
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
 from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll, QDateEditNoScroll, QBooleanInput, QDateListInput
-from SAGisXPlanung.gui.widgets.QXPlanScrollPage import QXPlanScrollPage
+from SAGisXPlanung.gui.widgets.DataInputPage import DataInputPage
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
 
 @pytest.fixture()
 def scroll_page(mocker):
     mocker.patch(
-        'SAGisXPlanung.gui.widgets.QXPlanScrollPage.QAddRelationDropdown.refreshComboBox',
+        'SAGisXPlanung.gui.widgets.DataInputPage.QAddRelationDropdown.refreshComboBox',
         return_value=None
     )
-    page = QXPlanScrollPage(BP_Plan, None)
+    page = DataInputPage(BP_Plan, None)
     return page
 
 
 @pytest.fixture()
 def tab_widget(mocker):
     mocker.patch(
-        'SAGisXPlanung.gui.widgets.QXPlanScrollPage.QAddRelationDropdown.refreshComboBox',
+        'SAGisXPlanung.gui.widgets.DataInputPage.QAddRelationDropdown.refreshComboBox',
         return_value=None
     )
     tab = QXPlanTabWidget(BP_Plan, None)
@@ -89,7 +89,7 @@ class TestQXPlanTabWidget_closeTab:
 
     def test_populateContent(self, tab_widget, mocker, qtbot):
         mocker.patch(
-            'SAGisXPlanung.gui.widgets.QXPlanScrollPage.QXPlanScrollPage.validateForms',
+            'SAGisXPlanung.gui.widgets.DataInputPage.DataInputPage.validateForms',
             return_value=True
         )
         session_mock = mocker.MagicMock()

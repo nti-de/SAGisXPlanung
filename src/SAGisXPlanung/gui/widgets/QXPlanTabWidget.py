@@ -7,7 +7,7 @@ from sqlalchemy import inspect
 
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.XPlan.types import ConformityException, InvalidFormException
-from SAGisXPlanung.gui.widgets.QXPlanScrollPage import QXPlanScrollPage
+from SAGisXPlanung.gui.widgets.DataInputPage import DataInputPage
 
 
 class QXPlanTabWidget(QtWidgets.QTabWidget):
@@ -27,7 +27,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         self.createTab(self.main_type, parent=parent_type)
 
     def closeTab(self, index):
-        tab_to_close: QXPlanScrollPage = self.widget(index)
+        tab_to_close: DataInputPage = self.widget(index)
 
         should_close = self.shouldCloseTab(tab_to_close)
         if not should_close:
@@ -37,7 +37,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         for i in range(0, self.count()):
             if i == index:
                 continue
-            page: QXPlanScrollPage = self.widget(i)
+            page: DataInputPage = self.widget(i)
             if tab_to_close in page.child_pages:
                 button = page.fields[tab_to_close.parent_attribute]
                 button.setEnabled(True)
@@ -47,7 +47,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
             self.removeTab(self.indexOf(child_page))
         self.removeTab(index)
 
-    def shouldCloseTab(self, tab: QXPlanScrollPage) -> bool:
+    def shouldCloseTab(self, tab: DataInputPage) -> bool:
         # always close if no dependencies present
         if len(tab.child_pages) == 0:
             return True
@@ -63,14 +63,14 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         return self.close_warning == QtWidgets.QMessageBox.Yes
 
     def createTab(self, cls, parent=None, parent_attribute=None, existing_xid=None, closable=False):
-        scroll = QXPlanScrollPage(cls, parent, parent_attribute, existing_xid, widgetResizable=True)
+        scroll = DataInputPage(cls, parent, parent_attribute, existing_xid, widgetResizable=True)
         scroll.addRelationRequested.connect(
             lambda cls_type, uselist, attr: self.onAddRelationRequested(cls, cls_type, uselist, attr))
         scroll.parentLinkClicked.connect(self.onParentLinkClicked)
         scroll.requestPageToTop.connect(lambda: self.setCurrentWidget(self.sender()))
 
         if self.currentIndex() != -1:
-            current_page: QXPlanScrollPage = self.widget(self.currentIndex())
+            current_page: DataInputPage = self.widget(self.currentIndex())
             current_page.addChildPage(scroll)
 
         self.insertTab(self.currentIndex() + 1, scroll, cls.__name__)
@@ -90,7 +90,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         for i in range(0, self.count()):
             if i == self.currentIndex():
                 continue
-            page: QXPlanScrollPage = self.widget(i)
+            page: DataInputPage = self.widget(i)
             if self.sender() in page.child_pages:
                 self.setCurrentWidget(page)
 

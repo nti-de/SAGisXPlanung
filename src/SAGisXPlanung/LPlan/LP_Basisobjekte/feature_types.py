@@ -42,10 +42,15 @@ class LP_Plan(XP_Plan):
     planungstraegerGKZ = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
     planungstraeger = Column(String(), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
-    gemeinde = relationship("XP_Gemeinde", back_populates="lp_plans", secondary=XP_PlanXP_GemeindeAssoc, doc='Gemeinde')
+    gemeinde = relationship("XP_Gemeinde", back_populates="lp_plans", secondary=XP_PlanXP_GemeindeAssoc,
+                            doc='Gemeinde', info={
+                                'form-type': 'inline'
+                            })
 
     plangeber_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_plangeber.id'), version=XPlanVersion.SIX)
-    plangeber = relationship("XP_Plangeber", back_populates="lp_plans", doc='Plangeber')
+    plangeber = relationship("XP_Plangeber", back_populates="lp_plans", doc='Plangeber', info={
+                                'form-type': 'inline'
+                            })
 
     rechtsstand = Column(Enum(LP_Rechtsstand))
     aufstellungsbeschlussDatum = Column(Date())

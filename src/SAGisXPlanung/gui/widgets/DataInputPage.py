@@ -26,14 +26,14 @@ PYQT_DEFAULT_DATE = datetime.date(1752, 9, 14)
 logger = logging.getLogger(__name__)
 
 
-class QXPlanScrollPage(QtWidgets.QScrollArea):
+class DataInputPage(QtWidgets.QScrollArea):
 
     addRelationRequested = QtCore.pyqtSignal(object, bool, str)
     parentLinkClicked = QtCore.pyqtSignal()
     requestPageToTop = QtCore.pyqtSignal()
 
     def __init__(self, cls_type, parent_class, parent_attribute=None, existing_xid=None, *args, **kwargs):
-        super(QXPlanScrollPage, self).__init__(*args, **kwargs)
+        super(DataInputPage, self).__init__(*args, **kwargs)
         self.cls_type = cls_type
         self.parent_class = parent_class
         self.parent_attribute = parent_attribute
@@ -69,7 +69,7 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
         self.vBox.addWidget(spacer)
 
     def sizeHint(self):
-        size = super(QXPlanScrollPage, self).sizeHint()
+        size = super(DataInputPage, self).sizeHint()
         size.setWidth(size.width() + 5 * self.verticalScrollBar().sizeHint().width())
         return size
 
@@ -154,10 +154,12 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                     label.setToolTip(tooltip)
 
                 label.setObjectName(rel[0])
-                required_rel = bool(hasattr(cls, '__requiredRelationships__') and label.objectName() in cls.__requiredRelationships__)
-                if required_rel:
+                nullable = rel[1].info.get('nullable')
+                if nullable is False:
                     label.setStyleSheet("font-weight: bold")
-                    self.required_inputs.append(label.objectName())
+                    self.required_inputs.append(rel[0])
+                    # self.addRelationRequested.emit(class_type, uselist, rel[0])
+
                 grid.addWidget(label, rel_offset, 0)
 
                 # complex many-to-many or many-to-one relation
@@ -167,11 +169,6 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                 # one-to-many relation, one-to-one relation (defined by `uselist=False`)
                 else:
                     widget = QtWidgets.QPushButton("Hinzufügen")
-                    try:
-                        if rel[0] in self.cls_type.__requiredRelationships__:
-                            self.addRelationRequested.emit(class_type)
-                    except AttributeError:
-                        pass
                     widget.clicked.connect(lambda state, c=class_type, u=rel[1].uselist, a=rel[0]:
                                            self.onRelationButtonClicked(c, u, a))
 

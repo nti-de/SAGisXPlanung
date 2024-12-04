@@ -160,7 +160,8 @@ class ElementOrderMixin:
                       with_geometry=True,
                       geometry_column_name='',
                       version=XPlanVersion.FIVE_THREE,
-                      ret_fmt=''):
+                      ret_fmt='',
+                      relations='all'):
 
         order = []
         for supercls in reversed(cls.__mro__[0:-1]):
@@ -170,12 +171,24 @@ class ElementOrderMixin:
             for key in supercls.__dict__:
                 val = supercls.__dict__[key]
                 if (
-                        isinstance(val, interfaces.InspectionAttr)
-                        and val.is_attribute
-                        and val.property.parent.class_.attr_fits_version(val.property.key, version)
+                    isinstance(val, interfaces.InspectionAttr)
+                    and val.is_attribute
+                    and val.property.parent.class_.attr_fits_version(val.property.key, version)
                 ):
-                    if only_columns and not isinstance(val.property, ColumnProperty):
+                    mapper_property = val.property
+                    # if requested, only show columns (no relations)
+                    if only_columns and not isinstance(mapper_property, ColumnProperty):
                         continue
+
+                    # only display relationships per declaration of form-type
+                    if isinstance(mapper_property, RelationshipProperty):
+                        form_type = mapper_property.info.get('form-type')
+                        if not form_type or form_type == 'never':
+                            continue
+                        if (
+                            not (relations == 'inline' and form_type == 'inline')
+                        ):
+                            continue
 
                     order.append(val)
 
@@ -201,6 +214,8 @@ class ElementOrderMixin:
             exclude.add(geometry_column_name)
 
         if not export and hasattr(cls, 'hidden_inputs'):
+            if not only_columns and hasattr(cls, '__avoidRelation__'):
+                exclude.update(cls.__avoidRelation__)
             exclude.update(cls.hidden_inputs())
         elif export and hasattr(cls, 'avoid_export'):
             exclude.update(cls.avoid_export())

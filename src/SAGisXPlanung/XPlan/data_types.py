@@ -26,7 +26,6 @@ class XP_Gemeinde(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation einer für die Aufstellung des Plans zuständigen Gemeinde. """
 
     __tablename__ = 'xp_gemeinde'
-    __accessColumn__ = 'gemeindeName'  # column to access by name/string representation
     __avoidRelation__ = ['bp_plans', 'fp_plans', 'lp_plans']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -162,7 +161,6 @@ class XP_Plangeber(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Institution, die für den Plan verantwortlich ist. """
 
     __tablename__ = 'xp_plangeber'
-    __accessColumn__ = 'name'
     __avoidRelation__ = ['bp_plans', 'fp_plans', 'lp_plans']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)

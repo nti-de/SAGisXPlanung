@@ -21,8 +21,9 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
         super(QAddRelationDropdown, self).__init__(*args, **kwargs)
         self.relation = relation
         self.cls = self.relation[1].mapper.class_
-        self.requires_relation = bool(self.relation[1].secondary is not None)
-        self.parent = parent
+
+        self.has_secondary = bool(self.relation[1].secondary is not None)
+        self.requires_relation = not (self.relation[1].info.get('nullable'))
 
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -31,7 +32,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
         self.container.setLayout(QHBoxLayout())
         self.container.layout().setContentsMargins(0, 0, 0, 0)
 
-        if self.requires_relation:
+        if self.has_secondary:
             self.cb = QgsCheckableComboBox()
             # this is not emitted on QGIS 3.16, see https://github.com/qgis/QGIS/pull/43487 for infos,
             self.cb.checkedItemsChanged.connect(lambda items: self.setInvalid(not bool(items)))
@@ -138,7 +139,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
         self.cb.model().sort(0)
 
     def validate_widget(self, required):
-        if not self.requires_relation:
+        if not self.has_secondary or not self.requires_relation:
             return True
 
         if not self.cb.checkedItems():
@@ -155,7 +156,8 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
             return
         self.container.setAttribute(Qt.WA_StyledBackground, True)
         self.container.layout().setContentsMargins(5, 5, 5, 5)
-        self.container.setStyleSheet('#container {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')
+        self.container.setStyleSheet(
+            '#container {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')
 
     def value(self):
         values = []
@@ -164,6 +166,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
             if (selected_id := self.cb.currentData()) is None:
                 return
             with Session.begin() as session:
+                session.expire_on_commit = False
                 return session.get(self.cls, selected_id)
 
         user_data = self.cb.checkedItemsData()

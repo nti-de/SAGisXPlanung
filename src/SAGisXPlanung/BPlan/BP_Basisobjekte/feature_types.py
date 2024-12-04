@@ -37,17 +37,22 @@ class BP_Plan(XP_Plan):
         self.traegerbeteiligungsEndDatum = []
 
     __tablename__ = 'bp_plan'
-    __requiredRelationships__ = ["gemeinde"]
     __mapper_args__ = {
         'polymorphic_identity': 'bp_plan',
     }
 
     id = Column(ForeignKey("xp_plan.id", ondelete='CASCADE'), primary_key=True)
 
-    gemeinde = relationship("XP_Gemeinde", back_populates="bp_plans", secondary=XP_PlanXP_GemeindeAssoc, doc='Gemeinde')
+    gemeinde = relationship("XP_Gemeinde", back_populates="bp_plans", secondary=XP_PlanXP_GemeindeAssoc,
+                            doc='Gemeinde', info={
+                                'form-type': 'inline',
+                                'nullable': False
+                            })
 
     plangeber_id = Column(UUID(as_uuid=True), ForeignKey('xp_plangeber.id'))
-    plangeber = relationship("XP_Plangeber", back_populates="bp_plans", doc='Plangeber')
+    plangeber = relationship("XP_Plangeber", back_populates="bp_plans", doc='Plangeber', info={
+                                'form-type': 'inline'
+                            })
 
     planArt = Column(Enum(BP_PlanArt), nullable=False, doc='Art des Planwerks')
     # sonstPlanArt: BP_SonstPlanArt[0..1]
@@ -110,17 +115,27 @@ class BP_Plan(XP_Plan):
     versionBauNVO_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
                              info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauNVO')
     versionBauNVO = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_nvo",
-                                 foreign_keys=[versionBauNVO_id], info={'xplan_version': XPlanVersion.SIX})
+                                 foreign_keys=[versionBauNVO_id],
+                                 info={
+                                    'xplan_version': XPlanVersion.SIX,
+                                    'form-type': 'inline'
+                                 })
     versionBauGB_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
                             info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauGB')
     versionBauGB = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_gb", foreign_keys=[versionBauGB_id],
-                                info={'xplan_version': XPlanVersion.SIX})
+                                info={
+                                    'xplan_version': XPlanVersion.SIX,
+                                    'form-type': 'inline'
+                                })
     versionSonstRechtsgrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
                                            info={'xplan_version': XPlanVersion.SIX},
                                            attribute='versionSonstRechtsgrundlage')
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_sonst",
                                                foreign_keys=[versionSonstRechtsgrundlage_id],
-                                               info={'xplan_version': XPlanVersion.SIX})
+                                               info={
+                                                   'xplan_version': XPlanVersion.SIX,
+                                                   'form-type': 'inline'
+                                               })
 
     bereich = relationship("BP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 

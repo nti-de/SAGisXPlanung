@@ -483,7 +483,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 return False
 
             data = []
-            for attr in item._data.xtype.element_order(only_columns=True, version=export_version()):
+            for attr in item._data.xtype.element_order(version=export_version(), relations='inline'):
 
                 if skip_column():
                     continue
