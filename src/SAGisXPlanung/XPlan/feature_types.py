@@ -21,7 +21,8 @@ from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
-from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, RendererMixin
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
+    RendererMixin
 from .types import LargeString, Angle, Length, GeometryType
 from ..MapLayerRegistry import MapLayerRegistry
 
@@ -177,7 +178,7 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
     """
 
     __tablename__ = 'xp_bereich'
-    __avoidRelation__ = ['planinhalt', 'praesentationsobjekt', 'simple_geometry']
+    __avoidRelation__ = ['praesentationsobjekt', 'simple_geometry']
     __readonly_columns__ = ['geltungsbereich']
 
     __LAYER_PRIORITY__ = LayerPriorityType.Bottom
@@ -199,9 +200,13 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
     refScan = relationship("XP_ExterneReferenz", back_populates="bereich", cascade="all, delete",
                            passive_deletes=True)
     planinhalt = relationship("XP_Objekt", back_populates="gehoertZuBereich", cascade="all, delete",
-                              passive_deletes=True)
+                              passive_deletes=True, info={
+                                  'form-type': 'hidden'
+                              })
     praesentationsobjekt = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="gehoertZuBereich",
-                                        cascade="all, delete", passive_deletes=True)
+                                        cascade="all, delete", passive_deletes=True, info={
+                                            'form-type': 'hidden'
+                                        })
     aendertPlan = relationship("XP_VerbundenerPlan", back_populates="aendertPlan_verbundenerPlan",
                                cascade="all, delete", passive_deletes=True,
                                foreign_keys='XP_VerbundenerPlan.aendertPlan_verbundenerPlan_id',
@@ -254,10 +259,6 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
         MapLayerRegistry().addLayer(layer, group=layer_group)
 
     @classmethod
-    def hidden_inputs(cls):
-        return ['praesentationsobjekt', 'simple_geometry']
-
-    @classmethod
     def avoid_export(cls):
         return ['praesentationsobjekt', 'simple_geometry']
 
@@ -282,7 +283,9 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
 
     gesetzlicheGrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
                                     version=XPlanVersion.SIX, attribute='gesetzlicheGrundlage')
-    gesetzlicheGrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="xp_objekts")
+    gesetzlicheGrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="xp_objekts", info={
+        'form-type': 'inline'
+    })
 
     gliederung1 = Column(String)
     gliederung2 = Column(String)
@@ -292,7 +295,10 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
                                 passive_deletes=True)
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    gehoertZuBereich = relationship('XP_Bereich', back_populates='planinhalt', info={'link': 'xlink-only'})
+    gehoertZuBereich = relationship('XP_Bereich', back_populates='planinhalt', info={
+        'link': 'xlink-only',
+        'form-type': 'hidden'
+    })
 
     wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="dientZurDarstellungVon",
                                         cascade="all, delete", passive_deletes=True)

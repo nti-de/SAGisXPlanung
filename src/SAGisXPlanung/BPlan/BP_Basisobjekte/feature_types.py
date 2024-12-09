@@ -236,7 +236,10 @@ class BP_Bereich(XP_Bereich):
                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE'))
-    gehoertZuPlan = relationship('BP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
+    gehoertZuPlan = relationship('BP_Plan', back_populates='bereich', info={
+                                     'link': 'xlink-only',
+                                     'form-type': 'hidden'
+                                 })
 
     @classmethod
     @fallback_renderer

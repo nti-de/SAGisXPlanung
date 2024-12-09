@@ -35,10 +35,16 @@ class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Ba
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    gehoertZuBereich = relationship('XP_Bereich', back_populates='praesentationsobjekt', info={'link': 'xlink-only'})
+    gehoertZuBereich = relationship('XP_Bereich', back_populates='praesentationsobjekt', info={
+                                        'link': 'xlink-only',
+                                        'form-type': 'hidden'
+                                    })
 
     dientZurDarstellungVon_id = Column(UUID(as_uuid=True), ForeignKey('xp_objekt.id', ondelete='CASCADE'))
-    dientZurDarstellungVon = relationship('XP_Objekt', back_populates='wirdDargestelltDurch', info={'link': 'xlink-only'})
+    dientZurDarstellungVon = relationship('XP_Objekt', back_populates='wirdDargestelltDurch', info={
+                                                'link': 'xlink-only',
+                                                'form-type': 'hidden'
+                                            })
 
     type = Column(String)
 

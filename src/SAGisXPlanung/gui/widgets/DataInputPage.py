@@ -12,7 +12,7 @@ from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
 
 from sqlalchemy import inspect, null
-from sqlalchemy.orm import class_mapper, MapperProperty
+from sqlalchemy.orm import class_mapper, MapperProperty, RelationshipProperty
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, Base
@@ -41,13 +41,9 @@ class DataInputPage(QtWidgets.QScrollArea):
         self.child_pages = []
         self.fields = {}
         self.required_inputs = []
-        self.hidden_inputs = []
 
         s = QSettings()
         self.ATTRIBUTE_CONFIG = yaml.safe_load(s.value(f"plugins/xplanung/attribute_config", '')) or {}
-
-        if hasattr(cls_type, 'hidden_inputs'):
-            self.hidden_inputs = cls_type.hidden_inputs()
 
         self.setFrameShape(QFrame.NoFrame)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
@@ -123,65 +119,9 @@ class DataInputPage(QtWidgets.QScrollArea):
             group_box = QGroupBox(cls.__name__)
             grid = QtWidgets.QGridLayout(group_box)
 
-            rel_offset = 0
-            for rel in inspect(cls).relationships.items():
-                class_type = rel[1].mapper.class_
-
-                # don't show if relationship property does not fit export version
-                if not cls.attr_fits_version(rel[0], export_version()):
-                    continue
-
-                # disallow specifically declared relations
-                if hasattr(cls, '__avoidRelation__') and rel[0] in cls.__avoidRelation__:
-                    continue
-
-                # disallow inherited relationships
-                if rel[1].parent.class_ != cls:
-                    continue
-
-                # avoid referencing of circular dependencies
-                if class_type == self.parent_class or \
-                        (self.parent_class is not None and issubclass(self.parent_class, class_type)):
-                    continue
-
-                # avoid references to XP_Objekt's. They are set via the 'Planinhalt konfigurieren' Dialog.
-                if class_type == XP_Objekt:
-                    continue
-
-                label_name, tooltip = cls.relation_prop_display(rel)
-                label = QtWidgets.QLabel(label_name)
-                if tooltip:
-                    label.setToolTip(tooltip)
-
-                label.setObjectName(rel[0])
-                nullable = rel[1].info.get('nullable')
-                if nullable is False:
-                    label.setStyleSheet("font-weight: bold")
-                    self.required_inputs.append(rel[0])
-                    # self.addRelationRequested.emit(class_type, uselist, rel[0])
-
-                grid.addWidget(label, rel_offset, 0)
-
-                # complex many-to-many or many-to-one relation
-                if next(iter(rel[1].remote_side)).primary_key or rel[1].secondary is not None:
-                    widget = QAddRelationDropdown(self, rel)
-
-                # one-to-many relation, one-to-one relation (defined by `uselist=False`)
-                else:
-                    widget = QtWidgets.QPushButton("Hinzufügen")
-                    widget.clicked.connect(lambda state, c=class_type, u=rel[1].uselist, a=rel[0]:
-                                           self.onRelationButtonClicked(c, u, a))
-
-                self.fields[rel[0]] = widget
-                grid.addWidget(widget, rel_offset, 1)
-                rel_offset += 1
-
             col_skip = 0
-            for i, (key, prop) in enumerate(cls.element_order(include_base=False, only_columns=True, export=False,
+            for i, (key, prop) in enumerate(cls.element_order(include_base=False, export=False,
                                                               ret_fmt='sqla', version=export_version())):
-                if key in self.hidden_inputs:
-                    col_skip += 1
-                    continue
                 # don't show attributes that are disabled in settings
                 if key in self.ATTRIBUTE_CONFIG.get(cls.__name__, []):
                     col_skip += 1
@@ -189,8 +129,8 @@ class DataInputPage(QtWidgets.QScrollArea):
 
                 label, control = self.create_input(key, prop)
                 control.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                grid.addWidget(label, i + rel_offset - col_skip, 0)
-                grid.addWidget(control, i + rel_offset - col_skip, 1)
+                grid.addWidget(label, i - col_skip, 0)
+                grid.addWidget(control, i - col_skip, 1)
 
                 self.fields[key] = control
 
@@ -209,23 +149,37 @@ class DataInputPage(QtWidgets.QScrollArea):
             button.setDisabled(True)
         self.addRelationRequested.emit(class_type, uselist, parent_attribute)
 
-    def create_input(self, label_name: str, mapper_property: MapperProperty):
+    def create_input(self, attr_name: str, mapper_property: MapperProperty):
         cls = mapper_property.parent.class_
-        # if column is a relationship-column, configure relation dropdown instead of normal input element
-        if (rel := next((r for r in cls.relationships() if r[0] == label_name), None)) is not None:
-            stub = namedtuple('stub', ['cls_type'])
-            control = QAddRelationDropdown(stub(cls_type=self.cls_type), rel)
 
-            label = QtWidgets.QLabel(label_name)
-            tooltip = xplan_tooltip(self.cls_type, label_name)
-            label.setToolTip(tooltip)
+        if isinstance(mapper_property, RelationshipProperty):
+            form_type = mapper_property.info.get('form-type')
+            label_display_name, tooltip = cls.relation_prop_display((attr_name, mapper_property))
+            label = QtWidgets.QLabel(label_display_name)
+            label.setObjectName(attr_name)
+            if tooltip:
+                label.setToolTip(tooltip)
+            if mapper_property.info.get('nullable') is False:
+                label.setStyleSheet("font-weight: bold")
 
-            return label, control
+            if form_type == 'inline' or mapper_property.secondary:
+                stub = namedtuple('stub', ['cls_type'])
+                control = QAddRelationDropdown(stub(cls_type=self.cls_type), (attr_name, mapper_property))
+
+                return label, control
+
+            # one-to-many relation, one-to-one relation (defined by `uselist=False`)
+            else:
+                widget = QtWidgets.QPushButton("Hinzufügen")
+                widget.clicked.connect(lambda state, c=mapper_property.mapper.class_,
+                                              u=mapper_property.uselist, a=attr_name:
+                                       self.onRelationButtonClicked(c, u, a))
+                return label, widget
 
         # base_classes = [c for c in list(getmro(cls)) if issubclass(c, Base)]
         # cls = next(c for c in base_classes if
         #            hasattr(c, label_name) and c.attr_fits_version(label_name, export_version()))
-        column = getattr(cls, label_name).property.columns[0]
+        column = getattr(cls, attr_name).property.columns[0]
         field_type = column.type
         nullable = column.nullable
 
@@ -233,19 +187,19 @@ class DataInputPage(QtWidgets.QScrollArea):
 
         if column.doc:
             label = QtWidgets.QLabel(column.doc)
-            label.setToolTip(f'XPlanung-Attribut: {label_name}')
+            label.setToolTip(f'XPlanung-Attribut: {attr_name}')
         else:
-            label = QtWidgets.QLabel(label_name)
-            tooltip = xplan_tooltip(self.cls_type, label_name)
+            label = QtWidgets.QLabel(attr_name)
+            tooltip = xplan_tooltip(self.cls_type, attr_name)
             label.setToolTip(tooltip)
 
-        label.setObjectName(label_name)
+        label.setObjectName(attr_name)
 
         if not nullable:
             font = QtGui.QFont()
             font.setBold(True)
             label.setFont(font)
-            self.required_inputs.append(label_name)
+            self.required_inputs.append(attr_name)
 
         return label, control
 

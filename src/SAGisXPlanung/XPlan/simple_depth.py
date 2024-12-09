@@ -26,7 +26,10 @@ class XP_SimpleGeometry(Base, RelationshipMixin, MapCanvasMixin):
     position = Column(Geometry())
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    gehoertZuBereich = relationship('XP_Bereich', back_populates='simple_geometry', info={'link': 'xlink-only'})
+    gehoertZuBereich = relationship('XP_Bereich', back_populates='simple_geometry', info={
+                                        'link': 'xlink-only',
+                                        'form-type': 'hidden'
+                                    })
 
     def geomType(self) -> GeometryType:
         return self.geometry().type()

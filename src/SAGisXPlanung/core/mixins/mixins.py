@@ -183,11 +183,11 @@ class ElementOrderMixin:
                     # only display relationships per declaration of form-type
                     if isinstance(mapper_property, RelationshipProperty):
                         form_type = mapper_property.info.get('form-type')
-                        if not form_type or form_type == 'never':
+                        if hasattr(cls, '__avoidRelation__') and mapper_property.key in cls.__avoidRelation__:
                             continue
-                        if (
-                            not (relations == 'inline' and form_type == 'inline')
-                        ):
+                        if relations == 'inline' and form_type != 'inline':
+                            continue
+                        if not export and form_type == 'hidden':
                             continue
 
                     order.append(val)

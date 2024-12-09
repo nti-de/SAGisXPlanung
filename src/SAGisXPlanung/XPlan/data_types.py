@@ -191,6 +191,7 @@ class XP_VerfahrensMerkmal(RelationshipMixin, ElementOrderMixin, Base):
     """ Vermerk eines am Planungsverfahrens beteiligten Akteurs. """
 
     __tablename__ = "xp_verfahrens_merkmal"
+    __avoidRelation__ = ['plan']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     plan_id = Column(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'))
