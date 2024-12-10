@@ -28,8 +28,6 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
 
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungGemeinbedarf)))
-
     @declared_attr
     def zweckbestimmung(cls):
         return XPCol(ARRAY(Enum(XP_ZweckbestimmungGemeinbedarf)), info={'xplan_version': XPlanVersion.FIVE_THREE},
@@ -41,8 +39,8 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
                                            'xplan_attribute': 'zweckbestimmung'
                                        })
 
-    traeger = Column(XPEnum(XP_Traegerschaft, include_default=True))
-    zugunstenVon = Column(String)
+    traeger = Column(XPEnum(XP_Traegerschaft, include_default=True), info={'xplan_version': XPlanVersion.SIX})
+    zugunstenVon = Column(String, info={'xplan_version': XPlanVersion.SIX})
 
     def layer_fields(self):
         return {

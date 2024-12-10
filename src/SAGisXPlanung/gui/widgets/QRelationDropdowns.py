@@ -9,6 +9,7 @@ from qgis.utils import iface
 
 from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.gui.style import load_svg
 from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll, QXPlanInputElement, XPlanungInputMeta
 from SAGisXPlanung.utils import confirmObjectDeletion
 
@@ -23,7 +24,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
         self.cls = self.relation[1].mapper.class_
 
         self.has_secondary = bool(self.relation[1].secondary is not None)
-        self.requires_relation = not (self.relation[1].info.get('nullable'))
+        self.requires_relation = bool(self.relation[1].info.get('nullable') is False)
 
         self.layout = QHBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -34,8 +35,9 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
 
         if self.has_secondary:
             self.cb = QgsCheckableComboBox()
-            # this is not emitted on QGIS 3.16, see https://github.com/qgis/QGIS/pull/43487 for infos,
-            self.cb.checkedItemsChanged.connect(lambda items: self.setInvalid(not bool(items)))
+            if self.requires_relation:
+                # this is not emitted on QGIS 3.16, see https://github.com/qgis/QGIS/pull/43487 for infos,
+                self.cb.checkedItemsChanged.connect(lambda items: self.setInvalid(not bool(items)))
             self.cb.view().customContextMenuRequested.disconnect()
         else:
             self.cb = QComboBoxNoScroll()
@@ -45,7 +47,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
 
         self.plus_icon_path = os.path.abspath(os.path.join(BASE_DIR, 'gui/resources/plus.svg'))
         self.b_plus = QToolButton()
-        self.b_plus.setIcon(self.loadSvg(self.plus_icon_path))
+        self.b_plus.setIcon(load_svg(self.plus_icon_path))
         self.b_plus.installEventFilter(self)
         self.b_plus.setCursor(Qt.PointingHandCursor)
         self.b_plus.setToolTip('Neues Objekt hinzufügen')
@@ -108,19 +110,10 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.HoverEnter:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
         elif event.type() == QEvent.HoverLeave:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
         return False
-
-    def loadSvg(self, svg, color=None):
-        img = QPixmap(svg)
-        if color:
-            qp = QPainter(img)
-            qp.setCompositionMode(QPainter.CompositionMode_SourceIn)
-            qp.fillRect(img.rect(), QColor(color))
-            qp.end()
-        return QIcon(img)
 
     @pyqtSlot()
     def addRelation(self):
