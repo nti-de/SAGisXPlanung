@@ -5,7 +5,7 @@ from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSing
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
-from sqlalchemy import Column, ForeignKey, Enum, ARRAY
+from sqlalchemy import Column, ForeignKey, Enum, ARRAY, String
 from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
@@ -40,6 +40,7 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
                                        })
 
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
+    zugunstenVon = Column(String)
 
     def layer_fields(self):
         return {
