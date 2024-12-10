@@ -3,7 +3,7 @@ from qgis.PyQt.QtGui import QColor
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer,
                        QgsGeometry, QgsCoordinateReferenceSystem)
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, event, Boolean, types
+from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, event, Boolean, types, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
@@ -170,7 +170,8 @@ class FP_Objekt(XP_Objekt):
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
     vonGenehmigungAusgenommen = Column(Boolean)
 
-    position = Column(Geometry())
+    position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
+                                                        name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
 
     def __getattribute__(self, name):

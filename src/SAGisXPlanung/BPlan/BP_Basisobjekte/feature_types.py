@@ -2,7 +2,7 @@ import logging
 import uuid
 
 from geoalchemy2 import Geometry, WKTElement
-from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event
+from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, declared_attr
@@ -265,7 +265,8 @@ class BP_Objekt(XP_Objekt):
     rechtscharakter = Column(BP_Rechtscharakter_EnumType(BP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
-    position = Column(Geometry())
+    position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
+                                                        name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
 
     def srs(self):

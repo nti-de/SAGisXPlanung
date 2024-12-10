@@ -239,6 +239,13 @@ def upgrade():
     op.alter_column('xp_plan', 'raeumlicherGeltungsbereich',
                     existing_type=Geometry(from_text='ST_GeomFromEWKT', name='geometry', _spatial_index_reflected=True),
                     nullable=False)
+
+    op.create_check_constraint("prevent_geometry_collection", "bp_objekt",
+                               "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
+    op.create_check_constraint("prevent_geometry_collection", "fp_objekt",
+                               "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
+    op.create_check_constraint("prevent_geometry_collection", "so_objekt",
+                               "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
     # ### end Alembic commands ###
 
 
@@ -250,4 +257,8 @@ def downgrade():
     op.add_column('bp_komplexe_sondernutzung', sa.Column('detail_id', postgresql.UUID(), autoincrement=False, nullable=True))
 
     op.drop_table('assoc_detail_zweckgemeinbedarf')
+
+    op.drop_constraint("prevent_geometry_collection", "bp_objekt", type_="check")
+    op.drop_constraint("prevent_geometry_collection", "fp_objekt", type_="check")
+    op.drop_constraint("prevent_geometry_collection", "so_objekt", type_="check")
     # ### end Alembic commands ###

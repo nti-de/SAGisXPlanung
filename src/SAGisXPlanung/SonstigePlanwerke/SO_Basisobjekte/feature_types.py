@@ -1,6 +1,6 @@
 
 from geoalchemy2 import Geometry, WKBElement
-from sqlalchemy import Column, ForeignKey, Enum, Boolean, Float
+from sqlalchemy import Column, ForeignKey, Enum, Boolean, Float, CheckConstraint
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry
 
@@ -28,7 +28,8 @@ class SO_Objekt(XP_Objekt):
     rechtscharakter = Column(SO_Rechtscharakter_EnumType(SO_Rechtscharakter), nullable=False, doc='Rechtscharakter',
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
-    position = Column(Geometry())
+    position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
+                                                        name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
     flussrichtung = Column(Boolean)
     nordwinkel = Column(Angle)
