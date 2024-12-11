@@ -99,7 +99,12 @@ class DataInputPage(QtWidgets.QScrollArea):
         h_layout.addWidget(l1)
         h_layout.addWidget(l2)
         if self.parent_attribute:
-            l3 = QtWidgets.QLabel(f'(Attribut: {self.parent_attribute})', objectName='lParentAttribute')
+            mapper_property = getattr(self.parent_class, self.parent_attribute).property
+            label_display_name = self.parent_attribute
+            if isinstance(mapper_property, RelationshipProperty):
+                label_display_name, _ = self.cls_type.relation_prop_display((self.parent_attribute, mapper_property))
+
+            l3 = QtWidgets.QLabel(f'(Attribut: {label_display_name})', objectName='lParentAttribute')
             l2.setCursor(Qt.PointingHandCursor)
             l2.clicked.connect(lambda checked: self.parentLinkClicked.emit())
             h_layout.addWidget(l3)
