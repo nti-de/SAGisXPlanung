@@ -12,7 +12,7 @@ from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
 
 from sqlalchemy import inspect, null
-from sqlalchemy.orm import class_mapper
+from sqlalchemy.orm import class_mapper, MapperProperty
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, Base
@@ -185,8 +185,9 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                 rel_offset += 1
 
             col_skip = 0
-            for i, key in enumerate(cls.element_order(include_base=False, only_columns=True, export=False,
-                                                      version=export_version())):
+            for i, (key, prop) in enumerate(cls.element_order(include_base=False, only_columns=True, export=False,
+                                                              ret_fmt='sqla', version=export_version())):
+                print(key, type(prop))
                 if key in self.hidden_inputs:
                     col_skip += 1
                     continue
@@ -195,7 +196,7 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
                     col_skip += 1
                     continue
 
-                label, control = self.createInput(key, cls)
+                label, control = self.create_input(key, prop)
                 control.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
                 grid.addWidget(label, i + rel_offset - col_skip, 0)
                 grid.addWidget(control, i + rel_offset - col_skip, 1)
@@ -217,7 +218,8 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
             button.setDisabled(True)
         self.addRelationRequested.emit(class_type, uselist, parent_attribute)
 
-    def createInput(self, label_name: str, cls: type):
+    def create_input(self, label_name: str, mapper_property: MapperProperty):
+        cls = mapper_property.parent.class_
         # if column is a relationship-column, configure relation dropdown instead of normal input element
         if (rel := next((r for r in cls.relationships() if r[0] == label_name), None)) is not None:
             stub = namedtuple('stub', ['cls_type'])
@@ -229,9 +231,10 @@ class QXPlanScrollPage(QtWidgets.QScrollArea):
 
             return label, control
 
-        base_classes = [c for c in list(getmro(cls)) if issubclass(c, Base)]
-        cls = next(c for c in base_classes if
-                   hasattr(c, label_name) and c.attr_fits_version(label_name, export_version()))
+        print(cls)
+        # base_classes = [c for c in list(getmro(cls)) if issubclass(c, Base)]
+        # cls = next(c for c in base_classes if
+        #            hasattr(c, label_name) and c.attr_fits_version(label_name, export_version()))
         column = getattr(cls, label_name).property.columns[0]
         field_type = column.type
         nullable = column.nullable

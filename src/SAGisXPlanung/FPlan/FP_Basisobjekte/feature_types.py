@@ -82,7 +82,7 @@ class FP_Plan(XP_Plan):
 
     @classmethod
     def avoid_export(cls):
-        return ['plangeber_id', 'versionBauNVO_id', 'versionBauGB_id', 'versionSonstRechtsgrundlage_id']
+        return super().avoid_export() + ['versionBauNVO_id', 'versionBauGB_id', 'versionSonstRechtsgrundlage_id']
 
     @classmethod
     @fallback_renderer
@@ -119,7 +119,7 @@ class FP_Bereich(XP_Bereich):
     id = Column(ForeignKey("xp_bereich.id", ondelete='CASCADE'), primary_key=True)
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('fp_plan.id', ondelete='CASCADE'))
-    gehoertZuPlan = relationship('FP_Plan', back_populates='bereich')
+    gehoertZuPlan = relationship('FP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
 
     @classmethod
     @fallback_renderer

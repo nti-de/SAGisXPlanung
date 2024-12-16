@@ -129,11 +129,6 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
         """ Abstrakte Methode zum Erzwingen des Flächenschluss. Muss in jeder konkreten Klasse implementiert werden."""
         raise NotImplementedError()
 
-    @classmethod
-    @property
-    def bereich(cls):
-        raise NotImplementedError()
-
     def edit_widget(self):
         from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
@@ -311,7 +306,7 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
                                 passive_deletes=True)
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    gehoertZuBereich = relationship('XP_Bereich', back_populates='planinhalt')
+    gehoertZuBereich = relationship('XP_Bereich', back_populates='planinhalt', info={'link': 'xlink-only'})
 
     wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="dientZurDarstellungVon",
                                         cascade="all, delete", passive_deletes=True)

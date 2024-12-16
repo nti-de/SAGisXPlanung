@@ -100,7 +100,7 @@ class LP_Bereich(XP_Bereich):
     id = Column(ForeignKey("xp_bereich.id", ondelete='CASCADE'), primary_key=True)
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('lp_plan.id', ondelete='CASCADE'))
-    gehoertZuPlan = relationship('LP_Plan', back_populates='bereich')
+    gehoertZuPlan = relationship('LP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
 
     @classmethod
     @fallback_renderer

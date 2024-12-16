@@ -115,7 +115,8 @@ class BP_Plan(XP_Plan):
 
     @classmethod
     def avoid_export(cls):
-        return ['plangeber_id', 'versionBauNVO_id', 'versionBauGB_id', 'versionSonstRechtsgrundlage_id']
+        return super().avoid_export() + ['plangeber_id', 'versionBauNVO_id', 'versionBauGB_id',
+                                        'versionSonstRechtsgrundlage_id']
 
     @classmethod
     def import_veraenderungssperre_attr(cls, version):
@@ -222,7 +223,7 @@ class BP_Bereich(XP_Bereich):
                                             version=XPlanVersion.FIVE_THREE)
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE'))
-    gehoertZuPlan = relationship('BP_Plan', back_populates='bereich')
+    gehoertZuPlan = relationship('BP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
 
     @classmethod
     @fallback_renderer

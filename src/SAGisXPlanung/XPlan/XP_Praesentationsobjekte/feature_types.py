@@ -35,10 +35,10 @@ class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Ba
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    gehoertZuBereich = relationship('XP_Bereich', back_populates='praesentationsobjekt')
+    gehoertZuBereich = relationship('XP_Bereich', back_populates='praesentationsobjekt', info={'link': 'xlink-only'})
 
     dientZurDarstellungVon_id = Column(UUID(as_uuid=True), ForeignKey('xp_objekt.id', ondelete='CASCADE'))
-    dientZurDarstellungVon = relationship('XP_Objekt', back_populates='wirdDargestelltDurch')
+    dientZurDarstellungVon = relationship('XP_Objekt', back_populates='wirdDargestelltDurch', info={'link': 'xlink-only'})
 
     type = Column(String)
 
@@ -47,10 +47,6 @@ class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Ba
         'polymorphic_on': type
     }
     __readonly_columns__ = ['position', 'skalierung', 'drehwinkel']
-
-    @classmethod
-    def avoid_export(cls):
-        return ['gehoertZuBereich', 'dientZurDarstellungVon']
 
     def displayName(self):
         return self.__class__.__name__
@@ -134,7 +130,7 @@ class XP_PPO(PointGeometry, MapCanvasMixin, XP_AbstraktesPraesentationsobjekt):
 
     @classmethod
     def avoid_export(cls):
-        return super(XP_PPO, cls).avoid_export() + ['symbol_path']
+        return ['symbol_path']
 
     @classmethod
     def hidden_inputs(cls):
@@ -240,4 +236,4 @@ class XP_Nutzungsschablone(PointGeometry, XP_AbstraktesPraesentationsobjekt):
 
     @classmethod
     def avoid_export(cls):
-        return super(XP_Nutzungsschablone, cls).avoid_export() + ['hidden', 'data_attributes']
+        return ['hidden', 'data_attributes']

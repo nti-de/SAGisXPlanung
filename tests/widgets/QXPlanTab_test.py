@@ -38,7 +38,8 @@ class TestQXPlanScrollPage_createInput:
                                                                       ('auslegungsStartDatum', QDateListInput, False),
                                                                       ('planArt', QComboBoxNoScroll, True)])
     def test_createInput(self, scroll_page, input_name, expected_control, required):
-        _, control = scroll_page.createInput(input_name, BP_Plan)
+        mapper_prop = getattr(BP_Plan, input_name)
+        _, control = scroll_page.create_input(input_name, mapper_prop)
 
         assert isinstance(control, expected_control)
         if required:
@@ -57,7 +58,8 @@ class TestQXPlanScrollPage_getObjectFromInputs:
         for i, key in enumerate(keys):
             if "id" in key or "srs" in key:
                 continue
-            label, control = scroll_page.createInput(key, BP_Plan)
+            mapper_prop = getattr(BP_Plan, key)
+            label, control = scroll_page.create_input(key, mapper_prop)
 
             if key == 'name':
                 control.setText('test')

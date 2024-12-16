@@ -39,6 +39,7 @@ from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt
 from SAGisXPlanung.FPlan.FP_Bebauung.data_types import FP_KomplexeSondernutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
+from SAGisXPlanung.FPlan.FP_Gemeinbedarf.codelists import FP_DetailZweckbestGemeinbedarf
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.data_types import FP_KomplexeZweckbestGemeinbedarf, \
     FP_KomplexeZweckbestSpielSportanlage
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.feature_types import FP_Gemeinbedarf, FP_SpielSportanlage

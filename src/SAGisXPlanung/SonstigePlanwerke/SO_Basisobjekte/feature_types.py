@@ -31,7 +31,7 @@ class SO_Objekt(XP_Objekt):
     position = Column(Geometry())
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
     flussrichtung = Column(Boolean)
-    nordwinkel = Column(Float)
+    nordwinkel = Column(Angle)
 
     def srs(self):
         return QgsCoordinateReferenceSystem(f'EPSG:{self.position.srid}')

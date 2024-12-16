@@ -5,7 +5,7 @@ from typing import Tuple, Union, Any, Iterator, Iterable
 from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsEditorWidgetSetup, QgsAnnotationLayer,
                        QgsWkbTypes)
 from qgis.PyQt.QtCore import QVariant
-from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm import RelationshipProperty, MapperProperty, interfaces, ColumnProperty
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.XPlan.core import XPRelationshipProperty, LayerPriorityType
@@ -14,6 +14,11 @@ from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
+
+try:
+    from functools import cache
+except ImportError:
+    from functools import lru_cache as cache
 
 logger = logging.getLogger(__name__)
 
@@ -90,13 +95,11 @@ class PointGeometry(GeometryObject):
 
     @classmethod
     def hidden_inputs(cls):
-        h = super(PointGeometry, cls).hidden_inputs()
-        return h + ['flaechenschluss']
+        return ['flaechenschluss']
 
     @classmethod
     def avoid_export(cls):
-        h = super(PointGeometry, cls).avoid_export()
-        return h + ['flaechenschluss']
+        return ['flaechenschluss']
 
 
 class PolygonGeometry(GeometryObject):
@@ -151,58 +154,82 @@ class ElementOrderMixin:
         Deklaration aller Basisklassen immer zuerst stehen, damit die Methode element_order korrekt funktioniert. """
 
     @classmethod
+    @cache
     def element_order(cls,
                       include_base=True,
                       only_columns=False,
                       export=True,
                       with_geometry=True,
                       geometry_column_name='',
-                      version=XPlanVersion.FIVE_THREE):
-        if only_columns:
-            order = cls.__table__.columns.keys()
-            order = [cls.normalize_column_name(x) for x in order if cls.attr_is_treated_as_column(x)]
+                      version=XPlanVersion.FIVE_THREE,
+                      ret_fmt=''):
 
-            # remove duplicates
-            order = list(dict.fromkeys(order))
-        else:
-            order = [key for key, value in cls.__dict__.items() if
-                     not (key.startswith('__') or key.startswith('_sa_') or callable(value)
-                          or isinstance(value, classmethod))]
+        # when include_base=False we can directly use the first item in mro (the class itself)
+        # otherwise start in reverse order, because xplan needs base attributes first
+        # [0:-1] removes last element, which is always sqlalchemy base
+        mro = reversed(cls.__mro__[0:-1]) if include_base else cls.__mro__
 
-        if version is not None:
-            order = [x for x in order if cls.attr_fits_version(x, version)]
+        order = []
+        for supercls in mro:
+            if not issubclass(supercls, ElementOrderMixin):
+                continue
 
-        if not export and hasattr(cls, 'hidden_inputs'):
-            order = [x for x in order if x not in cls.hidden_inputs()]
-        elif export and hasattr(cls, 'avoid_export'):
-            order = [x for x in order if x not in cls.avoid_export()]
+            inherits = supercls.__mro__[1]
+            for key in supercls.__dict__:
+                val = supercls.__dict__[key]
+                if (
+                        isinstance(val, interfaces.InspectionAttr)
+                        and val.is_attribute
+                        and val.class_.attr_fits_version(val.property, version)
+                ):
+                    if only_columns and not isinstance(val.property, ColumnProperty):
+                        continue
+                    if not include_base and key in inherits.__dict__:
+                        continue
 
-        # remove sqlalchemy utility attributes and geometry column
-        exclude = ['type', 'id']
+                    order.append(val)
+
+            if not include_base:
+                break
+
+        seen = set()
+        exclude = set()
+        result_order = []
+        for obj in order:
+            if obj.key not in seen:
+                result_order.append(obj)
+                seen.add(obj.key)
+
+                if '_id' in obj.key:  # immediately mark columns for removal, we never want to use _id columns
+                    exclude.add(obj.key)
+
+        # remove sqlalchemy utility attributes and geometry column if required
+        exclude |= {'type', 'id'}
         if not with_geometry:
             if hasattr(cls, '__geometry_column_name__'):
                 geometry_column_name = cls.__geometry_column_name__
-            exclude.append(geometry_column_name)
-        order = [x for x in order if x not in exclude]
+            exclude.add(geometry_column_name)
 
-        try:
-            bases = cls.__bases__[-1]
-            base_order = bases.element_order(only_columns=only_columns, export=export, with_geometry=with_geometry,
-                                             geometry_column_name=geometry_column_name, version=version)
+        if not export and hasattr(cls, 'hidden_inputs'):
+            exclude.update(cls.hidden_inputs())
+        elif export and hasattr(cls, 'avoid_export'):
+            exclude.update(cls.avoid_export())
 
-            if not include_base and not hasattr(cls, 'is_declarative_base'):
-                return [x for x in order if x not in base_order]
-            # why was this check even introduced?
-            # if only_columns:
-            #     return order
-            return base_order + [x for x in order if x not in base_order]
-        except Exception as e:
-            return order
+        result_order = [x for x in result_order if x.key not in exclude]
+
+        if ret_fmt == 'sqla':
+            return [(ins.key, ins.property) for ins in result_order]
+        else:
+            return [ins.key for ins in result_order]
 
     @classmethod
-    def attr_fits_version(cls, attr_name: str, version: XPlanVersion) -> bool:
+    def attr_fits_version(cls, attr: str | MapperProperty, version: XPlanVersion) -> bool:
         """ Überprüft, ob ein XPlanung-Attribut zur gegebenen Version des Standards gehört"""
-        attr = getattr(cls, attr_name)
+        if isinstance(attr, MapperProperty):
+            attr_name = attr.key
+        else:
+            attr_name = attr
+            attr = getattr(cls, attr_name)
         if hasattr(attr, "version") and attr.version != version:
             return False
         if hasattr(cls, 'xp_relationship_properties'):

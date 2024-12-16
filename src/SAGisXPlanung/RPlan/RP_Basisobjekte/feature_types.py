@@ -80,7 +80,7 @@ class RP_Bereich(XP_Bereich):
     geltungsmassstab = Column(Integer())
 
     gehoertZuPlan_id = Column(UUID(as_uuid=True), ForeignKey('rp_plan.id', ondelete='CASCADE'))
-    gehoertZuPlan = relationship('RP_Plan', back_populates='bereich')
+    gehoertZuPlan = relationship('RP_Plan', back_populates='bereich', info={'link': 'xlink-only'})
 
     @classmethod
     @fallback_renderer
