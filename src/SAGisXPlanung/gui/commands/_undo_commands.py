@@ -4,12 +4,14 @@ from typing import List, Iterable
 from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject, Qt
 from qgis.PyQt.QtWidgets import QUndoCommand
 from sqlalchemy import update, delete, select, inspect as s_inspect
-from sqlalchemy.orm import make_transient, selectinload
+from sqlalchemy.orm import make_transient, selectinload, load_only, RelationshipProperty
+from sqlalchemy.orm.attributes import flag_modified
 
 from SAGisXPlanung import Session, Base
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
+from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 
 
@@ -39,12 +41,34 @@ class AttributeChangedCommand(QUndoCommand):
         with Session.begin() as session:
             session.expire_on_commit = False
 
-            base_classes = [c for c in list(inspect.getmro(self.xplan_item.xtype)) if issubclass(c, Base)]
-            cls = next(c for c in reversed(base_classes) if hasattr(c, self.attribute) and c.attr_fits_version(self.attribute, export_version()))
+            cls = find_true_class(self.xplan_item.xtype, self.attribute)
+            if isinstance(mapper_property := getattr(cls, self.attribute).property, RelationshipProperty):
+                # if the changed property is a relationship, then write the corresponding id instead of ORM object
+                # (only if it does not contain a secondary relation with assoc table)
+                update_value = None
+                if mapper_property.secondary is not None:
+                    o = session.get(self.xplan_item.xtype, self.xplan_item.xid, [
+                        load_only('id')
+                    ])
+
+                    merged = []
+                    for selected_item in value:
+                        merged.append(session.merge(selected_item))
+
+                    setattr(o, self.attribute, merged)
+                    return
+                else:
+                    attr = self.attribute + '_id'
+                    if value is not None:
+                        session.add(value)
+                        update_value = value.id
+            else:
+                attr = self.attribute
+                update_value = value
 
             stmt = update(cls.__table__).where(
                 cls.__table__.c.id == self.xplan_item.xid
-            ).values({self.attribute: value})
+            ).values({attr: update_value})
             session.execute(stmt)
 
         CallbackRegistry().run_callbacks(self.xplan_item, attr, update_value)

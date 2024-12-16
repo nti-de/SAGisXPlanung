@@ -1,9 +1,8 @@
-import datetime
 import logging
 import os
 
 from qgis.PyQt import QtWidgets, uic, QtCore
-from sqlalchemy import Date
+from sqlalchemy.orm.exc import DetachedInstanceError
 
 from SAGisXPlanung.config import xplan_tooltip
 from SAGisXPlanung.gui.widgets.QXPlanInputElement import QXPlanInputElement, QFileInput
@@ -65,8 +64,11 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
             return
 
         value = self.control.value()
-        if value != self.original_value:
-            self.attributeChanged.emit(self.original_value, value)
+        try:
+            if value != self.original_value:
+                self.attributeChanged.emit(self.original_value, value)
+        except DetachedInstanceError as e:
+            logger.debug(e)
 
         if isinstance(self.control, QFileInput):
             self.fileChanged.emit(self.control.file())

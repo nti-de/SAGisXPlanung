@@ -164,6 +164,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
 
         user_data = self.cb.checkedItemsData()
         with Session.begin() as session:
+            session.expire_on_commit = False
             for i, item in enumerate(self.cb.checkedItems()):
                 values.append(session.get(self.cls, user_data[i]))
 

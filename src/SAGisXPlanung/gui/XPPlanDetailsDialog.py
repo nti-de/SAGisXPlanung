@@ -18,7 +18,8 @@ from qgis.gui import QgsDockWidget
 from qgis.core import (QgsGeometry, Qgis)
 from qgis.utils import iface
 from sqlalchemy import select, exists, inspect as sqla_inspect
-from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic, joinedload
+from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic, joinedload, class_mapper
+from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
@@ -470,7 +471,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         item = self.objectTree.selectedItems()[0]
         attribute_config = yaml.safe_load(QSettings().value(f"plugins/xplanung/attribute_config", '')) or {}
 
-        with Session.begin() as session:
+        with Session() as session:
             session.expire_on_commit = False
             plan_content = session.query(item._data.xtype).get(item._data.xid)
 
@@ -866,3 +867,11 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.lFinished.setVisible(False)
         self.reset_label.setVisible(False)
         self.lErrorCount.setText('')
+
+
+def _is_mapped(obj):
+    try:
+        class_mapper(obj)
+    except UnmappedClassError:
+        return False
+    return True
