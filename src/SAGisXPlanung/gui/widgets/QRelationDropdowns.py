@@ -21,6 +21,7 @@ class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputM
     def __init__(self, parent, relation, *args, **kwargs):
         super(QAddRelationDropdown, self).__init__(*args, **kwargs)
         self.relation = relation
+        self.parent = parent
         self.cls = self.relation[1].mapper.class_
 
         self.has_secondary = bool(self.relation[1].secondary is not None)

@@ -138,7 +138,7 @@ class GMLWriter:
                 continue
             if isinstance(value, list) and not value:
                 continue
-            if attr == "gemeinde" or attr == "externeReferenz" or attr == "verfahrensMerkmale":
+            if attr in ["gemeinde", "externeReferenz", "verfahrensMerkmale", "aendert", "wurdeGeaendertVon"]:
                 for g in value:
                     f = etree.SubElement(xplan, f"{{{self.nsmap['xplan']}}}{attr}")
                     f.append(self.writeSubObject(g))
@@ -265,13 +265,13 @@ class GMLWriter:
             if attr in ['praesentationsobjekt', 'simple_geometry', 'planinhalt']:
                 continue
             value = getattr(bereich, attr)
-            if attr == "gehoertZuPlan_id":
+            if attr == "gehoertZuPlan":
                 etree.SubElement(xp_bereich, f"{{{self.nsmap['xplan']}}}gehoertZuPlan",
-                                 {f"{{{self.nsmap['xlink']}}}href": f"#GML_{value}"})
+                                 {f"{{{self.nsmap['xlink']}}}href": f"#GML_{value.id}"})
                 continue
             if value is None or isinstance(value, XP_Plan):
                 continue
-            if attr == "refScan":
+            if attr in ["refScan", "aendertPlan", "wurdeGeaendertVonPlan"]:
                 for r in bereich.refScan:
                     f = etree.SubElement(xp_bereich, f"{{{self.nsmap['xplan']}}}{attr}")
                     f.append(self.writeSubObject(r))
