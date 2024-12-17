@@ -13,12 +13,15 @@ class BP_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
+        from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Rechtscharakter
+        if isinstance(value, BP_Rechtscharakter):
+            return value
+
         if isinstance(value, XP_Rechtscharakter):
             value = value.name
         if value == "FestsetzungBPlan":
             return "Festsetzung"
 
-        from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Rechtscharakter
         for bp_enum_item in BP_Rechtscharakter:
             if bp_enum_item.name == value:
                 return value
@@ -34,12 +37,15 @@ class FP_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
+        from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter
+        if isinstance(value, FP_Rechtscharakter):
+            return value
+
         if isinstance(value, XP_Rechtscharakter):
             value = value.name
         if value == "DarstellungFPlan":
             return "Darstellung"
 
-        from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter
         for fp_enum_item in FP_Rechtscharakter:
             if fp_enum_item.name == value:
                 return value
@@ -55,12 +61,15 @@ class SO_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 
     def process_bind_param(self, value, dialect):
+        from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte.enums import SO_Rechtscharakter
+        if isinstance(value, SO_Rechtscharakter):
+            return value
+
         if isinstance(value, XP_Rechtscharakter):
             value = value.name
         if value == "FestsetzungImLP":
             return "InhaltLPlan"
 
-        from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte.enums import SO_Rechtscharakter
         for so_enum_item in SO_Rechtscharakter:
             if so_enum_item.name == value:
                 return value
