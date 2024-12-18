@@ -8,13 +8,15 @@ from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_KlassifizNachSchienenverkehrsrecht,
                                                                           SO_KlassifizNachDenkmalschutzrecht)
-from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
-    SO_KlassifizNachSonstigemRecht
-from SAGisXPlanung.XPlan.core import LayerPriorityType
+from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, \
+    SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
+    SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht
+from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
@@ -123,6 +125,45 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(64, 64))
 
 
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class SO_Strassenverkehrsrecht(MixedGeometry, SO_Objekt):
+    """
+    Festlegung nach Straßenverkehrsrecht
+    """
+
+    __tablename__ = 'so_strassenverkehrsrecht'
+    __mapper_args__ = {
+        'polymorphic_identity': 'so_strassenverkehrsrecht',
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizNachStrassenverkehrsrecht, include_default=True))
+
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
+
+        symbol.appendSymbolLayer(fill)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
+
+
+@xp_version(versions=[XPlanVersion.SIX])
 class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
     """
     Verkehrsfläche besonderer Zweckbestimmung (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB), Darstellung von Flächen für den

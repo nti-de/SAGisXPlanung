@@ -40,6 +40,16 @@ class SO_KlassifizNachDenkmalschutzrecht(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
 
 
+class SO_KlassifizNachStrassenverkehrsrecht(XPlanungEnumMixin, Enum):
+    """ Rechtliche Klassifizierung für Festlegung nach Straßenverkehrsrecht """
+
+    Bundesautobahn = 1000
+    Bundesstrasse = 1100
+    LandesStaatsstrasse = 1200
+    Kreisstrasse = 1300
+    SonstOeffentlStrasse = 9999
+
+
 class SO_ZweckbestimmungStrassenverkehr(XPlanungEnumMixin, Enum):
     """ Allgemeine Zweckbestimmung der Fläche oder Anlage für Straßenverkehr"""
 

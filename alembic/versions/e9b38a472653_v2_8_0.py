@@ -269,6 +269,80 @@ def upgrade():
                                "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
     op.create_check_constraint("prevent_geometry_collection", "so_objekt",
                                "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
+
+    # merge so_strassenverkehr / so_strassenverkehrsrecht
+    op.create_table('so_strassenverkehrsrecht',
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('artDerFestlegung', sa.Enum('Bundesautobahn', 'Bundesstrasse', 'LandesStaatsstrasse',
+                                              'Kreisstrasse', 'SonstOeffentlStrasse',
+                                              name='so_klassifiznachstrassenverkehrsrecht'), nullable=True),
+        sa.Column('name', sa.String(), nullable=True),
+        sa.Column('nummer', sa.String(), nullable=True),
+        sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.execute("""
+        CREATE OR REPLACE FUNCTION temp_convert(v_input text)
+        RETURNS so_klassifiznachstrassenverkehrsrecht AS $$
+        DECLARE ret so_klassifiznachstrassenverkehrsrecht DEFAULT NULL;
+        BEGIN
+            BEGIN
+                ret := v_input::so_klassifiznachstrassenverkehrsrecht;
+            EXCEPTION WHEN OTHERS THEN
+                RAISE NOTICE 'Invalid so_klassifiznachstrassenverkehrsrecht value: "%".  Returning Default.', v_input;
+                RETURN 'SonstOeffentlStrasse'::so_klassifiznachstrassenverkehrsrecht;
+            END;
+        RETURN ret;
+        END;
+        $$ LANGUAGE plpgsql;
+
+        WITH old_and_new_ids AS (
+            SELECT 
+                uuid_generate_v4() AS new_id, -- new id to be inserted
+                'so_strassenverkehrsrecht' AS type,
+                xp.rechtscharakter,
+                str.id AS old_id -- capturing old id, needed later for merging data
+            FROM so_strassenverkehr str
+            JOIN xp_objekt xp ON xp.id = str.id
+        ),
+        -- Step 2: insert into xo_objekt
+        new_xp_objekt AS (
+            INSERT INTO xp_objekt (id, type, rechtscharakter, uuid, text, rechtsstand, gliederung1, gliederung2, ebene, "gehoertZuBereich_id", aufschrift, "gesetzlicheGrundlage_id", skalierung, drehwinkel)
+            SELECT 
+                new_id,
+                oani.type,
+                oani.rechtscharakter,
+                uuid, text, rechtsstand, gliederung1, gliederung2, ebene, "gehoertZuBereich_id", aufschrift, "gesetzlicheGrundlage_id", skalierung, drehwinkel
+            FROM old_and_new_ids oani
+            JOIN xp_objekt xp ON oani.old_id=xp.id
+            RETURNING id, type, rechtscharakter
+        ),
+        -- Step 2: insert into so_objekt
+        new_so_objekt AS (
+            INSERT INTO so_objekt (id, rechtscharakter, position, flaechenschluss, flussrichtung, nordwinkel)
+            SELECT 
+                new.id as id, 
+                so.rechtscharakter as rechtscharakter,
+                position, flaechenschluss, flussrichtung, nordwinkel
+            FROM new_xp_objekt new
+            JOIN old_and_new_ids oani ON new.id = oani.new_id
+            JOIN so_objekt so ON oani.old_id=so.id
+            RETURNING id, rechtscharakter
+        )
+        
+        -- Step 3: insert into so_strassenverkehrsrecht
+        INSERT INTO so_strassenverkehrsrecht (id, name, nummer, "artDerFestlegung")
+          SELECT
+            oani.new_id AS id, 
+            s.name, s.nummer, 
+            temp_convert(s.einteilung::text) AS "artDerFestlegung"
+        FROM so_strassenverkehr s
+        JOIN old_and_new_ids oani ON s.id = oani.old_id;
+        
+        DROP function temp_convert(v_input text);
+    """
+    )
     # ### end Alembic commands ###
 
 
@@ -284,4 +358,8 @@ def downgrade():
     op.drop_constraint("prevent_geometry_collection", "bp_objekt", type_="check")
     op.drop_constraint("prevent_geometry_collection", "fp_objekt", type_="check")
     op.drop_constraint("prevent_geometry_collection", "so_objekt", type_="check")
+
+    op.drop_table('so_strassenverkehrsrecht')
+    op.execute("DROP TYPE so_klassifiznachstrassenverkehrsrecht")
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht')")
     # ### end Alembic commands ###

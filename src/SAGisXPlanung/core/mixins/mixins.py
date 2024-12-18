@@ -52,6 +52,9 @@ class RelationshipMixin:
             # force iterable, if relation is one-to-one
             if not isinstance(rel_items, Iterable):
                 rel_items = [rel_items]
+            # remove classes that don't fit version
+            rel_items = [r for r in rel_items
+                         if not hasattr(r.__class__, 'xp_versions') or export_version() in r.__class__.xp_versions]
 
             yield from rel_items
 
