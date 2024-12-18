@@ -240,6 +240,29 @@ def upgrade():
                     existing_type=Geometry(from_text='ST_GeomFromEWKT', name='geometry', _spatial_index_reflected=True),
                     nullable=False)
 
+    # delete rows that violate new geometry check constraint, then insert new constraint
+    op.execute("""
+        DELETE FROM xp_objekt 
+        WHERE id IN (
+            SELECT id FROM bp_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION')
+        );
+
+        DELETE FROM bp_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION');
+
+        DELETE FROM xp_objekt 
+        WHERE id IN (
+            SELECT id FROM fp_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION')
+        );
+
+        DELETE FROM fp_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION');
+
+        DELETE FROM xp_objekt 
+        WHERE id IN (
+            SELECT id FROM so_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION')
+        );
+
+        DELETE FROM so_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION');
+    """)
     op.create_check_constraint("prevent_geometry_collection", "bp_objekt",
                                "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
     op.create_check_constraint("prevent_geometry_collection", "fp_objekt",
