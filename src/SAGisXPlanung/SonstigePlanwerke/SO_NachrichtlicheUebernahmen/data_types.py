@@ -45,7 +45,7 @@ class SO_KomplexeFestlegungGewaesser(RelationshipMixin, ElementOrderMixin, Base)
     aufschrift = Column(String)
 
     gewaesser_id = Column(UUID(as_uuid=True), ForeignKey('so_gewaesser.id', ondelete='CASCADE'))
-    gewaesser = relationship('SO_Gewaesser', back_populates='artDerFestlegung')
+    gewaesser = relationship('SO_Gewaesser', back_populates='rel_artDerFestlegung')
 
     @classmethod
     def avoid_export(cls):

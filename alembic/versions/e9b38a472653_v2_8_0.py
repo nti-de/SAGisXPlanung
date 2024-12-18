@@ -343,6 +343,13 @@ def upgrade():
         DROP function temp_convert(v_input text);
     """
     )
+
+    # fix gewaesser in v5
+    new_enum = postgresql.ENUM('Gewaesser', 'Fliessgewaesser', 'Gewaesser1Ordnung', 'Gewaesser2Ordnung',
+                               'Gewaesser3Ordnung', 'StehendesGewaesser', 'Hafen', 'Sonstiges',
+                               name='so_klassifizgewaesserv5')
+    new_enum.create(op.get_bind(), checkfirst=True)
+    op.add_column('so_gewaesser', sa.Column('artDerFestlegung', new_enum, nullable=True))
     # ### end Alembic commands ###
 
 
@@ -362,4 +369,6 @@ def downgrade():
     op.drop_table('so_strassenverkehrsrecht')
     op.execute("DROP TYPE so_klassifiznachstrassenverkehrsrecht")
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht')")
+
+    # op.drop_column('so_gewaesser', 'artDerFestlegung')
     # ### end Alembic commands ###

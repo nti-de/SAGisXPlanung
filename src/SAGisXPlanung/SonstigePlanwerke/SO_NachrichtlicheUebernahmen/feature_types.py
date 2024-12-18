@@ -15,8 +15,9 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
                                                                           SO_KlassifizNachDenkmalschutzrecht)
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, \
     SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
-    SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht
-from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
+    SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht, \
+    SO_KlassifizGewaesserv5
+from SAGisXPlanung.XPlan.core import XPCol, LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
@@ -263,11 +264,24 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
 
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    artDerFestlegung = relationship("SO_KomplexeFestlegungGewaesser", back_populates="gewaesser",
-                                    cascade="all, delete", passive_deletes=True)
+    artDerFestlegung = XPCol(XPEnum(SO_KlassifizGewaesserv5, include_default=True), info={
+        'xplan_version': XPlanVersion.FIVE_THREE,
+    })
+    rel_artDerFestlegung = relationship("SO_KomplexeFestlegungGewaesser", back_populates="gewaesser",
+                                        cascade="all, delete", passive_deletes=True, info={
+                                            'xplan_version': XPlanVersion.SIX,
+                                            'xplan_attribute': 'artDerFestlegung'
+                                        })
 
     name = Column(String)
     nummer = Column(String)
+
+    @classmethod
+    def import_artDerFestlegung_attr(cls, version):
+        if version == XPlanVersion.FIVE_THREE:
+            return 'artDerFestlegung'
+        else:
+            return 'rel_artDerFestlegung'
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

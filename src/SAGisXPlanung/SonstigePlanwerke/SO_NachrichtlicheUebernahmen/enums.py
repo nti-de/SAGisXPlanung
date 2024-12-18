@@ -111,6 +111,18 @@ class SO_KlassifizGewaesser(XPlanungEnumMixin, Enum):
     Kanal = 6000
     Sonstiges = 9999
 
+class SO_KlassifizGewaesserv5(XPlanungEnumMixin, Enum):
+    """ Allgemeine Zweckbestimmung einer Gewaesserfläche """
+
+    Gewaesser = 1000
+    Fliessgewaesser = 2000
+    Gewaesser1Ordnung = 10000
+    Gewaesser2Ordnung = 10001
+    Gewaesser3Ordnung = 10002
+    StehendesGewaesser = 10003
+    Hafen = 2000
+    Sonstiges = 9999
+
 
 class SO_KlassifizWasserwirtschaft(XPlanungEnumMixin, Enum):
     """ Klassifizierung der Festlegung einer Fläche für Wasserwirtschaft """
