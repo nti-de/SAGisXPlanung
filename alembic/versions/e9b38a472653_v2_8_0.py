@@ -370,5 +370,6 @@ def downgrade():
     op.execute("DROP TYPE so_klassifiznachstrassenverkehrsrecht")
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht')")
 
-    # op.drop_column('so_gewaesser', 'artDerFestlegung')
+    op.drop_column('so_gewaesser', 'artDerFestlegung')
+    op.execute("DROP TYPE so_klassifizgewaesserv5")
     # ### end Alembic commands ###
