@@ -9,6 +9,16 @@ logger = logging.getLogger(__name__)
 FlagNewRole = Qt.UserRole + 1
 
 
+class FixComboStyleDelegate(QStyledItemDelegate):
+    """
+    Weird workaround for showing checkboxes in the dropdown view of a combobox
+    Without this delegate the checkboxes are either not shown at all, or they are displayed way too large???
+    """
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
+        option.showDecorationSelected = False
+        super(FixComboStyleDelegate, self).paint(painter, option, index)
+
+
 class HighlightRowDelegate(QStyledItemDelegate):
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
