@@ -685,3 +685,21 @@ class XP_ZweckbestimmungKennzeichnung(XPlanungEnumMixin, Enum):
     Bodenordnung = 7000
     Vorhabensgebiet = 8000
     AndereGesetzlVorschriften = 9999
+
+
+class XP_KlassifizSchutzgebietNaturschutzrecht(XPlanungEnumMixin, Enum):
+    """ Klassifizierung des Schutzgebietes """
+
+    Naturschutzgebiet = 1000
+    Nationalpark = 1100
+    Biosphaerenreservat = 1200
+    Landschaftsschutzgebiet = 1300
+    Naturpark = 1400
+    Naturdenkmal = 1500
+    GeschuetzterLandschaftsBestandteil = 1600
+    GesetzlichGeschuetztesBiotop = 1700
+    Natura2000 = 1800
+    GebietGemeinschaftlicherBedeutung = 18000
+    EuropaeischesVogelschutzgebiet = 18001
+    NationalesNaturmonument = 2000
+    Sonstiges = 9999

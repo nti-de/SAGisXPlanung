@@ -60,6 +60,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.data_types imp
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr, SO_Gewaesser, \
     SO_Wasserwirtschaft, SO_Luftverkehrsrecht, SO_SonstigesRecht, SO_Strassenverkehrsrecht, SO_Wasserrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht
+from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneReferenz, XP_VerfahrensMerkmal,
@@ -168,6 +169,7 @@ CLASSES = {
     'SO_Denkmalschutzrecht': SO_Denkmalschutzrecht,
     'SO_Luftverkehrsrecht': SO_Luftverkehrsrecht,
     'SO_SchutzgebietWasserrecht': SO_SchutzgebietWasserrecht,
+    'SO_SchutzgebietNaturschutzrecht': SO_SchutzgebietNaturschutzrecht,
     'SO_Wasserwirtschaft': SO_Wasserwirtschaft,
     'SO_Gewaesser': SO_Gewaesser,
     'SO_Wasserrecht': SO_Wasserrecht,

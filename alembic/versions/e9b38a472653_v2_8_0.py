@@ -272,15 +272,15 @@ def upgrade():
 
     # merge so_strassenverkehr / so_strassenverkehrsrecht
     op.create_table('so_strassenverkehrsrecht',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('artDerFestlegung', sa.Enum('Bundesautobahn', 'Bundesstrasse', 'LandesStaatsstrasse',
-                                              'Kreisstrasse', 'SonstOeffentlStrasse',
-                                              name='so_klassifiznachstrassenverkehrsrecht'), nullable=True),
-        sa.Column('name', sa.String(), nullable=True),
-        sa.Column('nummer', sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('artDerFestlegung', sa.Enum('Bundesautobahn', 'Bundesstrasse', 'LandesStaatsstrasse',
+                                                          'Kreisstrasse', 'SonstOeffentlStrasse',
+                                                          name='so_klassifiznachstrassenverkehrsrecht'), nullable=True),
+                    sa.Column('name', sa.String(), nullable=True),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
 
     op.execute("""
         CREATE OR REPLACE FUNCTION temp_convert(v_input text)
@@ -353,21 +353,48 @@ def upgrade():
 
     # SO_Wasserrecht
     op.create_table('so_wasserrecht',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('artDerFestlegung', sa.Enum('Ueberschwemmungsgebiet',
-                                              'FestgesetztesUeberschwemmungsgebiet',
-                                              'NochNichtFestgesetztesUeberschwemmungsgebiet',
-                                              'UeberschwemmGefaehrdetesGebiet',
-                                              'Risikogebiet',
-                                              'RisikogebietAusserhUeberschwemmgebiet',
-                                              'Hochwasserentstehungsgebiet',
-                                              'Sonstiges', name='so_klassifiznachwasserrecht'), nullable=True),
-        sa.Column('istNatuerlichesUberschwemmungsgebiet', sa.Boolean(), nullable=True),
-        sa.Column('name', sa.String(), nullable=True),
-        sa.Column('nummer', sa.String(), nullable=True),
-        sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('id')
-    )
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('artDerFestlegung', sa.Enum('Ueberschwemmungsgebiet',
+                                                          'FestgesetztesUeberschwemmungsgebiet',
+                                                          'NochNichtFestgesetztesUeberschwemmungsgebiet',
+                                                          'UeberschwemmGefaehrdetesGebiet',
+                                                          'Risikogebiet',
+                                                          'RisikogebietAusserhUeberschwemmgebiet',
+                                                          'Hochwasserentstehungsgebiet',
+                                                          'Sonstiges', name='so_klassifiznachwasserrecht'),
+                              nullable=True),
+                    sa.Column('istNatuerlichesUberschwemmungsgebiet', sa.Boolean(), nullable=True),
+                    sa.Column('name', sa.String(), nullable=True),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
+    # SO_SchutzgebietNaturschutzrecht
+    op.create_table('so_naturschutz',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('artDerFestlegung',
+                              sa.Enum('Naturschutzgebiet', 'Nationalpark',
+                                      'Biosphaerenreservat',
+                                      'Landschaftsschutzgebiet',
+                                      'Naturpark', 'Naturdenkmal',
+                                      'GeschuetzterLandschaftsBestandteil',
+                                      'GesetzlichGeschuetztesBiotop',
+                                      'Natura2000',
+                                      'GebietGemeinschaftlicherBedeutung',
+                                      'EuropaeischesVogelschutzgebiet',
+                                      'NationalesNaturmonument',
+                                      'Sonstiges', name='xp_klassifizschutzgebietnaturschutzrecht'),
+                              nullable=True),
+                    sa.Column('zone', sa.Enum('Schutzzone_1', 'Schutzzone_2', 'Schutzzone_3',
+                                              'Kernzone', 'Pflegezone', 'Entwicklungszone',
+                                              'Regenerationszone', name='so_schutzzonennaturschutzrecht'),
+                              nullable=True),
+                    sa.Column('name', sa.String(), nullable=True),
+                    sa.Column('nummer', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
     # ### end Alembic commands ###
 
 
@@ -386,11 +413,16 @@ def downgrade():
 
     op.drop_table('so_strassenverkehrsrecht')
     op.execute("DROP TYPE so_klassifiznachstrassenverkehrsrecht")
-    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht')")
 
     op.drop_column('so_gewaesser', 'artDerFestlegung')
     op.execute("DROP TYPE so_klassifizgewaesserv5")
 
     op.drop_table('so_wasserrecht')
     op.execute("DROP TYPE so_klassifiznachwasserrecht")
+
+    op.drop_table('so_naturschutz')
+    op.execute("DROP TYPE so_schutzzonennaturschutzrecht")
+    op.execute("DROP TYPE xp_klassifizschutzgebietnaturschutzrecht")
+
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht', 'so_wasserrecht', 'so_naturschutz')")
     # ### end Alembic commands ###
