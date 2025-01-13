@@ -22,3 +22,14 @@ class LP_Rechtsstand(XPlanungEnumMixin, Enum):
     Wirksamkeit = 4000
     Untergegangen = 5000
 
+
+class LP_Raumkonkretisierung(XPlanungEnumMixin, Enum):
+    """ Rechtsstand des Plans """
+
+    Scharf = 1000
+    Suchraum = 2000
+    Unscharf = 3000
+    Position = 4000
+    Raumunkonkret = 5000
+    Unbekannt = 9998
+

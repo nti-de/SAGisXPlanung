@@ -174,14 +174,15 @@ class FP_Objekt(XP_Objekt):
                                                         name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
 
-    def __getattribute__(self, name):
-        if name == 'rechtscharakter' and export_version() == XPlanVersion.FIVE_THREE:
-            super_value = super().__getattribute__(name)
-            if isinstance(super_value, XP_Rechtscharakter):
-                return super_value.to_fp_rechtscharakter()
-            return super_value
-        else:
-            return super().__getattribute__(name)
+    # TODO: why was this required in the first place? there is nothing similar for BP?
+    # def __getattribute__(self, name):
+    #     if name == 'rechtscharakter' and export_version() == XPlanVersion.FIVE_THREE:
+    #         super_value = super().__getattribute__(name)
+    #         if isinstance(super_value, XP_Rechtscharakter):
+    #             return super_value.to_fp_rechtscharakter()
+    #         return super_value
+    #     else:
+    #         return super().__getattribute__(name)
 
     def srs(self):
         return QgsCoordinateReferenceSystem(f'EPSG:{self.position.srid}')

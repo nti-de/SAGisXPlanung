@@ -1,21 +1,25 @@
 from typing import List
 
+from geoalchemy2 import Geometry, WKTElement
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor
+from qgis._core import QgsCoordinateReferenceSystem, QgsGeometry
 from qgis.core import QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, Boolean
+from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, Boolean, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
-from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt
+from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
+from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt, LP_Raumkonkretisierung
 from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
-from SAGisXPlanung.XPlan.types import GeometryType
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.types import GeometryType, Angle
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 
 
 class LP_Plan(XP_Plan):
@@ -119,3 +123,43 @@ class LP_Bereich(XP_Bereich):
         simple_line = QgsSimpleLineSymbolLayer.create({})
         symbol.appendSymbolLayer(simple_line)
         return QgsSingleSymbolRenderer(symbol)
+
+
+class LP_Objekt(XP_Objekt):
+    """ Basisklasse für alle spezifischen Inhalte eines Landschaftsplans """
+
+    __tablename__ = 'lp_objekt'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+    __readonly_columns__ = ['position']
+
+    id = Column(ForeignKey("xp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    raumkonkretisierung = Column(Enum(LP_Raumkonkretisierung))
+    rechtsCharText = Column(String)
+
+    position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
+                                                        name='prevent_geometry_collection'))
+    flaechenschluss = Column(Boolean)
+    flussrichtung = Column(Boolean)
+    nordwinkel = Column(Angle)
+
+    def srs(self):
+        return QgsCoordinateReferenceSystem(f'EPSG:{self.position.srid}')
+
+    def geometry(self):
+        return geometry_from_spatial_element(self.position)
+
+    def setGeometry(self, geom: QgsGeometry, srid: int = None):
+        if srid is None and self.position is None:
+            raise Exception('geometry needs a srid')
+        self.position = WKTElement(geom.asWkt(), srid=srid or self.position.srid)
+
+    def geomType(self) -> GeometryType:
+        return self.geometry().type()
+
+    @classmethod
+    def hidden_inputs(cls):
+        h = super(LP_Objekt, cls).hidden_inputs()
+        return h + ['position']

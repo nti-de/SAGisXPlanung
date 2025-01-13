@@ -395,6 +395,29 @@ def upgrade():
                     sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
+
+    # LP
+    op.create_geospatial_table('lp_objekt',
+                               sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                               sa.Column('raumkonkretisierung',
+                                         sa.Enum('Scharf', 'Suchraum', 'Unscharf', 'Position', 'Raumunkonkret',
+                                                         'Unbekannt', name='lp_raumkonkretisierung'),
+                                         nullable=True),
+                               sa.Column('rechtsCharText', sa.String(), nullable=True),
+                               sa.Column('position',
+                                         Geometry(spatial_index=False, from_text='ST_GeomFromEWKT', name='geometry'),
+                                         nullable=True),
+                               sa.Column('flaechenschluss', sa.Boolean(), nullable=True),
+                               sa.Column('flussrichtung', sa.Boolean(), nullable=True),
+                               sa.Column('nordwinkel', sa.Integer(), nullable=True),
+                               sa.ForeignKeyConstraint(['id'], ['xp_objekt.id'], ondelete='CASCADE'),
+                               sa.PrimaryKeyConstraint('id')
+                               )
+    op.create_geospatial_index('idx_lp_objekt_position', 'lp_objekt', ['position'], unique=False,
+                               postgresql_using='gist', postgresql_ops={})
+    op.create_check_constraint("prevent_geometry_collection", "lp_objekt",
+                               "GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')")
+
     # ### end Alembic commands ###
 
 
@@ -410,6 +433,12 @@ def downgrade():
     op.drop_constraint("prevent_geometry_collection", "bp_objekt", type_="check")
     op.drop_constraint("prevent_geometry_collection", "fp_objekt", type_="check")
     op.drop_constraint("prevent_geometry_collection", "so_objekt", type_="check")
+    op.drop_constraint("prevent_geometry_collection", "lp_objekt", type_="check")
+
+    op.drop_geospatial_index('idx_lp_objekt_position', table_name='lp_objekt', postgresql_using='gist',
+                             column_name='position')
+    op.drop_geospatial_table('lp_objekt')
+    op.execute("DROP TYPE lp_raumkonkretisierung")
 
     op.drop_table('so_strassenverkehrsrecht')
     op.execute("DROP TYPE so_klassifiznachstrassenverkehrsrecht")

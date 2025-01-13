@@ -51,7 +51,7 @@ from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZwec
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
 from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser
-from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich
+from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich, LP_Objekt
 from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Plan
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import SO_Schienenverkehrsrecht, SO_Denkmalschutzrecht
@@ -176,7 +176,9 @@ CLASSES = {
     'SO_KomplexeFestlegungGewaesser': SO_KomplexeFestlegungGewaesser,
     'SO_Strassenverkehr': SO_Strassenverkehr,
     'SO_KomplexeZweckbestStrassenverkehr': SO_KomplexeZweckbestStrassenverkehr,
-    'SO_SonstigesRecht': SO_SonstigesRecht
+    'SO_SonstigesRecht': SO_SonstigesRecht,
+
+    'LP_Objekt': LP_Objekt,
 }
 
 PRE_FILLED_CLASSES = [
@@ -185,8 +187,9 @@ PRE_FILLED_CLASSES = [
     XP_GesetzlicheGrundlage
 ]
 
+ObjectBaseType = Union[Type[BP_Objekt], Type[FP_Objekt], Type[LP_Objekt], Type[SO_Objekt]]
 OBJECT_BASE_TYPES = [
-    BP_Objekt, FP_Objekt, SO_Objekt
+    BP_Objekt, FP_Objekt, LP_Objekt, SO_Objekt
 ]
 
 PLAN_BASE_TYPES = [
