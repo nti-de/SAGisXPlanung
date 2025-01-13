@@ -16,7 +16,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, \
     SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht, \
-    SO_KlassifizGewaesserv5
+    SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht
 from SAGisXPlanung.XPlan.core import XPCol, LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
@@ -307,6 +307,7 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
 
 
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
 class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     """
     Flächen für die Wasserwirtschaft, sowie Flächen für Hochwasserschutzanlagen und für die Regelung des
@@ -357,6 +358,42 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
+
+
+class SO_Wasserrecht(MixedGeometry, SO_Objekt):
+    """
+    Festlegung nach Wasserhaushaltsgesetz (WHG).
+    """
+
+    __tablename__ = 'so_wasserrecht'
+    __mapper_args__ = {
+        'polymorphic_identity': 'so_wasserrecht',
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizNachWasserrecht, include_default=True))
+
+    istNatuerlichesUberschwemmungsgebiet = Column(Boolean)
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    def line_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        blue_outline = QgsSimpleLineSymbolLayer(QColor('#377ded'))
+        symbol.appendSymbolLayer(blue_outline)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.LineGeometry:
+            return QgsSingleSymbolRenderer(cls.line_symbol())
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
 
 class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):

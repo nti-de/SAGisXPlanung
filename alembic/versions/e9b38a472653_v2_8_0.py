@@ -342,7 +342,7 @@ def upgrade():
         
         DROP function temp_convert(v_input text);
     """
-    )
+               )
 
     # fix gewaesser in v5
     new_enum = postgresql.ENUM('Gewaesser', 'Fliessgewaesser', 'Gewaesser1Ordnung', 'Gewaesser2Ordnung',
@@ -350,6 +350,24 @@ def upgrade():
                                name='so_klassifizgewaesserv5')
     new_enum.create(op.get_bind(), checkfirst=True)
     op.add_column('so_gewaesser', sa.Column('artDerFestlegung', new_enum, nullable=True))
+
+    # SO_Wasserrecht
+    op.create_table('so_wasserrecht',
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('artDerFestlegung', sa.Enum('Ueberschwemmungsgebiet',
+                                              'FestgesetztesUeberschwemmungsgebiet',
+                                              'NochNichtFestgesetztesUeberschwemmungsgebiet',
+                                              'UeberschwemmGefaehrdetesGebiet',
+                                              'Risikogebiet',
+                                              'RisikogebietAusserhUeberschwemmgebiet',
+                                              'Hochwasserentstehungsgebiet',
+                                              'Sonstiges', name='so_klassifiznachwasserrecht'), nullable=True),
+        sa.Column('istNatuerlichesUberschwemmungsgebiet', sa.Boolean(), nullable=True),
+        sa.Column('name', sa.String(), nullable=True),
+        sa.Column('nummer', sa.String(), nullable=True),
+        sa.ForeignKeyConstraint(['id'], ['so_objekt.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
     # ### end Alembic commands ###
 
 
@@ -372,4 +390,7 @@ def downgrade():
 
     op.drop_column('so_gewaesser', 'artDerFestlegung')
     op.execute("DROP TYPE so_klassifizgewaesserv5")
+
+    op.drop_table('so_wasserrecht')
+    op.execute("DROP TYPE so_klassifiznachwasserrecht")
     # ### end Alembic commands ###

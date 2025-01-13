@@ -135,6 +135,18 @@ class SO_KlassifizWasserwirtschaft(XPlanungEnumMixin, Enum):
     RegenRueckhaltebecken = 1500
     Sonstiges = 9999
 
+class SO_KlassifizNachWasserrecht(XPlanungEnumMixin, Enum):
+    """ Klassifizierung der Festlegung nach Wasserhaushaltsgesetz (WHG) """
+
+    Ueberschwemmungsgebiet = 2000
+    FestgesetztesUeberschwemmungsgebiet = 20000
+    NochNichtFestgesetztesUeberschwemmungsgebiet = 20001
+    UeberschwemmGefaehrdetesGebiet = 20002
+    Risikogebiet = 3000
+    RisikogebietAusserhUeberschwemmgebiet = 4000
+    Hochwasserentstehungsgebiet = 5000
+    Sonstiges = 9999
+
 
 class SO_KlassifizNachLuftverkehrsrecht(XPlanungEnumMixin, Enum):
     """ Rechtliche Klassifizierung der Festlegung für Luftverkehrsrecht """
