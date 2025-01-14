@@ -1,5 +1,26 @@
 ## Changelog
 
+### [2.8.0] - 14.01.2025
+
+#### Neue Funktionen
+
+- Suche/Filteroptionen bei Auswahl der XPlan-Objektklasse
+- verschiedene neue Objektklassen
+- Möglichkeit zum Zuweisen von Datenobjekten im Attributformular
+
+#### Veränderungen
+
+- verbesserte Validierungshinweise beim Anlgen neuer Objekte
+- neue Constraint, der das Speichern von GeometryCollection blockiert (051e9ca7)
+
+#### Fehlerbehebungen
+
+- Verfügbarkeiten von Objektklassen in falschen XPlan-Versionen korrigiert (268af81e, 0e383276, 098b2f5a)
+- Fehler beim Bearbeiten des Rechtscharakter-Attributs (06704874)
+- fehlerhafte Bezeichnung in Überschrift der Attribut-Dialoge (c8e0e29a)
+- Fehler bei dem Codelist-Attribute fälschlicherweise Pflichtattribute waren (10c60fd3)
+- Export von Codelisten-Werten (61062148)
+
 ### [2.7.1] - 25.11.2024
 
 #### Veränderungen
