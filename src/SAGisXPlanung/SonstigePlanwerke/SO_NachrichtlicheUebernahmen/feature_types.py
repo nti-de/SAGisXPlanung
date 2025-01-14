@@ -307,7 +307,7 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
 
 
-@xp_version(versions=[XPlanVersion.FIVE_THREE])
+@xp_version(versions=[XPlanVersion.SIX])
 class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     """
     Flächen für die Wasserwirtschaft, sowie Flächen für Hochwasserschutzanlagen und für die Regelung des
