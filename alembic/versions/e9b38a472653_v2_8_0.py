@@ -396,6 +396,29 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
 
+    # FP_PrivilegiertiesVorhaben
+    op.create_table('fp_privilegiertes_vorhaben',
+                    sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+                    sa.Column('zweckbestimmung',
+                              sa.Enum('LandForstwirtschaft', 'Aussiedlerhof', 'Altenteil',
+                                       'Reiterhof', 'Gartenbaubetrieb', 'Baumschule',
+                                       'OeffentlicheVersorgung', 'Wasser', 'Gas', 'Waerme',
+                                       'Elektrizitaet', 'Telekommunikation', 'Abwasser',
+                                       'OrtsgebundenerGewerbebetrieb', 'BesonderesVorhaben',
+                                       'BesondereUmgebungsAnforderung',
+                                       'NachteiligeUmgebungsWirkung',
+                                       'BesondereZweckbestimmung', 'ErneuerbareEnergien',
+                                       'Windenergie', 'Wasserenergie', 'Solarenergie',
+                                       'Biomasse', 'Kernenergie', 'NutzungKernerergie',
+                                       'EntsorgungRadioaktiveAbfaelle', 'Sonstiges',
+                                       'StandortEinzelhof', 'BebauteFlaecheAussenbereich',
+                                      name='fp_zweckbestimmungprivilegiertesvorhaben'),
+                              nullable=True),
+                    sa.Column('vorhaben', sa.String(), nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+
     # LP
     op.create_geospatial_table('lp_objekt',
                                sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
@@ -453,5 +476,8 @@ def downgrade():
     op.execute("DROP TYPE so_schutzzonennaturschutzrecht")
     op.execute("DROP TYPE xp_klassifizschutzgebietnaturschutzrecht")
 
-    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht', 'so_wasserrecht', 'so_naturschutz')")
+    op.drop_table('fp_privilegiertes_vorhaben')
+    op.execute("DROP TYPE fp_zweckbestimmungprivilegiertesvorhaben")
+
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_strassenverkehrsrecht', 'so_wasserrecht', 'so_naturschutz', 'fp_privilegiertes_vorhaben')")
     # ### end Alembic commands ###

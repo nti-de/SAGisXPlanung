@@ -1,15 +1,18 @@
 import logging
 
+from PyQt5.QtGui import QColor
+from qgis._core import QgsFillSymbol, QgsLinePatternFillSymbolLayer, QgsUnitTypes, QgsSimpleLineSymbolLayer
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
-from qgis.core import QgsWkbTypes, QgsSymbol
+from qgis.core import QgsWkbTypes, QgsSymbol, QgsSingleSymbolRenderer
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
+from SAGisXPlanung.FPlan.FP_Sonstiges.enums import FP_ZweckbestimmungPrivilegiertesVorhaben
 from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
-from SAGisXPlanung.XPlan.types import GeometryType
+from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)
 
@@ -54,3 +57,46 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
                                  'Sonstiges', geometry_type=geom_type,
                                  symbol_size=30)
         return generic_objects_renderer(geom_type)
+
+
+class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
+    """ Standorte für privilegierte Außenbereichsvorhaben und für sonstige Anlagen in Außenbereichen gem. § 35 Abs. 1
+        und 2 BauGB """
+
+    __tablename__ = 'fp_privilegiertes_vorhaben'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    zweckbestimmung = Column(XPEnum(FP_ZweckbestimmungPrivilegiertesVorhaben, include_default=True))
+    vorhaben = Column(String)
+
+    @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        line_pattern = QgsLinePatternFillSymbolLayer()
+        line_pattern.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        line_pattern.setLineAngle(45)
+        line_pattern.setDistance(30)
+        line_pattern.setLineWidth(1)
+        line_pattern.setColor(QColor(0, 0, 0))
+
+        symbol = QgsFillSymbol()
+        symbol.changeSymbolLayer(0, line_pattern)
+
+        line = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        line.setWidth(0.5)
+        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        symbol.appendSymbolLayer(line)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
