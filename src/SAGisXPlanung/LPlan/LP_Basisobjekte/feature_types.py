@@ -3,8 +3,8 @@ from typing import List
 from geoalchemy2 import Geometry, WKTElement
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QColor
-from qgis._core import QgsCoordinateReferenceSystem, QgsGeometry
-from qgis.core import QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer,
+                       QgsCoordinateReferenceSystem, QgsGeometry)
 
 from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, Boolean, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
@@ -19,7 +19,6 @@ from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.XPlan.types import GeometryType, Angle
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 
 
 class LP_Plan(XP_Plan):

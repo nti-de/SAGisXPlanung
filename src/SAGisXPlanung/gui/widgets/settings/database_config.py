@@ -2,20 +2,20 @@ import asyncio
 import functools
 import logging
 import os
+import traceback
 from dataclasses import dataclass
 from pathlib import Path
 
 import qasync
-from PyQt5.QtGui import QCloseEvent
 from qgis.core import QgsDataSourceUri, QgsProviderRegistry
 from qgis.utils import iface
 
-from qgis.PyQt.QtCore import pyqtSlot, QSettings, Qt, QTimer
+from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.PyQt.QtWidgets import QLineEdit
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QCloseEvent
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import DatabaseError, DBAPIError
+from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from SAGisXPlanung import BASE_DIR, VERSION, Session, SessionAsync
@@ -283,6 +283,7 @@ class DatabaseConfigPage(SettingsPage):
                 apply_color(self.ui.connection_test_result_label, ApplicationColor.Error)
                 self.ui.connection_test_result_label.setText(str(e))
                 logger.error(e)
+                logger.error(traceback.format_exc())
 
             await self.test_connection()
 
@@ -299,7 +300,7 @@ class DatabaseConfigPage(SettingsPage):
             for revision_file in revision_sequence:
                 with open(os.path.join(sql_dir, f'{revision_file}.sql'), 'r') as file:
                     sql_content = file.read()
-                    connection.execute(sql_content)
+                    connection.execute(text(sql_content))
 
     def _find_revision_sequence(self, sequence, start, end):
         result = []

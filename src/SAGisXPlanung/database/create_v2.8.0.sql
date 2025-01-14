@@ -3247,6 +3247,60 @@ CREATE TYPE so_klassifizgewaesserv5 AS ENUM ('Gewaesser', 'Fliessgewaesser', 'Ge
 
 ALTER TABLE so_gewaesser ADD COLUMN "artDerFestlegung" so_klassifizgewaesserv5;
 
+CREATE TYPE so_klassifiznachwasserrecht AS ENUM ('Ueberschwemmungsgebiet', 'FestgesetztesUeberschwemmungsgebiet', 'NochNichtFestgesetztesUeberschwemmungsgebiet', 'UeberschwemmGefaehrdetesGebiet', 'Risikogebiet', 'RisikogebietAusserhUeberschwemmgebiet', 'Hochwasserentstehungsgebiet', 'Sonstiges');
+
+CREATE TABLE so_wasserrecht (
+    id UUID NOT NULL, 
+    "artDerFestlegung" so_klassifiznachwasserrecht, 
+    "istNatuerlichesUberschwemmungsgebiet" BOOLEAN, 
+    name VARCHAR, 
+    nummer VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE xp_klassifizschutzgebietnaturschutzrecht AS ENUM ('Naturschutzgebiet', 'Nationalpark', 'Biosphaerenreservat', 'Landschaftsschutzgebiet', 'Naturpark', 'Naturdenkmal', 'GeschuetzterLandschaftsBestandteil', 'GesetzlichGeschuetztesBiotop', 'Natura2000', 'GebietGemeinschaftlicherBedeutung', 'EuropaeischesVogelschutzgebiet', 'NationalesNaturmonument', 'Sonstiges');
+
+CREATE TYPE so_schutzzonennaturschutzrecht AS ENUM ('Schutzzone_1', 'Schutzzone_2', 'Schutzzone_3', 'Kernzone', 'Pflegezone', 'Entwicklungszone', 'Regenerationszone');
+
+CREATE TABLE so_naturschutz (
+    id UUID NOT NULL, 
+    "artDerFestlegung" xp_klassifizschutzgebietnaturschutzrecht, 
+    zone so_schutzzonennaturschutzrecht, 
+    name VARCHAR, 
+    nummer VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE fp_zweckbestimmungprivilegiertesvorhaben AS ENUM ('LandForstwirtschaft', 'Aussiedlerhof', 'Altenteil', 'Reiterhof', 'Gartenbaubetrieb', 'Baumschule', 'OeffentlicheVersorgung', 'Wasser', 'Gas', 'Waerme', 'Elektrizitaet', 'Telekommunikation', 'Abwasser', 'OrtsgebundenerGewerbebetrieb', 'BesonderesVorhaben', 'BesondereUmgebungsAnforderung', 'NachteiligeUmgebungsWirkung', 'BesondereZweckbestimmung', 'ErneuerbareEnergien', 'Windenergie', 'Wasserenergie', 'Solarenergie', 'Biomasse', 'Kernenergie', 'NutzungKernerergie', 'EntsorgungRadioaktiveAbfaelle', 'Sonstiges', 'StandortEinzelhof', 'BebauteFlaecheAussenbereich');
+
+CREATE TABLE fp_privilegiertes_vorhaben (
+    id UUID NOT NULL, 
+    zweckbestimmung fp_zweckbestimmungprivilegiertesvorhaben, 
+    vorhaben VARCHAR, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE TYPE lp_raumkonkretisierung AS ENUM ('Scharf', 'Suchraum', 'Unscharf', 'Position', 'Raumunkonkret', 'Unbekannt');
+
+CREATE TABLE lp_objekt (
+    id UUID NOT NULL, 
+    raumkonkretisierung lp_raumkonkretisierung, 
+    "rechtsCharText" VARCHAR, 
+    position geometry(GEOMETRY,-1), 
+    flaechenschluss BOOLEAN, 
+    flussrichtung BOOLEAN, 
+    nordwinkel INTEGER, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(id) REFERENCES xp_objekt (id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_lp_objekt_position ON lp_objekt USING gist (position);
+
+ALTER TABLE lp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
+
 UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608';
 
 COMMIT;
