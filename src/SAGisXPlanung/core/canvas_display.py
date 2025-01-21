@@ -9,6 +9,7 @@ from SAGisXPlanung import Session
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
+from SAGisXPlanung.config import export_version
 from SAGisXPlanung.utils import createXPlanungIndicators
 
 logger = logging.getLogger(__name__)
@@ -96,9 +97,10 @@ def load_on_canvas(plan_xid, layer_group=None):
 
         plan.toCanvas(layer_group)
 
-        for b in [b for b in plan.bereich]:  # if b.geltungsbereich? only load if geltungsbereich has geom
+        for b in plan.bereich:
             for planinhalt in b.planinhalt:
-                planinhalt.toCanvas(layer_group, plan_xid=plan.id)
+                if not hasattr(planinhalt.__class__, 'xp_versions') or export_version() in planinhalt.__class__.xp_versions:
+                    planinhalt.toCanvas(layer_group, plan_xid=plan.id)
 
             # display "free" annotations which are not bound to a 'planinhalt'
             for po in b.praesentationsobjekt:
