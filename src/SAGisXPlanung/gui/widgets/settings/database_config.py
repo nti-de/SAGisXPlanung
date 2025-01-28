@@ -153,7 +153,7 @@ class DatabaseConfigPage(SettingsPage):
                     engine = create_engine(f"postgresql://{username}:{password}@{host}:{port}/{db}")
                     with engine.begin() as conn:
                         with open(os.path.join(BASE_DIR, f'database/create_v{VERSION}.sql')) as file:
-                            conn.execute(file.read())
+                            conn.execute(text(file.read()))
 
                 loop = asyncio.get_event_loop()
                 await loop.run_in_executor(None, create_schema)
