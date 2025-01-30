@@ -1,5 +1,11 @@
 ## Changelog
 
+### [2.8.1] - 14.01.2025
+
+#### Fehlerbehebungen
+
+- Fehler bei Datenbank-Erstellung (bced22bf)
+
 ### [2.8.0] - 14.01.2025
 
 #### Neue Funktionen

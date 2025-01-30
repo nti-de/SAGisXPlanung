@@ -72,7 +72,6 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.XPlan.simple_depth import XP_SimpleGeometry
 
 logger = logging.getLogger(__name__)
-
 CLASSES = {
     'XP_Plan': XP_Plan,
     'BP_Plan': BP_Plan,
@@ -182,6 +181,7 @@ CLASSES = {
 
     'LP_Objekt': LP_Objekt,
 }
+
 
 PRE_FILLED_CLASSES = [
     XP_Gemeinde,
