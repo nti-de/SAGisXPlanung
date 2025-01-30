@@ -1,6 +1,6 @@
-import asyncio
-import logging
-import os
+import subprocess
+import sys
+from typing import Union, Type
 from urllib.parse import urlparse
 
 from qgis.PyQt.QtWidgets import QMessageBox
@@ -53,6 +53,19 @@ from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsor
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
 from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich, LP_Objekt
+from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.data_types import LP_EingriffsregelungKomplex, \
+    LP_TypBioVerbundKomplex
+from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.feature_types import LP_BiotopverbundBiotopvernetzung, \
+    LP_Eingriffsregelung
+from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.data_types import LP_AdressatKomplex, \
+    LP_BiologischeVielfaltKomplex, LP_BiologischeVielfaltTypKomplex, LP_BioVfBiotoptypKomplex, \
+    LP_BioVfPflanzenArtKomplex, LP_BioVfTiereArtKomplex, LP_BodenKomplex, LP_ErholungKomplex, LP_KlimaKomplex, \
+    LP_LandschaftsbildKomplex, LP_LuftKomplex, LP_NutzungseinschraenkungKomplex, LP_SchutzgutKomplex, LP_SPEKomplex, \
+    LP_WasserKomplex, LP_ZielDimNatSchLaPflKomplex
+from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.feature_types import LP_ZieleErfordernisseMassnahmen
+from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.feature_types import \
+    LP_SchutzBestimmterTeileVonNaturUndLandschaft
+from SAGisXPlanung.LPlan.LP_Sonstiges.feature_types import LP_TextAbschnittObjekt, LP_GenerischesObjekt
 from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Plan
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import SO_Schienenverkehrsrecht, SO_Denkmalschutzrecht
@@ -179,9 +192,42 @@ CLASSES = {
     'SO_KomplexeZweckbestStrassenverkehr': SO_KomplexeZweckbestStrassenverkehr,
     'SO_SonstigesRecht': SO_SonstigesRecht,
 
+    # 5.1 LP_Basisobjekte
     'LP_Objekt': LP_Objekt,
+    # 5.2 LP_SchutzgebieteBestandteileNaturschutzrecht
+    'LP_SchutzBestimmterTeileVonNaturUndLandschaft': LP_SchutzBestimmterTeileVonNaturUndLandschaft,
+    'LP_DetailGesetzlGeschBiotopLR': LP_DetailGesetzlGeschBiotopLR,
+    # 5.3 LP_PlaninhalteLandschaftsplanung
+    'LP_BiotopverbundBiotopvernetzung': LP_BiotopverbundBiotopvernetzung,
+    'LP_Eingriffsregelung': LP_Eingriffsregelung,
+    'LP_EingriffsregelungKomplex': LP_EingriffsregelungKomplex,
+    'LP_TypBioVerbundKomplex': LP_TypBioVerbundKomplex,
+    # 5.4 LP_PlaninhalteLandschaftsplanungZEM
+    'LP_AdressatKomplex': LP_AdressatKomplex,
+    'LP_BiologischeVielfaltKomplex': LP_BiologischeVielfaltKomplex,
+    'LP_BiologischeVielfaltTypKomplex': LP_BiologischeVielfaltTypKomplex,
+    'LP_BioVfBiotoptypKomplex': LP_BioVfBiotoptypKomplex,
+    'LP_BioVfPflanzenArtKomplex': LP_BioVfPflanzenArtKomplex,
+    'LP_BioVfTiereArtKomplex': LP_BioVfTiereArtKomplex,
+    'LP_BodenKomplex': LP_BodenKomplex,
+    'LP_ErholungKomplex': LP_ErholungKomplex,
+    'LP_KlimaKomplex': LP_KlimaKomplex,
+    'LP_LandschaftsbildKomplex': LP_LandschaftsbildKomplex,
+    'LP_LuftKomplex': LP_LuftKomplex,
+    'LP_NutzungseinschraenkungKomplex': LP_NutzungseinschraenkungKomplex,
+    'LP_SchutzgutKomplex': LP_SchutzgutKomplex,
+    'LP_SPEKomplex': LP_SPEKomplex,
+    'LP_WasserKomplex': LP_WasserKomplex,
+    'LP_ZielDimNatSchLaPflKomplex': LP_ZielDimNatSchLaPflKomplex,
+    'LP_ZieleErfordernisseMassnahmen': LP_ZieleErfordernisseMassnahmen,
+    'LP_BioVfBiotoptyp_BKompV': LP_BioVfBiotoptyp_BKompV,
+    'LP_BioVfBiotoptyp_LandesKS': LP_BioVfBiotoptyp_LandesKS,
+    'LP_BioVf_FFH_LRT': LP_BioVf_FFH_LRT,
+    # 5.5 LP_Sonstiges
+    'LP_GenerischesObjekt': LP_GenerischesObjekt,
+    'LP_TextAbschnittObjekt': LP_TextAbschnittObjekt,
+    'LP_ZweckbestimmungGenerischeObjekte': LP_ZweckbestimmungGenerischeObjekte,
 }
-
 
 PRE_FILLED_CLASSES = [
     XP_Gemeinde,
