@@ -11,10 +11,11 @@ from qgis.PyQt.QtWidgets import (QLineEdit, QComboBox, QRadioButton, QTextEdit, 
                                  QHBoxLayout, QVBoxLayout, QSpacerItem, QSizePolicy, QPushButton, QButtonGroup, QLabel)
 from qgis.PyQt.QtCore import Qt, QDate, QObject, pyqtSlot, QEvent, QSize, QVersionNumber, qVersion
 from qgis.gui import QgsCheckableComboBox, QgsFileWidget, QgsDateEdit
-from sqlalchemy import ARRAY
+from sqlalchemy import ARRAY, String
 
 from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.config import export_version
+from SAGisXPlanung.gui.style import load_svg
 from SAGisXPlanung.utils import is_url
 from SAGisXPlanung.XPlan.types import LargeString, RefURL, Angle, Length, Volume, Area, Scale, XPlanungMeasureType, \
     RegExString, XPEnum, Sound
@@ -118,6 +119,8 @@ class QXPlanInputElement(ABC):
             return QMeasureTypeInput(field_type)
         if isinstance(field_type, RegExString):
             return QStringInput(field_type.expression, field_type.error_msg)
+        if isinstance(field_type, ARRAY) and isinstance(field_type.item_type, String):
+            return QTextListInput()
 
         if field_type.python_type == datetime.date:
             return QDateEditNoScroll(parent, calendarPopup=True)
@@ -371,114 +374,134 @@ class QMeasureTypeInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=
             return False
 
 
-class QDateListInput(LineEditMixin, QXPlanInputElement, QWidget, metaclass=XPlanungInputMeta):
-
-    def __init__(self):
-        super(QDateListInput, self).__init__()
+class QMultiInputWidget(QWidget):
+    def __init__(self, input_type='date', placeholder_text='', parent=None):
+        super().__init__(parent)
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.inputs = []
+        self.input_type = input_type
+
         self.plus_icon_path = os.path.abspath(os.path.join(BASE_DIR, 'gui/resources/plus.svg'))
         self.minus_icon_path = os.path.abspath(os.path.join(BASE_DIR, 'gui/resources/minus.svg'))
 
-        self.first_input = QDateEditNoScroll(self, calendarPopup=True)
+        # First input field
+        self.first_input = self.create_input_field(placeholder_text)
 
-        self.add_button = QToolButton()
-        self.add_button.setIcon(self.loadSvg(self.plus_icon_path))
-        self.add_button.installEventFilter(self)
-        self.add_button.setCursor(Qt.PointingHandCursor)
-        self.add_button.setToolTip('Weiteres Feld hinzufügen')
-        self.add_button.clicked.connect(self.addInput)
-        self.add_button.setStyleSheet('''
-            QToolButton {
-                background: palette(window); 
-                border: 0px; 
-            }
-            ''')
+        # Add button
+        self.add_button = self.create_button(self.plus_icon_path, "Add another field", self.add_input)
 
+        # Initial layout
         hbox = QHBoxLayout()
         hbox.setSpacing(10)
         hbox.addWidget(self.first_input)
         hbox.addWidget(self.add_button)
-        self.layout.addItem(hbox)
+        self.layout.addLayout(hbox)
         self.inputs.append(hbox)
 
         self.setLayout(self.layout)
 
-    def eventFilter(self, obj, event):
-        if event.type() == QEvent.HoverEnter:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
-        elif event.type() == QEvent.HoverLeave:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
-        return False
+    def create_input_field(self, placeholder_text):
+        raise NotImplementedError()
 
-    def loadSvg(self, svg, color=None):
-        img = QPixmap(svg)
-        if color:
-            qp = QPainter(img)
-            qp.setCompositionMode(QPainter.CompositionMode_SourceIn)
-            qp.fillRect(img.rect(), QColor(color))
-            qp.end()
-        return QIcon(img)
+    def create_button(self, icon_path, tooltip, callback):
+        """Create a styled button."""
+        button = QToolButton()
+        button.setIcon(load_svg(icon_path))
+        button.installEventFilter(self)
+        button.setCursor(Qt.PointingHandCursor)
+        button.setToolTip(tooltip)
+        button.clicked.connect(callback)
+        button.setStyleSheet("QToolButton { background: palette(window); border: 0px; }")
+        return button
 
-    def addInput(self, checked):
-        el = QDateEditNoScroll(self, calendarPopup=True)
+    def add_input(self):
+        """Add a new input field with a remove button."""
+        el = self.create_input_field('')
         hbox = QHBoxLayout()
         hbox.setSpacing(10)
         hbox.addWidget(el)
-        remove_button = QToolButton()
-        remove_button.setIcon(self.loadSvg(self.minus_icon_path))
-        remove_button.installEventFilter(self)
-        remove_button.setCursor(Qt.PointingHandCursor)
-        remove_button.setToolTip('Eingabefeld entfernen')
-        remove_button.clicked.connect(self.removeInput)
-        remove_button.setStyleSheet('''
-            QToolButton {
-                background: palette(window); 
-                border: 0px; 
-            }
-            ''')
+
+        remove_button = self.create_button(self.minus_icon_path, "Feld entfernen", self.remove_input)
         hbox.addWidget(remove_button)
+
         self.inputs.append(hbox)
         self.layout.addLayout(hbox)
         return el
 
-    def removeInput(self, checked):
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.HoverEnter:
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
+        elif event.type() == QEvent.HoverLeave:
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
+        return False
+
+    def remove_input(self, checked):
+        sender_button = self.sender()
         for layout in self.inputs:
-            for i in range(layout.count()):
-                if self.sender() == layout.itemAt(i).widget():
-                    self.inputs.remove(layout)
-                    self.layout.removeItem(layout)
-                    layout.deleteLater()
+            if sender_button in [layout.itemAt(i).widget() for i in range(layout.count())]:
+                self.inputs.remove(layout)
+                self.layout.removeItem(layout)
+                while layout.count():
+                    item = layout.takeAt(0)
+                    widget = item.widget()
+                    if widget:
+                        widget.deleteLater()
+                return
 
     def value(self):
-        input_fields = [layout.itemAt(0).widget() for layout in self.inputs]
-        dates = []
-        for edit in input_fields:
-            if not edit.value():
+        values = []
+        for layout in self.inputs:
+            widget = layout.itemAt(0).widget()
+            if not (v := widget.value()):
                 continue
-            dates.append(edit.value())
+            values.append(v)
 
-        return dates
+        return values
+
+    def validate_widget(self, required):
+        return True
+
+
+class QDateListInput(QMultiInputWidget):
+    def __init__(self, parent=None):
+        super().__init__(input_type='date', parent=parent)
+
+    def create_input_field(self, placeholder_text):
+        return QDateEditNoScroll(calendarPopup=True)
 
     def setDefault(self, default):
         if not default:
             return
-        if not all(isinstance(d, datetime.date) for d in default):
-            dates = [datetime.datetime.strptime(date, "%d.%m.%Y") for date in str(default).split(', ')]
-        else:
-            dates = default
 
-        if not dates:
+        if isinstance(default, str):
+            default = [datetime.datetime.strptime(date, "%d.%m.%Y").date() for date in default.split(', ')]
+        self.first_input.setDate(default[0])
+        for date in default[1:]:
+            el = self.add_input()
+            el.setDate(date)
+
+
+class QTextListInput(QMultiInputWidget):
+    def __init__(self, parent=None):
+        super().__init__(input_type='text', parent=parent)
+
+    def create_input_field(self, placeholder_text):
+        line_edit = QStringInput()
+        line_edit.setPlaceholderText(placeholder_text)
+        return line_edit
+
+    def setDefault(self, default):
+        if not default:
             return
-        self.first_input.setDefault(dates[0])
-        for date in dates[1:]:
-            el = self.addInput(None)
-            el.setDefault(date)
 
-    def validate_widget(self, required):
-        return True
+        if isinstance(default, str):
+            default = default.split(', ')
+        self.first_input.setText(default[0])
+        for text in default[1:]:
+            el = self.add_input()
+            el.setText(text)
 
 
 class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
