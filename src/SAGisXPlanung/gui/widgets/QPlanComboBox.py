@@ -7,7 +7,7 @@ from sqlalchemy.orm import load_only
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll
 
 logger = logging.getLogger(__name__)
 

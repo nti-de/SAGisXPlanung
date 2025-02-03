@@ -1,8 +1,8 @@
-from datetime import datetime, date
+from datetime import date
 
 from PyQt5.QtWidgets import QLineEdit
 
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll, QDateListInput, QTextListInput, \
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll, QDateListInput, QTextListInput, \
     QDateEditNoScroll
 
 

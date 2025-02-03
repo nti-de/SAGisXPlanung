@@ -1,8 +1,8 @@
 import logging
 import os
 
-from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QColor
-from qgis.PyQt.QtWidgets import QAction, QWidget, QHBoxLayout, QToolButton, QMenu, QMessageBox, QDialog
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction, QWidget, QHBoxLayout, QToolButton, QMenu, QDialog
 from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize, QEvent
 from qgis.gui import QgsCheckableComboBox
 from qgis.utils import iface
@@ -10,13 +10,14 @@ from qgis.utils import iface
 from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.style import load_svg
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll, QXPlanInputElement, XPlanungInputMeta
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, XPlanungInputMeta
 from SAGisXPlanung.utils import confirmObjectDeletion
 
 logger = logging.getLogger(__name__)
 
 
-class QAddRelationDropdown(QWidget, QXPlanInputElement, metaclass=XPlanungInputMeta):
+class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMeta):
 
     def __init__(self, parent, relation, *args, **kwargs):
         super(QAddRelationDropdown, self).__init__(*args, **kwargs)

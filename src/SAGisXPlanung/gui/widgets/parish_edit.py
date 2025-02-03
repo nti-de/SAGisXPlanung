@@ -2,13 +2,13 @@ import os
 from typing import List
 
 import qasync
-from qgis.PyQt.QtWidgets import QWidget, QGroupBox, QVBoxLayout, QHBoxLayout, QComboBox, QLabel, QToolButton, QSizePolicy, QFrame
-from qgis.PyQt.QtCore import Qt, QPoint, QSize, pyqtSlot, QRect, QEvent, pyqtSignal
+from qgis.PyQt.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QToolButton, QSizePolicy, QFrame
+from qgis.PyQt.QtCore import Qt, QSize, pyqtSlot, QEvent, pyqtSignal
 from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QColor
 
 from SAGisXPlanung import BASE_DIR, Session
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QCheckableComboBoxInput
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QCheckableComboBoxInput
 
 
 class QParishLabel(QWidget):

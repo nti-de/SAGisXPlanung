@@ -5,7 +5,8 @@ from qgis.PyQt import QtWidgets, uic, QtCore
 from sqlalchemy.orm.exc import DetachedInstanceError
 
 from SAGisXPlanung.config import xplan_tooltip
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QXPlanInputElement, QFileInput
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/XPlanung_edit_attribute.ui'))
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
     attributeChanged = QtCore.pyqtSignal(object, object)  # old_value, new_value
     fileChanged = QtCore.pyqtSignal(object)
 
-    def __init__(self, attribute_name, field_type, original_value, parent_xtype, parent=None):
+    def __init__(self, attribute_name, field_type, original_value, parent_xtype, set_default=True, parent=None):
         """
         Parameters
         ----------
@@ -42,8 +43,9 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.discard_button = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
         self.discard_button.clicked.connect(lambda s: self.setOriginalValue())
 
-        self.control: QXPlanInputElement = QXPlanInputElement.create(self.field_type, self)
-        self.setOriginalValue()
+        self.control: BaseInputElement = BaseInputElement.create(self.field_type, self)
+        if set_default:
+            self.setOriginalValue()
 
         self.hl1.addWidget(self.control)
 

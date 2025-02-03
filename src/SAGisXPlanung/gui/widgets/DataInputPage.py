@@ -1,9 +1,6 @@
 import datetime
 import logging
-import os
 from collections import namedtuple
-from inspect import getmro
-from pathlib import Path
 from typing import List
 
 import yaml
@@ -11,16 +8,16 @@ from qgis.PyQt import QtCore, QtWidgets, QtGui
 from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
 
-from sqlalchemy import inspect, null
+from sqlalchemy import null
 from sqlalchemy.orm import class_mapper, MapperProperty, RelationshipProperty
 from sqlalchemy.orm.exc import UnmappedClassError
 
-from SAGisXPlanung import Session, BASE_DIR, Base
-from SAGisXPlanung.XPlan.feature_types import XP_Objekt
+from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.types import InvalidFormException
 from SAGisXPlanung.config import xplan_tooltip, export_version
-from SAGisXPlanung.gui.widgets.QRelationDropdowns import QAddRelationDropdown
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QXPlanInputElement, QFileInput
+from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
 
 PYQT_DEFAULT_DATE = datetime.date(1752, 9, 14)
 logger = logging.getLogger(__name__)
@@ -188,7 +185,7 @@ class DataInputPage(QtWidgets.QScrollArea):
         field_type = column.type
         nullable = column.nullable
 
-        control = QXPlanInputElement.create(field_type, self)
+        control = BaseInputElement.create(field_type, self)
 
         if column.doc:
             label = QtWidgets.QLabel(column.doc)
@@ -237,7 +234,7 @@ class DataInputPage(QtWidgets.QScrollArea):
                     setattr(obj, column, obj_list)
                 continue
 
-            if not isinstance(input_field, QXPlanInputElement):
+            if not isinstance(input_field, BaseInputElement):
                 continue
 
             setattr(obj, column, input_field.value())
@@ -251,7 +248,7 @@ class DataInputPage(QtWidgets.QScrollArea):
         is_valid = True
         invalid_attributes = []
         for attribute, control in self.fields.items():
-            if not isinstance(control, QXPlanInputElement):
+            if not isinstance(control, BaseInputElement):
                 continue
 
             required_input = bool(attribute in self.required_inputs)

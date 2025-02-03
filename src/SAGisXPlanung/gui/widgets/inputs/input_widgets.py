@@ -2,144 +2,20 @@ import os
 import re
 import sys
 import datetime
-from abc import ABC, abstractmethod
 from pathlib import Path
 
-from geoalchemy2 import Geometry
-from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QColor
 from qgis.PyQt.QtWidgets import (QLineEdit, QComboBox, QRadioButton, QTextEdit, QToolButton, QWidget,
-                                 QHBoxLayout, QVBoxLayout, QSpacerItem, QSizePolicy, QPushButton, QButtonGroup, QLabel)
-from qgis.PyQt.QtCore import Qt, QDate, QObject, pyqtSlot, QEvent, QSize, QVersionNumber, qVersion
+                                 QHBoxLayout, QVBoxLayout, QSpacerItem, QSizePolicy, QPushButton, QButtonGroup)
+from qgis.PyQt.QtCore import Qt, QDate, pyqtSlot, QEvent, QSize
 from qgis.gui import QgsCheckableComboBox, QgsFileWidget, QgsDateEdit
-from sqlalchemy import ARRAY, String
 
 from SAGisXPlanung import BASE_DIR
-from SAGisXPlanung.config import export_version
 from SAGisXPlanung.gui.style import load_svg
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, XPlanungInputMeta
 from SAGisXPlanung.utils import is_url
-from SAGisXPlanung.XPlan.types import LargeString, RefURL, Angle, Length, Volume, Area, Scale, XPlanungMeasureType, \
-    RegExString, XPEnum, Sound
+from SAGisXPlanung.XPlan.types import Angle, Length, Volume, Area, Scale, Sound
 
 PYQT_DEFAULT_DATE = datetime.date(1752, 9, 14)
-
-
-class QXPlanInputElement(ABC):
-    """ Abstrakte Basisklasse für alle Eingabeformulare.
-        Mit der Factory-Methode `create` kann ein zum Datentyp passendes Eingabefeld genereriert werden"""
-
-    background_widget = None
-    invalid = False
-    error_message = None
-
-    @abstractmethod
-    def value(self):
-        pass
-
-    @abstractmethod
-    def setDefault(self, default):
-        pass
-
-    @abstractmethod
-    def validate_widget(self, required):
-        pass
-
-    def setInvalid(self, set_invalid):
-        if set_invalid:
-            self.insert_background_widget()
-            self.invalid = True
-        else:
-            self.remove_background_widget()
-            self.invalid = False
-
-    def error_message_label(self) -> QLabel:
-        error_label = QLabel(self.error_message)
-        error_label.setWordWrap(True)
-        error_label.setStyleSheet("font-weight: bold; font-size: 7pt; color: #991B1B")
-        return error_label
-
-    def insert_background_widget(self):
-        if self.invalid:
-            return
-
-        self.background_widget = QWidget()
-        parent = self.parentWidget().layout()
-        parent.replaceWidget(self, self.background_widget)
-
-        vbox = QVBoxLayout()
-        vbox.setSpacing(3)
-        vbox.addWidget(self)
-        if self.error_message:
-            vbox.addWidget(self.error_message_label())
-
-        self.background_widget.setLayout(vbox)
-        self.background_widget.setObjectName("back")
-        self.background_widget.setAttribute(Qt.WA_StyledBackground, True)
-        self.background_widget.layout().setContentsMargins(5, 5, 5, 5)
-        self.background_widget.setStyleSheet(
-            'QWidget#back {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')
-
-    def remove_background_widget(self):
-        if not self.invalid:
-            return
-
-        layout = self.parentWidget().parentWidget().layout()
-        layout.replaceWidget(self.background_widget, self)
-        self.background_widget.deleteLater()
-        self.error_message = None
-        self.setFocus()
-
-    @staticmethod
-    def create(field_type, parent=None):
-        if field_type is None:
-            return QStringInput()
-        if isinstance(field_type, ARRAY) and hasattr(field_type.item_type, 'enums'):
-            version = export_version()
-            if hasattr(field_type.item_type.enum_class, 'version'):
-                enum_values = [e for e in field_type.item_type.enums if field_type.item_type.enum_class[e].version in [None, version]]
-            else:
-                enum_values = field_type.item_type.enums
-            return QCheckableComboBoxInput(enum_values, enum_type=field_type.item_type.enum_class)
-        if hasattr(field_type, 'enums'):
-            should_include_default = isinstance(field_type, XPEnum) and field_type.include_default
-            version = export_version()
-            if hasattr(field_type.enum_class, 'version'):
-                enum_values = [e for e in field_type.enums if field_type.enum_class[e].version in [None, version]]
-            else:
-                enum_values = field_type.enums
-            return QComboBoxNoScroll(parent, items=enum_values, include_default=should_include_default,
-                                     enum_type=field_type.enum_class)
-        if isinstance(field_type, RefURL):
-            return QFileInput()
-        if isinstance(field_type, LargeString):
-            return QTextInput()
-        if isinstance(field_type, Geometry):
-            from SAGisXPlanung.gui.widgets.QFeatureIdentify import QFeatureIdentify
-            return QFeatureIdentify()
-        if isinstance(field_type, XPlanungMeasureType):
-            return QMeasureTypeInput(field_type)
-        if isinstance(field_type, RegExString):
-            return QStringInput(field_type.expression, field_type.error_msg)
-        if isinstance(field_type, ARRAY) and isinstance(field_type.item_type, String):
-            return QTextListInput()
-
-        if field_type.python_type == datetime.date:
-            return QDateEditNoScroll(parent, calendarPopup=True)
-        if field_type.python_type == bool:
-            return QBooleanInput()
-        if field_type.python_type == list and field_type.item_type.python_type == datetime.date:
-            return QDateListInput()
-        if field_type.python_type == int:
-            return QIntegerInput()
-        if field_type.python_type == float:
-            return QFloatInput()
-
-        return QStringInput()
-
-
-# workaround for mixin in abstract base class together with QObject
-# https://stackoverflow.com/questions/28720217/multiple-inheritance-metaclass-conflict
-class XPlanungInputMeta(type(QObject), type(QXPlanInputElement)):
-    pass
 
 
 class LineEditMixin:
@@ -156,7 +32,7 @@ class LineEditMixin:
         self.setInvalid(False)
 
 
-class QStringInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlanungInputMeta):
+class QStringInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
     def __init__(self, regex=None, validation_error=None):
         super(QStringInput, self).__init__()
@@ -178,7 +54,7 @@ class QStringInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlan
         return True
 
 
-class QFloatInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlanungInputMeta):
+class QFloatInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
     def value(self):
         return float(self.text()) if self.text() else None
@@ -196,7 +72,7 @@ class QFloatInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlanu
             return False
 
 
-class QIntegerInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlanungInputMeta):
+class QIntegerInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
     def value(self):
         return int(self.text()) if self.text() else None
@@ -214,7 +90,7 @@ class QIntegerInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPla
             return False
 
 
-class QBooleanInput(QXPlanInputElement, QWidget, metaclass=XPlanungInputMeta):
+class QBooleanInput(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
 
     def __init__(self):
         super(QBooleanInput, self).__init__()
@@ -279,7 +155,7 @@ class QBooleanInput(QXPlanInputElement, QWidget, metaclass=XPlanungInputMeta):
         return True
 
 
-class QFileInput(QXPlanInputElement, QgsFileWidget, metaclass=XPlanungInputMeta):
+class QFileInput(BaseInputElement, QgsFileWidget, metaclass=XPlanungInputMeta):
 
     def value(self):
         return self.filePath() or None
@@ -321,7 +197,7 @@ class QFileInput(QXPlanInputElement, QgsFileWidget, metaclass=XPlanungInputMeta)
         self.lineEdit().setFocus()
 
 
-class QTextInput(QXPlanInputElement, QTextEdit, metaclass=XPlanungInputMeta):
+class QTextInput(BaseInputElement, QTextEdit, metaclass=XPlanungInputMeta):
 
     def value(self):
         return self.toPlainText() or None
@@ -333,7 +209,7 @@ class QTextInput(QXPlanInputElement, QTextEdit, metaclass=XPlanungInputMeta):
         return True
 
 
-class QMeasureTypeInput(LineEditMixin, QXPlanInputElement, QLineEdit, metaclass=XPlanungInputMeta):
+class QMeasureTypeInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
     def __init__(self, measure_type):
         super(QMeasureTypeInput, self).__init__()
@@ -504,7 +380,7 @@ class QTextListInput(QMultiInputWidget):
             el.setText(text)
 
 
-class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
+class QCheckableComboBoxInput(BaseInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
 
     def __init__(self, items=None, enum_type=None):
         super(QCheckableComboBoxInput, self).__init__()
@@ -540,7 +416,7 @@ class QCheckableComboBoxInput(QXPlanInputElement, QgsCheckableComboBox, metaclas
         self.setInvalid(False)
 
 
-class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMeta):
+class QComboBoxNoScroll(BaseInputElement, QComboBox, metaclass=XPlanungInputMeta):
     def __init__(self, scroll_widget=None, items=None, include_default=None, enum_type=None, *args, **kwargs):
         super(QComboBoxNoScroll, self).__init__(*args, **kwargs)
         self.scrollWidget = scroll_widget
@@ -577,7 +453,7 @@ class QComboBoxNoScroll(QXPlanInputElement, QComboBox, metaclass=XPlanungInputMe
         return True
 
 
-class QDateEditNoScroll(QXPlanInputElement, QgsDateEdit, metaclass=XPlanungInputMeta):
+class QDateEditNoScroll(BaseInputElement, QgsDateEdit, metaclass=XPlanungInputMeta):
 
     def __init__(self, scroll_widget=None, *args, **kwargs):
         super(QDateEditNoScroll, self).__init__(*args, **kwargs)

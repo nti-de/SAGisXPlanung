@@ -10,12 +10,10 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
 from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon, QRegExpValidator
-from qgis.core import edit, QgsFeatureRequest
 from sqlalchemy import update
 
 from SAGisXPlanung import BASE_DIR, Session, Base
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
-from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
@@ -25,7 +23,7 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand
-from SAGisXPlanung.gui.widgets.QRelationDropdowns import QAddRelationDropdown
+from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
 FORM_CLASS, CLS = uic.loadUiType(os.path.join(BASE_DIR, 'ui/attribute_edit.ui'))
 logger = logging.getLogger(__name__)

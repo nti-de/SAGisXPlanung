@@ -5,7 +5,7 @@ from typing import Union
 
 from geoalchemy2 import WKTElement
 from qgis.PyQt.QtWidgets import QSizePolicy, QCheckBox
-from qgis.PyQt import QtWidgets, QtCore
+from qgis.PyQt import QtWidgets
 from qgis.gui import QgsMapLayerComboBox, QgsFeaturePickerWidget
 from qgis.core import QgsMapLayerProxyModel, QgsGeometry, QgsFeature, QgsDataSourceUri
 from qgis.PyQt.QtGui import QIcon
@@ -16,14 +16,14 @@ from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, geometry_d
 from SAGisXPlanung.Tools.IdentifyFeatureTool import IdentifyFeatureTool
 
 from SAGisXPlanung.gui.widgets import ElideLabel
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import XPlanungInputMeta, QXPlanInputElement
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, XPlanungInputMeta
 
 FETCH_LIMIT_WEB = 1000
 
 logger = logging.getLogger(__name__)
 
 
-class QFeatureIdentify(QXPlanInputElement, QtWidgets.QWidget, metaclass=XPlanungInputMeta):
+class QFeatureIdentify(BaseInputElement, QtWidgets.QWidget, metaclass=XPlanungInputMeta):
     """
     Widget zum Auswählen von Features eines Polygon-VektorLayers durch Klick auf den Karten-Canvas
     """

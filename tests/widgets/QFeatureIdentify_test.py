@@ -4,7 +4,7 @@ from qgis.core import QgsVectorLayer, QgsFeature, QgsGeometry, QgsField, QgsProj
 from qgis.utils import iface
 
 from SAGisXPlanung.Tools.IdentifyFeatureTool import IdentifyFeatureTool
-from SAGisXPlanung.gui.widgets.QFeatureIdentify import QFeatureIdentify
+from SAGisXPlanung.gui.widgets.inputs.QFeatureIdentify import QFeatureIdentify
 
 
 @pytest.fixture

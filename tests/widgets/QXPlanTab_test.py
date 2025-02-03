@@ -1,10 +1,8 @@
-from datetime import datetime
-
 import pytest
 from qgis.PyQt import QtWidgets, QtCore
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
-from SAGisXPlanung.gui.widgets.QXPlanInputElement import QComboBoxNoScroll, QDateEditNoScroll, QBooleanInput, QDateListInput
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll, QDateEditNoScroll, QBooleanInput, QDateListInput
 from SAGisXPlanung.gui.widgets.DataInputPage import DataInputPage
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
