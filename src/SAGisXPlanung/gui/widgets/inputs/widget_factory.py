@@ -54,4 +54,9 @@ def create_widget(field_type, parent=None) -> BaseInputElement:
         Float: lambda _: QFloatInput(),
     }
 
-    return field_mapping.get(field_type.__class__, lambda _: QStringInput())(field_type)
+    for field_class, widget_creator in field_mapping.items():
+        if isinstance(field_type, field_class):
+            return widget_creator(field_type)
+
+    # Fallback for unrecognized types
+    return QStringInput()
