@@ -8,7 +8,6 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import Angle, ConformityException
@@ -43,17 +42,6 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
 
     grundstueck_ueberbaubar_id = Column(UUID(as_uuid=True), ForeignKey('bp_grundstueck_ueberbaubar.id', ondelete='CASCADE'))
     grundstueck_ueberbaubar = relationship('BP_UeberbaubareGrundstuecksFlaeche', back_populates='dachgestaltung')
-
-    def to_xplan_node(self, node=None, version=XPlanVersion.FIVE_THREE):
-        from SAGisXPlanung.GML.GMLWriter import GMLWriter
-
-        this_node = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{self.__class__.__name__}")
-        GMLWriter.write_attributes(this_node, self, version)
-
-        if self.hoehenangabe is not None and version != XPlanVersion.FIVE_THREE:
-            sub_node = etree.SubElement(this_node, f"{{{this_node.nsmap['xplan']}}}{'hoehenangabe'}")
-            self.hoehenangabe.to_xplan_node(sub_node)
-        return node
 
     @classmethod
     def from_xplan_node(cls, node):

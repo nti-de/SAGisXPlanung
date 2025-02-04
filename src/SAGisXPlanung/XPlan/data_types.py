@@ -7,8 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, deferred
 
 from SAGisXPlanung import Base, XPlanVersion
-from SAGisXPlanung.XPlan.codelists import CodeList
-from SAGisXPlanung.XPlan.core import XPCol
+from SAGisXPlanung.XPlan.codelists import CodeListLegacy
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt, XP_ExterneReferenzTyp, XP_SPEMassnahmenTypen, \
     XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt, XP_RechtscharakterPlanaenderung, XP_Aenderungsarten
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
@@ -17,7 +16,9 @@ from SAGisXPlanung.XPlan.types import RefURL, RegExString, ConformityException, 
 XP_PlanXP_GemeindeAssoc = Table('xp_plan_gemeinde', Base.metadata,
     Column('bp_plan_id', UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE')),
     Column('fp_plan_id', UUID(as_uuid=True), ForeignKey('fp_plan.id', ondelete='CASCADE')),
-    XPCol('lp_plan_id', UUID(as_uuid=True), ForeignKey('lp_plan.id', ondelete='CASCADE'), version=XPlanVersion.SIX),
+    Column('lp_plan_id', UUID(as_uuid=True), ForeignKey('lp_plan.id', ondelete='CASCADE'), info={
+        'xplan_version': XPlanVersion.SIX
+    }),
     Column('gemeinde_id', UUID(as_uuid=True), ForeignKey('xp_gemeinde.id'))
 )
 
@@ -86,7 +87,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     art = Column(Enum(XP_ExterneReferenzArt), doc='Art der Referenz')
     referenzName = Column(String, nullable=False, doc='Name bzw. Titel')
     referenzURL = Column(RefURL, nullable=False, doc='URI der Referenz')
-    referenzMimeType = Column(Enum(*CodeList.XP_MIME_TYPES, name="xp_mime_types"), doc='Dateityp')
+    referenzMimeType = Column(Enum(*CodeListLegacy.XP_MIME_TYPES, name="xp_mime_types"), doc='Dateityp')
     beschreibung = Column(LargeString, doc='Beschreibung')
     datum = Column(Date, doc='Datum')
 
@@ -291,8 +292,7 @@ class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
     xp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('xp_objekt.id', ondelete='CASCADE'))
     xp_objekt = relationship("XP_Objekt", back_populates="hoehenangabe")
 
-    dachgestaltung_id = XPCol(UUID(as_uuid=True), ForeignKey('bp_dachgestaltung.id', ondelete='CASCADE'),
-                              version=XPlanVersion.SIX)
+    dachgestaltung_id = Column(UUID(as_uuid=True), ForeignKey('bp_dachgestaltung.id', ondelete='CASCADE'))
     dachgestaltung = relationship("BP_Dachgestaltung", back_populates="hoehenangabe")
 
     def to_xplan_node(self, node=None, version=XPlanVersion.FIVE_THREE):
@@ -328,24 +328,20 @@ class XP_VerbundenerPlan(RelationshipMixin, ElementOrderMixin, Base):
     nummer = Column(String)
     aenderungsdatum = Column(Date, info={'xplan_version': XPlanVersion.SIX})
 
-    aendert_verbundenerPlan_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'),
-                                       version=XPlanVersion.FIVE_THREE)
+    aendert_verbundenerPlan_id = Column(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'))
     aendert_verbundenerPlan = relationship('XP_Plan', back_populates='aendert',
                                            foreign_keys=[aendert_verbundenerPlan_id])
-    wurdeGeaendertVon_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
-                                                 ForeignKey('xp_plan.id', ondelete='CASCADE'),
-                                                 version=XPlanVersion.FIVE_THREE)
+    wurdeGeaendertVon_verbundenerPlan_id = Column(UUID(as_uuid=True),
+                                                 ForeignKey('xp_plan.id', ondelete='CASCADE'))
     wurdeGeaendertVon_verbundenerPlan = relationship('XP_Plan', back_populates='wurdeGeaendertVon',
                                                      foreign_keys=[wurdeGeaendertVon_verbundenerPlan_id])
 
-    aendertPlan_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
-                                           ForeignKey('xp_bereich.id', ondelete='CASCADE'),
-                                           version=XPlanVersion.SIX)
+    aendertPlan_verbundenerPlan_id = Column(UUID(as_uuid=True),
+                                            ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     aendertPlan_verbundenerPlan = relationship('XP_Bereich', back_populates='aendertPlan',
                                                foreign_keys=[aendertPlan_verbundenerPlan_id])
-    wurdeGeaendertVonPlan_verbundenerPlan_id = XPCol(UUID(as_uuid=True),
-                                                     ForeignKey('xp_bereich.id', ondelete='CASCADE'),
-                                                     version=XPlanVersion.SIX)
+    wurdeGeaendertVonPlan_verbundenerPlan_id = Column(UUID(as_uuid=True),
+                                                      ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     wurdeGeaendertVonPlan_verbundenerPlan = relationship('XP_Bereich', back_populates='wurdeGeaendertVonPlan',
                                                          foreign_keys=[wurdeGeaendertVonPlan_verbundenerPlan_id])
 

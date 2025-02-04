@@ -24,7 +24,6 @@ from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCe
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)

@@ -10,7 +10,6 @@ from sqlalchemy.orm import relationship, declared_attr
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald, \
     XP_EigentumsartWald, XP_WaldbetretungTyp, XP_ZweckbestimmungGruen

@@ -12,7 +12,6 @@ from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_Sondernutzungen,
                                        XP_AbweichungBauNVOTypen)

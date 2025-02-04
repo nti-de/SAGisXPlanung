@@ -15,7 +15,6 @@ from qgis.PyQt.QtCore import Qt
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import BP_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
@@ -109,24 +108,23 @@ class BP_Plan(XP_Plan):
     versionSonstRechtsgrundlageText = Column(String(), doc='Textl. Spezifikation sonst. Rechtsgrundlage',
                                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
-    versionBauNVO_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                             info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauNVO')
+    versionBauNVO_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
+                             info={'xplan_version': XPlanVersion.SIX})
     versionBauNVO = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_nvo",
                                  foreign_keys=[versionBauNVO_id],
                                  info={
                                     'xplan_version': XPlanVersion.SIX,
                                     'form-type': 'inline'
                                  })
-    versionBauGB_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                            info={'xplan_version': XPlanVersion.SIX}, attribute='versionBauGB')
+    versionBauGB_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
+                            info={'xplan_version': XPlanVersion.SIX})
     versionBauGB = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_gb", foreign_keys=[versionBauGB_id],
                                 info={
                                     'xplan_version': XPlanVersion.SIX,
                                     'form-type': 'inline'
                                 })
-    versionSonstRechtsgrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                           info={'xplan_version': XPlanVersion.SIX},
-                                           attribute='versionSonstRechtsgrundlage')
+    versionSonstRechtsgrundlage_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
+                                           info={'xplan_version': XPlanVersion.SIX})
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_sonst",
                                                foreign_keys=[versionSonstRechtsgrundlage_id],
                                                info={

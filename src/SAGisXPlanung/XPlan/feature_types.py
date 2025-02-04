@@ -16,7 +16,7 @@ from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer
 
 from .XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from .conversions import XP_Rechtscharakter_EnumType
-from .core import XPCol, LayerPriorityType
+from .core import LayerPriorityType
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
@@ -281,10 +281,10 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
     text = Column(String)
     rechtsstand = Column(Enum(XP_Rechtsstand))
 
-    gesetzlicheGrundlage_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                    version=XPlanVersion.SIX, attribute='gesetzlicheGrundlage')
+    gesetzlicheGrundlage_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'))
     gesetzlicheGrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="xp_objekts", info={
-        'form-type': 'inline'
+        'form-type': 'inline',
+        'xplan_version': XPlanVersion.SIX
     })
 
     gliederung1 = Column(String)

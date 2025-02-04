@@ -7,16 +7,6 @@ from sqlalchemy import Column
 from SAGisXPlanung import XPlanVersion
 
 
-class XPCol(Column):
-    inherit_cache = True
-
-    def __init__(self, *args, version=XPlanVersion.FIVE_THREE, attribute=None, import_attr=None, **kwargs):
-        self.version = version
-        self.attribute = attribute
-        self.import_attr = import_attr
-        super(XPCol, self).__init__(*args, **kwargs)
-
-
 class LayerPriorityType(Flag):
     """ Enum to configure the layer priority of XPlanung layers when adding to the layer tree """
 

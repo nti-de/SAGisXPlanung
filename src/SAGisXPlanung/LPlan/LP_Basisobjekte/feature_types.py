@@ -13,7 +13,6 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt, LP_Raumkonkretisierung
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
@@ -50,9 +49,11 @@ class LP_Plan(XP_Plan):
                                 'form-type': 'inline'
                             })
 
-    plangeber_id = XPCol(UUID(as_uuid=True), ForeignKey('xp_plangeber.id'), version=XPlanVersion.SIX)
+    plangeber_id = Column(UUID(as_uuid=True), ForeignKey('xp_plangeber.id'),
+                          info={'xplan_version': XPlanVersion.SIX})
     plangeber = relationship("XP_Plangeber", back_populates="lp_plans", doc='Plangeber', info={
-                                'form-type': 'inline'
+                                'form-type': 'inline',
+                                'xplan_version': XPlanVersion.SIX
                             })
 
     rechtsstand = Column(Enum(LP_Rechtsstand))

@@ -8,7 +8,6 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Rechtscharakter
 from SAGisXPlanung.XPlan.conversions import SO_Rechtscharakter_EnumType
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.XPlan.types import Angle, GeometryType
 
