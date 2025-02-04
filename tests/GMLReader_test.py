@@ -4,6 +4,7 @@ import pytest
 from lxml import etree
 from geoalchemy2 import WKTElement, WKBElement
 
+from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
 from SAGisXPlanung.GML.GMLReader import GMLReader
@@ -68,7 +69,7 @@ class TestGMLReader_read_data_object:
 class TestGMLReader_readPlan:
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan.gml'], indirect=True)
-    def test_readPlan(self, gml_reader):
+    def test_read_plan_v5(self, gml_reader):
         plan = gml_reader.plan
         assert plan.name == 'bp_plan'
         assert isinstance(plan.technHerstellDatum, datetime.date)
@@ -100,6 +101,13 @@ class TestGMLReader_readPlan:
         wegerecht = next(p for p in plan.bereich[1].planinhalt if isinstance(p, BP_Wegerecht))
         assert wegerecht.flaechenschluss is False
 
+    @pytest.mark.parametrize('gml_reader', ['BPlan001_6-0.gml'], indirect=True)
+    def test_read_plan_v6(self, gml_reader):
+        plan = gml_reader.plan
+        assert plan.name == 'BPlan001_6-0'
+
+        assert plan.rel_veraenderungssperre
+        assert plan.rel_veraenderungssperre.verlaengerung == BP_VerlaengerungVeraenderungssperre.Keine
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan1.gml'], indirect=True)
     def test_readPlan_top_level_ns_issue24(self, gml_reader):

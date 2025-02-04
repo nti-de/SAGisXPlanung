@@ -231,6 +231,24 @@ class ElementOrderMixin:
             return [ins.key for ins in result_order]
 
     @classmethod
+    def xplan_attribute_name(cls, attr_name: str) -> str:
+        """ Returns xplan attribute name from column name """
+        column = getattr(cls, attr_name, None)
+        if column is not None and hasattr(column, 'info'):
+            return column.info.get('xplan_attribute', attr_name)
+        return attr_name
+
+    @classmethod
+    def attribute_by_version(cls, xplan_name: str, version: XPlanVersion) -> str:
+        """ Returns schema definition/ column name for given xplan name and version"""
+        for column in cls.__mapper__.all_orm_descriptors:
+            if hasattr(column, 'info'):
+                info = column.info
+                if info.get('xplan_attribute') == xplan_name and info.get('xplan_version') == version:
+                    return column.key
+        return xplan_name
+
+    @classmethod
     def attr_fits_version(cls, attr_name: str, version: XPlanVersion) -> bool:
         """ Überprüft, ob ein XPlanung-Attribut zur gegebenen Version des Standards gehört"""
         attr = getattr(cls, attr_name)

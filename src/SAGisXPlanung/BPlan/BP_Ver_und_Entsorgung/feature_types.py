@@ -68,10 +68,7 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    @declared_attr
-    def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungVerEntsorgung), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_zweckbestimmung_attr)
+    zweckbestimmung = Column(Enum(XP_ZweckbestimmungVerEntsorgung), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestVerEntsorgung", back_populates="versorgung",
                                        cascade="all, delete", passive_deletes=True,
@@ -89,13 +86,6 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }
-
-    @classmethod
-    def import_zweckbestimmung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'zweckbestimmung'
-        else:
-            return 'rel_zweckbestimmung'
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

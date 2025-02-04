@@ -31,7 +31,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzun
     XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
-from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, LineGeometry, MixedGeometry, PointGeometry
+from SAGisXPlanung.core.mixins.mixins import GeometryObject
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version, table_name_to_class
 from SAGisXPlanung.core.canvas_display import plan_to_map
@@ -310,7 +310,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         data_class_menu = QtWidgets.QMenu('Neues Datenobjekt hinzufügen')
         for rel in item._data.xtype.relationships():
-            if isinstance(rel[1].entity.class_, (PolygonGeometry, LineGeometry)):
+            rel_class = rel[1].entity.class_
+            if issubclass(rel_class, (XP_Objekt, GeometryObject)) and not issubclass(rel_class, XP_Bereich):
                 continue
             if next(iter(rel[1].remote_side)).primary_key or rel[1].secondary is not None:
                 continue
@@ -319,9 +320,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             if not item.xplanItem().xtype.attr_fits_version(rel[0], export_version()):
                 continue
 
-            action_name, _ = item.xplanItem().xtype.relation_prop_display(rel)
+            action_name = item.xplanItem().xtype.xplan_attribute_name(rel[0])
 
-            for entity_class in [rel[1].entity.class_, *rel[1].entity.class_.__subclasses__()]:
+            for entity_class in [rel_class, *rel_class.__subclasses__()]:
 
                 data_class_action = QtWidgets.QAction(f'{action_name} ({entity_class.__name__})', self)
                 data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=entity_class:
@@ -332,8 +333,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         child_item = item.child(i)
                         with Session() as session:
                             col = next(iter(rel[1].remote_side)).description
-                            ex = session.query(exists().where(getattr(rel[1].entity.class_, col) == item.id())).scalar()
-                        if ex and child_item.xplanItem().xtype == rel[1].entity.class_:
+                            ex = session.query(exists().where(getattr(rel_class, col) == item.id())).scalar()
+                        if ex and child_item.xplanItem().xtype == rel_class:
                             data_class_action.setToolTip('Objekt existiert bereits!')
                             data_class_action.setEnabled(False)
                 data_class_menu.addAction(data_class_action)
@@ -498,7 +499,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     value = getattr(plan_content, attr)
                 data.append([attr, value])
 
-            if isinstance(plan_content, (PointGeometry, PolygonGeometry, LineGeometry, MixedGeometry)):
+            if isinstance(plan_content, GeometryObject):
                 if hasattr(plan_content, 'geomType'):
                     geom_type = plan_content.geomType()
                 else:

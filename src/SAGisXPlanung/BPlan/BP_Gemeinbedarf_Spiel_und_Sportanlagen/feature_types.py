@@ -76,10 +76,7 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    @declared_attr
-    def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungGemeinbedarf), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_zweckbestimmung_attr)
+    zweckbestimmung = Column(Enum(XP_ZweckbestimmungGemeinbedarf), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGemeinbedarf", back_populates="gemeinbedarf",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -99,13 +96,6 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }
-
-    @classmethod
-    def import_zweckbestimmung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'zweckbestimmung'
-        else:
-            return 'rel_zweckbestimmung'
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
@@ -181,10 +171,7 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    @declared_attr
-    def zweckbestimmung(cls):
-        return XPCol(Enum(XP_ZweckbestimmungSpielSportanlage), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_zweckbestimmung_attr)
+    zweckbestimmung = Column(Enum(XP_ZweckbestimmungSpielSportanlage), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestSpielSportanlage", back_populates="spiel_sportanlage",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -198,13 +185,6 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
         ('Spielanlage', '"zweckbestimmung" LIKE \'Spielanlage\'', 'Anlage_Spielanlage.svg'),
         ('Gemischt/Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
     ]
-
-    @classmethod
-    def import_zweckbestimmung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'zweckbestimmung'
-        else:
-            return 'rel_zweckbestimmung'
 
     @classmethod
     def symbol(cls) -> QgsSymbol:

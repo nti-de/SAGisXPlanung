@@ -112,10 +112,9 @@ class GMLReader:
                              'gehoertZuPlan']:
                 continue
 
-            col = getattr(object_type, node_name)
-
-            if hasattr(col, 'import_attr') and col.import_attr is not None:
-                node_name = col.import_attr(self.import_version)
+            logger.debug(f"find column from name {node_name}")
+            node_name = object_type.attribute_by_version(node_name, self.import_version)
+            logger.debug(f"found {node_name}")
 
             if node_name in [r[0] for r in obj.relationships()]:
                 # find node content if relationship is not immediately child but instead linked via xlink
@@ -178,6 +177,7 @@ class GMLReader:
 
     @staticmethod
     def read_attribute(col_type, node_name, obj, node):
+        logger.debug(f"read attribute {node_name}, {col_type}, {obj.__class__}")
         if isinstance(col_type, Geometry):
             value = GMLReader.readGeometry(node[0])
             if value is None:

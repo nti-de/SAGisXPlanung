@@ -41,10 +41,7 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     allgArtDerBaulNutzung = Column(Enum(XP_AllgArtDerBaulNutzung))
     besondereArtDerBaulNutzung = Column(XPEnum(XP_BesondereArtDerBaulNutzung, include_default=True))
 
-    @declared_attr
-    def sonderNutzung(cls):
-        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_sondernutzung_attr)
+    sonderNutzung = Column(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_sondernutzung = relationship("FP_KomplexeSondernutzung", back_populates="baugebiet",
                                      cascade="all, delete", passive_deletes=True, info={
@@ -55,13 +52,6 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
     nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     abweichungBauNVO = Column(XPEnum(XP_AbweichungBauNVOTypen, include_default=True),
                               info={'xplan_version': XPlanVersion.SIX})
-
-    @classmethod
-    def import_sondernutzung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'sonderNutzung'
-        else:
-            return 'rel_sondernutzung'
 
     @classmethod
     def symbol(cls):

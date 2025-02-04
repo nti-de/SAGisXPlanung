@@ -1,8 +1,15 @@
 import pytest
+from PyQt5.QtCore import QObject
+from PyQt5.QtWidgets import QGridLayout, QLabel
 from qgis.PyQt import QtWidgets, QtCore
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import declarative_base
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
-from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll, QDateEditNoScroll, QBooleanInput, QDateListInput
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll, QDateEditNoScroll, QBooleanInput, \
+    QDateListInput, QStringInput
 from SAGisXPlanung.gui.widgets.DataInputPage import DataInputPage
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
@@ -27,7 +34,7 @@ def tab_widget(mocker):
     return tab
 
 
-class TestQXPlanScrollPage_createInput:
+class TestDataInputPage_createInput:
 
     @pytest.mark.parametrize('input_name,expected_control,required', [('ausfertigungsDatum', QDateEditNoScroll, False),
                                                                       ('rechtsstand', QComboBoxNoScroll, False),
@@ -35,7 +42,7 @@ class TestQXPlanScrollPage_createInput:
                                                                       ('hoehenbezug', QtWidgets.QLineEdit, False),
                                                                       ('auslegungsStartDatum', QDateListInput, False),
                                                                       ('planArt', QComboBoxNoScroll, True)])
-    def test_createInput(self, scroll_page, input_name, expected_control, required):
+    def test_create_input(self, scroll_page, input_name, expected_control, required):
         mapper_prop = getattr(BP_Plan, input_name)
         _, control = scroll_page.create_input(input_name, mapper_prop)
 
@@ -43,8 +50,26 @@ class TestQXPlanScrollPage_createInput:
         if required:
             assert input_name in scroll_page.required_inputs
 
+    def test_create_input_advanced_column_config(self, scroll_page):
+        TestBase = declarative_base()
 
-class TestQXPlanScrollPage_getObjectFromInputs:
+        class ExampleModel(ElementOrderMixin, TestBase):
+            __tablename__ = 'example'
+
+            id = Column(Integer, primary_key=True)
+            columnA_v5 = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE, 'xplan_attribute': 'columnA'})
+            columnA_v6 = Column(Integer, info={'xplan_version': XPlanVersion.SIX, 'xplan_attribute': 'columnA'})
+
+        input_page = DataInputPage(ExampleModel, None)
+
+        assert len(input_page.fields) == 1  # form should contain one row for default version 5.3
+        assert isinstance(input_page.fields.get('columnA_v5'), QStringInput)
+        labels = input_page.findChildren(QLabel)
+        assert len(labels) == 1
+        assert labels[0].text() == 'columnA'  # validate that label shows xplan name instead of column name
+
+
+class TestDataInputPage_getObjectFromInputs:
 
     def test_get_object(self, mocker, scroll_page):
         session_mock = mocker.MagicMock()

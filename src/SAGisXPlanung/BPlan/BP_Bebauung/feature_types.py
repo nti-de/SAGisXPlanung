@@ -106,10 +106,7 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
     allgArtDerBaulNutzung = Column(Enum(XP_AllgArtDerBaulNutzung))
     besondereArtDerBaulNutzung = Column(XPEnum(XP_BesondereArtDerBaulNutzung, include_default=True))
 
-    @declared_attr
-    def sondernutzung(cls):
-        return XPCol(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_sondernutzung_attr)
+    sondernutzung = Column(ARRAY(Enum(XP_Sondernutzungen)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_sondernutzung = relationship("BP_KomplexeSondernutzung", back_populates="baugebiet",
                                      cascade="all, delete", passive_deletes=True, info={
@@ -128,13 +125,6 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
     refGebaeudequerschnitt = relationship("XP_ExterneReferenz", back_populates="baugebiet", cascade="all, delete",
                                           passive_deletes=True)
     zugunstenVon = Column(String)
-
-    @classmethod
-    def import_sondernutzung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'sondernutzung'
-        else:
-            return 'rel_sondernutzung'
 
     @classmethod
     def symbol(cls):
@@ -575,10 +565,7 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    @declared_attr
-    def zweckbestimmung(cls):
-        return XPCol(ARRAY(Enum(BP_ZweckbestimmungNebenanlagen)), info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_zweckbestimmung_attr)
+    zweckbestimmung = Column(ARRAY(Enum(BP_ZweckbestimmungNebenanlagen)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestNebenanlagen", back_populates="nebenanlage",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -592,13 +579,6 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
         return {
             'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
         }
-
-    @classmethod
-    def import_zweckbestimmung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'zweckbestimmung'
-        else:
-            return 'rel_zweckbestimmung'
 
     @classmethod
     def symbol(cls):

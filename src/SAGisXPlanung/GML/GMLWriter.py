@@ -8,14 +8,15 @@ from zipfile import ZipFile
 from lxml import etree
 from geoalchemy2 import WKBElement, WKTElement
 from osgeo import ogr, osr
+from sqlalchemy.orm import RelationshipProperty
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import enforce_wkb_constraints
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, \
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
-from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject
 from SAGisXPlanung.utils import is_url
 
 logger = logging.getLogger(__name__)
@@ -51,9 +52,7 @@ class GMLWriter:
         self.plan_name = plan.name
 
         self.root.append(self.writeEnvelope(plan.raeumlicherGeltungsbereich))
-        self.root.append(self.writePlan(plan))
-        for b in plan.bereich:
-            self.root.append(self.writeXPBereich(b))
+        self.write_feature(plan)
 
     def toGML(self) -> bytes:
         xml = etree.tostring(self.root, pretty_print=True, xml_declaration=True, encoding='UTF-8', standalone=True)
@@ -111,70 +110,88 @@ class GMLWriter:
 
         return boundedBy
 
-    def writePlan(self, plan):
+    def write_feature(self, xplan_object, parent_node=None, only_attributes=False):
         """
-        Erstellt einen XML-Knoten der entsprechenden Planart.
-
-        Parameters
-        ----------
-        plan: XP_Plan
-            XP_Plan Objekt
-        Returns
-        -------
-        lxml.etree.Element
-            <xplan:XP_Plan>-Knoten des XP_Plan Objekts
-
+        Erstellt einen XPlanGML-Knoten aus einem beliebigen FeatureType.
+        Fügt FeautureTypes am Ende der Rootnode des XPlanGML ein, ansonsten als Inline-Objekt der node.
         """
-        feature = etree.Element(f"{{{self.nsmap['gml']}}}featureMember", nsmap=self.nsmap)
-        xplan = etree.SubElement(feature, f"{{{self.nsmap['xplan']}}}{plan.__class__.__name__}",
-                                 {f"{{{self.nsmap['gml']}}}id": f"GML_{plan.id}"})
-        xplan.append(self.writeEnvelope(plan.raeumlicherGeltungsbereich))
+        # if no parent_node is given, the object is a new feature
+        if parent_node is None:
+            feature = etree.Element(f"{{{self.nsmap['gml']}}}featureMember", nsmap=self.nsmap)
+        else:
+            feature = parent_node
 
-        elements = plan.__class__.element_order(version=self.version)
-        rels = plan.relationships()
-        for attr in elements:
-            value = getattr(plan, attr)
-            if value is None:
+        xp_objekt = etree.SubElement(feature, f"{{{self.nsmap['xplan']}}}{xplan_object.__class__.__name__}",
+                                     nsmap=self.nsmap)
+        if not parent_node:
+            xp_objekt.attrib[f"{{{self.nsmap['gml']}}}id"] = f"GML_{xplan_object.id}"
+
+        # if feature has a geometry, write envelope
+        if isinstance(xplan_object, GeometryObject):
+            xp_objekt.append(
+                self.writeEnvelope(getattr(xplan_object, xplan_object.__geometry_column_name__))
+            )
+
+        # if feature is a reference, load its reference
+        if isinstance(xplan_object, XP_ExterneReferenz):
+            file = getattr(xplan_object, 'file')
+            if file is not None:
+                self.files[xplan_object.referenzURL] = (getattr(xplan_object, 'file'))
+
+        for (attr, mapper_property) in xplan_object.__class__.element_order(version=self.version, ret_fmt='sqla'):
+            value = getattr(xplan_object, attr)
+            if isinstance(mapper_property, RelationshipProperty) and only_attributes is True:
                 continue
-            if isinstance(value, list) and not value:
-                continue
-            if attr in ["gemeinde", "externeReferenz", "verfahrensMerkmale", "aendert", "wurdeGeaendertVon"]:
-                for g in value:
-                    f = etree.SubElement(xplan, f"{{{self.nsmap['xplan']}}}{attr}")
-                    f.append(self.writeSubObject(g))
-                continue
-            if isinstance(value, Enum) and hasattr(value, 'version'):
-                if value.version not in [None, self.version]:
-                    continue
-            f = etree.Element(f"{{{self.nsmap['xplan']}}}{attr}")
-            if attr == "raeumlicherGeltungsbereich":
-                f.append(self.writeGeometry(value))
-            elif attr == "bereich":
-                f.attrib[f"{{{self.nsmap['xlink']}}}href"] = f"#GML_{value[0].id}"
-                for bereich in value[1:]:
-                    etree.SubElement(xplan, f"{{{self.nsmap['xplan']}}}{attr}",
-                                     {f"{{{self.nsmap['xlink']}}}href": f"#GML_{bereich.id}"})
-            elif attr == "plangeber" or attr == "rel_veraenderungssperre":
-                rel = getattr(plan.__class__, attr).property
-                attr, _ = plan.__class__.relation_prop_display((attr, rel))
-                f.tag = f"{{{self.nsmap['xplan']}}}{attr.lower()}"
-                f.append(self.writeSubObject(value))
-            elif isinstance(value, list) and value:  # TODO: `and value` can never be reached?; also move to further up and make full loop
-                f.text = writeTextNode(value[0])
-                for e in value[1:]:
-                    if isinstance(e, Enum) and hasattr(e, 'version'):
-                        if e.version not in [None, self.version]:
+            if isinstance(mapper_property, RelationshipProperty):
+                if not mapper_property.uselist:
+                    value = [value] if value is not None else []
+                for o in value:
+                    # other feature types should appear via xlink
+                    if isinstance(o, (XP_Objekt, XP_Plan, XP_Bereich, XP_AbstraktesPraesentationsobjekt)):
+                        if hasattr(o, 'xp_versions') and self.version not in o.xp_versions:
                             continue
-                    el = etree.SubElement(xplan, f"{{{self.nsmap['xplan']}}}{attr}")
-                    el.text = writeTextNode(e)
-            else:
-                f.text = writeTextNode(value)
+                        if isinstance(o, XP_AbstraktesPraesentationsobjekt):
+                            if isinstance(o, XP_Nutzungsschablone) and o.hidden:
+                                continue
+                            if o.position is None:
+                                continue
 
-            xplan.append(f)
+                        f = etree.SubElement(xp_objekt, f"{{{self.nsmap['xplan']}}}{attr}")
+                        f.attrib[f"{{{self.nsmap['xlink']}}}href"] = f"#GML_{o.id}"
+                        if mapper_property.info.get('link') == 'xlink-only':
+                            continue
+
+                        self.write_feature(o)
+                        continue
+
+                    # export with xplan_name instead of attribute name
+                    xplan_name = xplan_object.__class__.xplan_attribute_name(attr)
+                    tag = f"{{{self.nsmap['xplan']}}}{xplan_name}"
+                    f = etree.SubElement(xp_objekt, tag)
+
+                    if hasattr(o, 'to_xplan_node'):
+                        o.to_xplan_node(f, version=self.version)
+                    else:
+                        self.write_feature(o, parent_node=f)
+                continue
+
+            self.write_attribute(xp_objekt, xplan_object, attr, self.version)
+
+        if isinstance(xplan_object, (XP_Objekt, XP_Plan, XP_Bereich, XP_AbstraktesPraesentationsobjekt)):
+            self.root.append(feature)
 
         return feature
 
-    def writeGeometry(self, geom):
+    @staticmethod
+    def writeUOM(node, attr, obj):
+        """ Fügt einem XML-Knoten je nach Datentyp die passende XPlanGML-Einheit als Attribut hinzu"""
+        try:
+            node.attrib['uom'] = getattr(obj.__class__, attr).property.columns[0].type.UOM
+        except:
+            pass
+
+    @staticmethod
+    def write_geometry(geom):
         """
         Erstellt einen GML-Knoten für eine beliebige Geometrie
         Parameters
@@ -202,155 +219,49 @@ class GMLWriter:
         gml = ogr_geom.ExportToGML(options=["FORMAT=GML32", f"GMLID=GML_{uuid4()}", "GML3_LONGSRS=NO", "NAMESPACE_DECL=YES"])
         return parse_etree(gml)
 
-    def writeSubObject(self, obj):
-        """
-        Erstellt einen XPlanGML-Knoten aus einem simplen XPlan-Basisobjekt, das über keine weiteren Relationen verfügt
-
-        Parameters
-        ----------
-        obj:
-            XPlan-Basisobjekt
-
-        Returns
-        -------
-        lxml.etree.Element
-            Zum Objekt korrespondierender XPlanGML-Knoten
-
-        Examples
-        --------
-        >>> gemeinde = XP_Gemeinde()
-        >>> gemeinde.ags = "37815"
-        >>> gemeinde.gemeindeName = "Berlin"
-        >>> node = self.writeSubObject(gemeinde)
-        >>> etree.tostring(node)
-        <xplan:XP_Gemeinde>
-          <xplan:ags>37815</xplan:ags>
-          <xplan:gemeindeName>Berlin</xplan:gemeindeName>
-        </xplan:XP_Gemeinde>
-
-        """
-        o = etree.Element(f"{{{self.nsmap['xplan']}}}{obj.__class__.__name__}", nsmap=self.nsmap)
-
-        if isinstance(obj, XP_ExterneReferenz):
-            file = getattr(obj, 'file')
-            if file is not None:
-                self.files[obj.referenzURL] = (getattr(obj, 'file'))
-
-        self.write_attributes(o, obj, version=self.version)
-
-        return o
-
-    def writeXPBereich(self, bereich):
-        """
-        Erstellt einen XPlanGML-Knoten aus einem XP_Bereich-Objekt. Für ein valides XPlanGML muss das Feld
-        gehoertZuPlan_id belegt sein, um die Referenz zu eine XP_Plan-Objekt herzustellen.
-
-        Parameters
-        ----------
-        bereich: XP_Bereich
-            XP_Bereich-Objekt eines Plans
-
-        Returns
-        -------
-        lxml.etree.Element
-            XPlanGML-Knoten des Bereichs
-        """
-        feature = etree.Element(f"{{{self.nsmap['gml']}}}featureMember", nsmap=self.nsmap)
-        xp_bereich = etree.SubElement(feature, f"{{{self.nsmap['xplan']}}}{bereich.__class__.__name__}",
-                                      {f"{{{self.nsmap['gml']}}}id": f"GML_{bereich.id}"})
-        if bereich.geltungsbereich:
-            xp_bereich.append(self.writeEnvelope(bereich.geltungsbereich))
-
-        for attr in bereich.__class__.element_order(version=self.version):
-            if attr in ['praesentationsobjekt', 'simple_geometry', 'planinhalt']:
-                continue
-            value = getattr(bereich, attr)
-            if attr == "gehoertZuPlan":
-                etree.SubElement(xp_bereich, f"{{{self.nsmap['xplan']}}}gehoertZuPlan",
-                                 {f"{{{self.nsmap['xlink']}}}href": f"#GML_{value.id}"})
-                continue
-            if value is None or isinstance(value, XP_Plan):
-                continue
-            if attr in ["refScan", "aendertPlan", "wurdeGeaendertVonPlan"]:
-                for r in bereich.refScan:
-                    f = etree.SubElement(xp_bereich, f"{{{self.nsmap['xplan']}}}{attr}")
-                    f.append(self.writeSubObject(r))
-                continue
-            if isinstance(value, Enum) and hasattr(value, 'version'):
-                if value.version not in [None, self.version]:
-                    continue
-            f = etree.SubElement(xp_bereich, f"{{{self.nsmap['xplan']}}}{attr}")
-            if attr == "geltungsbereich":
-                f.append(self.writeGeometry(value))
-            else:
-                f.text = writeTextNode(value)
-
-        return feature
-
-    def writePO(self, obj: XP_AbstraktesPraesentationsobjekt):
-        """
-        Erstellt einen XPlanGML-Knoten aus einer XP_AbstraktesPraesentationsobjekt - Instanz.
-        Fügt zum Root-Knoten hinzu!
-
-        Parameters
-        ----------
-        obj: XP_AbstraktesPraesentationsobjekt
-            Instanz einer von XP_AbstraktesPraesentationsobjekt erbenden Klasse
-        """
-        if isinstance(obj, XP_Nutzungsschablone) and obj.hidden:
-            return
-
-        feature = etree.Element(f"{{{self.nsmap['gml']}}}featureMember", nsmap=self.nsmap)
-        xp_po = etree.SubElement(feature, f"{{{self.nsmap['xplan']}}}{obj.__class__.__name__}",
-                                 {f"{{{self.nsmap['gml']}}}id": f"GML_{obj.id}"})
-        xp_po.append(self.writeEnvelope(obj.position))
-
-        for attr in obj.__class__.element_order(version=self.version):
-            value = getattr(obj, attr)
-            if value is None:
-                continue
-            if isinstance(value, Enum) and hasattr(value, 'version'):
-                if value.version not in [None, self.version]:
-                    continue
-            if attr.endswith('_id'):
-                etree.SubElement(xp_po, f"{{{self.nsmap['xplan']}}}{attr[:-3]}",
-                                 {f"{{{self.nsmap['xlink']}}}href": f"#GML_{value}"})
-                continue
-
-            f = etree.SubElement(xp_po, f"{{{self.nsmap['xplan']}}}{attr}")
-            if isinstance(value, WKBElement):
-                f.append(self.writeGeometry(value))
-            else:
-                f.text = writeTextNode(value)
-                self.writeUOM(f, attr, obj)
-
-        self.root.append(feature)
-        return feature
-
     @staticmethod
-    def writeUOM(node, attr, obj):
-        """ Fügt einem XML-Knoten je nach Datentyp die passende XPlanGML-Einheit als Attribut hinzu"""
-        try:
-            node.attrib['uom'] = getattr(obj.__class__, attr).property.columns[0].type.UOM
-        except:
-            pass
+    def write_attribute(node, xplan_object, attr, version: XPlanVersion):
+        value = getattr(xplan_object, attr)
+
+        if value is None:
+            # enforce writing of attribute `flaechenschluss` even if its value is None
+            if attr == 'flaechenschluss':
+                if isinstance(xplan_object, FlaechenschlussObjekt):
+                    el = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{attr}")
+                    el.text = 'true'
+                elif isinstance(xplan_object, UeberlagerungsObjekt):
+                    el = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{attr}")
+                    el.text = 'false'
+                return
+            return
+        if isinstance(value, Enum) and value.value is None:
+            return
+        if isinstance(value, Enum) and hasattr(value, 'version'):
+            if value.version not in [None, version]:
+                return
+        if isinstance(value, list):
+            for o in value:
+                if isinstance(o, Enum) and hasattr(o, 'version'):
+                    if o.version not in [None, version]:
+                        continue
+                el = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{attr}")
+                el.text = writeTextNode(o)
+            return
+        f = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{attr}")
+        if isinstance(value, (WKBElement, WKTElement)):
+            f.append(GMLWriter.write_geometry(value))
+        else:
+            f.text = writeTextNode(value)
+            GMLWriter.writeUOM(f, attr, xplan_object)
 
     @staticmethod
     def write_attributes(node, xplan_object, version: XPlanVersion):
-        rels = xplan_object.relationships()
         for attr in xplan_object.__class__.element_order(version=version):
             # don't process any relations at this point (this method only writes direct attributes)
-            if any(attr in rel for rel in rels):
+            if isinstance(xplan_object, RelationshipProperty):
                 continue
-            value = getattr(xplan_object, attr)
-            if value is None:
-                continue
-            if isinstance(value, Enum) and hasattr(value, 'version'):
-                if value.version not in [None, version]:
-                    continue
-            field = etree.SubElement(node, f"{{{node.nsmap['xplan']}}}{attr}")
-            field.text = writeTextNode(value)
-            GMLWriter.writeUOM(field, attr, xplan_object)
+
+            GMLWriter.write_attribute(node, xplan_object, attr, version)
 
 
 def writeTextNode(value):

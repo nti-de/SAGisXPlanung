@@ -96,10 +96,7 @@ class DataInputPage(QtWidgets.QScrollArea):
         h_layout.addWidget(l1)
         h_layout.addWidget(l2)
         if self.parent_attribute:
-            mapper_property = getattr(self.parent_class, self.parent_attribute).property
-            label_display_name = self.parent_attribute
-            if isinstance(mapper_property, RelationshipProperty):
-                label_display_name, _ = self.cls_type.relation_prop_display((self.parent_attribute, mapper_property))
+            label_display_name = self.parent_class.xplan_attribute_name(self.parent_attribute)
 
             l3 = QtWidgets.QLabel(f'(Attribut: {label_display_name})', objectName='lParentAttribute')
             l2.setCursor(Qt.PointingHandCursor)
@@ -186,13 +183,14 @@ class DataInputPage(QtWidgets.QScrollArea):
         nullable = column.nullable
 
         control = BaseInputElement.create(field_type, self)
+        xplan_name = cls.xplan_attribute_name(attr_name)
 
         if column.doc:
             label = QtWidgets.QLabel(column.doc)
-            label.setToolTip(f'XPlanung-Attribut: {attr_name}')
+            label.setToolTip(f'XPlanung-Attribut: {xplan_name}')
         else:
-            label = QtWidgets.QLabel(attr_name)
-            tooltip = xplan_tooltip(self.cls_type, attr_name)
+            label = QtWidgets.QLabel(xplan_name)
+            tooltip = xplan_tooltip(cls, xplan_name)
             label.setToolTip(tooltip)
 
         label.setObjectName(attr_name)

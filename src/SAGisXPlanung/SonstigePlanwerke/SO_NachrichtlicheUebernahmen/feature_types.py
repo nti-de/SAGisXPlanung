@@ -277,13 +277,6 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
     nummer = Column(String)
 
     @classmethod
-    def import_artDerFestlegung_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'artDerFestlegung'
-        else:
-            return 'rel_artDerFestlegung'
-
-    @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)

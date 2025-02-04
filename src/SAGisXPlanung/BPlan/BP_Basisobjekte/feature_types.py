@@ -89,10 +89,7 @@ class BP_Plan(XP_Plan):
     inkrafttretensDatum = Column(Date(), doc='Datum des Inkrafttretens')
     ausfertigungsDatum = Column(Date(), doc='Datum der Ausfertigung')
 
-    @declared_attr
-    def veraenderungssperre(cls):
-        return XPCol(Boolean, doc='Veränderungssperre?', info={'xplan_version': XPlanVersion.FIVE_THREE},
-                     import_attr=cls.import_veraenderungssperre_attr)
+    veraenderungssperre = Column(Boolean, doc='Veränderungssperre?', info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     staedtebaulicherVertrag = Column(Boolean, doc='städtebaulicher Vertrag?')
     erschliessungsVertrag = Column(Boolean, doc='Erschließungsvertrag?')
@@ -143,13 +140,6 @@ class BP_Plan(XP_Plan):
     def avoid_export(cls):
         return super().avoid_export() + ['plangeber_id', 'versionBauNVO_id', 'versionBauGB_id',
                                         'versionSonstRechtsgrundlage_id']
-
-    @classmethod
-    def import_veraenderungssperre_attr(cls, version):
-        if version == XPlanVersion.FIVE_THREE:
-            return 'veraenderungssperre'
-        else:
-            return 'rel_veraenderungssperre'
 
     @classmethod
     @fallback_renderer
