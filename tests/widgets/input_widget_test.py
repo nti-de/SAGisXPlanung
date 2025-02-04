@@ -1,9 +1,30 @@
 from datetime import date
+import enum
 
 from PyQt5.QtWidgets import QLineEdit
+from sqlalchemy import ARRAY, Column, Enum
 
+from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_NebenanlagenFlaeche
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll, QDateListInput, QTextListInput, \
-    QDateEditNoScroll
+    QDateEditNoScroll, QCheckableComboBoxInput
+from SAGisXPlanung.gui.widgets.inputs.widget_factory import create_widget
+
+
+class TestEnum(enum.Enum):
+    A = 1
+    B = 2
+    C = 3
+
+
+class TestWidgetFactory:
+    def test_widget_factory_enum_array(self):
+        field_type = ARRAY(Enum(TestEnum))
+
+        widget = create_widget(field_type)
+
+        assert isinstance(widget, QCheckableComboBoxInput)
+        assert widget.enum_type == TestEnum
+        assert widget.count() == 3
 
 
 class TestComboBox:

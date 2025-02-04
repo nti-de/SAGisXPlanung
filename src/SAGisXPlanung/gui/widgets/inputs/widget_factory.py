@@ -24,15 +24,15 @@ def create_widget(field_type, parent=None) -> BaseInputElement:
         return QStringInput()
 
     if isinstance(field_type, ARRAY):
-        if isinstance(field_type.item_type, String):
-            return QTextListInput()
-        if isinstance(field_type.item_type, Date):
-            return QDateListInput()
         if hasattr(field_type.item_type, 'enums'):
             return QCheckableComboBoxInput(
                 _get_enum_values(field_type.item_type),
                 enum_type=field_type.item_type.enum_class
             )
+        if isinstance(field_type.item_type, String):
+            return QTextListInput()
+        if isinstance(field_type.item_type, Date):
+            return QDateListInput()
 
     if hasattr(field_type, 'enums'):
         return QComboBoxNoScroll(
