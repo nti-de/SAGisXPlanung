@@ -20,5 +20,5 @@ class LP_ZweckbestimmungGenerischeObjekte(CodeListValue):
                                  secondary=LP_ZweckbestimmungGenerischeObjekteCodelistAssoc)
 
     __mapper_args__ = {
-        "polymorphic_identity": __name__
+        "polymorphic_identity": "LP_ZweckbestimmungGenerischeObjekte"
     }

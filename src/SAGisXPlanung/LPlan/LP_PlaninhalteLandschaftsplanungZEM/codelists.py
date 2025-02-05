@@ -12,7 +12,7 @@ class LP_BioVfBiotoptyp_BKompV(CodeListValue):
                                                foreign_keys='LP_BioVfBiotoptypKomplex.bioVfBiotoptyp_BKompV_id')
 
     __mapper_args__ = {
-        "polymorphic_identity": __name__
+        "polymorphic_identity": "LP_BioVfBiotoptyp_BKompV"
     }
 
 
@@ -25,7 +25,7 @@ class LP_BioVfBiotoptyp_LandesKS(CodeListValue):
                                                foreign_keys='LP_BioVfBiotoptypKomplex.bioVfBiotoptyp_LandesKS_id')
 
     __mapper_args__ = {
-        "polymorphic_identity": __name__
+        "polymorphic_identity": "LP_BioVfBiotoptyp_LandesKS"
     }
 
 
@@ -38,5 +38,5 @@ class LP_BioVf_FFH_LRT(CodeListValue):
                                                foreign_keys='LP_BioVfBiotoptypKomplex.bioVf_FFH_LRT_id')
 
     __mapper_args__ = {
-        "polymorphic_identity": __name__
+        "polymorphic_identity": "LP_BioVf_FFH_LRT"
     }

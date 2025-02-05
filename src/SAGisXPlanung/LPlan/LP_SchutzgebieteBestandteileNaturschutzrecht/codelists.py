@@ -12,5 +12,5 @@ class LP_DetailGesetzlGeschBiotopLR(CodeListValue):
                                                                  foreign_keys='LP_SchutzBestimmterTeileVonNaturUndLandschaft.detailGesetzlGeschBiotopLR_id')
 
     __mapper_args__ = {
-        "polymorphic_identity": __name__
+        "polymorphic_identity": "LP_DetailGesetzlGeschBiotopLR"
     }
