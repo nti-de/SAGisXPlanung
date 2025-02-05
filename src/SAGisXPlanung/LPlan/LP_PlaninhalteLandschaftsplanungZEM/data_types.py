@@ -10,7 +10,6 @@ from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.enums import LP_Adr
     LP_BodenAuspraegung, LP_ErholungFunktionen, LP_KlimaArt, LP_LandschaftsbildArt, LP_LuftArt, LP_SchutzgutArt, \
     LP_SchutzPflegeEntwicklung, LP_WasserAuspraegung, LP_ZielDimensionTyp, LP_BioVfPflanzenArtSystematik, \
     LP_BioVfPflanzenArtRechtlicherSchutz
-from SAGisXPlanung.XPlan.core import XPCol
 from SAGisXPlanung.XPlan.types import XPEnum
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
@@ -104,20 +103,17 @@ class LP_BioVfBiotoptypKomplex(RelationshipMixin, ElementOrderMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     # [0..1]
-    bioVfBiotoptyp_BKompV_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                                     attribute='bioVfBiotoptyp_BKompV')
+    bioVfBiotoptyp_BKompV_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
     bioVfBiotoptyp_BKompV = relationship("LP_BioVfBiotoptyp_BKompV", back_populates=__tablename__,
                                          foreign_keys=[bioVfBiotoptyp_BKompV_id], info={ 'form-type': 'inline' })
 
     # [0..1]
-    bioVfBiotoptyp_LandesKS_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                                       attribute='bioVfBiotoptyp_LandesKS')
+    bioVfBiotoptyp_LandesKS_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
     bioVfBiotoptyp_LandesKS = relationship("LP_BioVfBiotoptyp_LandesKS", back_populates=__tablename__,
                                            foreign_keys=[bioVfBiotoptyp_LandesKS_id], info={ 'form-type': 'inline' })
 
     # [0..1]
-    bioVf_FFH_LRT_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                             attribute='bioVf_FFH_LRT')
+    bioVf_FFH_LRT_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
     bioVf_FFH_LRT = relationship("LP_BioVf_FFH_LRT", back_populates=__tablename__,
                                  foreign_keys=[bioVf_FFH_LRT_id], info={ 'form-type': 'inline' })
 

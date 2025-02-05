@@ -72,8 +72,8 @@ class LP_ZieleErfordernisseMassnahmen(MixedGeometry, LP_Objekt):
     erholung = relationship("LP_ErholungKomplex", back_populates="ziele_erfordernisse_massnahmen",
                             cascade="all, delete", passive_deletes=True)
 
-    freiraeume = Column(ARRAY(String))  # TODO: CharacterString [0..*]
-    foerdermoeglichkeit = Column(ARRAY(String))  # TODO: CharacterString [0..*]
+    freiraeume = Column(ARRAY(String))
+    foerdermoeglichkeit = Column(ARRAY(String))
 
     # [0..*]
     nutzungseinschraenkung = relationship("LP_NutzungseinschraenkungKomplex", back_populates="ziele_erfordernisse_massnahmen",

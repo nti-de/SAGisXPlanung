@@ -34,7 +34,7 @@ class LP_BiotopverbundBiotopvernetzung(MixedGeometry, LP_Objekt):
     bioVerbundsystemArt = Column(XPEnum(LP_BioVerbundsystemArt), nullable=False)
     bioVStandortFeuchte = Column(XPEnum(LP_BioVStandortFeuchte, include_default=True))
     bioVerbundsystemText = Column(String)
-    foerdermoeglichkeit = Column(ARRAY(String))  # TODO: CharacterString [0..*]
+    foerdermoeglichkeit = Column(ARRAY(String))
 
     @classmethod
     def renderer(cls, geom_type: GeometryType):

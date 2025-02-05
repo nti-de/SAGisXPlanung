@@ -8,7 +8,7 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Objekt
 from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.enums import LP_KlassifizierungNaturschutzrecht, \
     LP_RechtsstandSchutzGeb, LP_GesGeschBiotopTyp, LP_SchutzzonenNaturschutzrecht
-from SAGisXPlanung.XPlan.core import xp_version, XPCol
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 
@@ -37,8 +37,7 @@ class LP_SchutzBestimmterTeileVonNaturUndLandschaft(MixedGeometry, LP_Objekt):
     gesetzlGeschBiotopText = Column(String)
 
     # [0..1]
-    detailGesetzlGeschBiotopLR_id = XPCol(UUID(as_uuid=True), ForeignKey('codelist_values.id'),
-                                          attribute='detailGesetzlGeschBiotopLR')
+    detailGesetzlGeschBiotopLR_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
     detailGesetzlGeschBiotopLR = relationship("LP_DetailGesetzlGeschBiotopLR", back_populates=__tablename__,
                                               foreign_keys=[detailGesetzlGeschBiotopLR_id], info={
                                                      'form-type': 'inline'
