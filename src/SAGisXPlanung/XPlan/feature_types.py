@@ -275,7 +275,7 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
     annotation_delete_queue = []  # stores all annotation items that should be removed from canvas after a delete
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    type = Column(String(50))
+    type = Column(String())
 
     uuid = Column(String)
     text = Column(String)
