@@ -346,7 +346,7 @@ class LP_SPEKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    schutzPflegeEntwicklungTyp = Column(Enum(LP_SchutzPflegeEntwicklung), nullable=False)
+    schutzPflegeEntwicklungTyp = Column(ARRAY(Enum(LP_SchutzPflegeEntwicklung)), nullable=False)
     schutzPflegeEntwicklungText = Column(String)
 
     # [1..*]
