@@ -4,6 +4,7 @@ from collections import namedtuple
 from typing import List
 
 import yaml
+from PyQt5.QtWidgets import QVBoxLayout
 from qgis.PyQt import QtCore, QtWidgets, QtGui
 from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
@@ -16,7 +17,7 @@ from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.types import InvalidFormException
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
-from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput, QMultiInputWidget
 from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
 
 PYQT_DEFAULT_DATE = datetime.date(1752, 9, 14)
@@ -128,7 +129,19 @@ class DataInputPage(QtWidgets.QScrollArea):
 
                 label, control = self.create_input(key, prop)
                 control.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-                grid.addWidget(label, i - col_skip, 0)
+
+                # wrap label in spacer items, to keep it aligned with first row of control widget
+                # when the control widget has expanding rows
+                if isinstance(control, QMultiInputWidget):
+                    spacer_container = QVBoxLayout()
+                    spacer_container.addItem(QSpacerItem(20, 5, QSizePolicy.Minimum, QSizePolicy.Minimum))
+                    spacer_container.addWidget(label)
+                    spacer_container.addItem(QSpacerItem(20, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+
+                    grid.addLayout(spacer_container, i - col_skip, 0)
+                else:
+                    grid.addWidget(label, i - col_skip, 0)
+
                 grid.addWidget(control, i - col_skip, 1)
 
                 self.fields[key] = control
@@ -294,6 +307,8 @@ class ColumnResizer:
                 continue
             for i in range(widget.rowCount()):
                 label = widget.itemAtPosition(i, 0).widget()
+                if not label:
+                    continue
                 size = label.minimumSizeHint().width()
                 largest_size = max(largest_size, size)
 
@@ -303,4 +318,6 @@ class ColumnResizer:
                 continue
             for i in range(widget.rowCount()):
                 label = widget.itemAtPosition(i, 0).widget()
+                if not label:
+                    continue
                 label.setMinimumWidth(largest_size)
