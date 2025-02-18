@@ -1,0 +1,1694 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--Erzeugt mit KIT (www.kit.edu) UmlToXmlTransformation-Software, Erstellungsdatum: 02.11.2022 15:52:28-->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xplan="http://www.xplanung.de/xplangml/6/0" targetNamespace="http://www.xplanung.de/xplangml/6/0" xmlns:gml="http://www.opengis.net/gml/3.2" elementFormDefault="qualified" version="6.0.2">
+  <include schemaLocation="XPlanGML_Basisschema.xsd" />
+  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="GmlProfile/gmlProfilexplan.xsd" />
+  <!--=========================================================================================-->
+  <!--FP_Bereich-->
+  <!--=========================================================================================-->
+  <element name="FP_Bereich" type="xplan:FP_BereichType" substitutionGroup="xplan:XP_Bereich" />
+  <complexType name="FP_BereichType">
+    <annotation>
+      <documentation>Diese Klasse modelliert einen Bereich eines Flächennutzungsplans.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_BereichType">
+        <sequence>
+          <element name="gehoertZuPlan" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_Plan</gml:targetElement>
+                <gml:reversePropertyName>xplan:bereich</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf den Flächennutzungsplan, zu dem das Bereichsobjekt gehört.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Bereich" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Bereich" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Flaechenobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Flaechenobjekt" type="xplan:FP_FlaechenobjektType" substitutionGroup="xplan:FP_Objekt" />
+  <complexType abstract="true" name="FP_FlaechenobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem Raumbezug (eine Einzelfläche oder eine Menge von Flächen, die sich nicht überlappen dürfen).  Die von &lt;i&gt;FP_Flaechenobjekt &lt;/i&gt;abgeleiteten Fachobjekte können sowohl als Flächenschlussobjekte als auch als Überlagerungsobjekte auftreten.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Flächenhafter Raumbezug des Objektes (Eine Einzelfläche oder eine Menge von Flächen, die sich nicht überlappen dürfen). </documentation>
+            </annotation>
+          </element>
+          <element name="flaechenschluss" type="boolean">
+            <annotation>
+              <documentation>Zeigt an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich des Flächennutzungsplans vollständig. </documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Flaechenobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Flaechenobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Flaechenschlussobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Flaechenschlussobjekt" type="xplan:FP_FlaechenschlussobjektType" substitutionGroup="xplan:FP_Flaechenobjekt" />
+  <complexType abstract="true" name="FP_FlaechenschlussobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem Raumbezug, die auf Ebene 0 immer Flächenschlussobjekte sind.
+Flächenschlussobjekte dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich des Flächennutzungsplans vollständig. </documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Flaechenschlussobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Flaechenschlussobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Geometrieobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Geometrieobjekt" type="xplan:FP_GeometrieobjektType" substitutionGroup="xplan:FP_Objekt" />
+  <complexType abstract="true" name="FP_GeometrieobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit variablem Raumbezug. Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften Raumbezug haben, gemischte Geometrie ist nicht zugelassen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte Geometrie ist nicht zugelassen.</documentation>
+            </annotation>
+          </element>
+          <element name="flaechenschluss" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt gebildet werden soll.
+Flächenschlussobjekte dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich des Flächennutzungsplans vollständig. </documentation>
+            </annotation>
+          </element>
+          <element name="flussrichtung" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften Raumbezug hat. Ist es mit dem Wert &lt;i&gt;true &lt;/i&gt;belegt, wird damit ausgedrückt, dass der Linie eine &lt;b&gt;Flussrichtung &lt;/b&gt; &lt;b&gt;in Digitalisierungsrichtung&lt;/b&gt; zugeordnet ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist, bleibt der Implementierung überlassen.
+Ist der Attributwert &lt;i&gt;false &lt;/i&gt;oder das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte &lt;b&gt;irrelevant&lt;/b&gt;.</documentation>
+            </annotation>
+          </element>
+          <element name="nordwinkel" minOccurs="0" type="gml:AngleType">
+            <annotation>
+              <documentation>Orientierung des Objektes bei punkförmigem Raumbezug als Winkel gegen die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd und West).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Geometrieobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Geometrieobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Linienobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Linienobjekt" type="xplan:FP_LinienobjektType" substitutionGroup="xplan:FP_Objekt" />
+  <complexType abstract="true" name="FP_LinienobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit linienförmigem Raumbezug (eine einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen zusammengesetzt sein kann, oder eine Menge derartiger Kurven).
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Linienförmiger Raumbezug (Einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen aufgebaut ist, oder eine Menge derartiger Kurven).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Linienobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Linienobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Objekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Objekt" type="xplan:FP_ObjektType" substitutionGroup="xplan:XP_Objekt" />
+  <complexType abstract="true" name="FP_ObjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Fachobjekte des Flächennutzungsplans.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_ObjektType">
+        <sequence>
+          <element name="spezifischePraegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_SpezifischePraegungTypen</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte spezifische bauliche Prägung einer Darstellung.</documentation>
+            </annotation>
+          </element>
+          <element name="vonGenehmigungAusgenommen" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Angabe, ob Teile des Flächennutzungsplans nach §6 Abs. 3 BauGB von der Genehmigung ausgenommen sind</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchFlaeche" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_AusgleichsFlaeche</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Ausgleichsfläche, die den Eingriff ausgleicht.</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchSPE" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_SchutzPflegeEntwicklung</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Schutz-,Pflege- oder Entwicklungsmaßnahme, die den Eingriff ausgleicht.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Objekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Objekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Plan-->
+  <!--=========================================================================================-->
+  <element name="FP_Plan" type="xplan:FP_PlanType" substitutionGroup="xplan:XP_Plan" />
+  <complexType name="FP_PlanType">
+    <annotation>
+      <documentation>Klasse zur Modellierung eines gesamten Flächennutzungsplans.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_PlanType">
+        <sequence>
+          <element name="gemeinde" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Zuständige Gemeinde</documentation>
+            </annotation>
+          </element>
+          <element name="planaufstellendeGemeinde" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese nicht unter dem Attribut &lt;i&gt;gemeinde &lt;/i&gt;aufgeführt ist. Dies kann z.B. nach Gemeindefusionen der Fall sein.</documentation>
+            </annotation>
+          </element>
+          <element name="plangeber" minOccurs="0" type="xplan:XP_PlangeberPropertyType">
+            <annotation>
+              <documentation>Für die Planung zuständige Institution
+</documentation>
+            </annotation>
+          </element>
+          <element name="planArt" type="xplan:FP_PlanArt">
+            <annotation>
+              <documentation>Typ des FPlans</documentation>
+            </annotation>
+          </element>
+          <element name="sonstPlanArt" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_SonstPlanArt</referenzierteCodelist>
+              </appinfo>
+              <documentation>Sonstiger Typ des FPlans bei "&lt;i&gt;planArt" &lt;/i&gt;== &lt;i&gt;9999&lt;/i&gt;.</documentation>
+            </annotation>
+          </element>
+          <element name="sachgebiet" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Sachgebiet eines Teilflächennutzungsplans.</documentation>
+            </annotation>
+          </element>
+          <element name="verfahren" minOccurs="0" type="xplan:FP_Verfahren">
+            <annotation>
+              <documentation>Verfahren nach dem ein FPlan aufgestellt oder geändert wird.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsstand" minOccurs="0" type="xplan:FP_Rechtsstand">
+            <annotation>
+              <documentation>Aktueller Rechtsstand des Plans.</documentation>
+            </annotation>
+          </element>
+          <element name="status" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_Status</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierter Status des Plans.</documentation>
+            </annotation>
+          </element>
+          <element name="aufstellungsbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Plan-Aufstellungsbeschlusses.</documentation>
+            </annotation>
+          </element>
+          <element name="auslegungsStartDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>Start-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung können mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="auslegungsEndDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>End-Datum der öffentlichen Auslegung. Bei mehrfacher öffentlicher Auslegung können mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="traegerbeteiligungsStartDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>Start-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung können mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="traegerbeteiligungsEndDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>End-Datum der Trägerbeteiligung. Bei mehrfacher Trägerbeteiligung  können mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="aenderungenBisDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum, bis zu dem Änderungen des Plans berücksichtigt wurden.</documentation>
+            </annotation>
+          </element>
+          <element name="entwurfsbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Entwurfsbeschlusses</documentation>
+            </annotation>
+          </element>
+          <element name="planbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Planbeschlusses</documentation>
+            </annotation>
+          </element>
+          <element name="wirksamkeitsDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum der Wirksamkeit</documentation>
+            </annotation>
+          </element>
+          <element name="versionBauNVO" minOccurs="0" type="xplan:XP_GesetzlicheGrundlagePropertyType">
+            <annotation>
+              <documentation>Spezifikation der dem Gesamtplan zugrunde liegenden Version der BauNVO</documentation>
+            </annotation>
+          </element>
+          <element name="versionBauGB" minOccurs="0" type="xplan:XP_GesetzlicheGrundlagePropertyType">
+            <annotation>
+              <documentation>Spezifikation der dem Gesamtplan zugrunde liegenden Version des BauGB</documentation>
+            </annotation>
+          </element>
+          <element name="versionSonstRechtsgrundlage" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GesetzlicheGrundlagePropertyType">
+            <annotation>
+              <documentation>Spezifikation sonstiger Rechtsgrundlagen des Gesamtplans</documentation>
+            </annotation>
+          </element>
+          <element name="bereich" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_Bereich</gml:targetElement>
+                <gml:reversePropertyName>xplan:gehoertZuPlan</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf einen Bereich des Flächennutzungsplans</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Plan" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Plan" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_PlanArt-->
+  <!--=========================================================================================-->
+  <simpleType name="FP_PlanArt">
+    <annotation>
+      <documentation>Aufzählung verschiedener Arten von Flächennutzungsplänen</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--FPlan-->
+        <annotation>
+          <documentation>Flächennutzungsplan nach § 5 BauGB.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--GemeinsamerFPlan-->
+        <annotation>
+          <documentation>Gemeinsamer Flächennutzungsplan nach § 204 BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--RegFPlan-->
+        <annotation>
+          <documentation>Regionaler Flächennutzungsplan, der zugleich die Funktion eines Regionalplans als auch eines gemeinsamen Flächennutzungsplans nach § 204 BauGB erfüllt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--FPlanRegPlan-->
+        <annotation>
+          <documentation>Flächennutzungsplan mit regionalplanerischen Festlegungen (nur in HH, HB, B).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--SachlicherTeilplan-->
+        <annotation>
+          <documentation>Sachlicher Teilflächennutzungsplan nach §5 Abs. 2b BauGB.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Flächennutzungsplan
+</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--FP_Punktobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Punktobjekt" type="xplan:FP_PunktobjektType" substitutionGroup="xplan:FP_Objekt" />
+  <complexType abstract="true" name="FP_PunktobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit punktförmigem Raumbezug (Einzelpunkt oder Punktmenge).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Punktförmiger Raumbezug (Einzelpunkt oder Punktmenge).</documentation>
+            </annotation>
+          </element>
+          <element name="nordwinkel" minOccurs="0" type="gml:AngleType">
+            <annotation>
+              <documentation>Orientierung des Punktobjektes als Winkel gegen die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd und West).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Punktobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Punktobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Rechtsstand-->
+  <!--=========================================================================================-->
+  <simpleType name="FP_Rechtsstand">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Aufstellungsbeschluss-->
+        <annotation>
+          <documentation>Der Aufstellungsbeschluss liegt vor.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--ImVerfahren-->
+        <annotation>
+          <documentation>Der Plan ist in Verfahren</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--FruehzeitigeBehoerdenBeteiligung-->
+        <annotation>
+          <documentation>Die frühzeitige Beteiligung der Behörden ( §4 Abs. 1 BauGB) wird durchgeführt.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--FruehzeitigeOeffentlichkeitsBeteiligung-->
+        <annotation>
+          <documentation>Die frühzeitige Beteiligung der Öffentlichkeit (§3 Abs. 1 BauGB) wird durchgeführt.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2250">
+        <!--Entwurfsbeschluss-->
+        <annotation>
+          <documentation>Ein Entwurfsbeschluss liegt vor</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--BehoerdenBeteiligung-->
+        <annotation>
+          <documentation>Die Beteiligung der Behörden wird durchgeführt  (§4 Abs. 2 BauGB).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2400">
+        <!--OeffentlicheAuslegung-->
+        <annotation>
+          <documentation>Der Plan wird öffentlich ausgelegt ( §3 Abs. 2 BauGB).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Plan-->
+        <annotation>
+          <documentation>Der Plan ist technisch erstellt worden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Wirksamkeit-->
+        <annotation>
+          <documentation>Der Plan ist rechtswirksam.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Untergegangen-->
+        <annotation>
+          <documentation>Der Plan wurde außer Kraft gesetzt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="50000">
+        <!--Aufgehoben-->
+        <annotation>
+          <documentation>Der Plan wurde durch ein förmliches Verfahren aufgehoben</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="50001">
+        <!--AusserKraft-->
+        <annotation>
+          <documentation>Der Plan ist ohne förmliches Verfahren z.B. durch Überplanung außer Kraft getreten</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--FP_Ueberlagerungsobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="FP_Ueberlagerungsobjekt" type="xplan:FP_UeberlagerungsobjektType" substitutionGroup="xplan:FP_Flaechenobjekt" />
+  <complexType abstract="true" name="FP_UeberlagerungsobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Flächennutzungsplans mit flächenhaftem Raumbezug, die immer Überlagerungsobjekte sind.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Ueberlagerungsobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Ueberlagerungsobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Verfahren-->
+  <!--=========================================================================================-->
+  <simpleType name="FP_Verfahren">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Normal-->
+        <annotation>
+          <documentation>Normales FPlan Verfahren.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Parag13-->
+        <annotation>
+          <documentation>FPlan Verfahren nach Parag 13 BauGB.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--FP_Abgrabung-->
+  <!--=========================================================================================-->
+  <element name="FP_Abgrabung" type="xplan:FP_AbgrabungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_AbgrabungType">
+    <annotation>
+      <documentation>Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen (§5, Abs. 2, Nr. 8 BauGB). Hier: Flächen für Abgrabungen und die Gewinnung von Bodenschätzen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="abbaugut" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Bezeichnung des Abbauguts.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Abgrabung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Abgrabung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Aufschuettung-->
+  <!--=========================================================================================-->
+  <element name="FP_Aufschuettung" type="xplan:FP_AufschuettungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_AufschuettungType">
+    <annotation>
+      <documentation>Flächen für Aufschüttungen, Abgrabungen oder für die Gewinnung von Bodenschätzen (§5, Abs. 2, Nr. 8 BauGB). Hier: Flächen für Aufschüttungen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="aufschuettungsmaterial" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Bezeichnung des aufgeschütteten Materials</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Aufschuettung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Aufschuettung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_BebauungsFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_BebauungsFlaeche" type="xplan:FP_BebauungsFlaecheType" substitutionGroup="xplan:FP_Flaechenschlussobjekt" />
+  <complexType name="FP_BebauungsFlaecheType">
+    <annotation>
+      <documentation>Darstellung einer für die Bebauung vorgesehenen Fläche (§ 5, Abs. 2, Nr. 1 BauGB).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenschlussobjektType">
+        <sequence>
+          <element name="GFZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Angabe einer maximalen Geschossflächenzahl als Maß der baulichen Nutzung.</documentation>
+            </annotation>
+          </element>
+          <element name="GFZmin" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Minimale Geschossflächenzahl bei einer Bereichsangabe (GFZmax muss ebenfalls spezifiziert werden).</documentation>
+            </annotation>
+          </element>
+          <element name="GFZmax" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximale Geschossflächenzahl bei einer Bereichsangabe (GFZmin muss ebenfalls spezifiziert werden).</documentation>
+            </annotation>
+          </element>
+          <element name="GFZdurchschnittlich" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Durchschnittliche GFZ im Baugebiet</documentation>
+            </annotation>
+          </element>
+          <element name="BMZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Angabe einer maximalen Baumassenzahl als Maß der baulichen Nutzung.</documentation>
+            </annotation>
+          </element>
+          <element name="GRZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Angabe einer maximalen Grundflächenzahl als Maß der baulichen Nutzung.</documentation>
+            </annotation>
+          </element>
+          <element name="allgArtDerBaulNutzung" minOccurs="0" type="xplan:XP_AllgArtDerBaulNutzung">
+            <annotation>
+              <documentation>Angabe der allgemeinen Art der baulichen Nutzung.</documentation>
+            </annotation>
+          </element>
+          <element name="besondereArtDerBaulNutzung" minOccurs="0" type="xplan:XP_BesondereArtDerBaulNutzung">
+            <annotation>
+              <documentation>Angabe der besonderen Art der baulichen Nutzung.</documentation>
+            </annotation>
+          </element>
+          <element name="sondernutzung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeSondernutzungPropertyType">
+            <annotation>
+              <documentation>&lt;u&gt;Differenziert Sondernutzungen nach §10 und §11 der BauNVO von 1977 und 1990. Das Attribut wird nur benutzt, wenn &lt;/u&gt;&lt;i&gt;&lt;u&gt;besondereArtDerBaulNutzung &lt;/u&gt;&lt;/i&gt;&lt;u&gt;unbelegt ist oder einen der Werte 2000 bzw. 2100 h&lt;/u&gt;at</documentation>
+            </annotation>
+          </element>
+          <element name="detaillierteArtDerBaulNutzung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_DetailArtDerBaulNutzung</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere Art der baulichen Nutzung, mit der die allgemeine und/oder besondere Art der baulichen Nutzung näher detailliert werden</documentation>
+            </annotation>
+          </element>
+          <element name="abweichungBauNVO" minOccurs="0" type="xplan:XP_AbweichungBauNVOTypen">
+            <annotation>
+              <documentation>Art der zulässigen Abweichung von der BauNVO.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_BebauungsFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_BebauungsFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_KeineZentrAbwasserBeseitigungFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_KeineZentrAbwasserBeseitigungFlaeche" type="xplan:FP_KeineZentrAbwasserBeseitigungFlaecheType" substitutionGroup="xplan:FP_Flaechenobjekt" />
+  <complexType name="FP_KeineZentrAbwasserBeseitigungFlaecheType">
+    <annotation>
+      <documentation>Baufläche, für die eine zentrale Abwasserbeseitigung nicht vorgesehen ist (§ 5, Abs. 2, Nr. 1 BauGB).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_KeineZentrAbwasserBeseitigungFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KeineZentrAbwasserBeseitigungFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_KomplexeSondernutzung-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeSondernutzung" type="xplan:FP_KomplexeSondernutzungType" />
+  <complexType name="FP_KomplexeSondernutzungType">
+    <annotation>
+      <documentation>Spezifikation einer Sondernutzung</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_Sondernutzungen">
+        <annotation>
+          <documentation>Allgemeine Festlegung der Sondernutzung</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailSondernutzung</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Sondernutzung, die die allgemeine Sondernutzung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="nutzungText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Spezifikation der Sondernutzung.</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeSondernutzung" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeSondernutzung" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeSondernutzungPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeSondernutzung" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_Gemeinbedarf-->
+  <!--=========================================================================================-->
+  <element name="FP_Gemeinbedarf" type="xplan:FP_GemeinbedarfType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_GemeinbedarfType">
+    <annotation>
+      <documentation>Darstellung von Flächen für den Gemeinbedarf nach § 5,  Abs. 2, Nr. 2 BauGB.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestGemeinbedarfPropertyType">
+            <annotation>
+              <documentation>Zweckbestimmung der Fläche</documentation>
+            </annotation>
+          </element>
+          <element name="traeger" minOccurs="0" type="xplan:XP_Traegerschaft">
+            <annotation>
+              <documentation>Trägerschaft einer Gemeinbedarfs-Fläche</documentation>
+            </annotation>
+          </element>
+          <element name="zugunstenVon" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Angabe des Begünstigten der Ausweisung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Gemeinbedarf" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Gemeinbedarf" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestGemeinbedarf-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestGemeinbedarf" type="xplan:FP_KomplexeZweckbestGemeinbedarfType" />
+  <complexType name="FP_KomplexeZweckbestGemeinbedarfType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung der Fläche</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungGemeinbedarf">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestGemeinbedarf</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestGemeinbedarf" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestGemeinbedarf" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestGemeinbedarfPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestGemeinbedarf" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestSpielSportanlage-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestSpielSportanlage" type="xplan:FP_KomplexeZweckbestSpielSportanlageType" />
+  <complexType name="FP_KomplexeZweckbestSpielSportanlageType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Spiel- und Sportanlage.</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungSpielSportanlage">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestSpielSportanlage</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestSpielSportanlage" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestSpielSportanlage" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestSpielSportanlagePropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestSpielSportanlage" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_SpielSportanlage-->
+  <!--=========================================================================================-->
+  <element name="FP_SpielSportanlage" type="xplan:FP_SpielSportanlageType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_SpielSportanlageType">
+    <annotation>
+      <documentation>Darstellung von Flächen für Spiel- und Sportanlagen nach §5,  Abs. 2, Nr. 2 BauGB.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestSpielSportanlagePropertyType">
+            <annotation>
+              <documentation>Allgemeine Zweckbestimmung der Fläche.</documentation>
+            </annotation>
+          </element>
+          <element name="zugunstenVon" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Bebünstigter der Ausweisung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_SpielSportanlage" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_SpielSportanlage" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Gruen-->
+  <!--=========================================================================================-->
+  <element name="FP_Gruen" type="xplan:FP_GruenType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_GruenType">
+    <annotation>
+      <documentation>Darstellung einer Grünfläche nach § 5, Abs. 2, Nr. 5 BauGB,</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestGruenPropertyType">
+            <annotation>
+              <documentation>Zweckbestimmung der Grünfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="nutzungsform" minOccurs="0" type="xplan:XP_Nutzungsform">
+            <annotation>
+              <documentation>Nutzungsform der Grünfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="zugunstenVon" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Begünstigter der Ausweisung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Gruen" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Gruen" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestGruen-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestGruen" type="xplan:FP_KomplexeZweckbestGruenType" />
+  <complexType name="FP_KomplexeZweckbestGruenType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Grünfläche</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungGruen">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestGruen</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestGruen" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestGruen" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestGruenPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestGruen" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestLandwirtschaft-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestLandwirtschaft" type="xplan:FP_KomplexeZweckbestLandwirtschaftType" />
+  <complexType name="FP_KomplexeZweckbestLandwirtschaftType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Fläche für die Landwirtschaft.</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungLandwirtschaft">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestLandwirtschaftsFlaeche</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestLandwirtschaft" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestLandwirtschaft" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestLandwirtschaftPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestLandwirtschaft" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestWald-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestWald" type="xplan:FP_KomplexeZweckbestWaldType" />
+  <complexType name="FP_KomplexeZweckbestWaldType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Waldfläche.</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungWald">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestWaldFlaeche</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestWald" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestWald" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestWaldPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestWald" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_Landwirtschaft-->
+  <!--=========================================================================================-->
+  <element name="FP_Landwirtschaft" type="xplan:FP_LandwirtschaftType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_LandwirtschaftType">
+    <annotation>
+      <documentation>Darstellung einer Landwirtschaftsfläche nach §5, Abs. 2, Nr. 9a.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestLandwirtschaftPropertyType">
+            <annotation>
+              <documentation>Zweckbestimmungen der Ausweisung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Landwirtschaft" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Landwirtschaft" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_WaldFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_WaldFlaeche" type="xplan:FP_WaldFlaecheType" substitutionGroup="xplan:FP_Flaechenschlussobjekt" />
+  <complexType name="FP_WaldFlaecheType">
+    <annotation>
+      <documentation>Darstellung von Waldflächen nach §5, Abs. 2, Nr. 9b,</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenschlussobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestWaldPropertyType">
+            <annotation>
+              <documentation>Funktion der Waldfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="eigentumsart" minOccurs="0" type="xplan:XP_EigentumsartWald">
+            <annotation>
+              <documentation>Festlegung der Eigentumsart des Waldes</documentation>
+            </annotation>
+          </element>
+          <element name="betreten" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_WaldbetretungTyp">
+            <annotation>
+              <documentation>Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die in dem Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_WaldFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_WaldFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_AnpassungKlimawandel-->
+  <!--=========================================================================================-->
+  <element name="FP_AnpassungKlimawandel" type="xplan:FP_AnpassungKlimawandelType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_AnpassungKlimawandelType">
+    <annotation>
+      <documentation>Anlagen, Einrichtungen und sonstige Maßnahmen, die der Anpassung an den Klimawandel dienen &lt;u&gt;nach §5 Abs.2 Nr.2c BauGB.&lt;/u&gt;</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="massnahme" minOccurs="0" type="xplan:FP_MassnahmeKlimawandelTypen">
+            <annotation>
+              <documentation>Klassifikation der Massnahme</documentation>
+            </annotation>
+          </element>
+          <element name="detailMassnahme" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_DetailMassnahmeKlimawandel</referenzierteCodelist>
+              </appinfo>
+              <documentation>Detaillierung der durch das Attribut &lt;i&gt;massnahme &lt;/i&gt;festgelegten Maßnahme über eine Codeliste.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_AnpassungKlimawandel" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_AnpassungKlimawandel" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_AusgleichsFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_AusgleichsFlaeche" type="xplan:FP_AusgleichsFlaecheType" substitutionGroup="xplan:FP_Flaechenobjekt" />
+  <complexType name="FP_AusgleichsFlaecheType">
+    <annotation>
+      <documentation>Flächen und Maßnahmen zum Ausgleich gemäß § 5, Abs. 2a  BauBG.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenobjektType">
+        <sequence>
+          <element name="ziel" minOccurs="0" type="xplan:XP_SPEZiele">
+            <annotation>
+              <documentation>Ziel der auf der Fläche durchzuführenden Maßnahmen.</documentation>
+            </annotation>
+          </element>
+          <element name="sonstZiel" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textlich formuliertes Ziel, wenn das Attribut &lt;i&gt;ziel &lt;/i&gt;den Wert &lt;i&gt;9999 &lt;/i&gt;(&lt;i&gt;Sonstiges&lt;/i&gt;) hat.</documentation>
+            </annotation>
+          </element>
+          <element name="massnahme" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_SPEMassnahmenDatenPropertyType">
+            <annotation>
+              <documentation>Auf der Fläche durchzuführende Maßnahme.</documentation>
+            </annotation>
+          </element>
+          <element name="refMassnahmenText" minOccurs="0" type="xplan:XP_ExterneReferenzPropertyType">
+            <annotation>
+              <documentation>Referenz auf ein Dokument in dem die Massnahmen beschrieben werden.</documentation>
+            </annotation>
+          </element>
+          <element name="refLandschaftsplan" minOccurs="0" type="xplan:XP_ExterneReferenzPropertyType">
+            <annotation>
+              <documentation>Referenz auf den Landschaftsplan.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_AusgleichsFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_AusgleichsFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_MassnahmeKlimawandelTypen-->
+  <!--=========================================================================================-->
+  <simpleType name="FP_MassnahmeKlimawandelTypen">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--ErhaltFreiflaechen-->
+        <annotation>
+          <documentation>Erhalt vegetationsbestandener Freiflächen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10000">
+        <!--ErhaltPrivGruen-->
+        <annotation>
+          <documentation>Erhalt privater Grünflächen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10001">
+        <!--ErhaltOeffentlGruen-->
+        <annotation>
+          <documentation>Erhalt öffentlicher Grünflächen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10002">
+        <!--ErhaltKaltluftschneise-->
+        <annotation>
+          <documentation>Erhalt einer Kaltluftschneise</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstMassnahme-->
+        <annotation>
+          <documentation>Sonstige Massnahme</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--FP_SchutzPflegeEntwicklung-->
+  <!--=========================================================================================-->
+  <element name="FP_SchutzPflegeEntwicklung" type="xplan:FP_SchutzPflegeEntwicklungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_SchutzPflegeEntwicklungType">
+    <annotation>
+      <documentation>Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft (§5 Abs. 2, Nr. 10 BauGB)</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="ziel" minOccurs="0" type="xplan:XP_SPEZiele">
+            <annotation>
+              <documentation>Ziel der Maßnahmen</documentation>
+            </annotation>
+          </element>
+          <element name="sonstZiel" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textlich formuliertes Ziel, wenn das Attribut &lt;i&gt;ziel &lt;/i&gt;den Wert &lt;i&gt;9999 &lt;/i&gt;(&lt;i&gt;Sonstiges&lt;/i&gt;) hat.</documentation>
+            </annotation>
+          </element>
+          <element name="massnahme" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_SPEMassnahmenDatenPropertyType">
+            <annotation>
+              <documentation>Durchzuführende Maßnahme.</documentation>
+            </annotation>
+          </element>
+          <element name="istAusgleich" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Gibt an, ob die Maßnahme zum Ausgleich eines Eingriffs benutzt wird.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_SchutzPflegeEntwicklung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_SchutzPflegeEntwicklung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_DarstellungNachLandesrecht-->
+  <!--=========================================================================================-->
+  <element name="FP_DarstellungNachLandesrecht" type="xplan:FP_DarstellungNachLandesrechtType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_DarstellungNachLandesrechtType">
+    <annotation>
+      <documentation>Inhalt des Flächennutzungsplans, der auf einer spezifischen Rechtsverordnung eines Bundeslandes beruht.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="detailZweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_DetailZweckbestimmungNachLandesrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detaillierte Zweckbestimmung der Planinhalts-</documentation>
+            </annotation>
+          </element>
+          <element name="kurzbeschreibung" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textuelle Beschreibung des Planinhalts.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_DarstellungNachLandesrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_DarstellungNachLandesrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_FlaecheOhneDarstellung-->
+  <!--=========================================================================================-->
+  <element name="FP_FlaecheOhneDarstellung" type="xplan:FP_FlaecheOhneDarstellungType" substitutionGroup="xplan:FP_Flaechenschlussobjekt" />
+  <complexType name="FP_FlaecheOhneDarstellungType">
+    <annotation>
+      <documentation>Fläche, für die keine geplante Nutzung angegben werden kann</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenschlussobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_FlaecheOhneDarstellung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_FlaecheOhneDarstellung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_GenerischesObjekt-->
+  <!--=========================================================================================-->
+  <element name="FP_GenerischesObjekt" type="xplan:FP_GenerischesObjektType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_GenerischesObjektType">
+    <annotation>
+      <documentation>Klasse zur Modellierung aller Inhalte des FPlans, die durch keine spezifische XPlanung-Klasse repräsentiert werden können.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_ZweckbestimmungGenerischeObjekte</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte Zweckbestimmung des Generischen Objekts.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_GenerischesObjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_GenerischesObjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Kennzeichnung-->
+  <!--=========================================================================================-->
+  <element name="FP_Kennzeichnung" type="xplan:FP_KennzeichnungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_KennzeichnungType">
+    <annotation>
+      <documentation>Kennzeichnung gemäß §5 Abs. 3 BauGB.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_ZweckbestimmungKennzeichnung">
+            <annotation>
+              <documentation>Zweckbestimmung der Kennzeichnung.</documentation>
+            </annotation>
+          </element>
+          <element name="istVerdachtsflaeche" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Legt fest, ob eine Altlast-Verdachtsfläche vorliegt</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Nummer in einem Altlastkataster</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Kennzeichnung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Kennzeichnung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_Nutzungsbeschraenkung-->
+  <!--=========================================================================================-->
+  <element name="FP_Nutzungsbeschraenkung" type="xplan:FP_NutzungsbeschraenkungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_NutzungsbeschraenkungType">
+    <annotation>
+      <documentation>Umgrenzungen von Flächen für Nutzungsbeschränkungen oder für Vorkehrungen zum Schutz gegen schädliche Umwelteinwirkungen im Sinne des Bundes-Immissionsschutzgesetzes (§ 5, Abs. 2, Nr. 6 BauGB)</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="nutzung" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Festgesetzte Nutzung der Fläche</documentation>
+            </annotation>
+          </element>
+          <element name="typ" minOccurs="0" type="xplan:XP_ImmissionsschutzTypen">
+            <annotation>
+              <documentation>Differenzierung der Fläche gemäß BauGB</documentation>
+            </annotation>
+          </element>
+          <element name="technVorkehrung" minOccurs="0" type="xplan:XP_TechnVorkehrungenImmissionsschutz">
+            <annotation>
+              <documentation>Klassifizierung der auf der Fläche zu treffenden baulichen oder sonstigen technischen Vorkehrungen</documentation>
+            </annotation>
+          </element>
+          <element name="detaillierteTechnVorkehrung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:XP_DetailTechnVorkehrungImmissionsschutz</referenzierteCodelist>
+              </appinfo>
+              <documentation>Detaillierte Klassifizierung der auf der Fläche zu treffenden baulichen oder sonstigen technischen Vorkehrungen.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_Nutzungsbeschraenkung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_Nutzungsbeschraenkung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_PrivilegiertesVorhaben-->
+  <!--=========================================================================================-->
+  <element name="FP_PrivilegiertesVorhaben" type="xplan:FP_PrivilegiertesVorhabenType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_PrivilegiertesVorhabenType">
+    <annotation>
+      <documentation>Standorte für privilegierte Außenbereichsvorhaben und für sonstige Anlagen in Außenbereichen gem. § 35 Abs. 1 und 2 BauGB.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_ZweckbestimmungPrivilegiertesVorhaben">
+            <annotation>
+              <documentation>Zweckbestimmungen des Vorhabens.</documentation>
+            </annotation>
+          </element>
+          <element name="vorhaben" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Nähere Beschreibung des Vorhabens.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_PrivilegiertesVorhaben" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_PrivilegiertesVorhaben" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_TextAbschnittFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_TextAbschnittFlaeche" type="xplan:FP_TextAbschnittFlaecheType" substitutionGroup="xplan:FP_Ueberlagerungsobjekt" />
+  <complexType name="FP_TextAbschnittFlaecheType">
+    <annotation>
+      <documentation>Bereich, in dem bestimmte Textliche Darstellungen gültig sind, die über die Relation "&lt;i&gt;refTextInhalt&lt;/i&gt;" (Basisklasse &lt;i&gt;XP_Objekt&lt;/i&gt;) spezifiziert werden.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_UeberlagerungsobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_TextAbschnittFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_TextAbschnittFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_UnverbindlicheVormerkung-->
+  <!--=========================================================================================-->
+  <element name="FP_UnverbindlicheVormerkung" type="xplan:FP_UnverbindlicheVormerkungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_UnverbindlicheVormerkungType">
+    <annotation>
+      <documentation>Unverbindliche Vormerkung späterer Planungsabsichten
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="vormerkung" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Text der Vormerkung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_UnverbindlicheVormerkung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_UnverbindlicheVormerkung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_VorbehalteFlaeche-->
+  <!--=========================================================================================-->
+  <element name="FP_VorbehalteFlaeche" type="xplan:FP_VorbehalteFlaecheType" substitutionGroup="xplan:FP_Flaechenobjekt" />
+  <complexType name="FP_VorbehalteFlaecheType">
+    <annotation>
+      <documentation>Flächen auf denen bestimmte Vorbehalte wirksam sind.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_FlaechenobjektType">
+        <sequence>
+          <element name="vorbehalt" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche Formulierung des Vorbehalts.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_VorbehalteFlaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_VorbehalteFlaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_ZweckbestimmungPrivilegiertesVorhaben-->
+  <!--=========================================================================================-->
+  <simpleType name="FP_ZweckbestimmungPrivilegiertesVorhaben">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--LandForstwirtschaft-->
+        <annotation>
+          <documentation>Allgemeines Vorhaben nach §35 Abs. 1 Nr. 1 oder 2 BauGB: Vorhaben, dass "einem land- oder forstwirtschaftlichen Betrieb dient und nur einen untergeordneten Teil der Betriebsfläche einnimmt", oder "einem Betrieb der gartenbaulichen Erzeugung dient".</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10000">
+        <!--Aussiedlerhof-->
+        <annotation>
+          <documentation>Aussiedlerhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10001">
+        <!--Altenteil-->
+        <annotation>
+          <documentation>Altenteil</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10002">
+        <!--Reiterhof-->
+        <annotation>
+          <documentation>Reiterhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10003">
+        <!--Gartenbaubetrieb-->
+        <annotation>
+          <documentation>Gartenbaubetrieb</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10004">
+        <!--Baumschule-->
+        <annotation>
+          <documentation>Baumschule</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--OeffentlicheVersorgung-->
+        <annotation>
+          <documentation>Allgemeines Vorhaben nach § 35 Abs. 1 Nr. 3 BauBG: Vorhaben dass "der öffentlichen Versorgung mit Elektrizität, Gas,
+Telekommunikationsdienstleistungen, Wärme und Wasser, der Abwasserwirtschaft" ... dient.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12000">
+        <!--Wasser-->
+        <annotation>
+          <documentation>Öffentliche Wasserversorgung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12001">
+        <!--Gas-->
+        <annotation>
+          <documentation>Gasversorgung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12002">
+        <!--Waerme-->
+        <annotation>
+          <documentation>Versorgung mit Fernwärme</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12003">
+        <!--Elektrizitaet-->
+        <annotation>
+          <documentation>Versorgung mit Elektrizität.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12004">
+        <!--Telekommunikation-->
+        <annotation>
+          <documentation>Versorgung mit Telekommunikations-Dienstleistungen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12005">
+        <!--Abwasser-->
+        <annotation>
+          <documentation>Abwasser Entsorgung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--OrtsgebundenerGewerbebetrieb-->
+        <annotation>
+          <documentation>Vorhaben nach §35 Abs. 1 Nr. 3 BauGB: Vorhaben das ...."einem ortsgebundenen gewerblichen Betrieb dient".</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--BesonderesVorhaben-->
+        <annotation>
+          <documentation>Vorhaben nach §35 Abs. 1 Nr. 4 BauGB: Vorhaben, dass "wegen seiner besonderen Anforderungen an die Umgebung, wegen seiner nachteiligen Wirkung auf die Umgebung oder wegen seiner besonderen Zweckbestimmung nur im Außenbereich ausgeführt werden soll".</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16000">
+        <!--BesondereUmgebungsAnforderung-->
+        <annotation>
+          <documentation>Vorhaben dass wegen seiner besonderen Anforderungen an die Umgebung nur im Außenbereich durchgeführt werden soll.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16001">
+        <!--NachteiligeUmgebungsWirkung-->
+        <annotation>
+          <documentation>Vorhaben dass wegen seiner nachteiligen Wirkung auf die Umgebung nur im Außenbereich durchgeführt werden soll.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16002">
+        <!--BesondereZweckbestimmung-->
+        <annotation>
+          <documentation>Vorhaben dass wegen seiner besonderen Zweckbestimmung nur im Außenbereich durchgeführt werden soll.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1800">
+        <!--ErneuerbareEnergien-->
+        <annotation>
+          <documentation>Allgemeine Vorhaben nach §35 Abs. 1 Nr. 4 BauGB: Vorhaben, dass "wegen seiner besonderen Anforderungen an die Umgebung, wegen seiner nachteiligen Wirkung auf die Umgebung oder wegen seiner besonderen Zweckbestimmung nur im Außenbereich ausgeführt werden soll".</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18000">
+        <!--Windenergie-->
+        <annotation>
+          <documentation>Vorhaben zur Erforschung, Entwicklung oder Nutzung der Windenergie.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18001">
+        <!--Wasserenergie-->
+        <annotation>
+          <documentation>Vorhaben zur Erforschung, Entwicklung oder Nutzung der Wasserenergie.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18002">
+        <!--Solarenergie-->
+        <annotation>
+          <documentation>Vorhaben zur Erforschung, Entwicklung oder Nutzung der Solarenergie.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18003">
+        <!--Biomasse-->
+        <annotation>
+          <documentation>Vorhaben zur energetischen Nutzung der Biomasse.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Kernenergie-->
+        <annotation>
+          <documentation>Vorhaben nach §35 Abs. 1 Nr. 7 BauGB: Vorhaben das "der Erforschung, Entwicklung oder Nutzung der Kernenergie zu friedlichen Zwecken oder der Entsorgung radioaktiver Abfälle dient".</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20000">
+        <!--NutzungKernerergie-->
+        <annotation>
+          <documentation>Vorhaben der Erforschung, Entwicklung oder Nutzung der Kernenergie zu friedlichen Zwecken.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20001">
+        <!--EntsorgungRadioaktiveAbfaelle-->
+        <annotation>
+          <documentation>Vorhaben zur Entsorgung radioaktiver Abfälle.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Vorhaben im Aussenbereich nach §35 Abs. 2 BauGB.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="99990">
+        <!--StandortEinzelhof-->
+        <annotation>
+          <documentation>Einzelhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="99991">
+        <!--BebauteFlaecheAussenbereich-->
+        <annotation>
+          <documentation>Bebaute Fläche im Außenbereich</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--FP_KomplexeZweckbestVerEntsorgung-->
+  <!--=========================================================================================-->
+  <element name="FP_KomplexeZweckbestVerEntsorgung" type="xplan:FP_KomplexeZweckbestVerEntsorgungType" />
+  <complexType name="FP_KomplexeZweckbestVerEntsorgungType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Fläche für Ver- oder Entsorgung</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:XP_ZweckbestimmungVerEntsorgung">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:FP_DetailZweckbestVerEntsorgung</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfFP_KomplexeZweckbestVerEntsorgung" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_KomplexeZweckbestVerEntsorgung" type="anyType" abstract="true" />
+  <complexType name="FP_KomplexeZweckbestVerEntsorgungPropertyType">
+    <sequence>
+      <element ref="xplan:FP_KomplexeZweckbestVerEntsorgung" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--FP_VerEntsorgung-->
+  <!--=========================================================================================-->
+  <element name="FP_VerEntsorgung" type="xplan:FP_VerEntsorgungType" substitutionGroup="xplan:FP_Geometrieobjekt" />
+  <complexType name="FP_VerEntsorgungType">
+    <annotation>
+      <documentation>Flächen für Versorgungsanlagen, für die Abfallentsorgung und Abwasserbeseitigung sowie für Ablagerungen (§5, Abs. 2, Nr. 4 BauGB).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="xplan:FP_KomplexeZweckbestVerEntsorgungPropertyType">
+            <annotation>
+              <documentation>Zweckbestimmung der Fläche.</documentation>
+            </annotation>
+          </element>
+          <element name="zugunstenVon" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Angabe des Begünstigten der Ausweisung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_VerEntsorgung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_VerEntsorgung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--FP_ZentralerVersorgungsbereich-->
+  <!--=========================================================================================-->
+  <element name="FP_ZentralerVersorgungsbereich" type="xplan:FP_ZentralerVersorgungsbereichType" substitutionGroup="xplan:FP_Ueberlagerungsobjekt" />
+  <complexType name="FP_ZentralerVersorgungsbereichType">
+    <annotation>
+      <documentation>Darstellung nach § 5 Abs. 2 Nr. 2d (Ausstattung des Gemeindegebietes mit zentralen Versorgungsbereichen).
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:FP_UeberlagerungsobjektType">
+        <sequence>
+          <element name="auspraegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:FP_ZentralerVersorgungsbereichAuspraegung</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte Ausprägung eines zentralen Versorgungsbereiches.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfFP_ZentralerVersorgungsbereich" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfFP_ZentralerVersorgungsbereich" type="anyType" abstract="true" />
+</schema>

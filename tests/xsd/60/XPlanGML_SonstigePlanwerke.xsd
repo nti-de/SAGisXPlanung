@@ -1,0 +1,2545 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--Erzeugt mit KIT (www.kit.edu) UmlToXmlTransformation-Software, Erstellungsdatum: 02.11.2022 15:53:08-->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xplan="http://www.xplanung.de/xplangml/6/0" targetNamespace="http://www.xplanung.de/xplangml/6/0" xmlns:gml="http://www.opengis.net/gml/3.2" elementFormDefault="qualified" version="6.0.2">
+  <include schemaLocation="XPlanGML_Basisschema.xsd" />
+  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="GmlProfile/gmlProfilexplan.xsd" />
+  <include schemaLocation="XPlanGML_BPlan.xsd" />
+  <!--=========================================================================================-->
+  <!--SO_Bereich-->
+  <!--=========================================================================================-->
+  <element name="SO_Bereich" type="xplan:SO_BereichType" substitutionGroup="xplan:XP_Bereich" />
+  <complexType name="SO_BereichType">
+    <annotation>
+      <documentation>Bereich eines sonstigen raumbezogenen Plans.
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_BereichType">
+        <sequence>
+          <element name="gehoertZuPlan" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:SO_Plan</gml:targetElement>
+                <gml:reversePropertyName>xplan:bereich</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf den Plan, zu dem der Bereich gehört</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Bereich" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Bereich" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Flaechenobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="SO_Flaechenobjekt" type="xplan:SO_FlaechenobjektType" substitutionGroup="xplan:SO_Objekt" />
+  <complexType abstract="true" name="SO_FlaechenobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte mit flächenhaftem Raumbezug (eine Einzelfläche oder eine Menge von Flächen, die sich nicht überlappen dürfen).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Flächenhafter Raumbezug des Objektes (Eine Einzelfläche oder eine Menge von Flächen, die sich nicht überlappen dürfen). </documentation>
+            </annotation>
+          </element>
+          <element name="flaechenschluss" type="boolean">
+            <annotation>
+              <documentation>Zeigt an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich des sonstigen raumbezogenen Plans vollständig. </documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Flaechenobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Flaechenobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Geometrieobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="SO_Geometrieobjekt" type="xplan:SO_GeometrieobjektType" substitutionGroup="xplan:SO_Objekt" />
+  <complexType abstract="true" name="SO_GeometrieobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte mit variablem Raumbezug. Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften Raumbezug haben, gemischte Geometrie ist nicht zugelassen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte Geometrie ist nicht zugelassen.</documentation>
+            </annotation>
+          </element>
+          <element name="flaechenschluss" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt gebildet werden soll. Flächenschlussobjekte dürfen sich nicht überlappen, sondern nur an den Flächenrändern berühren, wobei die jeweiligen Stützpunkte der Randkurven übereinander liegen müssen. Die Vereinigung der Flächenschlussobjekte überdeckt den Geltungsbereich des sonstigen raumbezogenen Plans vollständig. </documentation>
+            </annotation>
+          </element>
+          <element name="flussrichtung" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften Raumbezug hat. Ist es mit dem Wert &lt;i&gt;true &lt;/i&gt;belegt, wird damit ausgedrückt, dass der Linie eine &lt;b&gt;Flussrichtung &lt;/b&gt; &lt;b&gt;in Digitalisierungsrichtung&lt;/b&gt; zugeordnet ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist, bleibt der Implementierung überlassen.
+Ist der Attributwert &lt;i&gt;false &lt;/i&gt;oder das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte &lt;b&gt;irrelevant&lt;/b&gt;.</documentation>
+            </annotation>
+          </element>
+          <element name="nordwinkel" minOccurs="0" type="gml:AngleType">
+            <annotation>
+              <documentation>Orientierung des Objektes bei punktförmigem Raumbezug als Winkel gegen die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd und West)</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Geometrieobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Geometrieobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Linienobjekt-->
+  <!--=========================================================================================-->
+  <element name="SO_Linienobjekt" type="xplan:SO_LinienobjektType" substitutionGroup="xplan:SO_Objekt" />
+  <complexType name="SO_LinienobjektType">
+    <annotation>
+      <documentation>Basisklasse für Objekte mit linienförmigem Raumbezug (eine einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen zusammengesetzt sein kann, oder eine Menge derartiger Kurven).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Linienförmiger Raumbezug (Einzelne zusammenhängende Kurve, die aus Linienstücken und Kreisbögen aufgebaut ist, oder eine Menge derartiger Kurven),</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Linienobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Linienobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Objekt-->
+  <!--=========================================================================================-->
+  <element name="SO_Objekt" type="xplan:SO_ObjektType" substitutionGroup="xplan:XP_Objekt" />
+  <complexType name="SO_ObjektType">
+    <annotation>
+      <documentation>Basisklasse für die Inhalte sonstiger raumbezogener Planwerke ,von Klassen zur Modellierung nachrichtlicher Übernahmen, sowie Planart-übergreifende Planinhalte.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_ObjektType">
+        <sequence>
+          <element name="sonstRechtscharakter" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_SonstRechtscharakter</referenzierteCodelist>
+              </appinfo>
+              <documentation>Klassifizierung des Rechtscharakters wenn das Attribut "&lt;i&gt;rechtscharakter" &lt;/i&gt;den Wert "Sonstiges" (9999)  hat.</documentation>
+            </annotation>
+          </element>
+          <element name="vonGenehmigungAusgenommen" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Angabe, ob Teile des Flächennutzungsplans nach §6 Abs. 3 BauGB von der Genehmigung ausgenommen sind. Dies Attribut darf nur verwendet werden, wenn das Objekt Bestandteil eines &lt;b&gt;Flächennutzungsplans &lt;/b&gt;ist (&lt;i&gt;gehoertZuBereich &lt;/i&gt;zeogt auf ein &lt;i&gt;FP_Bereich &lt;/i&gt;Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchFPFlaeche" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_AusgleichsFlaeche</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Ausgleichsfläche im Flächennutzungsplan, die den Eingriff ausgleicht. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Flächennutzungsplans ist (gehoertZuBereich zeigt auf ein FP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchFPSPE" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:FP_SchutzPflegeEntwicklung</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Schutz-,Pflege- oder Entwicklungsmaßnahme im Flächennutzungsplan, die den Eingriff ausgleicht.Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Flächennutzungsplans ist (gehoertZuBereich zeigt auf ein FP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchBPFlaeche" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_AusgleichsFlaeche</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf Ausgleichsfläche im Bebauungsplan, die einen Eingriff ausgleicht. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist (gehoertZuBereich zeigt auf ein BP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchBPABE" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_AnpflanzungBindungErhaltung</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Anpflanzungs-, Bindungs- oder Erhaltungsmaßnahme im Bebauungsplan, durch die ein Eingriff ausgeglichen wird. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist (gehoertZuBereich zeigt auf ein BP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchBPSPEMassnahme" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_SchutzPflegeEntwicklungsMassnahme</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Schutz-, Pflege- oder Entwicklungsmaßnahme im Bebauungsplan, durch die ein Eingriff ausgeglichen wird. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist (gehoertZuBereich zeigt auf ein BP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchBPSPEFlaeche" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_SchutzPflegeEntwicklungsFlaeche</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Schutz-, Pflege- oder Entwicklungs-Fläche im Bebauungsplan, die den Eingriff ausgleicht. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist (gehoertZuBereich zeigt auf ein BP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="wirdAusgeglichenDurchBPMassnahme" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_AusgleichsMassnahme</gml:targetElement>
+              </appinfo>
+              <documentation>Verweis auf eine  Ausgleichsmaßnahme im Bebauungsplan, die einen vorgenommenen Eingriff ausgleicht. Die Referenz darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist (gehoertZuBereich zeigt auf ein BP_Bereich Objekt).</documentation>
+            </annotation>
+          </element>
+          <element name="laermkontingent" minOccurs="0" type="xplan:BP_EmissionskontingentLaermPropertyType">
+            <annotation>
+              <documentation>Festsetzung eines Lärmemissionskontingent. Das Attribut darf nur verwendet werden, wenn das Objekt Bestandteil eines &lt;b&gt;Bebauungsplans &lt;/b&gt;ist.</documentation>
+            </annotation>
+          </element>
+          <element name="laermkontingentGebiet" minOccurs="0" maxOccurs="unbounded" type="xplan:BP_EmissionskontingentLaermGebietPropertyType">
+            <annotation>
+              <documentation>Festsetzung von Lärmemissionskontingenten nach DIN 45691, die einzelnen Immissionsgebieten zugeordnet sind. Das Attribut darf nur verwendet werden, wenn das Objekt das Objekt Bestandteil eines &lt;b&gt;Bebauungsplans &lt;/b&gt;ist.</documentation>
+            </annotation>
+          </element>
+          <element name="zusatzkontingent" minOccurs="0" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_ZusatzkontingentLaerm</gml:targetElement>
+              </appinfo>
+              <documentation>Festsetzung von Zusatzkontingenten für die Lärmemission, die einzelnen Richtungssektoren zugeordnet sind. Die einzelnen Richtungssektoren werden parametrisch definiert. Die Relation darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist.</documentation>
+            </annotation>
+          </element>
+          <element name="zusatzkontingentFlaeche" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_ZusatzkontingentLaermFlaeche</gml:targetElement>
+              </appinfo>
+              <documentation>Festsetzung von Zusatzkontingenten für die Lärmemission, die einzelnen Richtungssektoren zugeordnet sind. Die einzelnen Richtungssektoren werden durch explizite Flächen definiert.Die Relation darf nur verwendet werden, wenn das referierende Bestandteil eines Bebauungsplans ist.</documentation>
+            </annotation>
+          </element>
+          <element name="richtungssektorGrenze" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_RichtungssektorGrenze</gml:targetElement>
+              </appinfo>
+              <documentation>Zuordnung einer Richtungssektor-Grenze für die Festlegung zusätzlicher Lärmkontingente. Die Relation darf nur verwendet werden, wenn das referierende Objekt Bestandteil eines Bebauungsplans ist.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Objekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Objekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Plan-->
+  <!--=========================================================================================-->
+  <element name="SO_Plan" type="xplan:SO_PlanType" substitutionGroup="xplan:XP_Plan" />
+  <complexType name="SO_PlanType">
+    <annotation>
+      <documentation>Klasse für sonstige, z. B. länderspezifische raumbezogene Planwerke.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_PlanType">
+        <sequence>
+          <element name="gemeinde" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Zuständige Gemeinde</documentation>
+            </annotation>
+          </element>
+          <element name="planaufstellendeGemeinde" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Die für die ursprüngliche Planaufstellung zuständige Gemeinde, falls diese nicht unter dem Attribut &lt;i&gt;gemeinde &lt;/i&gt;aufgeführt ist. Dies kann z.B. nach Gemeindefusionen der Fall sein.</documentation>
+            </annotation>
+          </element>
+          <element name="planArt" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_PlanArt</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierter Typ des Plans.</documentation>
+            </annotation>
+          </element>
+          <element name="plangeber" minOccurs="0" type="xplan:XP_PlangeberPropertyType">
+            <annotation>
+              <documentation>Für den Plan zuständige Stelle.
+</documentation>
+            </annotation>
+          </element>
+          <element name="versionBauGBDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Bekanntmachungs-Datum der zugrunde liegenden Version des BauGB.</documentation>
+            </annotation>
+          </element>
+          <element name="versionBauGBText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche Spezifikation der zugrunde liegenden Version des BauGB.</documentation>
+            </annotation>
+          </element>
+          <element name="versionSonstRechtsgrundlageDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Bekanntmachungs-Datum einer zugrunde liegenden anderen Rechtsgrundlage als das BauGB.</documentation>
+            </annotation>
+          </element>
+          <element name="versionSonstRechtsgrundlageText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche Spezifikation einer zugrunde liegenden anderen Rechtsgrundlage als das  BauGB.</documentation>
+            </annotation>
+          </element>
+          <element name="bereich" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:SO_Bereich</gml:targetElement>
+                <gml:reversePropertyName>xplan:gehoertZuPlan</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf einen Bereich des sonstigen raumbezogenen Plans.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Plan" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Plan" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Punktobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="SO_Punktobjekt" type="xplan:SO_PunktobjektType" substitutionGroup="xplan:SO_Objekt" />
+  <complexType abstract="true" name="SO_PunktobjektType">
+    <annotation>
+      <documentation>Basisklasse für Objekte mit punktförmigem Raumbezug (Einzelpunkt oder Punktmenge).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Punktförmiger Raumbezug (Einzelpunkt oder Punktmenge).</documentation>
+            </annotation>
+          </element>
+          <element name="nordwinkel" minOccurs="0" type="gml:AngleType">
+            <annotation>
+              <documentation>Orientierung des Punktobjektes als Winkel gegen die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd und West).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Punktobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Punktobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Baubeschraenkung-->
+  <!--=========================================================================================-->
+  <element name="SO_Baubeschraenkung" type="xplan:SO_BaubeschraenkungType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_BaubeschraenkungType">
+    <annotation>
+      <documentation>Bereich, in denen Verbote oder Beschr&amp;#228;nkungen f&amp;#252;r die Errichtung baulicher Anlagen bestehen</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizBaubeschraenkung">
+            <annotation>
+              <documentation>Klassifizierung des Bauverbots bzw. der Baubeschränkung</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizBaubeschraenkung</referenzierteCodelist>
+              </appinfo>
+              <documentation>Detaillierte Klassifizierung des Bauverbots bzw. der Baubeschränkung über eine Codeliste</documentation>
+            </annotation>
+          </element>
+          <element name="rechtlicheGrundlage" minOccurs="0" type="xplan:SO_RechtlicheGrundlageBaubeschraenkung">
+            <annotation>
+              <documentation>Rechtliche Grundlage des Bauverbots bzw. der Baubeschränkung</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Baubeschraenkung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Baubeschraenkung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Bodenschutzrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Bodenschutzrecht" type="xplan:SO_BodenschutzrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_BodenschutzrechtType">
+    <annotation>
+      <documentation>Festlegung nach Bodenschutzrecht.
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachBodenschutzrecht">
+            <annotation>
+              <documentation>Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachBodenschutzrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="istVerdachtsflaeche" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Angabe ob es sich um eine Verdachtsfläche handelt.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung. bzw. Nummer in einem Altlast-Kataster</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Bodenschutzrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Bodenschutzrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Denkmalschutzrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Denkmalschutzrecht" type="xplan:SO_DenkmalschutzrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_DenkmalschutzrechtType">
+    <annotation>
+      <documentation>Festlegung nach Denkmalschutzrecht
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachDenkmalschutzrecht">
+            <annotation>
+              <documentation>Rechtliche Klassifizierung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachDenkmalschutzrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="weltkulturerbe" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Gibt an, ob das geschützte Objekt zum Weltkulturerbe gehört.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Denkmalschutzrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Denkmalschutzrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Forstrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Forstrecht" type="xplan:SO_ForstrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_ForstrechtType">
+    <annotation>
+      <documentation>Festlegung nach Forstrecht</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:XP_EigentumsartWald">
+            <annotation>
+              <documentation>Klassifizierung der Eigentumsart des Waldes.</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachForstrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere Klassifizierung der Eigentumsart des Waldes</documentation>
+            </annotation>
+          </element>
+          <element name="funktion" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_ZweckbestimmungWald">
+            <annotation>
+              <documentation>Klassifizierung der Fukktion des Waldes</documentation>
+            </annotation>
+          </element>
+          <element name="betreten" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_WaldbetretungTyp">
+            <annotation>
+              <documentation>Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die in dem Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Forstrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Forstrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Gewaesser-->
+  <!--=========================================================================================-->
+  <element name="SO_Gewaesser" type="xplan:SO_GewaesserType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_GewaesserType">
+    <annotation>
+      <documentation>Planart&amp;#252;bergreifende Klasse zur Abbildung von Gew&amp;#228;ssern </documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" maxOccurs="unbounded" type="xplan:SO_KomplexeFestlegungGewaesserPropertyType">
+            <annotation>
+              <documentation>Klassifizierung des Gewässers</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung dees Gewässers</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer des Gewässers.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Gewaesser" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Gewaesser" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachBodenschutzrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachBodenschutzrecht">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--SchaedlicheBodenveraenderung-->
+        <annotation>
+          <documentation>Schädliche Bodenveränderung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Altlast-->
+        <annotation>
+          <documentation>Altlast</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20000">
+        <!--Altablagerung-->
+        <annotation>
+          <documentation>Altablagerung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20001">
+        <!--Altstandort-->
+        <annotation>
+          <documentation>Altstandort</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20002">
+        <!--AltstandortAufAltablagerung-->
+        <annotation>
+          <documentation>Altstandort einer Altablagerung</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachDenkmalschutzrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachDenkmalschutzrecht">
+    <annotation>
+      <documentation>Basis Klassifizierung von Ausweisungen nach Denkmalschutzrecht.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--DenkmalschutzEnsemble-->
+        <annotation>
+          <documentation>Denkmalschutz Ensemble</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--DenkmalschutzEinzelanlage-->
+        <annotation>
+          <documentation>Denkmalschutz Einzelanlage</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Grabungsschutzgebiet-->
+        <annotation>
+          <documentation>Grabungsschutzgebiet</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--PufferzoneWeltkulturerbeEnger-->
+        <annotation>
+          <documentation>Engere Pufferzone um eine Welterbestätte</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--PufferzoneWeltkulturerbeWeiter-->
+        <annotation>
+          <documentation>Weitere Pufferzone um eine Welterbestätte</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--ArcheologischesDenkmal-->
+        <annotation>
+          <documentation>Archäologisches Denkmal</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--Bodendenkmal-->
+        <annotation>
+          <documentation>Bodendenkmal</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Klassifizierung nach Denkmalschutzrecht.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachLuftverkehrsrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachLuftverkehrsrecht">
+    <annotation>
+      <documentation>Aufzählung der möglichen Zweckbestimmungen einer Luftverkehrs-Fläche.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Flughafen-->
+        <annotation>
+          <documentation>Flughafen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Landeplatz-->
+        <annotation>
+          <documentation>Landeplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Segelfluggelaende-->
+        <annotation>
+          <documentation>Segelfluggelände</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--HubschrauberLandeplatz-->
+        <annotation>
+          <documentation>Hubschrauber Landeplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Ballonstartplatz-->
+        <annotation>
+          <documentation>Ballon Startplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Haengegleiter-->
+        <annotation>
+          <documentation>Startplatz für Hängegleiter</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5400">
+        <!--Gleitsegler-->
+        <annotation>
+          <documentation>Startplatz für Gleitsegler</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Laermschutzbereich-->
+        <annotation>
+          <documentation>Lärmschutzbereich nach LuftVG</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Klassifizierung nach Luftverkehrsrecht.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachSchienenverkehrsrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachSchienenverkehrsrecht">
+    <annotation>
+      <documentation>Aufzählung der besonderen Zweckbestimmungen einer Bahnfläche ,Bahnlinie oder Bahnanlage.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Bahnanlage-->
+        <annotation>
+          <documentation>Bahnanlage allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10000">
+        <!--DB_Bahnanlage-->
+        <annotation>
+          <documentation>Bahnanlage der DB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10001">
+        <!--Personenbahnhof-->
+        <annotation>
+          <documentation>Personenbahnhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10002">
+        <!--Fernbahnhof-->
+        <annotation>
+          <documentation>Fernbahnhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10003">
+        <!--Gueterbahnhof-->
+        <annotation>
+          <documentation>Güterbahnhof</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Bahnlinie-->
+        <annotation>
+          <documentation>Bahnlinie allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12000">
+        <!--Personenbahnlinie-->
+        <annotation>
+          <documentation>Personenbahnlinie</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12001">
+        <!--Regionalbahn-->
+        <annotation>
+          <documentation>Regionalbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12002">
+        <!--Kleinbahn-->
+        <annotation>
+          <documentation>Kleinbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12003">
+        <!--Gueterbahnlinie-->
+        <annotation>
+          <documentation>Güterbahnlinie</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12004">
+        <!--WerksHafenbahn-->
+        <annotation>
+          <documentation>Werks- oder Hafenbahnlinie.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="12005">
+        <!--Seilbahn-->
+        <annotation>
+          <documentation>Seilbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--OEPNV-->
+        <annotation>
+          <documentation>Schienengebundener ÖPNV allgemein.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14000">
+        <!--Strassenbahn-->
+        <annotation>
+          <documentation>Straßenbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14001">
+        <!--UBahn-->
+        <annotation>
+          <documentation>U-Bahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14002">
+        <!--SBahn-->
+        <annotation>
+          <documentation>S-Bahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14003">
+        <!--OEPNV_Haltestelle-->
+        <annotation>
+          <documentation>Haltestelle im ÖPNV</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Klassifizierung nach Schienenverkehrsrecht.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachSonstigemRecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachSonstigemRecht">
+    <annotation>
+      <documentation>Basis Klassifizierung der sonstigen Ausweisungen.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1100">
+        <!--Berggesetz-->
+        <annotation>
+          <documentation>Beschränkung nach Berggesetz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Truppenuebungsplatz-->
+        <annotation>
+          <documentation>Truppenübungsplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--VermessungsKatasterrecht-->
+        <annotation>
+          <documentation>Beschränkungen nach Vermessungs- und Katasterrecht</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--Rekultivierungsflaeche-->
+        <annotation>
+          <documentation>Zu rekultivierende Fläche</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--Renaturierungsflaeche-->
+        <annotation>
+          <documentation>Zu renaturierende Fläche</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1700">
+        <!--Laermschutzbereich-->
+        <annotation>
+          <documentation>Lärmschutzbereich nach anderen gesetzlichen Regelungen als dem Luftverkehrsrecht.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1800">
+        <!--SchutzzoneLeitungstrasse-->
+        <annotation>
+          <documentation>Schutzzone um eine Leitungstrasse nach Bundes-Immissionsschutzgesetz.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Klassifizierung</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizNachWasserrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizNachWasserrecht">
+    <annotation>
+      <documentation>Basis Klassifizierung von Festlegungen nach Wasserrecht.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="2000">
+        <!--Ueberschwemmungsgebiet-->
+        <annotation>
+          <documentation>Allgemeines Überschwemmungsgebiet nach WHG </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20000">
+        <!--FestgesetztesUeberschwemmungsgebiet-->
+        <annotation>
+          <documentation>Überschwemmungsgebiet nach §76 Abs.2 WHG </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20001">
+        <!--NochNichtFestgesetztesUeberschwemmungsgebiet-->
+        <annotation>
+          <documentation>N Noch nicht festgesetztes Überschwemmungsgebiet, das vorläufig gesichert ist nach. § 76 Abs. 3 WHG </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20002">
+        <!--UeberschwemmGefaehrdetesGebiet-->
+        <annotation>
+          <documentation>Überschwemmungsgefährdetes Gebiet nach §31c des vor dem 1.3.2010 gültigen WHG</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Risikogebiet-->
+        <annotation>
+          <documentation>Risikogebiet nach § 76 Abs. 3 WHG </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--RisikogebietAusserhUeberschwemmgebiet-->
+        <annotation>
+          <documentation>Risikogebiet außerhalb von Überschwemmungsgebieten  nach. § 78b Abs. 1 WHG </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Hochwasserentstehungsgebiet-->
+        <annotation>
+          <documentation>Hochwasserentstehungsgebiet nach § 78d Abs. 1 WHG</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Klassifizierung nach Wasserrecht.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizWasserwirtschaft-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizWasserwirtschaft">
+    <annotation>
+      <documentation>Aufzählung wasserwirtschaftlicher Zweckbestimmungen.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--HochwasserRueckhaltebecken-->
+        <annotation>
+          <documentation>Hochwasser-Rückhaltebecken</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Ueberschwemmgebiet-->
+        <annotation>
+          <documentation>Überschwemmungsgefährdetes Gebiet nach §31c des vor dem 1.10.2010 gültigen WHG</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Versickerungsflaeche-->
+        <annotation>
+          <documentation>Versickerungsfläche</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Entwaesserungsgraben-->
+        <annotation>
+          <documentation>Entwässerungsgraben</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Deich-->
+        <annotation>
+          <documentation>Deich</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--RegenRueckhaltebecken-->
+        <annotation>
+          <documentation>Regen-Rückhaltebecken</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Wasserwirtschaftsfläche, sofern keiner der anderen Codes zutreffend ist.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KomplexeFestlegungGewaesser-->
+  <!--=========================================================================================-->
+  <element name="SO_KomplexeFestlegungGewaesser" type="xplan:SO_KomplexeFestlegungGewaesserType" />
+  <complexType name="SO_KomplexeFestlegungGewaesserType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung der Fläche</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:SO_KlassifizGewaesser">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:SO_DetailKlassifizGewaesser</referenzierteCodelist>
+          </appinfo>
+          <documentation>Über eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung näher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en).</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfSO_KomplexeFestlegungGewaesser" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_KomplexeFestlegungGewaesser" type="anyType" abstract="true" />
+  <complexType name="SO_KomplexeFestlegungGewaesserPropertyType">
+    <sequence>
+      <element ref="xplan:SO_KomplexeFestlegungGewaesser" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--SO_KomplexeZweckbestStrassenverkehr-->
+  <!--=========================================================================================-->
+  <element name="SO_KomplexeZweckbestStrassenverkehr" type="xplan:SO_KomplexeZweckbestStrassenverkehrType" />
+  <complexType name="SO_KomplexeZweckbestStrassenverkehrType">
+    <annotation>
+      <documentation>Spezifikation der Zweckbestimmung einer Fläche oder Anlage für den Strassenverkehr</documentation>
+    </annotation>
+    <sequence>
+      <element name="allgemein" type="xplan:SO_ZweckbestimmungStrassenverkehr">
+        <annotation>
+          <documentation>Allgemeine Zweckbestimmung der Fläche oder Anlage</documentation>
+        </annotation>
+      </element>
+      <element name="detail" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:SO_DetailZweckbestStrassenverkehr</referenzierteCodelist>
+          </appinfo>
+          <documentation>ber eine Codeliste definierte Zweckbestimmungen, die die allgemeine Zweckbestimmung nher detaillieren.</documentation>
+        </annotation>
+      </element>
+      <element name="textlicheErgaenzung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Ergänzung der spezifizierten Zweckbestimmung(en)</documentation>
+        </annotation>
+      </element>
+      <element name="aufschrift" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Aufschrift</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfSO_KomplexeZweckbestStrassenverkehr" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_KomplexeZweckbestStrassenverkehr" type="anyType" abstract="true" />
+  <complexType name="SO_KomplexeZweckbestStrassenverkehrPropertyType">
+    <sequence>
+      <element ref="xplan:SO_KomplexeZweckbestStrassenverkehr" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--SO_LaermschutzzoneTypen-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_LaermschutzzoneTypen">
+    <annotation>
+      <documentation>Einteilung von Lärmschutzzonen
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--TagZone1-->
+        <annotation>
+          <documentation>Tag-Zone 1</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--TagZone2-->
+        <annotation>
+          <documentation>Tag-Zone 2</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Nacht-->
+        <annotation>
+          <documentation>Nacht-Zone</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_Luftverkehrsrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Luftverkehrsrecht" type="xplan:SO_LuftverkehrsrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_LuftverkehrsrechtType">
+    <annotation>
+      <documentation>Festlegung nach Luftverkehrsrecht.
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachLuftverkehrsrecht">
+            <annotation>
+              <documentation>Rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachLuftverkehrsrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="laermschutzzone" minOccurs="0" type="xplan:SO_LaermschutzzoneTypen">
+            <annotation>
+              <documentation>Lärmschutzzone nach LuftVG.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Luftverkehrsrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Luftverkehrsrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Schienenverkehrsrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Schienenverkehrsrecht" type="xplan:SO_SchienenverkehrsrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_SchienenverkehrsrechtType">
+    <annotation>
+      <documentation>Festlegung nach Schienenverkehrsrecht.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachSchienenverkehrsrecht">
+            <annotation>
+              <documentation>Rechtliche Klassifizierung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachSchienenverkehrsrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Schienenverkehrsrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Schienenverkehrsrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_SonstigesRecht-->
+  <!--=========================================================================================-->
+  <element name="SO_SonstigesRecht" type="xplan:SO_SonstigesRechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_SonstigesRechtType">
+    <annotation>
+      <documentation>Sonstige Festlegung.
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachSonstigemRecht">
+            <annotation>
+              <documentation>Rechtliche Klassifizierung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachSonstigemRecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_SonstigesRecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_SonstigesRecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_StrassenEinteilung-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_StrassenEinteilung">
+    <annotation>
+      <documentation>Aufzählung von Basis-Klassifizierungen der Festlegungen nach Straßenrecht.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Bundesautobahn-->
+        <annotation>
+          <documentation>Bundesautobahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Bundesstrasse-->
+        <annotation>
+          <documentation>Bundesstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--LandesStaatsstrasse-->
+        <annotation>
+          <documentation>Landes- oder Staatsstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Kreisstrasse-->
+        <annotation>
+          <documentation>Kreisstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Gemeindestrasse-->
+        <annotation>
+          <documentation>Gemeindestraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstOeffentlStrasse-->
+        <annotation>
+          <documentation>Sonstige öffentliche Straße</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_Strassenverkehr-->
+  <!--=========================================================================================-->
+  <element name="SO_Strassenverkehr" type="xplan:SO_StrassenverkehrType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_StrassenverkehrType">
+    <annotation>
+      <documentation>Verkehrsfläche besonderer Zweckbestimmung (§ 9 Abs. 1 Nr. 11 und Abs. 6 BauGB), Darstellung von Flächen für den überörtlichen Verkehr und für die örtlichen Hauptverkehrszüge ( §5, Abs. 2, Nr. 3 BauGB) sowie Festlegung nach Straßenverkehrsrecht. &lt;b&gt;Das gleiche Attribut darf nicht gleichzeitig &lt;/b&gt;in &lt;i&gt;SO_Strassenverkehr &lt;/i&gt;und einem überlagernden Objekt &lt;i&gt;BP_UeberbaubareGrundstuecksFlaeche &lt;/i&gt;&lt;b&gt;belegt werden&lt;/b&gt;. </documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="MaxZahlWohnungen" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Höchstzulässige Zahl der Wohnungen in Wohngebäuden</documentation>
+            </annotation>
+          </element>
+          <element name="MinGRWohneinheit" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Minimale Größe eines Grundstücks pro Wohneinheit</documentation>
+            </annotation>
+          </element>
+          <element name="Fmin" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Mindestmaß für die Größe (Fläche) eines Baugrundstücks.</documentation>
+            </annotation>
+          </element>
+          <element name="Fmax" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Höchstmaß für die Größe (Fläche) eines Baugrundstücks.</documentation>
+            </annotation>
+          </element>
+          <element name="Bmin" minOccurs="0" type="gml:LengthType">
+            <annotation>
+              <documentation>Minimale Breite von Baugrundstücken</documentation>
+            </annotation>
+          </element>
+          <element name="Bmax" minOccurs="0" type="gml:LengthType">
+            <annotation>
+              <documentation>Maximale Breite von Baugrundstücken.</documentation>
+            </annotation>
+          </element>
+          <element name="Tmin" minOccurs="0" type="gml:LengthType">
+            <annotation>
+              <documentation>Minimale Tiefe von Baugrundstücken.</documentation>
+            </annotation>
+          </element>
+          <element name="Tmax" minOccurs="0" type="gml:LengthType">
+            <annotation>
+              <documentation>Maximale Tiefe von Baugrundstücken.</documentation>
+            </annotation>
+          </element>
+          <element name="GFZmin" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Minimal zulässige Geschossflächenzahl .</documentation>
+            </annotation>
+          </element>
+          <element name="GFZmax" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Geschossflächenzahl bei einer Bereichsangabe. Das Attribut GFZmin muss ebenfalls belegt sein.</documentation>
+            </annotation>
+          </element>
+          <element name="GFZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Geschossflächenzahl.</documentation>
+            </annotation>
+          </element>
+          <element name="GFZ_Ausn" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Geschossflächenzahl als Ausnahme.</documentation>
+            </annotation>
+          </element>
+          <element name="GFmin" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Minimal zulässige Geschossfläche</documentation>
+            </annotation>
+          </element>
+          <element name="GFmax" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Maximal zulässige Geschossfläche bei einer Bereichsabgabe. Das Attribut GFmin muss ebenfalls belegt sein.</documentation>
+            </annotation>
+          </element>
+          <element name="GF" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Maximal zulässige Geschossfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="GF_Ausn" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Geschossfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="BMZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Baumassenzahl.</documentation>
+            </annotation>
+          </element>
+          <element name="BMZ_Ausn" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Baumassenzahl.</documentation>
+            </annotation>
+          </element>
+          <element name="BM" minOccurs="0" type="gml:VolumeType">
+            <annotation>
+              <documentation>Maximal zulässige Baumasse.</documentation>
+            </annotation>
+          </element>
+          <element name="BM_Ausn" minOccurs="0" type="gml:VolumeType">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Baumasse.</documentation>
+            </annotation>
+          </element>
+          <element name="GRZmin" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Minimal zulässige Grundflächenzahl.</documentation>
+            </annotation>
+          </element>
+          <element name="GRZmax" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Grundflächenzahl bei einer Bereichsangabe.  Das Attribut GRZmin muss ebenfalls spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="GRZ" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Maximal zulässige Grundflächenzahl</documentation>
+            </annotation>
+          </element>
+          <element name="GRZ_Ausn" minOccurs="0" type="double">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Grundflächenzahl.</documentation>
+            </annotation>
+          </element>
+          <element name="GRmin" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Minimal zulässige Grundfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="GRmax" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Maximal zulässige Grundfläche bei einer Bereichsangabe. Das Attribut GRmin muss ebenfalls spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="GR" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Maximal zulässige Grundfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="GR_Ausn" minOccurs="0" type="gml:AreaType">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Grundfläche.</documentation>
+            </annotation>
+          </element>
+          <element name="Zmin" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Minimal zulässige Zahl der oberirdischen Vollgeschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="Zmax" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximal zulässige Zahl der oberirdischen Vollgeschosse bei einer Bereichsangabe. Das Attribut Zmin muss ebenfalls belegt sein.</documentation>
+            </annotation>
+          </element>
+          <element name="Zzwingend" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Zwingend vorgeschriebene Zahl der oberirdischen Vollgeschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="Z" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximalzahl der oberirdischen Vollgeschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="Z_Ausn" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Zahl der oberirdischen Vollgeschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="Z_Staffel" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximale Anzahl von oberirdisch zurückgesetzten Vollgeschossen als zusätzliche Staffelgeschosse</documentation>
+            </annotation>
+          </element>
+          <element name="Z_Dach" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximalzahl der zusätzlich erlaubten Dachgeschosse, die gleichzeitig Vollgeschosse sind.</documentation>
+            </annotation>
+          </element>
+          <element name="ZUmin" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Minimal zulässige Zahl der unterirdischen Geschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="ZUmax" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximal zulässige Zahl der unterirdischen Geschosse bei einer Bereichsangabe. Das Attribut ZUmin muss ebenfalls belegt sein.</documentation>
+            </annotation>
+          </element>
+          <element name="ZUzwingend" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Zwingend vorgeschriebene Zahl der unterirdischen Geschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="ZU" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Maximal zulässige Zahl der unterirdischen Geschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="ZU_Ausn" minOccurs="0" type="int">
+            <annotation>
+              <documentation>Ausnahmsweise maximal zulässige Zahl der unterirdischen Geschosse.</documentation>
+            </annotation>
+          </element>
+          <element name="MZspezial" minOccurs="0" maxOccurs="unbounded" type="string">
+            <annotation>
+              <documentation>Textuelle Spezifikation von speziellen Maßzahlen, wie z.B. einer GRZ in Abhängigkeit von der Bebauungsart.</documentation>
+            </annotation>
+          </element>
+          <element name="artDerFestlegung" minOccurs="0" maxOccurs="unbounded" type="xplan:SO_KomplexeZweckbestStrassenverkehrPropertyType">
+            <annotation>
+              <documentation>Zweckbestimmung der Straßenverkehrsfläche oder Anlage</documentation>
+            </annotation>
+          </element>
+          <element name="einteilung" minOccurs="0" type="xplan:SO_StrassenEinteilung">
+            <annotation>
+              <documentation>Straßeneinteilung nach Bundes-Fernstraßengesetz</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="istOrtsdurchfahrt" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Gibt an, ob es sich um eine Ortsdurchfahrt handelt</documentation>
+            </annotation>
+          </element>
+          <element name="nutzungsform" minOccurs="0" type="xplan:XP_Nutzungsform">
+            <annotation>
+              <documentation>Nutzungsform der Fläche / Anlage</documentation>
+            </annotation>
+          </element>
+          <element name="zugunstenVon" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Begünstigter der Ausweisung</documentation>
+            </annotation>
+          </element>
+          <element name="hatDarstellungMitBesondZweckbest" type="boolean">
+            <annotation>
+              <documentation>Bei &lt;i&gt;true &lt;/i&gt;wird ein flächenhaftes Planobjekt gemäß § 6.3 PlanZV dargestellt ("Verkehrsflächen besonderer Zweckbestimmung"), und bei false gemäß § 6.1 PlanZV ("Straßenverkehrsflächen").</documentation>
+            </annotation>
+          </element>
+          <element name="begrenzungslinie" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:BP_StrassenbegrenzungsLinie</gml:targetElement>
+              </appinfo>
+              <documentation>Referenz auf eine Linie, die die Straßenverkehrsfläche begrenzt.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Strassenverkehr" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Strassenverkehr" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Wasserrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_Wasserrecht" type="xplan:SO_WasserrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_WasserrechtType">
+    <annotation>
+      <documentation>Festlegung nach Wasserhaushaltsgesetz (WHG)</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizNachWasserrecht">
+            <annotation>
+              <documentation>Rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizNachWasserrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element name="istNatuerlichesUberschwemmungsgebiet" minOccurs="0" default="false" type="boolean">
+            <annotation>
+              <documentation>Gibt an, ob es sich bei der Fläche um ein natürliches Überschwemmungsgebiet handelt.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Wasserrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Wasserrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Wasserwirtschaft-->
+  <!--=========================================================================================-->
+  <element name="SO_Wasserwirtschaft" type="xplan:SO_WasserwirtschaftType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_WasserwirtschaftType">
+    <annotation>
+      <documentation>Flächen für die Wasserwirtschaft, sowie Flächen für Hochwasserschutzanlagen und für die Regelung des Wasserabflusses (§9 Abs. 1 Nr. 16a und 16b BauGB, §5 Abs. 2 Nr. 7 BauGB).</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizWasserwirtschaft">
+            <annotation>
+              <documentation>Klassifizierung der Festlegung</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizWasserwirtschaft</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere rechtliche Klassifizierung der Festlegung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Wasserwirtschaft" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Wasserwirtschaft" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_ZweckbestimmungStrassenverkehr-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_ZweckbestimmungStrassenverkehr">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--AutobahnUndAehnlich-->
+        <annotation>
+          <documentation>Autobahn oder autobahnähnliche Straße.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Hauptverkehrsstrasse-->
+        <annotation>
+          <documentation>Sonstige örtliche oder überörtliche Hauptverkehrsstraße bzw. Weg.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--SonstigerVerkehrswegAnlage-->
+        <annotation>
+          <documentation>Sonstiger Verkehrsweg oder Anlage. Planinhalte nach § 5.3 PlanZV ("Überörtliche Wege und örtliche Hauptwege") werden ebenfalls auf diesen Enumerationswert abgebildet.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14000">
+        <!--VerkehrsberuhigterBereich-->
+        <annotation>
+          <documentation>Bereich einer Verkehrsfläche, der der Verkehrsberuhigung in geschlossenen Ortschaften dient.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14001">
+        <!--Platz-->
+        <annotation>
+          <documentation>Platz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14002">
+        <!--Fussgaengerbereich-->
+        <annotation>
+          <documentation>Fußgängerbereich</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14003">
+        <!--RadGehweg-->
+        <annotation>
+          <documentation>Rad- und Fußweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14004">
+        <!--Radweg-->
+        <annotation>
+          <documentation>Radweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14005">
+        <!--Gehweg-->
+        <annotation>
+          <documentation>Fußweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14006">
+        <!--Wanderweg-->
+        <annotation>
+          <documentation>Wanderweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14007">
+        <!--ReitKutschweg-->
+        <annotation>
+          <documentation>Reit- und Kutschweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14008">
+        <!--Rastanlage-->
+        <annotation>
+          <documentation>Rastanlage</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14009">
+        <!--Busbahnhof-->
+        <annotation>
+          <documentation>Busbahnhof, auch zentraler Omnibusbahnhof (ZOB)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="140010">
+        <!--UeberfuehrenderVerkehrsweg-->
+        <annotation>
+          <documentation>Brückenbereich, hier: Überführender Verkehrsweg.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="140011">
+        <!--UnterfuehrenderVerkehrsweg-->
+        <annotation>
+          <documentation>Brückenbereich, hier: Unterführender Verkehrsweg.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="140012">
+        <!--Wirtschaftsweg-->
+        <annotation>
+          <documentation>Wege, die überwiegend land- und forstwirtschaftlichen Zwecken dienen und keine überörtliche Bedeutung haben</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="140013">
+        <!--LandwirtschaftlicherVerkehr-->
+        <annotation>
+          <documentation>Landwirtschaftlicher Verkehr</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14014">
+        <!--Anschlussflaeche-->
+        <annotation>
+          <documentation>Anschlussfläche</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="14015">
+        <!--Verkehrsgruen-->
+        <annotation>
+          <documentation>Verkehrsgrün</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--RuhenderVerkehr-->
+        <annotation>
+          <documentation>Fläche oder Anlage für den ruhenden Verkehr</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16000">
+        <!--Parkplatz-->
+        <annotation>
+          <documentation>Parkplatz, Parkfläche</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16001">
+        <!--FahrradAbstellplatz-->
+        <annotation>
+          <documentation>Abstellplatz für Fahräder</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16002">
+        <!--P_RAnlage-->
+        <annotation>
+          <documentation>Park-and-Ride Anlagen sind Parkanlagen, die in der Nähe von Haltestellen des öffentlichen Nahverkehrs (ÖPNV) für Pkw, teilweise auch Motorräder und Busse, zur Verfügung gestellt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16003">
+        <!--B_RAnlage-->
+        <annotation>
+          <documentation>Bike-and-Ride Anlagen sind Radabstellanlagen, die in der Nähe von Haltestellen des öffentlichen Nahverkehrs (ÖPNV) zur Verfügung gestellt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16004">
+        <!--Parkhaus-->
+        <annotation>
+          <documentation>Parkhaus</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16005">
+        <!--CarSharing-->
+        <annotation>
+          <documentation>Anlage für die organisierte gemeinschaftliche Nutzung von Automobilen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="16006">
+        <!--BikeSharing-->
+        <annotation>
+          <documentation>Anlage für die organisierte gemeinschaftliche Nutzung von Fahrrädern.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3400">
+        <!--Mischverkehrsflaeche-->
+        <annotation>
+          <documentation>Mischverkehrsfläche, oder „Shared Space“, „Begegnungszone“, ist eine Verkehrsfläche, auf der eine möglichst gemeinsame Nutzung des Straßenraumes und eine Gleichberechtigung aller Verkehrsteilnehmerinnen und Verkehrsteilnehmer angestrebt wird.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3500">
+        <!--Ladestation-->
+        <annotation>
+          <documentation>Flächen für Ladeinfrastruktur elektrisch betriebener Fahrzeuge .</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Zweckbestimmung</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizBaubeschraenkung-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizBaubeschraenkung">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Bauverbotszone-->
+        <annotation>
+          <documentation>Bereich, in denen keine baulichen Anlagen errichtet werden dürfen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Baubeschraenkungszone-->
+        <annotation>
+          <documentation>Bereich, in denen Bau-Beschränkungen bestehen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Waldabstand-->
+        <annotation>
+          <documentation>Bereich um Wälder, Moore und Heiden, in dem aus Brandschutzgründen keinen baulichen Anlagen errichtet werden dürfen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstigeBeschraenkung-->
+        <annotation>
+          <documentation>Bereich mit sonstigen Baubeschränkungen.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizGewaesser-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizGewaesser">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Gewaesser-->
+        <annotation>
+          <documentation>Allgemeines, bestehendes Gewässer</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--FliessGewaesser-->
+        <annotation>
+          <documentation>Allgemeines Fließgewässer</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20000">
+        <!--Gewaesser1Ordnung-->
+        <annotation>
+          <documentation>Bestehendes Gewässer 1. Ordnung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20001">
+        <!--Gewaesser2Ordnung-->
+        <annotation>
+          <documentation>Bestehendes Gewässer 2. Ordnung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="20002">
+        <!--Gewaesser3Ordnung-->
+        <annotation>
+          <documentation>Bestehendes Gewässer 3. Ordnung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--StehendesGewaesser-->
+        <annotation>
+          <documentation>Stehendes Gewässer</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Hafen-->
+        <annotation>
+          <documentation>Hafen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="40000">
+        <!--Sportboothafen-->
+        <annotation>
+          <documentation>Sportboothafen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Wasserstrasse-->
+        <annotation>
+          <documentation>Wasserstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Kanal-->
+        <annotation>
+          <documentation>Kanal</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges bestehendes Gewässer</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_RechtlicheGrundlageBaubeschraenkung-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_RechtlicheGrundlageBaubeschraenkung">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Luftverkehrsrecht-->
+        <annotation>
+          <documentation>Luftverkehrsrecht</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Strassenverkehrsrecht-->
+        <annotation>
+          <documentation>Strassenverkehrsrecht</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstigesRecht-->
+        <annotation>
+          <documentation>Sonstige Rechtsverordnung</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_KlassifizSchutzgebietWasserrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizSchutzgebietWasserrecht">
+    <annotation>
+      <documentation>Aufzählung wasserrechtlicher Zweckbestimmungen.
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Wasserschutzgebiet-->
+        <annotation>
+          <documentation>Wasserschutzgebiet</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10000">
+        <!--QuellGrundwasserSchutzgebiet-->
+        <annotation>
+          <documentation>Ausgewiesenes Schutzgebiet für Quell- und Grundwasser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="10001">
+        <!--OberflaechengewaesserSchutzgebiet-->
+        <annotation>
+          <documentation>Ausgewiesenes Schutzgebiet für Oberflächengewässer</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Heilquellenschutzgebiet-->
+        <annotation>
+          <documentation>Heilquellen Schutzgebiet</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Schutzgebiet nach Wasserrecht.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_SchutzgebietWasserrecht-->
+  <!--=========================================================================================-->
+  <element name="SO_SchutzgebietWasserrecht" type="xplan:SO_SchutzgebietWasserrechtType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_SchutzgebietWasserrechtType">
+    <annotation>
+      <documentation>Schutzgebiet nach WasserSchutzGesetz (WSG) bzw. HeilQuellenSchutzGesetz (HQSG).
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizSchutzgebietWasserrecht">
+            <annotation>
+              <documentation>Klassifizierung des Schutzgebietes</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizSchutzgebietWasserrecht</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codelieste definierte detailliertere Klassifizierung</documentation>
+            </annotation>
+          </element>
+          <element name="zone" minOccurs="0" type="xplan:SO_SchutzzonenWasserrecht">
+            <annotation>
+              <documentation>Klassifizierung der Schutzzone</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung des Gebiets</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer des Gebiets.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_SchutzgebietWasserrecht" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_SchutzgebietWasserrecht" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_SchutzzonenWasserrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_SchutzzonenWasserrecht">
+    <annotation>
+      <documentation>Wasserschutzgebietszonen nach WasserSchutzgesetz (WSG) bzw. Heilquellenschutzzonen nach HeilQuellenSchutzGesetz (HQSG)
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Zone_1-->
+        <annotation>
+          <documentation>Zone 1</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Zone_2-->
+        <annotation>
+          <documentation>Zone 2</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Zone_3-->
+        <annotation>
+          <documentation>Zone 3</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Zone_3a-->
+        <annotation>
+          <documentation>Zone 3a e(xistiert nur bei Wasserschutzgebieten).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Zone_3b-->
+        <annotation>
+          <documentation>Zone 3b (existiert nur bei Wasserschutzgebieten).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--Zone_4-->
+        <annotation>
+          <documentation>Zone 4 e(xistiert nur bei Heilquellen).</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_Gebiet-->
+  <!--=========================================================================================-->
+  <element name="SO_Gebiet" type="xplan:SO_GebietType" substitutionGroup="xplan:SO_Flaechenobjekt" />
+  <complexType name="SO_GebietType">
+    <annotation>
+      <documentation>Umgrenzung eines sonstigen Gebietes nach BauGB
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_FlaechenobjektType">
+        <sequence>
+          <element name="gemeinde" minOccurs="0" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Zuständige Gemeinde</documentation>
+            </annotation>
+          </element>
+          <element name="gebietsArt" minOccurs="0" type="xplan:SO_GebietsArt">
+            <annotation>
+              <documentation>Klassifikation des Gebietes nach BauGB.</documentation>
+            </annotation>
+          </element>
+          <element name="sonstGebietsArt" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_SonstGebietsArt</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte Klassifikation einer nicht auf dem BauGB beruhenden, z.B. länderspezifischen Gebietsausweisung. In dem Fall muss das Attribut "&lt;i&gt;gebietsArt" &lt;/i&gt;den Wert &lt;i&gt;9999 &lt;/i&gt;(Sonstiges) haben.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsstandGebiet" minOccurs="0" type="xplan:SO_RechtsstandGebietTyp">
+            <annotation>
+              <documentation>Rechtsstand der Gebietsausweisung</documentation>
+            </annotation>
+          </element>
+          <element name="sonstRechtsstandGebiet" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_SonstRechtsstandGebietTyp</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierter sonstiger Rechtsstand der Gebietsausweisung, der nicht durch die Liste &lt;i&gt;SO_RechtsstandGebietTyp &lt;/i&gt;wiedergegeben werden kann. Das Attribut "&lt;i&gt;rechtsstandGebiet" &lt;/i&gt;muss in diesem Fall den Wert &lt;i&gt;9999 &lt;/i&gt;(Sonstiges) haben.</documentation>
+            </annotation>
+          </element>
+          <element name="aufstellungsbeschhlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Aufstellungsbeschlusses</documentation>
+            </annotation>
+          </element>
+          <element name="durchfuehrungStartDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Start-Datum der Durchführung</documentation>
+            </annotation>
+          </element>
+          <element name="durchfuehrungEndDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>End-Datum der Durchführung</documentation>
+            </annotation>
+          </element>
+          <element name="traegerMassnahme" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Maßnahmen-Träger</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Gebiet" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Gebiet" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_GebietsArt-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_GebietsArt">
+    <annotation>
+      <documentation>Aufzählung von Gebietsausweisungen nach BauGB</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Umlegungsgebiet-->
+        <annotation>
+          <documentation>Umlegungsgebiet (§ 45 ff BauGB).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--StaedtebaulicheSanierung-->
+        <annotation>
+          <documentation>Gebiet nach § 136 ff BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--StaedtebaulicheEntwicklungsmassnahme-->
+        <annotation>
+          <documentation>Gebiet nach § 165 ff BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Stadtumbaugebiet-->
+        <annotation>
+          <documentation>Gebiet nach § 171 a-d BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--SozialeStadt-->
+        <annotation>
+          <documentation>Gebiet nach § 171 e BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--BusinessImprovementDistrict-->
+        <annotation>
+          <documentation>Gebiet nach §171 f BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--HousingImprovementDistrict-->
+        <annotation>
+          <documentation>Gebiet nach §171 f BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1700">
+        <!--Erhaltungsgebiet-->
+        <annotation>
+          <documentation>Allgemeines Erhaltungsgebiet nach &amp;#167;172 BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="17000">
+        <!--ErhaltungsgebietStaedtebaulicheGestalt-->
+        <annotation>
+          <documentation>Gebiet einer Satzung/Verordnung nach § 172 Abs. 1.1 BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="17001">
+        <!--ErhaltungsgebietWohnbevoelkerung-->
+        <annotation>
+          <documentation>Gebiet einer Satzung/Verordnung nach § 172 Abs. 1.2 BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="17002">
+        <!--ErhaltungsgebietUmstrukturierung-->
+        <annotation>
+          <documentation>Gebiet einer Satzung/Verordnung nach § 172 Abs. 1.3 BauGB</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--StaedtebaulEntwicklungskonzeptInnenentwicklung-->
+        <annotation>
+          <documentation>Städtebauliches Entwicklungskonzept zur Stärkung der Innenentwicklung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2400">
+        <!--GebietMitAngespanntemWohnungsmarkt-->
+        <annotation>
+          <documentation>Gebiet mit einem angespannten Wohnungsmarkt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2500">
+        <!--GenehmigungWohnungseigentum-->
+        <annotation>
+          <documentation>Gebiet mit angespanntem Wohnungsmarkt, in dem die Begr&amp;#252;ndung oder Teilung von Wohnungseigentum oder Teileigentum der Genehmigung bedarf.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Gebietstyp</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_RechtsstandGebietTyp-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_RechtsstandGebietTyp">
+    <annotation>
+      <documentation>Aufzählung der möglichen Rechtsstände des Gebiets.
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--VorbereitendeUntersuchung-->
+        <annotation>
+          <documentation>Vorbereitende Untersuchung </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Aufstellung-->
+        <annotation>
+          <documentation>Aufstellung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Festlegung-->
+        <annotation>
+          <documentation>Festlegung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Abgeschlossen-->
+        <annotation>
+          <documentation>Abgeschlossen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Verstetigung-->
+        <annotation>
+          <documentation>Verstetigung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_Gelaendemorphologie-->
+  <!--=========================================================================================-->
+  <element name="SO_Gelaendemorphologie" type="xplan:SO_GelaendemorphologieType" substitutionGroup="xplan:SO_Geometrieobjekt" />
+  <complexType name="SO_GelaendemorphologieType">
+    <annotation>
+      <documentation>Das Landschaftsbild prägende Geländestruktur</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" minOccurs="0" type="xplan:SO_KlassifizGelaendemorphologie">
+            <annotation>
+              <documentation>Klassifikation der Geländestruktur</documentation>
+            </annotation>
+          </element>
+          <element name="detailArtDerFestlegung" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_DetailKlassifizGelaendemorphologie</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte detailliertere Klassifikation der Geländestruktur</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Informelle Bezeichnung der Struktur</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Amtliche Bezeichnung / Kennziffer der Struktur</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Gelaendemorphologie" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Gelaendemorphologie" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_Grenze-->
+  <!--=========================================================================================-->
+  <element name="SO_Grenze" type="xplan:SO_GrenzeType" substitutionGroup="xplan:SO_Linienobjekt" />
+  <complexType name="SO_GrenzeType">
+    <annotation>
+      <documentation>Grenze einer Verwaltungseinheit oder sonstige Grenze in raumbezogenen Plänen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_LinienobjektType">
+        <sequence>
+          <element name="typ" minOccurs="0" type="xplan:XP_GrenzeTypen">
+            <annotation>
+              <documentation>Typ der Grenze</documentation>
+            </annotation>
+          </element>
+          <element name="sonstTyp" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:SO_SonstGrenzeTypen</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte weitere Grenztypen, wenn das Attribut &lt;i&gt;typ &lt;/i&gt;den Wert &lt;i&gt;9999 &lt;/i&gt;hat.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Grenze" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Grenze" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_KlassifizGelaendemorphologie-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_KlassifizGelaendemorphologie">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Terassenkante-->
+        <annotation>
+          <documentation>Terrassenkante</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Rinne-->
+        <annotation>
+          <documentation>Trockengefallene Gewässerrinne</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--EhemMaeander-->
+        <annotation>
+          <documentation>Ehemalige Fluss- und Bachmäander</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstigeStruktur-->
+        <annotation>
+          <documentation>Sonstige Struktur der Geländemorphologie</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_Sichtflaeche-->
+  <!--=========================================================================================-->
+  <element name="SO_Sichtflaeche" type="xplan:SO_SichtflaecheType" substitutionGroup="xplan:SO_Flaechenobjekt" />
+  <complexType name="SO_SichtflaecheType">
+    <annotation>
+      <documentation>Flächenhafte Festlegung einer Sichtfläche bzw. eines Sichtdreiecks</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_FlaechenobjektType">
+        <sequence>
+          <element name="art" minOccurs="0" type="xplan:SO_SichtflaecheArt">
+            <annotation>
+              <documentation>Klassifikation der Einmündung einer untergeordneten auf eine übergeordnete Straße gemäß den "Richtlinien für die Anlage von Stadtstraßen" (TAST 06)</documentation>
+            </annotation>
+          </element>
+          <element name="knotenpunkt" minOccurs="0" type="xplan:SO_SichtflaecheKnotenpunktTypen">
+            <annotation>
+              <documentation>Klassifikation des Knotenpunktes, dem die Sichtfläche zugeordnet ist</documentation>
+            </annotation>
+          </element>
+          <element name="geschwindigkeit" minOccurs="0" type="gml:MeasureType">
+            <annotation>
+              <documentation>Zulässige Geschwindigkeit in der übergeordneten Straße, im km/h</documentation>
+            </annotation>
+          </element>
+          <element name="schenkellaenge" minOccurs="0" type="gml:LengthType">
+            <annotation>
+              <documentation>Schenkellänge des Sichtdreiecks gemäß RAST 06</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfSO_Sichtflaeche" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfSO_Sichtflaeche" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--SO_SichtflaecheArt-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_SichtflaecheArt">
+    <annotation>
+      <documentation>Aufzählung der Typen von Sichtflächen</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Haltesichtweite-->
+        <annotation>
+          <documentation>Haltesichtweite</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Anfahrsichtfeld-->
+        <annotation>
+          <documentation>Anfahrsichtfeld</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Annaeherungssichtfeld-->
+        <annotation>
+          <documentation>Annäherungssichtfeld</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Ueberquerung-->
+        <annotation>
+          <documentation>Sichtfeld an Überquerungsstellen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstigeSichtflaeche-->
+        <annotation>
+          <documentation>Sonstige Sichtfläche</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_SichtflaecheKnotenpunktTypen-->
+  <!--=========================================================================================-->
+  <simpleType name="SO_SichtflaecheKnotenpunktTypen">
+    <annotation>
+      <documentation>Aufzählung von Kombinationen sich treffender Straßentypen</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--AnlgStr-AnlgWeg-->
+        <annotation>
+          <documentation>Knotenpunkt Anliegerstraße - Anliegerweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--AnlgStr-AnlgStr-->
+        <annotation>
+          <documentation>Knotenpunkt Anliegerstraße - Anliegerstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--SammelStr-AnlgStr-->
+        <annotation>
+          <documentation>Knotenpunkt Sammelstraße - Anliegerstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--HauptSammelStr-->
+        <annotation>
+          <documentation>Knotenpunkt mit einer Haupt-Sammelstraße</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--HauptVerkStrAngeb-->
+        <annotation>
+          <documentation>Knotenpunkt mit einer angebaute Hauptverkehrsstraße (Bebauung parallel zur Straße ist vorhanden)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--HauptVerkStrNichtAngeb-->
+        <annotation>
+          <documentation>Knotenpunkt mit einer nicht angebaute Hauptverkehrsstraße (Keine Bebauung parallel zur Straße )</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--SonstigerKnotenpunkt-->
+        <annotation>
+          <documentation>Sonstiger Knotenpunkt</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--SO_TextAbschnittFlaeche-->
+  <!--=========================================================================================-->
+  <element name="SO_TextAbschnittFlaeche" type="xplan:SO_TextAbschnittFlaecheType" substitutionGroup="xplan:SO_Flaechenobjekt" />
+  <complexType name="SO_TextAbschnittFlaecheType">
+    <annotation>
+      <documentation>Bereich, in dem bestimmte textlich spezifizierte Planinhalte g&amp;#252;ltig sind, die &amp;#252;ber die Relation "&lt;i&gt;refTextInhalt&lt;/i&gt;" (Basisklasse XP&lt;i&gt;_Objekt&lt;/i&gt;) spezifiziert werden.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:SO_FlaechenobjektType" />
+    </complexContent>
+  </complexType>
+  <complexType name="SO_TextAbschnittFlaechePropertyType">
+    <sequence>
+      <element ref="xplan:SO_TextAbschnittFlaeche" minOccurs="0" />
+    </sequence>
+    <attributeGroup ref="gml:AssociationAttributeGroup" />
+  </complexType>
+</schema>

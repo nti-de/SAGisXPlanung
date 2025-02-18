@@ -1,4 +1,4 @@
-lxml
+lxml>=5.3.0
 packaging
 SQLAlchemy==1.4.49
 GeoAlchemy2==0.12.5

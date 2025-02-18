@@ -1,0 +1,3570 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!--Erzeugt mit KIT (www.kit.edu) UmlToXmlTransformation-Software, Erstellungsdatum: 02.11.2022 15:52:55-->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xplan="http://www.xplanung.de/xplangml/6/0" targetNamespace="http://www.xplanung.de/xplangml/6/0" xmlns:gml="http://www.opengis.net/gml/3.2" elementFormDefault="qualified" version="6.0.2">
+  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="GmlProfile/gmlProfilexplan.xsd" />
+  <include schemaLocation="XPlanGML_Basisschema.xsd" />
+  <!--=========================================================================================-->
+  <!--LP_Geometrieobjekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="LP_Geometrieobjekt" type="xplan:LP_GeometrieobjektType" substitutionGroup="xplan:LP_Objekt" />
+  <complexType abstract="true" name="LP_GeometrieobjektType">
+    <annotation>
+      <documentation>Basisklasse für alle Objekte eines Landschaftsplans mit variablem Raumbezug. Ein konkretes Objekt muss entweder punktförmigen, linienförmigen oder flächenhaften Raumbezug haben, gemischte Geometrie ist nicht zugelassen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_ObjektType">
+        <sequence>
+          <element name="position" type="gml:GeometryPropertyType">
+            <annotation>
+              <documentation>Raumbezug - Entweder punktförmig, linienförmig oder flächenhaft, gemischte Geometrie ist nicht zugelassen.</documentation>
+            </annotation>
+          </element>
+          <element name="flaechenschluss" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Zeigt bei flächenhaftem Raumbezug an, ob das Objekt als Flächenschlussobjekt oder Überlagerungsobjekt gebildet werden soll. Das Attribut ist nur relevant, wenn das Objekt in einem Planwerk mit Flächenschluss verwendet wird. Ansonsten sollte das Attribut nicht belegt oder mit dem Wert false belegt werden.</documentation>
+            </annotation>
+          </element>
+          <element name="flussrichtung" minOccurs="0" type="boolean">
+            <annotation>
+              <documentation>Das Attribut ist nur relevant, wenn ein Geometrieobjekt einen linienhaften Raumbezug hat. Ist es mit dem Wert &lt;i&gt;true &lt;/i&gt;belegt, wird damit ausgedrückt, dass der Linie eine &lt;b&gt;Flussrichtung &lt;/b&gt; &lt;b&gt;in Digitalisierungsrichtung&lt;/b&gt; zugeordnet ist. In diesem Fall darf bei Im- und Export die Digitalisierungsreihenfolge der Stützpunkte nicht geändert werden. Wie eine definierte Flussrichtung  zu interpretieren oder bei einer Plandarstellung zu visualisieren ist, bleibt der Implementierung überlassen.
+Ist der Attributwert &lt;i&gt;false &lt;/i&gt;oder das Attribut nicht belegt, ist die Digitalisierungsreihenfolge der Stützpunkte &lt;b&gt;irrelevant&lt;/b&gt;.</documentation>
+            </annotation>
+          </element>
+          <element name="nordwinkel" minOccurs="0" type="gml:AngleType">
+            <annotation>
+              <documentation>Orientierung des Objektes bei punkförmigem Raumbezug als Winkel gegen die Nordrichtung. Zählweise im geographischen Sinn (von Nord über Ost nach Süd und West).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_Geometrieobjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_Geometrieobjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_Bereich-->
+  <!--=========================================================================================-->
+  <element name="LP_Bereich" type="xplan:LP_BereichType" substitutionGroup="xplan:XP_Bereich" />
+  <complexType name="LP_BereichType">
+    <annotation>
+      <documentation>Die Klasse modelliert einen Planbereich mit landschaftsplanerischen Darstellungen bzw. Festsetzungen sowie gutachterliche Aussagen der Landschaftsplanung.&lt;font color="#c00000"&gt; &lt;/font&gt;
+LP_Bereich kann z.B. ein eigenes Kartenblatt, einen Teilplan, eine Detail- oder &amp;#220;bersichtskarte darstellen. 
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_BereichType">
+        <sequence>
+          <element name="gehoertZuPlan" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:LP_Plan</gml:targetElement>
+                <gml:reversePropertyName>xplan:bereich</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf den Landschaftsplan, zu dem der Bereich gehört.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_Bereich" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_Bereich" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_Plan-->
+  <!--=========================================================================================-->
+  <element name="LP_Plan" type="xplan:LP_PlanType" substitutionGroup="xplan:XP_Plan" />
+  <complexType name="LP_PlanType">
+    <annotation>
+      <documentation>Die Klasse modelliert ein Planwerk mit landschaftsplanerischen gutachterlichen Aussagen, Darstellungen bzw. Festsetzungen.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_PlanType">
+        <sequence>
+          <element name="bundesland" type="xplan:XP_Bundeslaender">
+            <annotation>
+              <documentation>Zuständiges Bundesland</documentation>
+            </annotation>
+          </element>
+          <element name="rechtlicheAussenwirkung" type="boolean">
+            <annotation>
+              <documentation>Gibt an, ob der Plan eine rechtliche Außenwirkung hat.</documentation>
+            </annotation>
+          </element>
+          <element name="planArt" maxOccurs="unbounded" type="xplan:LP_PlanArt">
+            <annotation>
+              <documentation>Typ des vorliegenden Landschaftsplans.</documentation>
+            </annotation>
+          </element>
+          <element name="sonstPlanArt" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:LP_SonstPlanArt</referenzierteCodelist>
+              </appinfo>
+              <documentation>Spezifikation einer "Sonstigen Planart", wenn kein Plantyp aus der Enumeration &lt;i&gt;LP_PlanArt &lt;/i&gt;zutreffend ist. Das Attribut "&lt;i&gt;planArt" &lt;/i&gt;muss in diesem Fall der Wert &lt;i&gt;9999 &lt;/i&gt;haben.</documentation>
+            </annotation>
+          </element>
+          <element name="gemeinde" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Die f&amp;#252;r diesen Plan zust&amp;#228;ndige Gemeinde.</documentation>
+            </annotation>
+          </element>
+          <element name="planaufstellendeGemeinde" minOccurs="0" maxOccurs="unbounded" type="xplan:XP_GemeindePropertyType">
+            <annotation>
+              <documentation>Die f&amp;#252;r die urspr&amp;#252;ngliche Planaufstellung zust&amp;#228;ndige Gemeinde, falls diese nicht unter dem Attribut gemeinde aufgef&amp;#252;hrt ist. Dies kann z.B. nach Gemeindefusionen der Fall sein.</documentation>
+            </annotation>
+          </element>
+          <element name="plangeber" minOccurs="0" type="xplan:XP_PlangeberPropertyType">
+            <annotation>
+              <documentation>F&amp;#252;r die Planung zust&amp;#228;ndige Institution falls von der Gemeinde abweichend, z.B. ein Planungsverband.
+</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsstand" minOccurs="0" type="xplan:LP_Rechtsstand">
+            <annotation>
+              <documentation>Rechtsstand des Plans</documentation>
+            </annotation>
+          </element>
+          <element name="aufstellungsbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Aufstellungsbeschlusses</documentation>
+            </annotation>
+          </element>
+          <element name="auslegungsStartDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>Start-Datum der &amp;#246;ffentlichen Auslegung. Bei mehrfacher &amp;#246;ffentlicher Auslegung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="auslegungsEndDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>End-Datum der &amp;#246;ffentlichen Auslegung. Bei mehrfacher &amp;#246;ffentlicher Auslegung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="tOeBbeteiligungsStartDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>Start-Datum der &amp;#214;B-Tr&amp;#228;gerbeteiligung. Bei mehrfacher &amp;#246;ffentlicher Auslegung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="tOeBbeteiligungsEndDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>End-Datum der &amp;#214;B-Tr&amp;#228;gerbeteiligung. Bei mehrfacher &amp;#246;ffentlicher Auslegung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="oeffentlichkeitsBetStartDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>Start-Datum der &amp;#214;ffentlichkeitsbeteiligung. Bei mehrfacher &amp;#246;ffentlicher Beteiligung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="oeffentlichkeitsBetEndDatum" minOccurs="0" maxOccurs="unbounded" type="date">
+            <annotation>
+              <documentation>End-Datum der &amp;#214;ffentlichkeitsbeteiligung. Bei mehrfacher &amp;#246;ffentlicher Beteiligung k&amp;#246;nnen mehrere Datumsangaben spezifiziert werden.</documentation>
+            </annotation>
+          </element>
+          <element name="aenderungenBisDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum, bis zu dem Plan&amp;#228;nderungen ber&amp;#252;cksichtigt wurden.</documentation>
+            </annotation>
+          </element>
+          <element name="entwurfsbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Entwurfsbeschlusses.</documentation>
+            </annotation>
+          </element>
+          <element name="planbeschlussDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Planbeschlusses.</documentation>
+            </annotation>
+          </element>
+          <element name="inkrafttretenDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum des Inkrafttretens.</documentation>
+            </annotation>
+          </element>
+          <element name="veroeffentlichungsDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Datum der Ver&amp;#246;ffentlichung des Plans.</documentation>
+            </annotation>
+          </element>
+          <element name="sonstVerfahrensDatum" minOccurs="0" type="date">
+            <annotation>
+              <documentation>Sonstiges Verfahrens-Datum (Verfahrens-Art siehe &lt;i&gt;sonstVerfahrensText&lt;/i&gt;)</documentation>
+            </annotation>
+          </element>
+          <element name="sonstVerfahrensText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche Pr&amp;#228;zisierung des sonstigen Verfahrens gem. Attribut &lt;i&gt;sonstVerfahrensDatum&lt;/i&gt;</documentation>
+            </annotation>
+          </element>
+          <element name="startBedingungen" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Beschreibt Bedingung(en),  ab wann ein Plan wirksam ist.</documentation>
+            </annotation>
+          </element>
+          <element name="endeBedingungen" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Beschreibt Bedingung(en), bis wann ein Plan wirksam ist.</documentation>
+            </annotation>
+          </element>
+          <element name="bereich" minOccurs="0" maxOccurs="unbounded" type="gml:ReferenceType">
+            <annotation>
+              <appinfo>
+                <gml:targetElement>xplan:LP_Bereich</gml:targetElement>
+                <gml:reversePropertyName>xplan:gehoertZuPlan</gml:reversePropertyName>
+              </appinfo>
+              <documentation>Referenz auf die Bereiche des Landschaftsplans (einzelne Kartenblätter, Detailkarten, Übersichtskarten etc.).</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_Plan" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_Plan" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_Objekt-->
+  <!--=========================================================================================-->
+  <element abstract="true" name="LP_Objekt" type="xplan:LP_ObjektType" substitutionGroup="xplan:XP_Objekt" />
+  <complexType abstract="true" name="LP_ObjektType">
+    <annotation>
+      <documentation>Basisklasse für alle spezifischen Inhalte eines Landschaftsplans.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:XP_ObjektType">
+        <sequence>
+          <element name="raumkonkretisierung" type="xplan:LP_Raumkonkretisierung">
+            <annotation>
+              <documentation>Beschreibung der r&amp;#228;umlichen Sch&amp;#228;rfe des geometrischen Objekts, d.h. wie konkret die Geometrie in Attribut &lt;i&gt;position &lt;/i&gt;die tats&amp;#228;chliche r&amp;#228;umliche Gestalt des Planinhalts darstellt.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsCharText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche Konkretisierung der rechtlichen Charakterisierung.</documentation>
+            </annotation>
+          </element>
+          <element name="vorschlagIntegrationBLP" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_VorschlagIntegrationBauleitplanungPropertyType">
+            <annotation>
+              <documentation>Verweis auf ein Objekt im Modellbereich Bauleitplanung, das von der Landschaftsplanung als Kopiervorlage zur &amp;#220;bernahme in den FNP/Bebauungsplan vorgeschlagen wird. Referenziert ein Objekt mit Angabe der Begr&amp;#252;ndung.</documentation>
+            </annotation>
+          </element>
+          <element name="vorschlagIntegrationRO" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_VorschlagIntegrationRaumordnungPropertyType">
+            <annotation>
+              <documentation>Verweis auf ein Objekt im Modellbereich Raumordnung, das von der Landschaftsplanung als Kopiervorlage zur &amp;#220;bernahme in den Raumordnungsplan vorgeschlagen wird. Referenziert ein Objekt mit Angabe der Begr&amp;#252;ndung.</documentation>
+            </annotation>
+          </element>
+          <element name="referenziertLPObjekt" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_ReferenzLPObjektPropertyType">
+            <annotation>
+              <documentation>Angaben zu einem anderen LP-Planinhalt, der mit diesem LP-Objekt in Verbindung steht.
+</documentation>
+            </annotation>
+          </element>
+          <element name="wirdReferenziertVon" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_ReferenzLPObjektPropertyType">
+            <annotation>
+              <documentation>R&amp;#252;ckw&amp;#228;rtsreferenz zu einem LP- Objekt, das dieses LP-Objekt referenziert.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_Objekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_Objekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_PlanArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_PlanArt">
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Landschaftsprogramm-->
+        <annotation>
+          <documentation>&amp;#220;ber&amp;#246;rtliche konkretisierte Ziele, Erfordernisse und Ma&amp;#223;nahmen des Naturschutzes und der Landschaftspflege auf r&amp;#228;umlicher Ebene eines Bundeslandes</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Landschaftsrahmenplan-->
+        <annotation>
+          <documentation>&amp;#220;ber&amp;#246;rtliche konkretisierte Ziele, Erfordernisse und Ma&amp;#223;nahmen des Naturschutzes und der Landschaftspflege&lt;b&gt; &lt;/b&gt;f&amp;#252;r r&amp;#228;umliche Teilbereiche eines Bundeslandes, z.B. eines (Land-)Kreises.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Landschaftsplan-->
+        <annotation>
+          <documentation>Planwerk mit konkretisierten Zielen, Erfordernissen und Maßnahmen des Naturschutzes und der Landschaftspflege auf gesamtstädtischer räumlicher Ebene</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Gruenordnungsplan-->
+        <annotation>
+          <documentation>Die für die örtliche Ebene konkretisierten Ziele, Erfordernisse und Maßnahmen des Naturschutzes und der Landschaftspflege werden für Teile eines Gemeindegebiets in Grünordnungsplänen dargestellt. (§ 11, Abs .1  BNatSchG)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Planart</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_Rechtsstand-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_Rechtsstand">
+    <annotation>
+      <documentation>Rechtsstand eines Plans der Landschaftsplanung.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Aufstellungsbeschluss-->
+        <annotation>
+          <documentation>Der Aufstellungsbeschluss wurde getroffen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Entwurf-->
+        <annotation>
+          <documentation>Eine vorl&amp;#228;ufige Planfassung/Vorentwurf liegt vor.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Plan-->
+        <annotation>
+          <documentation>Der Plan ist technisch erstellt, aber noch nicht rechtwirksam bzw. noch nicht gutachterlich wirksam.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Wirksamkeit-->
+        <annotation>
+          <documentation>Der Plan ist wirksam einschlie&amp;#223;lich einer gutachterlichen Wirksamkeit.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Untergegangen-->
+        <annotation>
+          <documentation>Der Plan ist nicht mehr rechtswirksam, 
+wurde aufgehoben oder au&amp;#223;erkraftgesetzt.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--InFortschreibung-->
+        <annotation>
+          <documentation>Der Plan befindet sich in Fortschreibung (Landschaftsplanung).</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_ReferenzLPObjekt-->
+  <!--=========================================================================================-->
+  <element name="LP_ReferenzLPObjekt" type="xplan:LP_ReferenzLPObjektType" />
+  <complexType name="LP_ReferenzLPObjektType">
+    <annotation>
+      <documentation>Verweis auf einen anderen Planinhalt (LP-Objekt) dieses Plans, der mit diesem LP-Objekt in Verbindung steht.
+Dieses kennzeichnet ein zugeh&amp;#246;riges Objekt im Landschaftsplan.
+(z.B. kann zum Beispiel ein ges. gesch. Biotop aus &lt;i&gt;LP_SchutzBestimmterTeileVonNaturUndLandschaft &lt;/i&gt;ein Feature der Klasse &lt;i&gt;LP_ZieleErfordernisseMassnahmen referenzieren, in dem &lt;/i&gt;die Angabe des Biotoptypen-Schl&amp;#252;ssels nach BKompV und / oder Landeskartierschl&amp;#252;ssel erfolgt.
+Oder ein Objekt der Klasse &lt;i&gt;LP_BiotopverbundBiotopvernetzung &lt;/i&gt;referenziert ein Objekt der Klasse &lt;i&gt;LP_ZieleErfordernisseMassnahmen&lt;/i&gt;, in dem die Arten oder Biotoptypen n&amp;#228;her spezifiziert werden, die &amp;#252;ber das Biotopverbundelement vernetzt werden sollen. </documentation>
+    </annotation>
+    <sequence>
+      <element name="beschreibung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Beschreibung der Beziehung zwischen diesem und dem referenzierten Landschaftsplanungs-Objekt.</documentation>
+        </annotation>
+      </element>
+      <element name="verbundenesLPObjekt" type="gml:ReferenceType">
+        <annotation>
+          <appinfo>
+            <gml:targetElement>xplan:LP_Objekt</gml:targetElement>
+          </appinfo>
+          <documentation>Referenz auf einen anderen Planinhalt, der mit diesem LP-Objekt in Verbindung steht.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_ReferenzLPObjekt" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_ReferenzLPObjekt" type="anyType" abstract="true" />
+  <complexType name="LP_ReferenzLPObjektPropertyType">
+    <sequence>
+      <element ref="xplan:LP_ReferenzLPObjekt" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_VorschlagIntegrationBauleitplanung-->
+  <!--=========================================================================================-->
+  <element name="LP_VorschlagIntegrationBauleitplanung" type="xplan:LP_VorschlagIntegrationBauleitplanungType" />
+  <complexType name="LP_VorschlagIntegrationBauleitplanungType">
+    <annotation>
+      <documentation>Vorschlag zur Integration in die Bauleitplanung</documentation>
+    </annotation>
+    <sequence>
+      <element name="begruendung" type="string">
+        <annotation>
+          <documentation>Begr&amp;#252;ndung, warum die Landschaftsplanung die &amp;#220;bernahme in die Bauleitplanung vorschl&amp;#228;gt / empfiehlt / festsetzt.</documentation>
+        </annotation>
+      </element>
+      <element name="refObjektBauleitplanung" type="gml:ReferenceType">
+        <annotation>
+          <appinfo>
+            <gml:targetElement>xplan:XP_Objekt</gml:targetElement>
+          </appinfo>
+          <documentation>Referenz auf ein Objekt im Modellbereich Bauleitplanung, das von der Landschaftsplanung als Kopiervorlage zur Übernahme in einen Bauleitplan vorgeschlagen wird.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_VorschlagIntegrationBauleitplanung" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_VorschlagIntegrationBauleitplanung" type="anyType" abstract="true" />
+  <complexType name="LP_VorschlagIntegrationBauleitplanungPropertyType">
+    <sequence>
+      <element ref="xplan:LP_VorschlagIntegrationBauleitplanung" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_VorschlagIntegrationRaumordnung-->
+  <!--=========================================================================================-->
+  <element name="LP_VorschlagIntegrationRaumordnung" type="xplan:LP_VorschlagIntegrationRaumordnungType" />
+  <complexType name="LP_VorschlagIntegrationRaumordnungType">
+    <annotation>
+      <documentation>Vorschlag zur Integration in die Raumordnung</documentation>
+    </annotation>
+    <sequence>
+      <element name="begruendung" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Begr&amp;#252;ndung, warum die Landschaftsplanung die &amp;#220;bernahme in die Bauleitplanung vorschl&amp;#228;gt / empfiehlt / festsetzt.</documentation>
+        </annotation>
+      </element>
+      <element name="refObjektRaumordnung" type="gml:ReferenceType">
+        <annotation>
+          <appinfo>
+            <gml:targetElement>xplan:XP_Objekt</gml:targetElement>
+          </appinfo>
+          <documentation>Referenz auf ein Objekt im Modellbereich Raumordnung, das von der Landschaftsplanung als Kopiervorlage zur Übernahme in einen Raumordnungsplan vorgeschlagen wird.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_VorschlagIntegrationRaumordnung" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_VorschlagIntegrationRaumordnung" type="anyType" abstract="true" />
+  <complexType name="LP_VorschlagIntegrationRaumordnungPropertyType">
+    <sequence>
+      <element ref="xplan:LP_VorschlagIntegrationRaumordnung" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_Raumkonkretisierung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_Raumkonkretisierung">
+    <annotation>
+      <documentation>Verschiedene Ausprägungen der räumlichen Schärfe von Planinhalten.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Scharf-->
+        <annotation>
+          <documentation>Scharf abgegrenzte Fl&amp;#228;che bzw. eine im Erfassungsma&amp;#223;stab des Plans sinnvollerweise als Linien- oder Punktobjekt erfassbare scharfe Geometrie.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Suchraum-->
+        <annotation>
+          <documentation>Suchraum (die Ma&amp;#223;nahme/Planung bzw. bezieht sich auf Teilbereiche innerhalb der Gesamtfl&amp;#228;che)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Unscharf-->
+        <annotation>
+          <documentation>Flie&amp;#223;ende Grenzen, mit &amp;#220;bergangsbereichen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Position-->
+        <annotation>
+          <documentation>Markierung durch eine vereinfachte Geometrie ohne konkrete Festlegung der tats&amp;#228;chlichen r&amp;#228;umlichen Ausdehnung; meist als Geometrietyp Punkt oder Linie); f&amp;#252;r diese Stelle liegt eine Information vor, die genaue r&amp;#228;umliche Ausdehnung &amp;#252;ber diese Geometrie hinaus ist unklar.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Raumunkonkret-->
+        <annotation>
+          <documentation>Raumunkonkret (keine r&amp;#228;umlich belastbaren oder nur textliche Informationen zum gemeinten Raum, z.B. „naturfern verbaute Teilabschnitte der B&amp;#228;che und Flie&amp;#223;gew&amp;#228;sser im Plangebiet“); m&amp;#246;glicherweise  ganz ohne Darstellung in der Planzeichnung.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Unbekannt (keine Einordnung m&amp;#246;glich, z.B. zur &amp;#220;bernahme von Alt-Pl&amp;#228;nen, in denen der Grad der Raumkonkretisierung erkennbar / nicht mehr recherchierbar ist.)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_SchutzBestimmterTeileVonNaturUndLandschaft-->
+  <!--=========================================================================================-->
+  <element name="LP_SchutzBestimmterTeileVonNaturUndLandschaft" type="xplan:LP_SchutzBestimmterTeileVonNaturUndLandschaftType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_SchutzBestimmterTeileVonNaturUndLandschaftType">
+    <annotation>
+      <documentation>Schutzgebietskategorien gemäß Kapitel 4 BNatSchG „Schutz bestimmter Teile von Natur und Landschaft“.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element name="artDerFestlegung" type="xplan:LP_KlassifizierungNaturschutzrecht">
+            <annotation>
+              <documentation>Kategorien der Schutzgebiete und sonstigen gesch&amp;#252;tzten Bestandteilen von Natur und Landschaft nach Kap. 4 Bundesnaturschutzgesetz (BNatSchG) und Landes-Naturschutzgesetzen.</documentation>
+            </annotation>
+          </element>
+          <element name="artDerFestlegungText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erl&amp;#228;uterung zu Sonstige Schutzgebietskategorie oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlten Schutzgebietskategorien.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsstandSchG" type="xplan:LP_RechtsstandSchutzGeb">
+            <annotation>
+              <documentation>Rechtsstand des Schutzgebiets oder des gesch&amp;#252;tzten Bestandteils von Natur und Landschaft.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtsstandSchGText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erl&amp;#228;uterung zu Sonstigem Rechtsstand (wenn &lt;i&gt;rechtsstandSchG &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem Rechtsstand.</documentation>
+            </annotation>
+          </element>
+          <element name="name" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Name des Schutzgebietes, z.B. "Leineaue zwischen Ruthe und Koldingen".</documentation>
+            </annotation>
+          </element>
+          <element name="nummer" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Schutzgebietsnummer, eindeutiges Kennzeichen des Gebiets, z.B. "NSG HA 203".</documentation>
+            </annotation>
+          </element>
+          <element name="gesetzlGeschBiotop" minOccurs="0" type="xplan:LP_GesGeschBiotopTyp">
+            <annotation>
+              <documentation>Angabe einer gesetzlich gesch&amp;#252;tzten Biotoptypen-Art gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 1-6 BNatSchG.</documentation>
+            </annotation>
+          </element>
+          <element name="gesetzlGeschBiotopText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erl&amp;#228;uterung zu Sonstige gesetzlich gesch&amp;#252;tzte Biotope (wenn &lt;i&gt;gesetzlichGeschuetztBiotop &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu anderem ausgew&amp;#228;hlten gesetzlich gesch&amp;#252;tztem Biotoptyp.</documentation>
+            </annotation>
+          </element>
+          <element name="detailGesetzlGeschBiotopLR" minOccurs="0" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:LP_DetailGesetzlGeschBiotopLR</referenzierteCodelist>
+              </appinfo>
+              <documentation>&amp;#220;ber eine Codeliste definierte weitere gesetzlich gesch&amp;#252;tzte Biotope z.B. nach Landesrecht.</documentation>
+            </annotation>
+          </element>
+          <element name="schutzzone" minOccurs="0" type="xplan:LP_SchutzzonenNaturschutzrecht">
+            <annotation>
+              <documentation>Angabe der Schutzzone f&amp;#252;r zonierte Schutzgebiete, insbesondere Biosph&amp;#228;renreservate und Nationalparke.
+</documentation>
+            </annotation>
+          </element>
+          <element name="schutzzonenText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erl&amp;#228;uterung zu Sonstige Schutzzone (Konformit&amp;#228;tsregel, wenn schutzzone = 9999, dann Belegung Pflicht oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlten Schutzzonen.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_SchutzBestimmterTeileVonNaturUndLandschaft" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_SchutzBestimmterTeileVonNaturUndLandschaft" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_KlassifizierungNaturschutzrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_KlassifizierungNaturschutzrecht">
+    <annotation>
+      <documentation>Kategorien der Schutzgebiete und sonstigen gesch&amp;#252;tzten Bestandteilen von Natur und Landschaft nach Kap. 4 Bundesnaturschutzgesetz (BNatSchG) u. Europ&amp;#228;ischem Recht.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Naturschutzgebiet-->
+        <annotation>
+          <documentation>Naturschutzgebiet gemäß &lt;font color="#00000a"&gt;§23 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Nationalpark-->
+        <annotation>
+          <documentation>Nationalpark &lt;font color="#00000a"&gt;gemäß §24 BNatSchG&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Biosphaerenreservat-->
+        <annotation>
+          <documentation>Biosphärenreservat &lt;font color="#00000a"&gt;gemäß §25 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Landschaftsschutzgebiet-->
+        <annotation>
+          <documentation>Landschaftsschutzgebiet &lt;font color="#00000a"&gt;gem&amp;#228;&amp;#223; &amp;#167;26 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Naturpark-->
+        <annotation>
+          <documentation>Naturpark &lt;font color="#00000a"&gt;gemäß §27 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--Naturdenkmal-->
+        <annotation>
+          <documentation>Naturdenkmal &lt;font color="#00000a"&gt;gemäß §28 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--GeschuetzterLandschaftsBestandteil-->
+        <annotation>
+          <documentation>Geschützter Bestandteil der Landschaft &lt;font color="#00000a"&gt;gemäß §29 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1700">
+        <!--GesetzlichGeschuetztesBiotop-->
+        <annotation>
+          <documentation>Gesetzlich geschützte Biotope &lt;font color="#00000a"&gt;gemäß §30 BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1800">
+        <!--Natura2000-->
+        <annotation>
+          <documentation>Schutzgebiet nach Europäischem Recht. Dies umfasst das "Gebiet Gemeinschaftlicher Bedeutung" (FFH-Gebiet) und das "Europäische Vogelschutzgebiet"</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18000">
+        <!--GebietGemeinschaftlicherBedeutung-->
+        <annotation>
+          <documentation>Gebiete von gemeinschaftlicher Bedeutung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="18001">
+        <!--EuropaeischesVogelschutzgebiet-->
+        <annotation>
+          <documentation>Europäische Vogelschutzgebiete</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--NationalesNaturmonument-->
+        <annotation>
+          <documentation>Nationales Naturmonument &lt;font color="#00000a"&gt;gemäß §24 Abs. (4)  BNatSchG.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Schutzgebietskategorie (z.B. gesch&amp;#252;tzte Parkanlagen), siehe &lt;i&gt;artDerFestlegungText.&lt;/i&gt;</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_GesGeschBiotopTyp-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_GesGeschBiotopTyp">
+    <annotation>
+      <documentation>Liste der gesetzlich gesch&amp;#252;tzten Biotoptypen-Arten gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 1-6 BNatSchG.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--GewaesserBiotope-->
+        <annotation>
+          <documentation>Nat&amp;#252;rliche oder naturnahe Bereiche flie&amp;#223;ender und stehender Binnengew&amp;#228;sser einschlie&amp;#223;lich ihrer Ufer und der dazugeh&amp;#246;rigen uferbegleitenden nat&amp;#252;rlichen oder naturnahen Vegetation sowie ihrer nat&amp;#252;rlichen oder naturnahen Verlandungsbereiche, Altarme und regelm&amp;#228;&amp;#223;ig &amp;#252;berschwemmten Bereiche (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 1 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--FeuchtNassBiotope-->
+        <annotation>
+          <documentation>Moore, S&amp;#252;mpfe, R&amp;#246;hrichte, Gro&amp;#223;seggenrieder, seggen- und binsenreiche Nasswiesen, Quellbereiche, Binnenlandsalzstellen (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 2 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--TrockenBiotope-->
+        <annotation>
+          <documentation>Offene Binnend&amp;#252;nen, offene nat&amp;#252;rliche Block-, Schutt- und Ger&amp;#246;llhalden, Lehm- und L&amp;#246;ssw&amp;#228;nde, Zwergstrauch-, Ginster- und Wacholderheiden, Borstgrasrasen, Trockenrasen, Schwermetallrasen, W&amp;#228;lder und Geb&amp;#252;sche trockenwarmer Standorte (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 3 BNatSchG). </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--WaldBiotope-->
+        <annotation>
+          <documentation>Bruch-, Sumpf- und Auenw&amp;#228;lder, Schlucht-, Blockhalden- und Hangschuttw&amp;#228;lder, subalpine L&amp;#228;rchen- und L&amp;#228;rchen-Arvenw&amp;#228;lder (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 4 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--FelsenAlpinBiotope-->
+        <annotation>
+          <documentation>Offene Felsbildungen, H&amp;#246;hlen sowie naturnahe Stollen, alpine Rasen sowie Schneet&amp;#228;lchen und Krummholzgeb&amp;#252;sche (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 5 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--KuestenBiotope-->
+        <annotation>
+          <documentation>Fels- und Steilk&amp;#252;sten, K&amp;#252;stend&amp;#252;nen und Strandw&amp;#228;lle, Strandseen, Boddengew&amp;#228;sser mit Verlandungsbereichen, Salzwiesen und Wattfl&amp;#228;chen im K&amp;#252;stenbereich, Seegraswiesen und sonstige marine Makrophytenbest&amp;#228;nde, Riffe, sublitorale Sandb&amp;#228;nke, Schlickgr&amp;#252;nde mit bohrender Bodenmegafauna sowie artenreiche Kies-, Grobsand- und Schilfgr&amp;#252;nde im Meeres- und K&amp;#252;stenbereich (gem&amp;#228;&amp;#223; &amp;#167;30 Abs. 2 Ziffern 6 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>&lt;font color="#333333"&gt;Sonstige gesetzlich gesch&amp;#252;tzte Biotope, siehe &lt;i&gt;gesetzlGeschBiotopText&lt;/i&gt; und / oder &lt;i&gt;detailGesetzlGeschBiotopLR&lt;/i&gt;.&lt;/font&gt;</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_RechtsstandSchutzGeb-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_RechtsstandSchutzGeb">
+    <annotation>
+      <documentation>Rechtsstand eines Schutzgebiets oder gesch&amp;#252;tzter Teile von Natur und Landschaft. Ersetzt in aller Regel das allgemeine Attribut rechtsstand (XP_Rechtsstand), kann jedoch bei Bedarf mit diesem kombiniert werden, um z.B. rechtsstand = geplant mit rechtsstandSchG=Erweiterung zu kombinieren.
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Geplant-->
+        <annotation>
+          <documentation>Schutzgebiet geplant. </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Bestehend-->
+        <annotation>
+          <documentation>Das Schutzgebiet besteht.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Fortfallend-->
+        <annotation>
+          <documentation>Schutzgebiet fortfallend, untergegangen oder aufgehoben. </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Eignung-->
+        <annotation>
+          <documentation>Als Schutzgebiet geeignet. </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Erweiterung-->
+        <annotation>
+          <documentation>Erweiterung eines bestehenden Schutzgebiets.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Qualifizierung-->
+        <annotation>
+          <documentation>Qualifizierung eines Schutzgebietes  (z.B. &amp;#196;nderung der Schutzgebietsverordnung, &amp;#196;nderung der Schutzgebietskategorie usw.)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Rechtsstand (siehe &lt;i&gt;rechtsstandSchGText&lt;/i&gt;).</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_SchutzzonenNaturschutzrecht-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_SchutzzonenNaturschutzrecht">
+    <annotation>
+      <documentation>Schutzzonen für zonierte Schutzgebiete, insbesondere Biosphärenreservate und Nationalparke.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Schutzzone_1-->
+        <annotation>
+          <documentation>Schutzzone 1</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--Schutzzone_2-->
+        <annotation>
+          <documentation>Schutzzone 2</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Schutzzone_3-->
+        <annotation>
+          <documentation>Schutzzone 3</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Kernzone-->
+        <annotation>
+          <documentation>Kernzone</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--Pflegezone-->
+        <annotation>
+          <documentation>Pflegezone</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--Entwicklungszone-->
+        <annotation>
+          <documentation>Entwicklungszone</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--Regenerationszone-->
+        <annotation>
+          <documentation>Regenerationszone</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Zone, siehe &lt;i&gt;schutzZoneText&lt;/i&gt;.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BiotopverbundBiotopvernetzung-->
+  <!--=========================================================================================-->
+  <element name="LP_BiotopverbundBiotopvernetzung" type="xplan:LP_BiotopverbundBiotopvernetzungType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_BiotopverbundBiotopvernetzungType">
+    <annotation>
+      <documentation>Fl&amp;#228;chen und Elemente f&amp;#252;r Biotopverbund und Biotopvernetzung.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element name="planungsEbene" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_PlanungsEbene">
+            <annotation>
+              <documentation>Nutzungsregelung (Klassifikation).</documentation>
+            </annotation>
+          </element>
+          <element name="typBioVerbund" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_TypBioVerbundKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Typen des Biotopverbundelementes</documentation>
+            </annotation>
+          </element>
+          <element name="rechtlicheSicherung" minOccurs="0" type="xplan:LP_RechtlicheSicherung">
+            <annotation>
+              <documentation>Rechtliche Sicherung f&amp;#252;r Fl&amp;#228;chen des Biotopverbunds und der Biotopvernetzung nach &amp;#167; 21 Abs. 4 BNatSchG.</documentation>
+            </annotation>
+          </element>
+          <element name="rechtlicheSicherungText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erl&amp;#228;uterung zu Sonstiger rechtlicher Sicherung in &lt;i&gt;rechtlicheSicherung&lt;/i&gt; oder erg&amp;#228;nzende Information zur ausgew&amp;#228;hlten rechtlichen Sicherungsart.</documentation>
+            </annotation>
+          </element>
+          <element name="bioVerbundsystemArt" type="xplan:LP_BioVerbundsystemArt">
+            <annotation>
+              <documentation>Zeigt die Art des Verbundsystems an.</documentation>
+            </annotation>
+          </element>
+          <element name="bioVStandortFeuchte" minOccurs="0" type="xplan:LP_BioVStandortFeuchte">
+            <annotation>
+              <documentation>Zeigt die Auspr&amp;#228;gung der Standortverh&amp;#228;ltnisse des Verbundsystems im Hinblick auf Feuchtigkeit an.</documentation>
+            </annotation>
+          </element>
+          <element name="bioVerbundsystemText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Textliche erg&amp;#228;nzende Informationen zu Art und Auspr&amp;#228;gung der Standortverh&amp;#228;ltnisse des Verbundsystems.</documentation>
+            </annotation>
+          </element>
+          <element name="foerdermoeglichkeit" minOccurs="0" maxOccurs="unbounded" type="string">
+            <annotation>
+              <documentation>Nennung von F&amp;#246;rderm&amp;#246;glichkeiten f&amp;#252;r den Biotopverbund oder die Biotopvernetzung.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_BiotopverbundBiotopvernetzung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BiotopverbundBiotopvernetzung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_TypBioVerbundKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_TypBioVerbundKomplex" type="xplan:LP_TypBioVerbundKomplexType" />
+  <complexType name="LP_TypBioVerbundKomplexType">
+    <annotation>
+      <documentation>Datentyp mit Angaben zu Typen des Biotopverbunds.</documentation>
+    </annotation>
+    <sequence>
+      <element name="flaechenTypBV" type="xplan:LP_FlaechenTypBV">
+        <annotation>
+          <documentation>Fl&amp;#228;chentyp des Biotopverbunds nach &amp;#167; 21 Abs. 3 BNatSchG.</documentation>
+        </annotation>
+      </element>
+      <element name="flaechentypBVSpeziell" minOccurs="0" type="xplan:LP_FlaechenTypBVSpeziell">
+        <annotation>
+          <documentation>Differenzierung des speziellen Fl&amp;#228;chentyp des Biotopverbunds nach &amp;#167; 21 Abs. 3 BNatSchG.</documentation>
+        </annotation>
+      </element>
+      <element name="flaechentypSpeziellText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Erg&amp;#228;nzungen zu &lt;i&gt;flaechentypBVSpeziell&lt;/i&gt;.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_TypBioVerbundKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_TypBioVerbundKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_TypBioVerbundKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_TypBioVerbundKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BioVerbundsystemArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVerbundsystemArt">
+    <annotation>
+      <documentation>Zeigt die Art des Verbundsystems an. </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Allgemein-->
+        <annotation>
+          <documentation>Allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--OffenlandHalboffenland-->
+        <annotation>
+          <documentation>Offenland inkl. Halboffenland</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Wald-->
+        <annotation>
+          <documentation>Wald</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Gewaesser-->
+        <annotation>
+          <documentation>Gew&amp;#228;sser</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVStandortFeuchte-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVStandortFeuchte">
+    <annotation>
+      <documentation>Zeigt die Ausprägung der Standortverhältnisse des Verbundsystems im Hinblick auf Feuchtigkeit an.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Feucht-->
+        <annotation>
+          <documentation>Feuchte Standortverh&amp;#228;ltnisse</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Mittel-->
+        <annotation>
+          <documentation>Mittelfeuchte Standortverh&amp;#228;ltnisse</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Trocken-->
+        <annotation>
+          <documentation>Trockene Standortverh&amp;#228;ltnisse</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_FlaechenTypBV-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_FlaechenTypBV">
+    <annotation>
+      <documentation>Flächentyp des Biotopverbunds nach § 21 Abs. 3 BNatSchG.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Kernflaeche-->
+        <annotation>
+          <documentation>Kernfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Verbindungsfläche-->
+        <annotation>
+          <documentation>Verbindungsfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Verbindungselement-->
+        <annotation>
+          <documentation>Verbindungselement</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_FlaechenTypBVSpeziell-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_FlaechenTypBVSpeziell">
+    <annotation>
+      <documentation>Differenzierung des Flächentyps des Biotopverbunds.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Verbindungsraeume-->
+        <annotation>
+          <documentation>Verbindungsr&amp;#228;ume</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Verbundachse-->
+        <annotation>
+          <documentation>Verbundachse</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Wildtierkorridor-->
+        <annotation>
+          <documentation>Wildtierkorridor</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Entwicklungsflaeche-->
+        <annotation>
+          <documentation>Entwicklungsfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Entwicklungsmassnahme-->
+        <annotation>
+          <documentation>Entwicklungsma&amp;#223;nahme</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Vernetzungselement-->
+        <annotation>
+          <documentation>Vernetzungselement</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7000">
+        <!--Trittsteinbiotop-->
+        <annotation>
+          <documentation>Trittsteinbiotop</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Biotopverbundelement.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_PlanungsEbene-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_PlanungsEbene">
+    <annotation>
+      <documentation>Zeigt die Planungsebene des Biotopverbunds nach &amp;#167; 21 BNatSchG an.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Biotopverbund-->
+        <annotation>
+          <documentation>Biotopvernetzung auf Landesebene nach &amp;#167; 21 Abs. 1-5 BNatSchG</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Biotopvernetzung-->
+        <annotation>
+          <documentation>Biotopvernetzung auf regionaler Ebene nach &amp;#167; 21 Abs. 6 BNatschG</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_RechtlicheSicherung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_RechtlicheSicherung">
+    <annotation>
+      <documentation>Rechtliche Sicherung f&amp;#252;r Fl&amp;#228;chen des Biotopverbunds und der Biotopvernetzung nach &amp;#167; 21 Abs. 4 BNatSchG.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Schutzerklaerung-->
+        <annotation>
+          <documentation>Schutzerkl&amp;#228;rung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--PlanungsrechtlicheFestlegung-->
+        <annotation>
+          <documentation>Planungsrechtliche Festlegung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--VertraglicheRegelung-->
+        <annotation>
+          <documentation>Vertragliche Regelung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige rechtliche Sicherung (siehe &lt;i&gt;rechtlicheSicherungText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_Eingriffsregelung-->
+  <!--=========================================================================================-->
+  <element name="LP_Eingriffsregelung" type="xplan:LP_EingriffsregelungType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_EingriffsregelungType">
+    <annotation>
+      <documentation>Planungsaussagen mit Bezug zur Eingriffsregelung und der Bew&amp;#228;ltigung von Eingriffsfolgen.
+Fl&amp;#228;chen und Ma&amp;#223;nahmen zum Ausgleich von Eingriffen im Sinne des &amp;#167; 8 und 8a BNatSchG (in Verbindung mit &amp;#167; 1a BauGB, Ausgleichs- und Ersatzma&amp;#223;nahmen).
+</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element name="eingriffsregelungFlaechenTyp" maxOccurs="unbounded" type="xplan:LP_EingriffsregelungKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Fl&amp;#228;chentyp in Bezug auf Eingriffsregelung</documentation>
+            </annotation>
+          </element>
+          <element name="umsetzungsstand" type="xplan:LP_Umsetzungsstand">
+            <annotation>
+              <documentation>Zeigt an, ob eine bereit umgesetzte oder angerechnete Kompensationsfl&amp;#228;che oder -Ma&amp;#223;nahme nachrichtlich &amp;#252;bernommen oder f&amp;#252;r neue Kompensationsma&amp;#223;enahmen vorgeschlagen wird. 
+</documentation>
+            </annotation>
+          </element>
+          <element name="massnahmentyp" maxOccurs="unbounded" type="xplan:LP_MassnahmenTyp">
+            <annotation>
+              <documentation>Differenziert in nationalrechtliche und unionsrechtliche Kompensationsma&amp;#223;nahmen.</documentation>
+            </annotation>
+          </element>
+          <element name="kompensationText" minOccurs="0" type="string">
+            <annotation>
+              <documentation>Erg&amp;#228;nzende Informationen zur Kompensation. </documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_Eingriffsregelung" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_Eingriffsregelung" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_EingriffsregelungKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_EingriffsregelungKomplex" type="xplan:LP_EingriffsregelungKomplexType" />
+  <complexType name="LP_EingriffsregelungKomplexType">
+    <annotation>
+      <documentation>Datentyp mit Angaben für eine komplexe Eingriffsregelung</documentation>
+    </annotation>
+    <sequence>
+      <element name="eRFlaechenArt" type="xplan:LP_ERFlaechenArt">
+        <annotation>
+          <documentation>Differenzierung der Planungsaussagen mit Bezug zur Eingriffsregelung und der Bewältigung von Eingriffsfolgen.</documentation>
+        </annotation>
+      </element>
+      <element name="eRFlaechenArtText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Differenzierung der Planungsaussagen mit Bezug zur Eingriffsregelung und der Bewältigung von Eingriffsfolgen, wenn &lt;i&gt;ERFlaechenArt &lt;/i&gt;= 9999.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_EingriffsregelungKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_EingriffsregelungKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_EingriffsregelungKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_EingriffsregelungKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_ERFlaechenArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_ERFlaechenArt">
+    <annotation>
+      <documentation>Differenzierung der Planungsaussagen mit Bezug zur Eingriffsregelung und der Bew&amp;#228;ltigung von Eingriffsfolgen.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--PotenzielleFlaecheKompensation-->
+        <annotation>
+          <documentation>Potenzielle Fl&amp;#228;che f&amp;#252;r Kompensation (nach &amp;#167;9 Abs. 3 Ziffer 4 lit. c BNatSchG)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Flaechenpool-->
+        <annotation>
+          <documentation>Fl&amp;#228;chenpool</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--KompensationEinzelflaeche-->
+        <annotation>
+          <documentation>Kompensation (Einzelfl&amp;#228;che)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Kompensationsverzeichnis-->
+        <annotation>
+          <documentation>Kompensationsverzeichnis</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Typ von Kompensationsfl&amp;#228;chen/-Ma&amp;#223;nahmen, siehe &lt;i&gt;ERFlaechenArtText&lt;/i&gt;.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_MassnahmenTyp-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_MassnahmenTyp">
+    <annotation>
+      <documentation>Differenziert in nationalrechtliche und unionsrechtliche Kompensationsmaßnahmen.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Kompensationsmassnahme-->
+        <annotation>
+          <documentation>Kompensationsma&amp;#223;nahme nach nationalem Recht.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--MassnahmeCEF-->
+        <annotation>
+          <documentation>Ma&amp;#223;nahme des strengen Artenschutzes &lt;b&gt;zur dauerhaften Sicherung der &amp;#246;kologischen Funktion&lt;/b&gt; im Rahmen der SAP (engl. &lt;b&gt;C&lt;/b&gt;ontinuous &lt;b&gt;E&lt;/b&gt;cological &lt;b&gt;F&lt;/b&gt;unctionality-measures).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--MassnahmeFCS-->
+        <annotation>
+          <documentation>Ma&amp;#223;nahme des strengen Artenschutzes &lt;b&gt;zur Sicherung des Erhaltungszustandes&lt;/b&gt; im Rahmen der SAP (engl. &lt;b&gt;F&lt;/b&gt;avorable &lt;b&gt;C&lt;/b&gt;onservation &lt;b&gt;S&lt;/b&gt;tatus).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--MassnahmeKohaerenzsicherung-->
+        <annotation>
+          <documentation>Ma&amp;#223;nahme zur Koh&amp;#228;renzsicherung im Rahmen der FFH-Vertr&amp;#228;glichkeitspr&amp;#252;fung.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Unbekannter Typ von Kompensationsfl&amp;#228;chen/-Ma&amp;#223;nahmen (zur &amp;#220;bernahme von Altdaten)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_Umsetzungsstand-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_Umsetzungsstand">
+    <annotation>
+      <documentation>Zeigt an, ob eine bereit umgesetzte oder angerechnete Kompensationsfl&amp;#228;che oder -ma&amp;#223;nahme nachrichtlich &amp;#252;bernommen wurde oder f&amp;#252;r neue Vorhaben / Kompensationsma&amp;#223;enahmen vorgeschlagen wird. </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--NachrichtlichUmgesetztAngerechnet-->
+        <annotation>
+          <documentation>Nachrichtliche &amp;#220;bernahme von Kompensationsfl&amp;#228;chen und -ma&amp;#223;nahmen aus vorliegenden Planwerken, die bereits umgesetzt oder angerechnet wurden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Vorschlag-->
+        <annotation>
+          <documentation>Vorschlag von Kompensationsfl&amp;#228;chen und -ma&amp;#223;nahmen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Unbekannter Umsetzungsstand (bei &amp;#220;bernahme von Altdaten).</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_ZieleErfordernisseMassnahmen-->
+  <!--=========================================================================================-->
+  <element name="LP_ZieleErfordernisseMassnahmen" type="xplan:LP_ZieleErfordernisseMassnahmenType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_ZieleErfordernisseMassnahmenType">
+    <annotation>
+      <documentation>Ziele, Erfordernisse und Ma&amp;#223;nahmen f&amp;#252;r Naturschutz und Landschaftspflege gem. Kapitel 2 BNatSchG.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element name="zieleErfordernisseMassnahmen" maxOccurs="unbounded" type="xplan:LP_ZEMTyp">
+            <annotation>
+              <documentation>Zeigt an, ob es sich bei dem Objekt um ein Ziel, ein Erfordernis und/oder um eine Maßnahme gemäß Kapitel 2 BNatSchG handelt.</documentation>
+            </annotation>
+          </element>
+          <element name="schutzgut" maxOccurs="unbounded" type="xplan:LP_SchutzgutKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Schutzgut / zu den Schutzg&amp;#252;tern.</documentation>
+            </annotation>
+          </element>
+          <element name="zielDimNatSchLaPfl" maxOccurs="unbounded" type="xplan:LP_ZielDimNatSchLaPflKomplexPropertyType">
+            <annotation>
+              <documentation>Zieldimension von Naturschutz und Landschaftspflege; Teilziele des Naturschutzes und der Landschaftspflege gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffern 1. bis 3. BNatSchG</documentation>
+            </annotation>
+          </element>
+          <element name="adressat" maxOccurs="unbounded" type="xplan:LP_AdressatKomplexPropertyType">
+            <annotation>
+              <documentation>Adressat(en), an den oder die sich die Aussage der Landschaftsplanung richtet.</documentation>
+            </annotation>
+          </element>
+          <element name="schutzPflegeEntwicklung" maxOccurs="unbounded" type="xplan:LP_SPEKomplexPropertyType">
+            <annotation>
+              <documentation>Differenzierung Schutz-, Pflege und Entwicklungsziele von Naturschutz und Landschaftspflege.
+</documentation>
+            </annotation>
+          </element>
+          <element name="biologischeVielfalt" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BiologischeVielfaltKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand „Biologische Vielfalt“
+</documentation>
+            </annotation>
+          </element>
+          <element name="boden" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BodenKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Boden</documentation>
+            </annotation>
+          </element>
+          <element name="wasser" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_WasserKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Wasser</documentation>
+            </annotation>
+          </element>
+          <element name="klima" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_KlimaKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Klima</documentation>
+            </annotation>
+          </element>
+          <element name="luft" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_LuftKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Luft</documentation>
+            </annotation>
+          </element>
+          <element name="landschaftsbild" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_LandschaftsbildKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Landschaftsbild</documentation>
+            </annotation>
+          </element>
+          <element name="erholung" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_ErholungKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zum Planungsgegenstand Erholung in Natur und Landschaft.</documentation>
+            </annotation>
+          </element>
+          <element name="freiraeume" minOccurs="0" maxOccurs="unbounded" type="string">
+            <annotation>
+              <documentation>Textliche Erl&amp;#228;uterung zum Planungsgegenstand Freir&amp;#228;ume.
+</documentation>
+            </annotation>
+          </element>
+          <element name="foerdermoeglichkeit" minOccurs="0" maxOccurs="unbounded" type="string">
+            <annotation>
+              <documentation>Textliche Nennung von F&amp;#246;rderm&amp;#246;glichkeiten f&amp;#252;r Ma&amp;#223;nahmen.
+</documentation>
+            </annotation>
+          </element>
+          <element name="nutzungseinschraenkung" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_NutzungseinschraenkungKomplexPropertyType">
+            <annotation>
+              <documentation>Angaben zu Nutzungseinschr&amp;#228;nkungen.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_ZieleErfordernisseMassnahmen" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_ZieleErfordernisseMassnahmen" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_AdressatKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_AdressatKomplex" type="xplan:LP_AdressatKomplexType" />
+  <complexType name="LP_AdressatKomplexType">
+    <annotation>
+      <documentation>Angaben zu Adressaten, an den sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="adressatArt" type="xplan:LP_AdressatArt">
+        <annotation>
+          <documentation>Art des Adressaten, an den sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="adressatText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu sonstigem Adressaten(&lt;i&gt;adressatArt &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem anderen Adressaten.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_AdressatKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_AdressatKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_AdressatKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_AdressatKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BodenKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BodenKomplex" type="xplan:LP_BodenKomplexType" />
+  <complexType name="LP_BodenKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Boden, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="bodenAuspraegung" type="xplan:LP_BodenAuspraegung">
+        <annotation>
+          <documentation>Auspr&amp;#228;gungen in Bezug auf Boden, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="bodenText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiger Boden (&lt;i&gt;bodenAuspraegung&lt;/i&gt; = 9999) oder erg&amp;#228;nzende Information zu anderer ausgew&amp;#228;hlter Auspr&amp;#228;gung des Planungsgegenstandes Boden.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BodenKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BodenKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BodenKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BodenKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_ErholungKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_ErholungKomplex" type="xplan:LP_ErholungKomplexType" />
+  <complexType name="LP_ErholungKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Erholung, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="erholungFunktionArt" type="xplan:LP_ErholungFunktionen">
+        <annotation>
+          <documentation>Art der Erholungsfunktion oder -Infrastruktur, an die sich
+ das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="erholungFunktionText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiger Planungsgegenstand Erholung oder erg&amp;#228;nzende Information zu einer anderen ausgew&amp;#228;hlten Erholungsfunktion/Infrastruktur.
+
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_ErholungKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_ErholungKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_ErholungKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_ErholungKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_KlimaKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_KlimaKomplex" type="xplan:LP_KlimaKomplexType" />
+  <complexType name="LP_KlimaKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Klima, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="klimaArt" type="xplan:LP_KlimaArt">
+        <annotation>
+          <documentation>Art des Planungsgegenstand f&amp;#252;r Klima, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="klimaText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiger Planungsgegenstand Schutzgut Klima oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlten Planungsgegenst&amp;#228;nden.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_KlimaKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_KlimaKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_KlimaKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_KlimaKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_LandschaftsbildKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_LandschaftsbildKomplex" type="xplan:LP_LandschaftsbildKomplexType" />
+  <complexType name="LP_LandschaftsbildKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Landschaftsbild, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="landschaftsbildArt" type="xplan:LP_LandschaftsbildArt">
+        <annotation>
+          <documentation>Art des Planungsgegenstand f&amp;#252;r das Landschaftsbild, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="landschaftsbildText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiger Planungsgegenstand Schutzgut Landschaftsbild oder erg&amp;#228;nzende Information zu anderem ausgew&amp;#228;hltem Planungsgegenstand Landschaftsbild.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_LandschaftsbildKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_LandschaftsbildKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_LandschaftsbildKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_LandschaftsbildKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_LuftKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_LuftKomplex" type="xplan:LP_LuftKomplexType" />
+  <complexType name="LP_LuftKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Luft, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="luftArt" type="xplan:LP_LuftArt">
+        <annotation>
+          <documentation>Art des Planungsgegenstand f&amp;#252;r Luft, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="luftText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiger Planungsgegenstand Schutzgut Luft oder erg&amp;#228;nzende Information zu anderem ausgew&amp;#228;hltem Planungsgegenstand Luft.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_LuftKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_LuftKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_LuftKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_LuftKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_NutzungseinschraenkungKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_NutzungseinschraenkungKomplex" type="xplan:LP_NutzungseinschraenkungKomplexType" />
+  <complexType name="LP_NutzungseinschraenkungKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben zu Nutzungseinschr&amp;#228;nkungen.
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="hatNutzungseinschraenkung" type="boolean">
+        <annotation>
+          <documentation>Zeigt an, ob eine Einschr&amp;#228;nkung bestimmter Nutzungen empfohlen/vorgeschlagen wird.</documentation>
+        </annotation>
+      </element>
+      <element name="nutzungseinschraenkungText" type="string">
+        <annotation>
+          <documentation>Textfeld, Erl&amp;#228;uterung von Art und Umfang der empfohlenen/vorgeschlagenen Einschr&amp;#228;nkung bestimmter Nutzungen.
+
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_NutzungseinschraenkungKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_NutzungseinschraenkungKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_NutzungseinschraenkungKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_NutzungseinschraenkungKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_WasserKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_WasserKomplex" type="xplan:LP_WasserKomplexType" />
+  <complexType name="LP_WasserKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben in Bezug auf Planungsgegenstand Wasser, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="wasserAuspraegung" type="xplan:LP_WasserAuspraegung">
+        <annotation>
+          <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Wasser, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet.</documentation>
+        </annotation>
+      </element>
+      <element name="wasserText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstiges (&lt;i&gt;wasserAuspraegung&lt;/i&gt; = 9999) oder erg&amp;#228;nzende Information zu anderer ausgew&amp;#228;hlter Auspr&amp;#228;gung des Planungsgegenstandes Wasser.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_WasserKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_WasserKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_WasserKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_WasserKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_SPEKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_SPEKomplex" type="xplan:LP_SPEKomplexType" />
+  <complexType name="LP_SPEKomplexType">
+    <annotation>
+      <documentation>Angaben zur Differenzierung der Schutz-, Pflege und Entwicklungsziele von Naturschutz und Landschaftspflege.
+</documentation>
+    </annotation>
+    <sequence>
+      <element name="schutzPflegeEntwicklungTyp" maxOccurs="unbounded" type="xplan:LP_SchutzPflegeEntwicklung">
+        <annotation>
+          <documentation>Differenzierung der Ziele, der Erfordernisse oder der Ma&amp;#223;nahmen von Naturschutz und Landschaftspflege.</documentation>
+        </annotation>
+      </element>
+      <element name="schutzPflegeEntwicklungText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textfeld, Erl&amp;#228;uterung sonstigem Ziel Schutz, Pflege und Entwicklung oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlten Differenzierungen. </documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_SPEKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_SPEKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_SPEKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_SPEKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_SchutzgutKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_SchutzgutKomplex" type="xplan:LP_SchutzgutKomplexType" />
+  <complexType name="LP_SchutzgutKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben zum Schutzgut/Schutzg&amp;#252;tern, auf die sich die Ziele, Erfordernisse und Ma&amp;#223;nahmen richten. </documentation>
+    </annotation>
+    <sequence>
+      <element name="schutzgutArt" type="xplan:LP_SchutzgutArt">
+        <annotation>
+          <documentation>Schutzg&amp;#252;ter von Naturschutz und Landschaftspflege, abgeleitet aus &amp;#167; 1 BNatSchG.</documentation>
+        </annotation>
+      </element>
+      <element name="schutzgutText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu sonstigem Schutzgut (&lt;i&gt;schutzgutArt &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem anderen Schutzgut.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_SchutzgutKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_SchutzgutKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_SchutzgutKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_SchutzgutKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BiologischeVielfaltKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BiologischeVielfaltKomplex" type="xplan:LP_BiologischeVielfaltKomplexType" />
+  <complexType name="LP_BiologischeVielfaltKomplexType">
+    <annotation>
+      <documentation>Angaben zum Planungsgegenstand „Biologische Vielfalt“</documentation>
+    </annotation>
+    <sequence>
+      <element name="bioVielfaltTypus" type="xplan:LP_BiologischeVielfaltTypKomplexPropertyType">
+        <annotation>
+          <documentation>Zeigt an, auf welchen Bestandteil der Biologischen Vielfalt sich das Objekt bezieht
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfPflanzenArt" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BioVfPflanzenArtKomplexPropertyType">
+        <annotation>
+          <documentation>Angaben zu Planzenarten als Bestandteil der biologischen Vielfalt.</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTierArt" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BioVfTiereArtKomplexPropertyType">
+        <annotation>
+          <documentation>Angaben zu Tierarten als Bestandteil der biologischen Vielfalt.
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfArtFFHAnhangII" type="boolean">
+        <annotation>
+          <documentation>Gibt an, ob Nachweise f&amp;#252;r Tier- und Pflanzenarten von gemeinschaftlichem Interesse kartiert wurden, f&amp;#252;r deren Erhaltung besondere Schutzgebiete ausgewiesen werden m&amp;#252;ssen (gem&amp;#228;&amp;#223; Anhang II der FFH-RL).</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfBiotoptyp" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BioVfBiotoptypKomplexPropertyType">
+        <annotation>
+          <documentation>Angaben zum Biotoptyp</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BiologischeVielfaltKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BiologischeVielfaltKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BiologischeVielfaltKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BiologischeVielfaltKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BiologischeVielfaltTypKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BiologischeVielfaltTypKomplex" type="xplan:LP_BiologischeVielfaltTypKomplexType" />
+  <complexType name="LP_BiologischeVielfaltTypKomplexType">
+    <annotation>
+      <documentation>Angaben, auf welchen Bestandteil / Typus der Biologischen Vielfalt sich das Objekt bezieht:</documentation>
+    </annotation>
+    <sequence>
+      <element name="bioVielfaltTyp" type="xplan:LP_BioVfBestandteil">
+        <annotation>
+          <documentation>Zeigt an, auf welchen Bestandteil der Biologischen Vielfalt sich das Objekt bezieht:</documentation>
+        </annotation>
+      </element>
+      <element name="bioVielfaltTypText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Spezfizierung des Typs/Bestandteils der biologischen Vielfalt, wenn &lt;i&gt;bioVielfaltTyp &lt;/i&gt;=  9999 („Sonstiger Bestandteil Biologische Vielfalt“), oder erg&amp;#228;nzende Information zu anderen Typen der Biologischen Vielfalt</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BiologischeVielfaltTypKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BiologischeVielfaltTypKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BiologischeVielfaltTypKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BiologischeVielfaltTypKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_ZielDimNatSchLaPflKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_ZielDimNatSchLaPflKomplex" type="xplan:LP_ZielDimNatSchLaPflKomplexType" />
+  <complexType name="LP_ZielDimNatSchLaPflKomplexType">
+    <annotation>
+      <documentation>Zieldimension von Naturschutz und Landschaftspflege; Teilziele des Naturschutzes und der Landschaftspflege gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffern 1. bis 3. BNatSchG</documentation>
+    </annotation>
+    <sequence>
+      <element name="zielDimensionTyp" type="xplan:LP_ZielDimensionTyp">
+        <annotation>
+          <documentation>Teilziele des Naturschutzes und der Landschaftspflege gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffern 1. bis 3. BNatSchG.</documentation>
+        </annotation>
+      </element>
+      <element name="zielDimensionText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu sonstigem Teilziel (&lt;i&gt;teilZielArt &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem Teilziel.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_ZielDimNatSchLaPflKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_ZielDimNatSchLaPflKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_ZielDimNatSchLaPflKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_ZielDimNatSchLaPflKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfBiotoptypKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BioVfBiotoptypKomplex" type="xplan:LP_BioVfBiotoptypKomplexType" />
+  <complexType name="LP_BioVfBiotoptypKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit &lt;b&gt;mindestens &lt;/b&gt;einer Angabe des Biotoptypen. </documentation>
+    </annotation>
+    <sequence>
+      <element name="bioVfBiotoptyp_BKompV" minOccurs="0" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:LP_BioVfBiotoptyp_BKompV</referenzierteCodelist>
+          </appinfo>
+          <documentation>Biotoptypen-Katalog der Bundeskompensationsverordnung (Anlage 2 (zu &amp;#167; 5 Absatz 1 BKompV )
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfBiotoptyp_LandesKS" minOccurs="0" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:LP_BioVfBiotoptyp_LandesKS</referenzierteCodelist>
+          </appinfo>
+          <documentation>Biotoptyp gem. eines Landeskartierschl&amp;#252;ssels
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVf_FFH_LRT" minOccurs="0" type="gml:CodeType">
+        <annotation>
+          <appinfo>
+            <referenzierteCodelist>xplan:LP_BioVf_FFH_LRT</referenzierteCodelist>
+          </appinfo>
+          <documentation>FFH-Lebensraumtypen gem. Anhang I der Fauna Flora Habitatrichtlinie</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfBiotoptyp_Text" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Angabe zum Biotoptypen; alternativ oder zus&amp;#228;tzlich zur Auswahl eines &amp;#252;ber Codelisten bereitgestellten Kartierschl&amp;#252;ssels von Bund, Land oder FFH-LRT.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BioVfBiotoptypKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BioVfBiotoptypKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BioVfBiotoptypKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BioVfBiotoptypKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfPflanzenArtKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BioVfPflanzenArtKomplex" type="xplan:LP_BioVfPflanzenArtKomplexType" />
+  <complexType name="LP_BioVfPflanzenArtKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben zum Planungsgegenstand Biologische Vielfalt / Pflanzen</documentation>
+    </annotation>
+    <sequence>
+      <element name="bioVfPflanzenArtName" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Angabe zur Pflanzen-Art, botanisch oder Trivialnamen</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfPflanzenSystematik" type="xplan:LP_BioVfPflanzenArtSystematik">
+        <annotation>
+          <documentation>Gibt systematische Einordnung einer Pflanzenart an:</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfPflanzenSystematikText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Erl&amp;#228;uterung zu sonstiger PflanzenartenSystematik (wenn &lt;i&gt;bioVfPflanzenSystematik&lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu einer anderen Systematischen Einordnung.</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfPflanzenRechtlicherSchutz" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BioVfPflanzenArtRechtlicherSchutz">
+        <annotation>
+          <documentation>Rechtliche Grundlage f&amp;#252;r den Schutz einer Pflanzenart an.
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfPflanzenRechtlicherSchutzText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Erl&amp;#228;uterung zu sonstigem Rechtlichen Schutz (bioVfPflanzenRechtlicherSchutz&lt;i&gt; &lt;/i&gt;= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem rechtlichem Schutz.
+</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BioVfPflanzenArtKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BioVfPflanzenArtKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BioVfPflanzenArtKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BioVfPflanzenArtKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfTiereArtKomplex-->
+  <!--=========================================================================================-->
+  <element name="LP_BioVfTiereArtKomplex" type="xplan:LP_BioVfTiereArtKomplexType" />
+  <complexType name="LP_BioVfTiereArtKomplexType">
+    <annotation>
+      <documentation>Komplexes Attribut mit Angaben zum Planungsgegenstand Biologische Vielfalt / Tiere</documentation>
+    </annotation>
+    <sequence>
+      <element name="bioVfTierArtName" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Angabe zur Tierart; alternativ oder zus&amp;#228;tzlich auch &lt;i&gt;bioVfTierArtSystematik &lt;/i&gt;</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTiereSystematik" type="xplan:LP_BioVfTiereArtSystematik">
+        <annotation>
+          <documentation>Gibt systematische Einordnung einer Tierart an
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTiereSystematikText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Erl&amp;#228;uterung zu sonstiger Tierartensystematik (bioVfTiereSystematik= 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlter Gruppe.</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTierArtRechtlicherSchutz" minOccurs="0" maxOccurs="unbounded" type="xplan:LP_BioVfTierArtRechtlicherSchutz">
+        <annotation>
+          <documentation>Rechtliche Grundlage f&amp;#252;r den Schutz einer Tierart an.
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTierArtRechtlicherSchutzText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Textliche Erl&amp;#228;uterung zu sonstigem rechtlichen Schutz (bioVfTierArtRechtlicherSchutz = 9999) oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hltem Rechtlichem Schutz.
+</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTierArtHabitatanforderung" minOccurs="0" type="xplan:LP_BioVfTierArtHabitatanforderung">
+        <annotation>
+          <documentation>Gibt besondere Habitatanforderungen einer Tierart an.</documentation>
+        </annotation>
+      </element>
+      <element name="bioVfTierArtHabitatanforderungText" minOccurs="0" type="string">
+        <annotation>
+          <documentation>Erl&amp;#228;uterung zu Sonstige Habitatanforderungen oder erg&amp;#228;nzende Information zu ausgew&amp;#228;hlten Habitatanforderungen.</documentation>
+        </annotation>
+      </element>
+      <element ref="xplan:_GenericApplicationPropertyOfLP_BioVfTiereArtKomplex" minOccurs="0" maxOccurs="unbounded" />
+    </sequence>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_BioVfTiereArtKomplex" type="anyType" abstract="true" />
+  <complexType name="LP_BioVfTiereArtKomplexPropertyType">
+    <sequence>
+      <element ref="xplan:LP_BioVfTiereArtKomplex" minOccurs="0" />
+    </sequence>
+  </complexType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfTierArtHabitatanforderung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfTierArtHabitatanforderung">
+    <annotation>
+      <documentation>Auflistung besonderer Habitatanforderungen von Tierarten.
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--GrosserHabitatsAnspruch-->
+        <annotation>
+          <documentation>Art mit (sehr) gro&amp;#223;em Habitatsanforderungen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Gebaeudebewohnend-->
+        <annotation>
+          <documentation>Geb&amp;#228;udebewohnende Art</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstige-->
+        <annotation>
+          <documentation>Sonstige Habitatanforderungen (siehe &lt;i&gt;bioBioVfTierArtHabitatanforderungText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfTiereArtSystematik-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfTiereArtSystematik">
+    <annotation>
+      <documentation>Auflistung zur systematischen Einordnung von Tierart an. </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1100">
+        <!--GrossSaeuger-->
+        <annotation>
+          <documentation>Gro&amp;#223;s&amp;#228;uger</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1120">
+        <!--Wolf-->
+        <annotation>
+          <documentation>Wolf</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1110">
+        <!--Luchs-->
+        <annotation>
+          <documentation>Luchs</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Mittelsaeuger-->
+        <annotation>
+          <documentation>Mittels&amp;#228;uger</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1210">
+        <!--Wildkatze-->
+        <annotation>
+          <documentation>Wildkatze</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1220">
+        <!--Fischotter-->
+        <annotation>
+          <documentation>Fischotter</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1230">
+        <!--Biber-->
+        <annotation>
+          <documentation>Biber</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1240">
+        <!--Marder-->
+        <annotation>
+          <documentation>Marder</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Kleinsaeuger-->
+        <annotation>
+          <documentation>Kleins&amp;#228;uger</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1310">
+        <!--KleinsaeugerNagetiere-->
+        <annotation>
+          <documentation>Kleins&amp;#228;uger, Nagetiere
+</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1311">
+        <!--Feldhamster-->
+        <annotation>
+          <documentation>Feldhamster</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1312">
+        <!--Maeuse-->
+        <annotation>
+          <documentation>M&amp;#228;use</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1320">
+        <!--KleinsaeugerHasenartige-->
+        <annotation>
+          <documentation>Kleins&amp;#228;uger (Hasenartige)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1330">
+        <!--KleinsaeugerInsektenfresser-->
+        <annotation>
+          <documentation>Kleins&amp;#228;uger (Insektenfresser)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1331">
+        <!--Spitzmaeuse-->
+        <annotation>
+          <documentation>Spitzm&amp;#228;use</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1340">
+        <!--KleinsaeugerFledermaeuse-->
+        <annotation>
+          <documentation>Kleins&amp;#228;uger (Flederm&amp;#228;use)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Meeressaeuger-->
+        <annotation>
+          <documentation>Meeress&amp;#228;uger</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--Voegel-->
+        <annotation>
+          <documentation>V&amp;#246;gel</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2110">
+        <!--ZugVoegel-->
+        <annotation>
+          <documentation>Zugv&amp;#246;gel</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2120">
+        <!--BrutVoegel-->
+        <annotation>
+          <documentation>Brutv&amp;#246;gel</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--Reptilien-->
+        <annotation>
+          <documentation>Reptilien</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--Amphibien-->
+        <annotation>
+          <documentation>Amphibien</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2400">
+        <!--Fische-->
+        <annotation>
+          <documentation>Fische</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Gliederfuesser-->
+        <annotation>
+          <documentation>Gliederfuesser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3110">
+        <!--Libellen-->
+        <annotation>
+          <documentation>Libellen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3120">
+        <!--Tagfalter-->
+        <annotation>
+          <documentation>Tagfalter</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3130">
+        <!--Kaefer-->
+        <annotation>
+          <documentation>K&amp;#228;fer</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3140">
+        <!--Heuschrecken-->
+        <annotation>
+          <documentation>Heuschrecken</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3150">
+        <!--Spinnen-->
+        <annotation>
+          <documentation>Spinnen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3200">
+        <!--Krebstiere-->
+        <annotation>
+          <documentation>Krebstiere</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4100">
+        <!--Mollusken-->
+        <annotation>
+          <documentation>Mollusken</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige (siehe &lt;i&gt;bioVfTiereSystematikText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_ErholungFunktionen-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_ErholungFunktionen">
+    <annotation>
+      <documentation>Auflistung von Erholungsfunktionen.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Gruenflaechen-->
+        <annotation>
+          <documentation>Gr&amp;#252;nfl&amp;#228;chen allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1100">
+        <!--ParkanlageGruenanlage-->
+        <annotation>
+          <documentation>Parkanlage / Gr&amp;#252;nanlage</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Dauerkleingaerten-->
+        <annotation>
+          <documentation>Dauerkleingarten</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Sportplatz-->
+        <annotation>
+          <documentation>Sportplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Spielplatz-->
+        <annotation>
+          <documentation>Spielplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--BadeplatzFreibad-->
+        <annotation>
+          <documentation>Badeplatz, Freibad</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--Liegewiese-->
+        <annotation>
+          <documentation>Liegewiese</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Erholungsinfrastruktur-->
+        <annotation>
+          <documentation>Erholungsinfrastruktur</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--Schutzhuette-->
+        <annotation>
+          <documentation>Schutzhütte</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2110">
+        <!--Rastplatz-->
+        <annotation>
+          <documentation>Rastplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2120">
+        <!--Informationstafel-->
+        <annotation>
+          <documentation>Informationstafel</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2130">
+        <!--FeuerstelleGrillplatz-->
+        <annotation>
+          <documentation>Feuerstelle, Grillplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--Aussichtsturm-->
+        <annotation>
+          <documentation>Aussichtsturm</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2210">
+        <!--Aussichtspunkt-->
+        <annotation>
+          <documentation>Aussichtspunkt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--Angelteich-->
+        <annotation>
+          <documentation>Angelteich</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2400">
+        <!--Modellflugplatz-->
+        <annotation>
+          <documentation>Modellflugplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2410">
+        <!--Gleitschirmplatz-->
+        <annotation>
+          <documentation>Gleitschirmplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2500">
+        <!--WildgehegeSchaugatter-->
+        <annotation>
+          <documentation>Wildgehege, Schaugatter</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2600">
+        <!--Parkplatz-->
+        <annotation>
+          <documentation>Parkplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2700">
+        <!--ZeltplatzCampingplatz-->
+        <annotation>
+          <documentation>Zeltplatz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2750">
+        <!--JugendzeltplatzEinzelcamp-->
+        <annotation>
+          <documentation>Jugendzeltplatz, Jugendcamp</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2900">
+        <!--ErholungsInfrastrukturBesBedeutung-->
+        <annotation>
+          <documentation>Erholungsinfrastruktur mit besonderer Bedeutung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--WandernAllgemein-->
+        <annotation>
+          <documentation>Wandern allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3100">
+        <!--Wanderweg-->
+        <annotation>
+          <documentation>Wanderweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3200">
+        <!--Lehrpfad-->
+        <annotation>
+          <documentation>Lehrpfad</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3300">
+        <!--Reitweg-->
+        <annotation>
+          <documentation>Reitweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3400">
+        <!--Radweg-->
+        <annotation>
+          <documentation>Radweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Wintersport-->
+        <annotation>
+          <documentation>Wintersport allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4100">
+        <!--Skiabfahrt-->
+        <annotation>
+          <documentation>Skiabfahrt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4200">
+        <!--Skilanglaufloipe-->
+        <annotation>
+          <documentation>Langlaufloipe</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4300">
+        <!--RodelbahnBobbahn-->
+        <annotation>
+          <documentation>Rodelbahn, Bobbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--WassersportSchifffahrt-->
+        <annotation>
+          <documentation>Wassersport allgemein</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5100">
+        <!--Wasserwanderweg-->
+        <annotation>
+          <documentation>Wasserwanderweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Schifffahrtsroute-->
+        <annotation>
+          <documentation>Schifffahrtsroute</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5300">
+        <!--AnlegestelleMitMotorbooten-->
+        <annotation>
+          <documentation>Schiffsanlegestelle mit Motorbooten</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5310">
+        <!--AnlegestelleOhneMotorboote-->
+        <annotation>
+          <documentation>Schiffsanlegestelle ohne Motorboote</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Seilbahn-->
+        <annotation>
+          <documentation>Kabinenseilbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6100">
+        <!--SesselliftSchlepplift-->
+        <annotation>
+          <documentation>Sessellift, Schlepplift</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6200">
+        <!--Kabinenseilbahn-->
+        <annotation>
+          <documentation>Kabinenseilbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7000">
+        <!--Bildungsstaette-->
+        <annotation>
+          <documentation>Bildungsst&amp;#228;tte</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7100">
+        <!--Umweltbildungsstaette-->
+        <annotation>
+          <documentation>Umweltbildungsst&amp;#228;tte</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7200">
+        <!--Museum-->
+        <annotation>
+          <documentation>Museum</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges (siehe &lt;i&gt;erholungFunktionText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_SchutzPflegeEntwicklung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_SchutzPflegeEntwicklung">
+    <annotation>
+      <documentation>Auflistung von Zielen und Handlungsarten f&amp;#252;r Schutz-, Pflege- und Entwicklungsma&amp;#223;nahmen.
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1100">
+        <!--Schutz-->
+        <annotation>
+          <documentation>Schutz bzw. Erhalt von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Pflege-->
+        <annotation>
+          <documentation>Pflege von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Entwicklung-->
+        <annotation>
+          <documentation>Entwicklung von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Anlage-->
+        <annotation>
+          <documentation>Anlage bzw. Schaffung von neuen Strukturen und Funktionen (z.B. Anlage einer Hecke) </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3500">
+        <!--Wiederherstellung-->
+        <annotation>
+          <documentation>Wiederherstellung von ehemals vorhandenen Strukturen und Funktionen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5100">
+        <!--Vermeidung-->
+        <annotation>
+          <documentation>Vermeidung von Beeintr&amp;#228;chtigungen von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Minderung-->
+        <annotation>
+          <documentation>Minderung von Beeintr&amp;#228;chtigungen von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5300">
+        <!--Beseitigung-->
+        <annotation>
+          <documentation>Beseitigung von Beeintr&amp;#228;chtigungen von Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Ziel (siehe &lt;i&gt;schutzPflegeEntwicklungText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfBestandteil-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfBestandteil">
+    <annotation>
+      <documentation>Auflistung von Bestandteilen der Biologischen Vielfalt</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Art-->
+        <annotation>
+          <documentation>Zielart</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--BiotopLebensraum-->
+        <annotation>
+          <documentation>Zielbiotop (Lebensraum)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--LebensstaetteArthabitat-->
+        <annotation>
+          <documentation>Lebensst&amp;#228;tte (Arthabitat)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Bestandteil Biologische Vielfalt (siehe &lt;i&gt;bioVielfaltTypText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfPflanzenArtRechtlicherSchutz-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfPflanzenArtRechtlicherSchutz">
+    <annotation>
+      <documentation>Gibt rechtliche Grundlage für den Schutz einer Pflanzenart an</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--AnhangIV_FFH_RL-->
+        <annotation>
+          <documentation>Art nach Anhang IV FFH-RL</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Anlage1_BArtSchV-->
+        <annotation>
+          <documentation>Art nach Anlage 1 BArtSchV</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Verantwortungsart-->
+        <annotation>
+          <documentation>Verantwortungsart (gem. § 54 Abs. 1 Nr. 2 BNatSchG oder Landesnaturschutzgesetz)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstige-->
+        <annotation>
+          <documentation>Sonstige rechtliche Grundlage (siehe &lt;i&gt;bioVfPflanzenRechtlicherSchutzText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfTierArtRechtlicherSchutz-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfTierArtRechtlicherSchutz">
+    <annotation>
+      <documentation>Gibt rechtliche Grundlage f&amp;#252;r den Schutz einer Pflanzenart an</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--ArtAnhangIV_FFH_RL-->
+        <annotation>
+          <documentation>Art nach Anhang IV FFH-RL</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--ArtAnhang_I_Art4_Abs2_VS_RL-->
+        <annotation>
+          <documentation>Art nach Anhang I/ Art. 4 Abs. 2 Vogelschutz-Richtlinie</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--ArtAnlage1_BArtSchV-->
+        <annotation>
+          <documentation>Art nach Anlage 1 BArtSchV</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Verantwortungsart-->
+        <annotation>
+          <documentation>Verantwortungsart (gem. &amp;#167; 54 Abs. 1 Nr. 2 BNatSchG oder Landesnaturschutzgesetz)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstige-->
+        <annotation>
+          <documentation>Sonstige rechtliche Grundlage (siehe &lt;i&gt;bioVfTierArtRechtlicherSchutzText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BioVfPflanzenArtSystematik-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BioVfPflanzenArtSystematik">
+    <annotation>
+      <documentation>Gibt systematische Einordnung der Pflanzenart an.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Gefaesspflanze-->
+        <annotation>
+          <documentation>Gef&amp;#228;&amp;#223;pflanze</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--MooseFlechten-->
+        <annotation>
+          <documentation>Moose/Flechten</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Pilze-->
+        <annotation>
+          <documentation>Pilze</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstige Systematik (siehe &lt;i&gt;bioVfPflanzenSystematikText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_ZEMTyp-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_ZEMTyp">
+    <annotation>
+      <documentation>Aufprägungen gem. Kapitel 2 BNatSchG.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Ziel-->
+        <annotation>
+          <documentation>Zeigt an, dasses sich bei dem Objekt um ein f&amp;#252;r den Planungsraum konkretisiertes Ziel gem&amp;#228;&amp;#223; Kapitel 2 BNatSchG handelt.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Erfordernis-->
+        <annotation>
+          <documentation>Zeigt an, ob es sich bei dem Objekt um ein Erfordernis zur Verwirklichung der konkretisierten Ziele gem&amp;#228;&amp;#223; Kapitel 2 BNatSchG handelt. Erfordernisse sind Anforderungen an andere Fachplanungen und Landnutzungen (u. a. Wasserwirtschaft, Land- und Forstwirtschaft). Sie beschreiben, „welche planerischen oder praktischen Aktivit&amp;#228;ten von anderen Planungstr&amp;#228;gern im Rahmen ihres Mitwirkungsauftrages bei der Erf&amp;#252;llung der Ziele des Naturschutzes und der Landschaftspflege erwartet werden“ (&amp;#167; 9 Abs. 3 und 5 BNatSchG).</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Massnahme-->
+        <annotation>
+          <documentation>Zeigt an, ob es sich bei dem Objekt um eine Ma&amp;#223;nahme zur Verwirklichung der konkretisierten Ziele gem&amp;#228;&amp;#223; Kapitel 2 BNatSchG handelt. </documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_SchutzgutArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_SchutzgutArt">
+    <annotation>
+      <documentation>Klassifikation von Schutzg&amp;#252;tern nach Naturschutzrecht.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--AlleSchutzgueter-->
+        <annotation>
+          <documentation>Alle Schutzg&amp;#252;ter betreffend.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--ArtenLebensgemeinschaften-->
+        <annotation>
+          <documentation>Arten und Lebensgemeinschaften</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Biotope-->
+        <annotation>
+          <documentation>Biotope</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Boden-->
+        <annotation>
+          <documentation>Boden</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Wasser-->
+        <annotation>
+          <documentation>Wasser.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--Klima-->
+        <annotation>
+          <documentation>Klima.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7000">
+        <!--Luft-->
+        <annotation>
+          <documentation>Luft.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8000">
+        <!--Landschaftsbild-->
+        <annotation>
+          <documentation>Landschaftsbild.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9000">
+        <!--ErholungInNaturUndLandschaft-->
+        <annotation>
+          <documentation>Erholung In Natur und Landschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Schutzgut ist unbekannt (nur zur &amp;#220;bernahme von Altpl&amp;#228;nen)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Schutzgut gem. textlicher Angabe in &lt;i&gt;schutzgutText&lt;/i&gt;</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_AdressatArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_AdressatArt">
+    <annotation>
+      <documentation>Adressaten, an die sich das Ziel, das Erfordernis oder die Maßnahme richtet.</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Naturschutz-->
+        <annotation>
+          <documentation>Adressat Naturschutzverwaltung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Bauleitplanung-->
+        <annotation>
+          <documentation>Adressat Tr&amp;#228;ger der Bauleitplanung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--Raumordnung-->
+        <annotation>
+          <documentation>Adressat Landes- und Regionalplanung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Flurneuordnung-->
+        <annotation>
+          <documentation>Adressat Flurneuordnung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5100">
+        <!--Forstwirtschaft-->
+        <annotation>
+          <documentation>Adressat Forstwirtschaft.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Landwirtschaft-->
+        <annotation>
+          <documentation>Adressat Landwirtschaft. Bezieht sich in der Regel nicht auf einzelne Betriebe, sondern die Landwirtschaft im Allgemeinen.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5300">
+        <!--Wasserwirtschaft-->
+        <annotation>
+          <documentation>Adressat Wasserwirtschaft.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5400">
+        <!--Fischereiwirtschaft-->
+        <annotation>
+          <documentation>Adressat Fischereiwirtschaft.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5500">
+        <!--Jagd-->
+        <annotation>
+          <documentation>Adressat Jagd Aus&amp;#252;bende und Jagdverb&amp;#228;nde.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6100">
+        <!--RohstoffgewinnungUndBergbau-->
+        <annotation>
+          <documentation>Adressat Rohstoffgewinnung/ Bergbau</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6200">
+        <!--VerteidigungSicherungZivilbevoelkerung-->
+        <annotation>
+          <documentation>Adressat Verteidigung/Schutz der Zivilbev&amp;#246;lkerung
+</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6300">
+        <!--Verkehrsplanung-->
+        <annotation>
+          <documentation>Adressat Verkehrsplanung einschlie&amp;#223;lich Unterhaltung Verkehrswege</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6400">
+        <!--Energiegewinnung-->
+        <annotation>
+          <documentation>Adressat Energiegewinnung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6500">
+        <!--Abfallwirtschaft-->
+        <annotation>
+          <documentation>Adressat Abfallwirtschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7000">
+        <!--Bodenschutz-->
+        <annotation>
+          <documentation>Adressat Bodenschutz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8100">
+        <!--KommunaleKoerperschaften-->
+        <annotation>
+          <documentation>Adressat Kommunale K&amp;#246;rperschaften</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8200">
+        <!--LandKreis-->
+        <annotation>
+          <documentation>Adressat (Land-) Kreisverwaltung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8300">
+        <!--Land-->
+        <annotation>
+          <documentation>Adressat Bundesland / Stadtstaat</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Adressat ist unbekannt (nur zur &amp;#220;bernahme von Altpl&amp;#228;nen)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Adressat gem. textlicher Angabe in &lt;i&gt;AdressatText.&lt;/i&gt;</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_BodenAuspraegung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_BodenAuspraegung">
+    <annotation>
+      <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Boden, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1110">
+        <!--Ablagerungen-->
+        <annotation>
+          <documentation>Ablagerungen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1120">
+        <!--Altablagerungsflaeche-->
+        <annotation>
+          <documentation>Altablagerungsfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1130">
+        <!--Altlastenverdachtsflaeche-->
+        <annotation>
+          <documentation>Altlastenverdachtsfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2110">
+        <!--BodenFilterPufferfunktion-->
+        <annotation>
+          <documentation>Boden mit Filter- und Pufferfunktion</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2120">
+        <!--BodenHoheBodenfruchtbarkeit-->
+        <annotation>
+          <documentation>Boden mit hoher Bodenfruchtbarkeit</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2130">
+        <!--BodenHoherFunktionglobalerKlimaschutz-->
+        <annotation>
+          <documentation>Boden mit hoher Funktion f&amp;#252;r den globalen Klimaschutz</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2210">
+        <!--BodenKulturgeschichtlicheBedeutung-->
+        <annotation>
+          <documentation>Boden mit kulturgeschichtlicher Bedeutung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2220">
+        <!--BodenNaturgeschichtlicheBedeutung-->
+        <annotation>
+          <documentation>Boden mit naturgeschichtlicher Bedeutung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2230">
+        <!--BodenGeowissenschaftlicheBedeutung-->
+        <annotation>
+          <documentation>Boden mit geowissenschaftlicher Bedeutung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2240">
+        <!--NatuerlicheBoedenExtremStandort-->
+        <annotation>
+          <documentation>Nat&amp;#252;rliche B&amp;#246;den mit extremen Standorteigenschaften (nasse und feuchte B&amp;#246;den sowie B&amp;#246;den, die trocken und/oder n&amp;#228;hrstoffarm sind),</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3100">
+        <!--ehemMilitaerischGenutzterStandort-->
+        <annotation>
+          <documentation>Ehemals milit&amp;#228;risch genutzter Standort</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4100">
+        <!--Erosionsgefaehrdet-->
+        <annotation>
+          <documentation>Erosionsgef&amp;#228;hrdete Fl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4110">
+        <!--ErosionsgefaehrdetWind-->
+        <annotation>
+          <documentation>Erosionsgef&amp;#228;hrdete Fl&amp;#228;che (Wind)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4120">
+        <!--ErosionsgefaehrdetWasser-->
+        <annotation>
+          <documentation>Erosionsgef&amp;#228;hrdete Fl&amp;#228;che (Wasser)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5110">
+        <!--Geotop-->
+        <annotation>
+          <documentation>Geotop</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5120">
+        <!--SelteneBodenform-->
+        <annotation>
+          <documentation>Seltene Bodenform</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5210">
+        <!--NaturnaherBoden-->
+        <annotation>
+          <documentation>Naturnaher Boden</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6100">
+        <!--BoedenHohesRetentionspotenzial-->
+        <annotation>
+          <documentation>B&amp;#246;den mit hohem Retentionspotenzial</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6200">
+        <!--EntsiegelungWiederherstBodenfunktion-->
+        <annotation>
+          <documentation>Entsiegelung oder Wiederherstellung der nat&amp;#252;rlichen Bodenfunktionen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Planungsgegenstand Schutzgut Boden (siehe &lt;i&gt;bodenText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_KlimaArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_KlimaArt">
+    <annotation>
+      <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Klima, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--BioklimatischeFunktion-->
+        <annotation>
+          <documentation>Bioklimatische Funktion</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Luftleitbahn-->
+        <annotation>
+          <documentation>Luftleitbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3100">
+        <!--Frischluftbahn-->
+        <annotation>
+          <documentation>Frischluftbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3200">
+        <!--Frischluftentstehungsgebiet-->
+        <annotation>
+          <documentation>Frischluftentstehungsgebiet</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4100">
+        <!--Kaltluftbahn-->
+        <annotation>
+          <documentation>Kaltluftbahn</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4200">
+        <!--Kaltluftentstehungsgebiet-->
+        <annotation>
+          <documentation>Kaltluftentstehungsgebiet</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5000">
+        <!--Stadtklima-->
+        <annotation>
+          <documentation>Stadtklima</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6000">
+        <!--THGSenkenKlimaschutzflaechen-->
+        <annotation>
+          <documentation>Treibhausgas-Senken (Klimaschutzfl&amp;#228;chen)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Planungsgegenstand Schutzgut Klima (siehe klimaText)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_LandschaftsbildArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_LandschaftsbildArt">
+    <annotation>
+      <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Landschaftsbild, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1100">
+        <!--KircheKlosterKapelle-->
+        <annotation>
+          <documentation>Kirche/Kloster/Kapelle</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--BurgSchloss-->
+        <annotation>
+          <documentation>Burg/Schloss</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Turm-->
+        <annotation>
+          <documentation>Turm</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--HistorischesOrtsbild-->
+        <annotation>
+          <documentation>Historisches Ortsbild</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Ruine-->
+        <annotation>
+          <documentation>Ruine</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--kulturgeschichtlichWertvollerOrtsteil-->
+        <annotation>
+          <documentation>kulturgeschichtlich wertvoller Ortsteil
+
+</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--Aussichtspunkt-->
+        <annotation>
+          <documentation>Aussichtspunkt
+</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--Aussichtsturm-->
+        <annotation>
+          <documentation>Aussichtsturm</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3100">
+        <!--landschaftsgerechteEinbindung-->
+        <annotation>
+          <documentation>landschaftsgerechte Einbindung von Bebauung und Infrastruktur</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3200">
+        <!--LandschaftsgerechterSiedlungsrand-->
+        <annotation>
+          <documentation>Landschaftsgerechter Siedlungsrand</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4100">
+        <!--Strukturvielfalt-->
+        <annotation>
+          <documentation>Strukturvielfalt</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4200">
+        <!--LandschaftHoheEigenart-->
+        <annotation>
+          <documentation>Landschaft mit hoher Eigenart</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5100">
+        <!--Landschaftsachsen-->
+        <annotation>
+          <documentation>Landschaftsachsen, Sichtachsen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Landschaftsraeume-->
+        <annotation>
+          <documentation>Landschaftsr&amp;#228;ume</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6100">
+        <!--HistorischeWaldinsel-->
+        <annotation>
+          <documentation>Historische Waldinsel</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6200">
+        <!--Waldraender-->
+        <annotation>
+          <documentation>Waldr&amp;#228;nder</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7000">
+        <!--Kulturlandschaft-->
+        <annotation>
+          <documentation>Kulturlandschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7100">
+        <!--HistorischeKulturlandschaft-->
+        <annotation>
+          <documentation>Historische Kulturlandschaft</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7200">
+        <!--Kulturlandschaftselement-->
+        <annotation>
+          <documentation>Kulturlandschaftselement</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7300">
+        <!--Hohlweg-->
+        <annotation>
+          <documentation>Hohlweg</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8000">
+        <!--Gartendenkmal-->
+        <annotation>
+          <documentation>Gartendenkmal</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Planungsgegenstand Schutzgut Landschaftsbild
+
+</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_LuftArt-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_LuftArt">
+    <annotation>
+      <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Luft, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--Geruchsbelastung-->
+        <annotation>
+          <documentation>Geruchsbelastung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--Laermbelastung-->
+        <annotation>
+          <documentation>L&amp;#228;rmbelastung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--lufthygienischeFktStofflBelastung-->
+        <annotation>
+          <documentation>lufthygienische Funktion / Stoffliche Belastung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="4000">
+        <!--Staubbelastung-->
+        <annotation>
+          <documentation>Staubbelastung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Planungsgegenstand Schutzgut Luft (siehe luftText)
+</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_WasserAuspraegung-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_WasserAuspraegung">
+    <annotation>
+      <documentation>Auspr&amp;#228;gungen in Bezug auf Planungsgegenstand Wasser, an die sich das Ziel, das Erfordernis oder die Ma&amp;#223;nahme richtet..
+</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1100">
+        <!--Hochwasserschutz-->
+        <annotation>
+          <documentation>Ziele, Erfordernisse oder Ma&amp;#223;nahmen begr&amp;#252;ndet durch Hochwasserschutz. </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1200">
+        <!--Ueberschwemmungsgebiet-->
+        <annotation>
+          <documentation>ZEM begründet mit Lage in Überschwemmungsgebiet. Das wasserrechtliche Gebiet selbst sollte in SO_Wasserrecht angelegt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1300">
+        <!--Hochwasservorsorge-->
+        <annotation>
+          <documentation>Hochwasservorsorge</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1310">
+        <!--Retentionsraum-->
+        <annotation>
+          <documentation>Retentionsraum</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1320">
+        <!--Polderflaeche-->
+        <annotation>
+          <documentation>Polderfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1400">
+        <!--Deichrueckverlegung-->
+        <annotation>
+          <documentation>Deichr&amp;#252;ckverlegung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1500">
+        <!--Trinkwassergewinnung-->
+        <annotation>
+          <documentation>Ziele, Erfordernisse oder Maßnahmen begründet mit Lage in Trinkwassergewinnungsgebiet. Das wasserrechtliche Gebiet selbst sollte in SO_Wasserrecht angelegt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1600">
+        <!--Trinkwasserschutz-->
+        <annotation>
+          <documentation>Ziele, Erfordernisse oder Maßnahmen begründet mit Lage in Trinkwasserschutz-Einzugsgebiet. Das wasserrechtliche Gebiet selbst sollte in SO_Wasserrecht angelegt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="1700">
+        <!--Grundwasserneubildungsgebiet-->
+        <annotation>
+          <documentation>Ziele, Erfordernisse oder Maßnahmen begründet mit Lage in Grundwasserneubildungsgebiet. Das wasserrechtliche Gebiet selbst sollte in SO_Wasserrecht angelegt werden.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2100">
+        <!--LaengsdurchgaengigkeitGewaesser-->
+        <annotation>
+          <documentation>L&amp;#228;ngsdurchg&amp;#228;ngigkeit von Gew&amp;#228;ssern</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2200">
+        <!--MindestwasserfuehrungGewaesser-->
+        <annotation>
+          <documentation>Mindestwasserf&amp;#252;hrung von Gew&amp;#228;ssern</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2300">
+        <!--Drainage-->
+        <annotation>
+          <documentation>Drainage</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2400">
+        <!--Entwaesserungsgraben-->
+        <annotation>
+          <documentation>Entw&amp;#228;sserungsgraben</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3100">
+        <!--NaturnaeheGewaesser-->
+        <annotation>
+          <documentation>Naturn&amp;#228;he von Gew&amp;#228;ssern</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3200">
+        <!--NaturnaheUferbereiche-->
+        <annotation>
+          <documentation>Naturnahe Uferbereiche von Standgew&amp;#228;ssern/Flie&amp;#223;gew&amp;#228;ssern </documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3300">
+        <!--OekologischeFunktionFliessgewaesser-->
+        <annotation>
+          <documentation>&amp;#214;kologische Funktion Flie&amp;#223;gew&amp;#228;sser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3400">
+        <!--OekologischeFunktionQuellbereich-->
+        <annotation>
+          <documentation>&amp;#214;kologische Funktion Quellbereich</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3500">
+        <!--OekologischeFunktionStillgewaesser-->
+        <annotation>
+          <documentation>&amp;#214;kologische Funktion Stillgew&amp;#228;sser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3600">
+        <!--Gewaesserstruktur-->
+        <annotation>
+          <documentation>Gew&amp;#228;sserstruktur</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3700">
+        <!--Gewaesserdynamik-->
+        <annotation>
+          <documentation>Gew&amp;#228;sserdynamik</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5100">
+        <!--Gewaesserrandstreifen-->
+        <annotation>
+          <documentation>Gew&amp;#228;sserrandstreifen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5200">
+        <!--Gewaesserschutzstreifen-->
+        <annotation>
+          <documentation>Gew&amp;#228;sserschutzstreifen</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5300">
+        <!--Pufferzone-->
+        <annotation>
+          <documentation>Pufferzone</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="5400">
+        <!--Ufergehoelze-->
+        <annotation>
+          <documentation>Ufergeh&amp;#246;lze</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6100">
+        <!--FischaufstiegsAbstiegsanlage-->
+        <annotation>
+          <documentation>Fischaufstiegs- bzw. -abstiegsanlage</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6200">
+        <!--Wehr-->
+        <annotation>
+          <documentation>Wehr</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6300">
+        <!--Verrohrung-->
+        <annotation>
+          <documentation>Verrohrung</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="6400">
+        <!--Sohlstufe-->
+        <annotation>
+          <documentation>Sohlstufe</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7100">
+        <!--Gewaesserguete-->
+        <annotation>
+          <documentation>Gew&amp;#228;sserg&amp;#252;te</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7200">
+        <!--StoffeintraegeInGrundwasser-->
+        <annotation>
+          <documentation>Stoffeintr&amp;#228;ge in Grundwasser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="7300">
+        <!--StoffeintraegeInOberflaechengewaesser-->
+        <annotation>
+          <documentation>Stoffeintr&amp;#228;ge in Oberfl&amp;#228;chengew&amp;#228;sser</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8100">
+        <!--Versickerungsflaeche-->
+        <annotation>
+          <documentation>Versickerungsfl&amp;#228;che</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="8200">
+        <!--Verlandungsbereiche-->
+        <annotation>
+          <documentation>Verlandungsbereich</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiger Planungsgegenstand Schutzgut Wasser (siehe &lt;i&gt;wasserText&lt;/i&gt;)</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_ZielDimensionTyp-->
+  <!--=========================================================================================-->
+  <simpleType name="LP_ZielDimensionTyp">
+    <annotation>
+      <documentation>Auflistung unterschiedlicher Zieldimensionen von Naturschutz und Landschaftspflege. Teilziele des Naturschutzes und der Landschaftspflege gemäß § 1 Abs. 1 Ziffern 1. bis 3. BNatSchG</documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="1000">
+        <!--SchutzBiologischeVielfalt-->
+        <annotation>
+          <documentation>Schutz der biologischen Vielfalt gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffer 1 BNatSchG.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="2000">
+        <!--SchutzNaturhaushalt-->
+        <annotation>
+          <documentation>Schutz des Naturhaushaltes gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffer 2 BNatSchG.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="3000">
+        <!--SchutzLandschaftsbildErholungsvorsorge-->
+        <annotation>
+          <documentation>Schutz des Landschaftsbildes sowie Erholungsvorsorge gem&amp;#228;&amp;#223; &amp;#167; 1 Abs. 1 Ziffer 3 BNatSchG.</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9998">
+        <!--Unbekannt-->
+        <annotation>
+          <documentation>Unbekannte Zieldimension / Teilziel von Naturschutz und Landschaftspflege (zur &amp;#220;bernahme von Altpl&amp;#228;nen)</documentation>
+        </annotation>
+      </enumeration>
+      <enumeration value="9999">
+        <!--Sonstiges-->
+        <annotation>
+          <documentation>Sonstiges Teilziel  gem. textlicher Angabe in &lt;i&gt;teilZielText&lt;/i&gt;.</documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  <!--=========================================================================================-->
+  <!--LP_GenerischesObjekt-->
+  <!--=========================================================================================-->
+  <element name="LP_GenerischesObjekt" type="xplan:LP_GenerischesObjektType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_GenerischesObjektType">
+    <annotation>
+      <documentation>Klasse zur Modellierung aller Inhalte des Landschaftsplans, die durch keine spezifische XPlanung-Klasse repräsentiert werden können.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element name="zweckbestimmung" minOccurs="0" maxOccurs="unbounded" type="gml:CodeType">
+            <annotation>
+              <appinfo>
+                <referenzierteCodelist>xplan:LP_ZweckbestimmungGenerischeObjekte</referenzierteCodelist>
+              </appinfo>
+              <documentation>Über eine Codeliste definierte Zweckbestimmung des Generischen Objektes.</documentation>
+            </annotation>
+          </element>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_GenerischesObjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_GenerischesObjekt" type="anyType" abstract="true" />
+  <!--=========================================================================================-->
+  <!--LP_TextAbschnittObjekt-->
+  <!--=========================================================================================-->
+  <element name="LP_TextAbschnittObjekt" type="xplan:LP_TextAbschnittObjektType" substitutionGroup="xplan:LP_Geometrieobjekt" />
+  <complexType name="LP_TextAbschnittObjektType">
+    <annotation>
+      <documentation>Bereich, in dem bestimmte textliche Festsetzungen gültig sind, die über die Relation "&lt;i&gt;refTextInhalt&lt;/i&gt;" (Basisklasse &lt;i&gt;XP_Objekt&lt;/i&gt;) spezifiziert werden.</documentation>
+    </annotation>
+    <complexContent>
+      <extension base="xplan:LP_GeometrieobjektType">
+        <sequence>
+          <element ref="xplan:_GenericApplicationPropertyOfLP_TextAbschnittObjekt" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>
+      </extension>
+    </complexContent>
+  </complexType>
+  <element name="_GenericApplicationPropertyOfLP_TextAbschnittObjekt" type="anyType" abstract="true" />
+</schema>
