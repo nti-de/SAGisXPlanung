@@ -823,19 +823,38 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         p = str(plan.__class__.__name__[:2]).lower()
         with Session.begin() as session:
             stmt = f"""
-                SELECT ST_AsText(ST_CollectionExtract(ST_INTERSECTION(a.position, b.position))) AS wkt, 
-                    xp_a.id AS a_xid, xp_a.type AS a_type, xp_b.id AS b_xid, xp_b.type AS b_type, xp_plan.id
-                FROM {p}_objekt a, {p}_objekt b, xp_objekt xp_a, xp_objekt xp_b, xp_plan, {p}_bereich
+                WITH all_objekt_positions AS (
+                    SELECT id, flaechenschluss, position FROM bp_objekt
+                    UNION ALL
+                    SELECT id, flaechenschluss, position FROM fp_objekt
+                    UNION ALL
+                    SELECT id, flaechenschluss, position FROM lp_objekt
+                    UNION ALL
+                    SELECT id, flaechenschluss, position FROM so_objekt
+                )
+                SELECT
+                    ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position))) AS wkt,
+                    xp_a.id AS a_xid, xp_a.type AS a_type,
+                    xp_b.id AS b_xid, xp_b.type AS b_type,
+                    xp_plan.id
+                FROM all_objekt_positions a
+                    CROSS JOIN all_objekt_positions b
+                    INNER JOIN xp_objekt xp_a ON a.id = xp_a.id
+                    INNER JOIN xp_objekt xp_b ON b.id = xp_b.id
+                    INNER JOIN {p}_bereich ON xp_a."gehoertZuBereich_id" = {p}_bereich.id
+                                          AND xp_b."gehoertZuBereich_id" = {p}_bereich.id
+                    INNER JOIN xp_plan ON {p}_bereich."gehoertZuPlan_id" = xp_plan.id
                 WHERE
-                    a.ID < b.ID AND
-                    a.id = xp_a.id AND
-                    b.id = xp_b.id AND 
-                    ST_IsValid(a.position) AND ST_IsValid(b.position) AND
-                    a.flaechenschluss = True AND b.flaechenschluss = True AND
-                    xp_plan.id = {p}_bereich."gehoertZuPlan_id" AND
-                    {p}_bereich.id = xp_a."gehoertZuBereich_id" AND {p}_bereich.id = xp_b."gehoertZuBereich_id" AND
-                    xp_plan.id = '{plan.id}' AND
-                    ST_OVERLAPS(a.position, b.position);
+                    a.id < b.id
+                    AND ST_IsValid(a.position)
+                    AND ST_IsValid(b.position)
+                    AND a.flaechenschluss = TRUE
+                    AND b.flaechenschluss = TRUE
+                    AND xp_plan.id = '{plan.id}'
+                    AND (
+                        ST_Overlaps(a.position, b.position)
+                        OR st_within(a.position, b.position)
+                    );
             """
 
             res = session.execute(stmt).all()
