@@ -643,6 +643,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     @qasync.asyncSlot()
     async def startValidation(self):
+        from timeit import default_timer as timer
+        from datetime import timedelta
+
+        start = timer()
         self.validation_spinner.start()
 
         self.bValidate.setEnabled(False)
@@ -689,6 +693,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
             self.validation_spinner.stop()
 
+            end = timer()
+            print(timedelta(seconds=end - start))
+
     def validateFlaechenschluss(self, plan):
         """
         Validierung der Flächenschlussbedingung (d.h. die Vereinigung aller Planinhalte in Ebene 0
@@ -706,19 +713,24 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
                 FROM
                     (
-                    SELECT ST_union(a.position) as united, {p}_bereich."gehoertZuPlan_id" AS plan_id
-                    FROM 
+                    SELECT ST_union(objects.position) as united, {p}_bereich."gehoertZuPlan_id" AS plan_id
+                    FROM
                     (
-                        SELECT a.id, a.flaechenschluss, a.position FROM {p}_objekt a
-                        UNION
-                        SELECT so_a.id, so_a.flaechenschluss, so_a.position FROM so_objekt so_a
-                    ) a, 
-                    xp_objekt xp_a, {p}_bereich
-                    WHERE xp_a.id = a.id AND a.flaechenschluss = True AND xp_a."gehoertZuBereich_id" = {p}_bereich.id
+                        SELECT id, flaechenschluss, position FROM bp_objekt
+                        UNION ALL
+                        SELECT id, flaechenschluss, position FROM fp_objekt
+                        UNION ALL
+                        SELECT id, flaechenschluss, position FROM lp_objekt
+                        UNION ALL
+                        SELECT id, flaechenschluss, position FROM so_objekt
+                    ) objects
+                    INNER JOIN xp_objekt xp_a ON xp_a.id = objects.id
+                    INNER JOIN {p}_bereich ON xp_a."gehoertZuBereich_id" = {p}_bereich.id
+                    WHERE objects.flaechenschluss = TRUE
                     GROUP BY {p}_bereich."gehoertZuPlan_id"
-                    ) as plan_contents,
-                    xp_plan
-                WHERE plan_contents.plan_id = xp_plan.id AND xp_plan.id = '{plan.id}';
+                    ) as plan_contents
+                INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
+                WHERE xp_plan.id = '{plan.id}';
             """
             try:
                 res = session.execute(stmt)
