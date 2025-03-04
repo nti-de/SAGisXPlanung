@@ -123,13 +123,6 @@ class TestXPPlanDetailsDialog_constructExplorer:
 
 class TestXPlanungDetailsDialog_GeometryValidation:
 
-    def test_validateVertexUniqueness(self, dialog: XPPlanDetailsDialog, plan: XP_Plan):
-        spy = QtTest.QSignalSpy(dialog.log.model().rowsInserted)
-
-        dialog.validateUniqueVertices(plan)
-
-        assert len(spy) == 1  # 1 area with duplicate vertex
-
     def test_highlight_error(self, dialog: XPPlanDetailsDialog, plan):
         validation_result = ValidationResult(
             xid=str(plan.id),

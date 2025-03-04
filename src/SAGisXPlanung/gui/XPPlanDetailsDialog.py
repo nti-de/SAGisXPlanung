@@ -658,31 +658,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         internal_error = False
 
         try:
-
-            async with SessionAsync.begin() as session:
-                # highly optimized query to only load required columns and populate all required sub tables from the
-                # beginning so that no further sql is emitted
-                xp_objekt_polymorphic = with_polymorphic(XP_Objekt, "*")
-                attribute_tuples = [(attrgetter(f'{o_type.__name__}.position')(xp_objekt_polymorphic),
-                                     attrgetter(f'{o_type.__name__}.flaechenschluss')(xp_objekt_polymorphic))
-                                    for o_type in OBJECT_BASE_TYPES]
-                attribute_list = itertools.chain(*attribute_tuples)
-                opts = [load_only('id', 'raeumlicherGeltungsbereich'),
-                        selectinload('bereich').options(
-                            load_only('id', 'geltungsbereich'),
-                            selectinload(XP_Bereich.planinhalt.of_type(xp_objekt_polymorphic)).options(
-                                load_only('id', *attribute_list)
-                            )
-                        )]
-                # plan = session.query(self.plan_type).options(*opts).get(self.plan_xid)
-                plan = await session.get(self.plan_type, self.plan_xid, opts)
-
-                # validation tasks are heavy cpu work, therefore run them in threadpool
-                # unfortunately ProcessPoolExecutor does not work inside QGIS -> can't use multiprocessing to side-step GIL
-                loop = asyncio.get_event_loop()
-                await loop.run_in_executor(None, self.validateFlaechenschluss, plan)
-                await loop.run_in_executor(None, self.validateUniqueVertices, plan)
-
+            await asyncio.to_thread(self.validate_plan_geometric)
         except Exception as e:
             internal_error = True
             logger.error(e)
@@ -699,25 +675,26 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             end = timer()
             print(timedelta(seconds=end - start))
 
-    def validateFlaechenschluss(self, plan):
+    def validate_plan_geometric(self):
         """
         Validierung der Flächenschlussbedingung (d.h. die Vereinigung aller Planinhalte in Ebene 0
         stimmt mit der Fläche des Geltungsbereichs überein <=> es existieren kleine Überlappungen/Klaffung zwischen
         den Flächen der Planinhalte und jeder Stützpunkt liegt auf mindestens einem anderen)
         """
-        self._validate_geometry_valid(plan)
-        self._validate_within_bounds(plan)
-        self._validate_overlaps(plan)
+        short_plan_type = str(self.plan_type.__name__[:2]).lower()
 
-        # validate that the union of all plan contents is equal to the geltungsbereich
-        p = str(plan.__class__.__name__[:2]).lower()
+        self._validate_geometry_valid(self.plan_xid, short_plan_type)
+        self._validate_within_bounds(self.plan_xid, short_plan_type)
+        self._validate_overlaps(self.plan_xid, short_plan_type)
+
+        # validate that the union of all plan contents is equal to the geltungsbereich => find gaps
         with Session.begin() as session:
             stmt = f"""
                 SELECT 
                     ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
                 FROM
                     (
-                    SELECT ST_union(objects.position) as united, {p}_bereich."gehoertZuPlan_id" AS plan_id
+                    SELECT ST_union(objects.position) as united, {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id
                     FROM
                     (
                         SELECT id, flaechenschluss, position FROM bp_objekt
@@ -729,12 +706,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         SELECT id, flaechenschluss, position FROM so_objekt
                     ) objects
                     INNER JOIN xp_objekt xp_a ON xp_a.id = objects.id
-                    INNER JOIN {p}_bereich ON xp_a."gehoertZuBereich_id" = {p}_bereich.id
+                    INNER JOIN {short_plan_type}_bereich ON xp_a."gehoertZuBereich_id" = {short_plan_type}_bereich.id
                     WHERE objects.flaechenschluss = TRUE AND st_isvalid(objects.position)
-                    GROUP BY {p}_bereich."gehoertZuPlan_id"
+                    GROUP BY {short_plan_type}_bereich."gehoertZuPlan_id"
                     ) as plan_contents
                 INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
-                WHERE xp_plan.id = '{plan.id}';
+                WHERE xp_plan.id = '{self.plan_xid}';
             """
             try:
                 res = session.execute(stmt)
@@ -749,33 +726,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             except Exception as e:
                 logger.error(e)
 
-    def validateUniqueVertices(self, plan: XP_Plan):
-        """ Startet die Untersuchung aller Stützpunkte von XPlanung-Geometrien auf Duplikate"""
-        self.checkUniqueVertices(plan)
-        for b in plan.bereich:
-            self.checkUniqueVertices(b)
-            for p in b.planinhalt:
-                self.checkUniqueVertices(p)
-
-    def checkUniqueVertices(self, obj):
-        """ überprüft ein XPlanung-Objekt auf doppelte Stützpunkte und schreibt das Ergebnis in das Log-Fenster"""
-        # try if geometry is not empty
-        try:
-            geom_copy = QgsGeometry(obj.geometry())
-        except AssertionError:
-            return
-        nodes_removed = geom_copy.removeDuplicateNodes()
-        if nodes_removed:
-            validation_result = ValidationResult(
-                xid=str(obj.id),
-                xtype=obj.__class__,
-                geom_wkt=geom_copy.asWkt(),
-                error_msg='Planinhalt besitzt doppelte Stützpunkte'
-            )
-            self.validation_finished.emit(validation_result)
-
-    def _validate_geometry_valid(self, plan: XP_Plan):
-        p = str(plan.__class__.__name__[:2]).lower()
+    def _validate_geometry_valid(self, plan_id, short_plan_type: str):
         with Session() as session:
             stmt = text(f"""
                 WITH all_objekt_positions AS (
@@ -793,7 +744,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         xp_bereich.geltungsbereich,
                         xp_bereich.type
                     FROM xp_bereich
-                    JOIN {p}_bereich ON {p}_bereich.id = xp_bereich.id
+                    JOIN {short_plan_type}_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
                     WHERE fp_bereich."gehoertZuPlan_id" = :planid
                 ),
                 objects AS (
@@ -810,7 +761,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     ST_AsText(geom) as wkt,
                     type,
                     ST_IsValid(geom) AS is_valid,
-                    ST_IsValidReason(geom) AS invalid_reason
+                    ST_IsValidReason(geom) AS invalid_reason,
+                    NOT ST_OrderingEquals(geom, ST_RemoveRepeatedPoints(geom)) AS has_duplicate_vertices
                 FROM (
                     SELECT id, position AS geom, type FROM objects
                     UNION ALL
@@ -818,13 +770,13 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     UNION ALL
                     SELECT id, "raeumlicherGeltungsbereich" AS geom, 'xp_plan' FROM xp_plan
                     WHERE xp_plan.id = :planid
-                ) AS all_geometries
-                WHERE st_isvalid(geom) = false;
+                ) AS all_geometries;
             """)
-            stmt = stmt.bindparams(planid=plan.id)
+            stmt = stmt.bindparams(planid=plan_id)
 
             res = session.execute(stmt).all()
             for row in res:
+                validation_result = None
                 if row.is_valid is False:
                     validation_result = ValidationResult(
                         xid=str(row.id),
@@ -832,10 +784,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         geom_wkt=row.wkt,
                         error_msg=row.invalid_reason
                     )
+                if row.has_duplicate_vertices is True:
+                    validation_result = ValidationResult(
+                        xid=str(row.id),
+                        xtype=table_name_to_class(row.type),
+                        geom_wkt=row.wkt,
+                        error_msg='Planinhalt besitzt doppelte Stützpunkte'
+                    )
 
-                self.validation_finished.emit(validation_result)
+                if validation_result is not None:
+                    self.validation_finished.emit(validation_result)
 
-    def _validate_within_bounds(self, plan: XP_Plan):
+    def _validate_within_bounds(self, plan_id, short_plan_type: str):
         """ validate if all geometries of plan contents are within the bounds of the plan """
         with Session() as session:
             stmt = text(f"""
@@ -850,15 +810,15 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     xp_bereich.type as bereich_type,
                     xp_plan.id as plan_id,
                     xp_plan.type as plan_type
-                FROM fp_bereich
-                JOIN xp_bereich ON fp_bereich.id = xp_bereich.id
-                JOIN xp_plan ON xp_plan.id = fp_bereich."gehoertZuPlan_id"
+                FROM {short_plan_type}_bereich
+                JOIN xp_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
+                JOIN xp_plan ON xp_plan.id = {short_plan_type}_bereich."gehoertZuPlan_id"
                 WHERE
                     xp_plan.id = :planid AND
                     ST_IsValid(xp_bereich.geltungsbereich) AND
                     not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich");
             """)
-            stmt = stmt.bindparams(planid=plan.id)
+            stmt = stmt.bindparams(planid=plan_id)
 
             res = session.execute(stmt).all()
             for row in res:
@@ -893,20 +853,19 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     end as wkt,
                     xp_a.id AS a_xid,
                     xp_a.type AS a_type,
-                    xp_plan.id AS plan_id,
+                    {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id,
                     xp_bereich.id AS bereich_id,
                     xp_bereich.type as bereich_type
                 FROM all_objekt_positions a
                 JOIN xp_objekt xp_a ON a.id = xp_a.id
-                JOIN fp_bereich ON fp_bereich.id = xp_a."gehoertZuBereich_id"
-                JOIN xp_bereich ON fp_bereich.id = xp_bereich.id
-                JOIN xp_plan ON xp_plan.id = fp_bereich."gehoertZuPlan_id"
+                JOIN {short_plan_type}_bereich ON {short_plan_type}_bereich.id = xp_a."gehoertZuBereich_id"
+                JOIN xp_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
                 WHERE
-                    xp_plan.id = :planid AND
+                    {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
                     ST_IsValid(a.position) AND
                     NOT ST_Within(a.position, xp_bereich.geltungsbereich);
             """)
-            stmt = stmt.bindparams(planid=plan.id)
+            stmt = stmt.bindparams(planid=plan_id)
 
             res = session.execute(stmt).all()
             for row in res:
@@ -916,13 +875,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     geom_wkt=row.wkt,
                     intersection_type=GeometryIntersectionType.Bereich,
                     other_xid=str(row.bereich_id),
-                    other_xtype=table_name_to_class(row.bereich_type)
+                    other_xtype=table_name_to_class(f'{short_plan_type}_bereich')
                 )
                 self.validation_finished.emit(validation_result)
 
-    def _validate_overlaps(self, plan: XP_Plan):
+    def _validate_overlaps(self, plan_id, short_plan_type: str):
         """ validates if any of the plan contents overlap each other"""
-        p = str(plan.__class__.__name__[:2]).lower()
         with Session.begin() as session:
             stmt = f"""
                 WITH all_objekt_positions AS (
@@ -938,22 +896,20 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position))) AS wkt,
                     xp_a.id AS a_xid, xp_a.type AS a_type,
                     xp_b.id AS b_xid, xp_b.type AS b_type,
-                    xp_plan.id, 
                     st_within(a.position, b.position) as is_within
                 FROM all_objekt_positions a
                     CROSS JOIN all_objekt_positions b
                     INNER JOIN xp_objekt xp_a ON a.id = xp_a.id
                     INNER JOIN xp_objekt xp_b ON b.id = xp_b.id
-                    INNER JOIN {p}_bereich ON xp_a."gehoertZuBereich_id" = {p}_bereich.id
-                                          AND xp_b."gehoertZuBereich_id" = {p}_bereich.id
-                    INNER JOIN xp_plan ON {p}_bereich."gehoertZuPlan_id" = xp_plan.id
+                    INNER JOIN {short_plan_type}_bereich ON xp_a."gehoertZuBereich_id" = {short_plan_type}_bereich.id
+                                          AND xp_b."gehoertZuBereich_id" = {short_plan_type}_bereich.id
                 WHERE
                     a.id < b.id
                     AND ST_IsValid(a.position)
                     AND ST_IsValid(b.position)
                     AND a.flaechenschluss = TRUE
                     AND b.flaechenschluss = TRUE
-                    AND xp_plan.id = '{plan.id}'
+                    AND {short_plan_type}_bereich."gehoertZuPlan_id" = '{plan_id}'
                     AND (
                         ST_Overlaps(a.position, b.position)
                         OR st_within(a.position, b.position)
