@@ -848,7 +848,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position))) AS wkt,
                     xp_a.id AS a_xid, xp_a.type AS a_type,
                     xp_b.id AS b_xid, xp_b.type AS b_type,
-                    xp_plan.id
+                    xp_plan.id, 
+                    st_within(a.position, b.position) as is_within
                 FROM all_objekt_positions a
                     CROSS JOIN all_objekt_positions b
                     INNER JOIN xp_objekt xp_a ON a.id = xp_a.id
@@ -871,11 +872,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
             res = session.execute(stmt).all()
             for row in res:
+                error_type = GeometryIntersectionType.FullyWithin if row.is_within else GeometryIntersectionType.Planinhalt
                 validation_result = ValidationResult(
                     xid=str(row.a_xid),
                     xtype=table_name_to_class(row.a_type),
                     geom_wkt=row.wkt,
-                    intersection_type=GeometryIntersectionType.Planinhalt,
+                    intersection_type=error_type,
                     other_xid=str(row.b_xid),
                     other_xtype=table_name_to_class(row.b_type),
                 )

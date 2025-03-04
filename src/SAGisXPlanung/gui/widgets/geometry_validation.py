@@ -16,6 +16,7 @@ class GeometryIntersectionType(Enum):
     Bereich = 'Planinhalt liegt nicht vollständig im Bereich'
     Plan = 'Bereich liegt nicht vollständig im Geltungsbereich des Plans'
     NotCovered = 'Kein Flächenschluss vorliegend'
+    FullyWithin = 'Planinhalt wird vollständig überdeckt'
 
 
 @dataclass
