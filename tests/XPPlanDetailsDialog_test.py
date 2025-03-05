@@ -17,8 +17,8 @@ from SAGisXPlanung.core.canvas_display import create_raster_layer
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
-from SAGisXPlanung.gui.widgets.geometry_validation import ValidationResult, ValidationGeometryErrorTreeWidgetItem, \
-    GeometryIntersectionType
+from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationGeometryErrorTreeWidgetItem
+from SAGisXPlanung.core.geometry_validation import GeometryIntersectionType, ValidationResult
 
 
 @pytest.fixture()

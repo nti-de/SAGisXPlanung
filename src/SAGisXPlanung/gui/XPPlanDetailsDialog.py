@@ -1,11 +1,9 @@
 import asyncio
 import functools
 import inspect
-import itertools
 import logging
 import os
 import uuid
-from operator import attrgetter
 from typing import List, Tuple, Union
 
 import qasync
@@ -15,10 +13,10 @@ from qgis.PyQt import QtWidgets, QtGui
 from qgis.PyQt.QtWidgets import QTreeWidgetItem, QAbstractItemView
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSettings
 from qgis.gui import QgsDockWidget
-from qgis.core import (QgsGeometry, Qgis)
+from qgis.core import (Qgis)
 from qgis.utils import iface
-from sqlalchemy import select, exists, inspect as sqla_inspect, text
-from sqlalchemy.orm import lazyload, load_only, selectinload, with_polymorphic, joinedload, class_mapper
+from sqlalchemy import select, exists
+from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
@@ -33,16 +31,17 @@ from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.core.mixins.mixins import GeometryObject
 from SAGisXPlanung.XPlanungItem import XPlanungItem
-from SAGisXPlanung.config import export_version, table_name_to_class
+from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
 from SAGisXPlanung.gui.actions import EnableBuldingTemplateAction, EditBuildingTemplateAction
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
-from SAGisXPlanung.gui.widgets.geometry_validation import (ValidationBaseTreeWidgetItem,
-                                                           GeometryIntersectionType, ValidationResult,
-                                                           ValidationGeometryErrorTreeWidgetItem)
+from SAGisXPlanung.gui.widgets.geometry_validation_view import (ValidationBaseTreeWidgetItem,
+                                                                ValidationGeometryErrorTreeWidgetItem)
+from SAGisXPlanung.core.geometry_validation import ValidationResult, _validate_overlaps, \
+    _validate_within_bounds, _validate_geometry_valid, _validate_gaps, VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.style.styles import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -59,7 +58,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     planDeleted = pyqtSignal()
     nameChanged = pyqtSignal(str, str)  # xid, new plan name
-    validation_finished = pyqtSignal(ValidationResult)
 
     _init_lock = asyncio.Lock()
 
@@ -98,7 +96,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.searchEdit.textChanged.connect(self.objectTree.filter)
 
         self.bValidate.clicked.connect(self.startValidation)
-        self.validation_finished.connect(self.on_validation_result)
         self.log.itemDoubleClicked.connect(self.onErrorDoubleClicked)
         self.log.setContextMenuPolicy(Qt.CustomContextMenu)
         self.log.customContextMenuRequested.connect(self.show_geometry_validation_contextmenu)
@@ -677,262 +674,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     def validate_plan_geometric(self):
         """
-        Validierung der Flächenschlussbedingung (d.h. die Vereinigung aller Planinhalte in Ebene 0
-        stimmt mit der Fläche des Geltungsbereichs überein <=> es existieren kleine Überlappungen/Klaffung zwischen
-        den Flächen der Planinhalte und jeder Stützpunkt liegt auf mindestens einem anderen)
+        Validate geometric correctness of the opened plan
+        Tests for:
+        -   All geometries are valid
+        -   All geometries are within bounds of the plan
+        -   There are no gaps/overlaps between geometries
         """
         short_plan_type = str(self.plan_type.__name__[:2]).lower()
 
-        self._validate_geometry_valid(self.plan_xid, short_plan_type)
-        self._validate_within_bounds(self.plan_xid, short_plan_type)
-        self._validate_overlaps(self.plan_xid, short_plan_type)
-
-        # validate that the union of all plan contents is equal to the geltungsbereich => find gaps
-        with Session.begin() as session:
-            stmt = f"""
-                SELECT 
-                    ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
-                FROM
-                    (
-                    SELECT ST_union(objects.position) as united, {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id
-                    FROM
-                    (
-                        SELECT id, flaechenschluss, position FROM bp_objekt
-                        UNION ALL
-                        SELECT id, flaechenschluss, position FROM fp_objekt
-                        UNION ALL
-                        SELECT id, flaechenschluss, position FROM lp_objekt
-                        UNION ALL
-                        SELECT id, flaechenschluss, position FROM so_objekt
-                    ) objects
-                    INNER JOIN xp_objekt xp_a ON xp_a.id = objects.id
-                    INNER JOIN {short_plan_type}_bereich ON xp_a."gehoertZuBereich_id" = {short_plan_type}_bereich.id
-                    WHERE objects.flaechenschluss = TRUE AND st_isvalid(objects.position)
-                    GROUP BY {short_plan_type}_bereich."gehoertZuPlan_id"
-                    ) as plan_contents
-                INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
-                WHERE xp_plan.id = '{self.plan_xid}';
-            """
-            try:
-                res = session.execute(stmt)
-                for row in res:
-                    validation_result = ValidationResult(
-                        xid=str(row.id),
-                        xtype=XP_Plan,
-                        geom_wkt=row.wkt,
-                        intersection_type=GeometryIntersectionType.NotCovered
-                    )
-                    self.validation_finished.emit(validation_result)
-            except Exception as e:
-                logger.error(e)
-
-    def _validate_geometry_valid(self, plan_id, short_plan_type: str):
-        with Session() as session:
-            stmt = text(f"""
-                WITH all_objekt_positions AS (
-                    SELECT id, flaechenschluss, position FROM bp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM fp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM lp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM so_objekt
-                ),
-                bereiche AS (
-                    SELECT
-                        xp_bereich.id,
-                        xp_bereich.geltungsbereich,
-                        xp_bereich.type
-                    FROM xp_bereich
-                    JOIN {short_plan_type}_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
-                    WHERE fp_bereich."gehoertZuPlan_id" = :planid
-                ),
-                objects AS (
-                    SELECT
-                        o.id,
-                        o.position,
-                        xp_objekt.type
-                    FROM all_objekt_positions o
-                    JOIN xp_objekt ON o.id = xp_objekt.id
-                    JOIN bereiche b ON b.id = xp_objekt."gehoertZuBereich_id"
-                )
-                SELECT
-                    id,
-                    ST_AsText(geom) as wkt,
-                    type,
-                    ST_IsValid(geom) AS is_valid,
-                    ST_IsValidReason(geom) AS invalid_reason,
-                    NOT ST_OrderingEquals(geom, ST_RemoveRepeatedPoints(geom)) AS has_duplicate_vertices
-                FROM (
-                    SELECT id, position AS geom, type FROM objects
-                    UNION ALL
-                    SELECT id, geltungsbereich AS geom, type FROM bereiche
-                    UNION ALL
-                    SELECT id, "raeumlicherGeltungsbereich" AS geom, 'xp_plan' FROM xp_plan
-                    WHERE xp_plan.id = :planid
-                ) AS all_geometries;
-            """)
-            stmt = stmt.bindparams(planid=plan_id)
-
-            res = session.execute(stmt).all()
-            for row in res:
-                validation_result = None
-                if row.is_valid is False:
-                    validation_result = ValidationResult(
-                        xid=str(row.id),
-                        xtype=table_name_to_class(row.type),
-                        geom_wkt=row.wkt,
-                        error_msg=row.invalid_reason
-                    )
-                if row.has_duplicate_vertices is True:
-                    validation_result = ValidationResult(
-                        xid=str(row.id),
-                        xtype=table_name_to_class(row.type),
-                        geom_wkt=row.wkt,
-                        error_msg='Planinhalt besitzt doppelte Stützpunkte'
-                    )
-
-                if validation_result is not None:
-                    self.validation_finished.emit(validation_result)
-
-    def _validate_within_bounds(self, plan_id, short_plan_type: str):
-        """ validate if all geometries of plan contents are within the bounds of the plan """
-        with Session() as session:
-            stmt = text(f"""
-                SELECT
-                    case when ST_IsValid(xp_bereich.geltungsbereich) then
-                        ST_AsText(
-                            ST_CollectionExtract(
-                                ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich")
-                            )
-                    ) end as wkt,
-                    xp_bereich.id as bereich_id,
-                    xp_bereich.type as bereich_type,
-                    xp_plan.id as plan_id,
-                    xp_plan.type as plan_type
-                FROM {short_plan_type}_bereich
-                JOIN xp_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
-                JOIN xp_plan ON xp_plan.id = {short_plan_type}_bereich."gehoertZuPlan_id"
-                WHERE
-                    xp_plan.id = :planid AND
-                    ST_IsValid(xp_bereich.geltungsbereich) AND
-                    not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich");
-            """)
-            stmt = stmt.bindparams(planid=plan_id)
-
-            res = session.execute(stmt).all()
-            for row in res:
-                validation_result = ValidationResult(
-                    xid=str(row.bereich_id),
-                    xtype=table_name_to_class(row.bereich_type),
-                    geom_wkt=row.wkt,
-                    intersection_type=GeometryIntersectionType.Plan,
-                    other_xid=str(row.plan_id),
-                    other_xtype=table_name_to_class(row.plan_type)
-                )
-                self.validation_finished.emit(validation_result)
-
-            stmt = text(f"""
-                WITH all_objekt_positions AS (
-                    SELECT id, position FROM bp_objekt
-                    UNION ALL
-                    SELECT id, position FROM fp_objekt
-                    UNION ALL
-                    SELECT id, position FROM lp_objekt
-                    UNION ALL
-                    SELECT id, position FROM so_objekt
-                )
-                SELECT
-                    case when ST_IsValid(a.position) then
-                        ST_AsText(
-                            ST_CollectionExtract(
-                                ST_Difference(a.position, xp_bereich.geltungsbereich)
-                            )
-                        ) 
-                    else ST_AsText(a.position)
-                    end as wkt,
-                    xp_a.id AS a_xid,
-                    xp_a.type AS a_type,
-                    {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id,
-                    xp_bereich.id AS bereich_id,
-                    xp_bereich.type as bereich_type
-                FROM all_objekt_positions a
-                JOIN xp_objekt xp_a ON a.id = xp_a.id
-                JOIN {short_plan_type}_bereich ON {short_plan_type}_bereich.id = xp_a."gehoertZuBereich_id"
-                JOIN xp_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
-                WHERE
-                    {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
-                    ST_IsValid(a.position) AND
-                    NOT ST_Within(a.position, xp_bereich.geltungsbereich);
-            """)
-            stmt = stmt.bindparams(planid=plan_id)
-
-            res = session.execute(stmt).all()
-            for row in res:
-                validation_result = ValidationResult(
-                    xid=str(row.a_xid),
-                    xtype=table_name_to_class(row.a_type),
-                    geom_wkt=row.wkt,
-                    intersection_type=GeometryIntersectionType.Bereich,
-                    other_xid=str(row.bereich_id),
-                    other_xtype=table_name_to_class(f'{short_plan_type}_bereich')
-                )
-                self.validation_finished.emit(validation_result)
-
-    def _validate_overlaps(self, plan_id, short_plan_type: str):
-        """ validates if any of the plan contents overlap each other"""
-        with Session.begin() as session:
-            stmt = f"""
-                WITH all_objekt_positions AS (
-                    SELECT id, flaechenschluss, position FROM bp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM fp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM lp_objekt
-                    UNION ALL
-                    SELECT id, flaechenschluss, position FROM so_objekt
-                )
-                SELECT
-                    ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position))) AS wkt,
-                    xp_a.id AS a_xid, xp_a.type AS a_type,
-                    xp_b.id AS b_xid, xp_b.type AS b_type,
-                    st_within(a.position, b.position) as is_within
-                FROM all_objekt_positions a
-                    CROSS JOIN all_objekt_positions b
-                    INNER JOIN xp_objekt xp_a ON a.id = xp_a.id
-                    INNER JOIN xp_objekt xp_b ON b.id = xp_b.id
-                    INNER JOIN {short_plan_type}_bereich ON xp_a."gehoertZuBereich_id" = {short_plan_type}_bereich.id
-                                          AND xp_b."gehoertZuBereich_id" = {short_plan_type}_bereich.id
-                WHERE
-                    a.id < b.id
-                    AND ST_IsValid(a.position)
-                    AND ST_IsValid(b.position)
-                    AND a.flaechenschluss = TRUE
-                    AND b.flaechenschluss = TRUE
-                    AND {short_plan_type}_bereich."gehoertZuPlan_id" = '{plan_id}'
-                    AND (
-                        ST_Overlaps(a.position, b.position)
-                        OR st_within(a.position, b.position)
-                    );
-            """
-
-            res = session.execute(stmt).all()
-            for row in res:
-                error_type = GeometryIntersectionType.FullyWithin if row.is_within else GeometryIntersectionType.Planinhalt
-                validation_result = ValidationResult(
-                    xid=str(row.a_xid),
-                    xtype=table_name_to_class(row.a_type),
-                    geom_wkt=row.wkt,
-                    intersection_type=error_type,
-                    other_xid=str(row.b_xid),
-                    other_xtype=table_name_to_class(row.b_type),
-                )
-                self.validation_finished.emit(validation_result)
-
-    @pyqtSlot(ValidationResult)
-    def on_validation_result(self, validation_result: ValidationResult):
-        tree_item = ValidationGeometryErrorTreeWidgetItem(validation_result)
-        self.log.addTopLevelItem(tree_item)
+        for func in VALIDATION_FUNCTIONS:
+            validation_results = func(self.plan_xid, short_plan_type)
+            result_view_items = [ValidationGeometryErrorTreeWidgetItem(r) for r in validation_results]
+            self.log.addTopLevelItems(result_view_items)
 
     @pyqtSlot(QTreeWidgetItem, int)
     def onErrorDoubleClicked(self, item: ValidationBaseTreeWidgetItem, column):

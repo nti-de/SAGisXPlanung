@@ -1,33 +1,12 @@
 import re
-from dataclasses import dataclass
-from enum import Enum
 
 from qgis.PyQt import QtWidgets, QtGui, sip
 from qgis.gui import QgsGeometryRubberBand
 from qgis.core import (QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon,
-                    QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
+                       QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
 from qgis.utils import iface
 
-
-class GeometryIntersectionType(Enum):
-    """ Gibt an, welcher Grund einen Überschneidungsfehler hevorgerufen hat. """
-
-    Planinhalt = 'Flächenschlussobjekt weist Überschneidung auf'
-    Bereich = 'Planinhalt liegt nicht vollständig im Bereich'
-    Plan = 'Bereich liegt nicht vollständig im Geltungsbereich des Plans'
-    NotCovered = 'Kein Flächenschluss vorliegend'
-    FullyWithin = 'Planinhalt wird vollständig überdeckt'
-
-
-@dataclass
-class ValidationResult:
-    xid: str
-    xtype: type
-    error_msg: str = None
-    geom_wkt: str = None
-    intersection_type: GeometryIntersectionType = None
-    other_xid: str = None
-    other_xtype: type = None
+from SAGisXPlanung.core.geometry_validation import ValidationResult
 
 
 def _error_detail_message(error_msg: str, validation_result: ValidationResult) -> str:
