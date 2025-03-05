@@ -10,7 +10,7 @@ import qasync
 import yaml
 
 from qgis.PyQt import QtWidgets, QtGui
-from qgis.PyQt.QtWidgets import QTreeWidgetItem, QAbstractItemView
+from qgis.PyQt.QtWidgets import QAbstractItemView
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSettings
 from qgis.gui import QgsDockWidget
 from qgis.core import (Qgis)
@@ -38,12 +38,8 @@ from SAGisXPlanung.gui.actions import EnableBuldingTemplateAction, EditBuildingT
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
-from SAGisXPlanung.gui.widgets.geometry_validation_view import (ValidationBaseTreeWidgetItem,
-                                                                ValidationGeometryErrorTreeWidgetItem)
-from SAGisXPlanung.core.geometry_validation import ValidationResult, _validate_overlaps, \
-    _validate_within_bounds, _validate_geometry_valid, _validate_gaps, VALIDATION_FUNCTIONS
+from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
-from SAGisXPlanung.gui.style.styles import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 from SAGisXPlanung.utils import OBJECT_BASE_TYPES, full_version_required_warning
 
@@ -96,14 +92,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.searchEdit.textChanged.connect(self.objectTree.filter)
 
         self.bValidate.clicked.connect(self.startValidation)
-        self.log.itemDoubleClicked.connect(self.onErrorDoubleClicked)
-        self.log.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.log.customContextMenuRequested.connect(self.show_geometry_validation_contextmenu)
-        self.log.setMouseTracking(True)
-        self.log.setItemDelegate(TagStyledDelegate())
-        self.log_proxy_style = HighlightRowProxyStyle('Fusion')
-        self.log_proxy_style.setParent(self.log)
-        self.log.setStyle(self.log_proxy_style)
+
         self.bFixAreas.clicked.connect(self.fillAreasWithoutUsage)
         self.lFinished.setVisible(False)
         self.reset_label.setVisible(False)
@@ -121,7 +110,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.objectTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.stackedWidget.currentChanged.connect(self.updateButtons)
 
-        self.validation_spinner = WaitingSpinner(self.log, disableParentWhenSpinning=True, radius=5, lines=20,
+        self.validation_spinner = WaitingSpinner(self.validation_result_view, disableParentWhenSpinning=True, radius=5, lines=20,
                                                  line_length=5, line_width=1, color=(0, 6, 128))
         self.init_spinner = WaitingSpinner(self, disableParentWhenSpinning=True, radius=5, lines=20,
                                            line_length=5, line_width=1, color=(0, 6, 128))
@@ -185,7 +174,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 self.reset_label.setVisible(False)
                 self.lErrorCount.setText('')
                 self.undo_stack.clear()
-                self.log.clear()
+                self.validation_result_view.clear()
                 self.objectTree.clear()
 
                 if not keep_page:
@@ -288,13 +277,13 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             return
 
         if hasattr(item._data.xtype, 'geometry'):
-            flash_action = QtWidgets.QAction(QtGui.QIcon(':/images/themes/default/mActionScaleHighlightFeature.svg'),
+            flash_action = QtWidgets.QAction(QIcon(':/images/themes/default/mActionScaleHighlightFeature.svg'),
                                              'Planinhalt auf Karte hervorheben')
             flash_action.triggered.connect(self.highlightPlanContent)
             menu.addAction(flash_action)
 
         if item.parent():
-            delete_action = QtWidgets.QAction(QtGui.QIcon(self.deleteIcon), 'Planinhalt löschen')
+            delete_action = QtWidgets.QAction(QIcon(self.deleteIcon), 'Planinhalt löschen')
             delete_action.triggered.connect(lambda state, item_to_delete=item: self.onDeleteClick(item_to_delete))
             menu.addAction(delete_action)
 
@@ -341,11 +330,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.addMenu(data_class_menu)
 
         menu.exec_(self.objectTree.viewport().mapToGlobal(point))
-
-    def highlightGeometryError(self):
-        item: ValidationBaseTreeWidgetItem = self.log.selectedItems()[0]
-        iface.mapCanvas().setExtent(item.extent())
-        self.onErrorDoubleClicked(item, 0)  # highlights error and refreshes canvas
 
     @pyqtSlot()
     def highlightPlanContent(self):
@@ -650,7 +634,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.lFinished.setVisible(False)
         self.reset_label.setVisible(False)
         self.lErrorCount.setText('')
-        self.log.clear()
+        self.validation_result_view.clear()
 
         internal_error = False
 
@@ -660,7 +644,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             internal_error = True
             logger.error(e)
         finally:
-            error_count = self.log.topLevelItemCount()
+            error_count = self.validation_result_view.item_count()
             self.lFinished.setVisible(True)
             self.lErrorCount.setText(f'{error_count} Fehler gefunden' if error_count else 'Keine Fehler gefunden')
             if error_count:
@@ -684,18 +668,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         for func in VALIDATION_FUNCTIONS:
             validation_results = func(self.plan_xid, short_plan_type)
-            result_view_items = [ValidationGeometryErrorTreeWidgetItem(r) for r in validation_results]
-            self.log.addTopLevelItems(result_view_items)
-
-    @pyqtSlot(QTreeWidgetItem, int)
-    def onErrorDoubleClicked(self, item: ValidationBaseTreeWidgetItem, column):
-        for i in range(self.log.topLevelItemCount()):
-            self.log.topLevelItem(i).removeFromCanvas()
-        item.displayErrorOnCanvas()
-        iface.mapCanvas().refresh()
+            self.validation_result_view.add_result_items(validation_results)
 
     def onResetGeometryValidation(self, event):
-        self.log.clear()
+        self.validation_result_view.clear()
 
         self.lFinished.setVisible(False)
         self.reset_label.setVisible(False)

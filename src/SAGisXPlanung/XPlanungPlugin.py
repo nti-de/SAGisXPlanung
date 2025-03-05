@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import logging
 import os.path
 import webbrowser
@@ -10,7 +11,7 @@ from qgis.PyQt.QtWidgets import QAction, QMenu, QFileDialog, QStyleOptionGraphic
 from qgis.PyQt.QtPrintSupport import QPrinter
 
 from qgis.core import (QgsProject, QgsLayerTreeGroup, QgsAnnotationLayer, Qgis,
-                       QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication, QgsVectorLayer)
+                       QgsMapRendererCustomPainterJob, QgsRenderContext, QgsApplication)
 from qgis import processing
 
 import qasync
@@ -157,6 +158,8 @@ class XPlanung(QObject):
         # unload processing
         if not sip.isdeleted(self.provider):
             QgsApplication.processingRegistry().removeProvider(self.provider)
+
+        gc.collect()
 
     @pyqtSlot()
     def run(self):

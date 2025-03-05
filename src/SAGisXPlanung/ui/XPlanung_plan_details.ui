@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>419</width>
-    <height>644</height>
+    <width>449</width>
+    <height>722</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -198,7 +198,7 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_7" stretch="0">
                <item>
-                <widget class="QTreeWidget" name="log">
+                <widget class="ValidationTreeView" name="validation_result_view">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
                    <horstretch>0</horstretch>
@@ -211,19 +211,6 @@
                  <property name="frameShadow">
                   <enum>QFrame::Sunken</enum>
                  </property>
-                 <property name="columnCount">
-                  <number>2</number>
-                 </property>
-                 <column>
-                  <property name="text">
-                   <string>Fläche</string>
-                  </property>
-                 </column>
-                 <column>
-                  <property name="text">
-                   <string>Fehler</string>
-                  </property>
-                 </column>
                 </widget>
                </item>
               </layout>
@@ -624,6 +611,11 @@ QToolButton:checked {
    <extends>QWidget</extends>
    <header>SAGisXPlanung/gui/widgets.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ValidationTreeView</class>
+   <extends>QTreeView</extends>
+   <header>SAGisXPlanung/gui/widgets/geometry_validation_view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

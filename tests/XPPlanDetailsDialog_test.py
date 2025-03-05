@@ -17,7 +17,6 @@ from SAGisXPlanung.core.canvas_display import create_raster_layer
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
-from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationGeometryErrorTreeWidgetItem
 from SAGisXPlanung.core.geometry_validation import GeometryIntersectionType, ValidationResult
 
 
@@ -127,18 +126,19 @@ class TestXPlanungDetailsDialog_GeometryValidation:
         validation_result = ValidationResult(
             xid=str(plan.id),
             xtype=plan.__class__,
-            geom_wkt='MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))',
+            geom_wkt='MultiPolygon (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))',
             intersection_type=GeometryIntersectionType.Plan
         )
 
-        item = ValidationGeometryErrorTreeWidgetItem(validation_result)
-        dialog.log.addTopLevelItem(item)
-        item.setSelected(True)
+        dialog.validation_result_view.add_result_items([validation_result])
+        assert dialog.validation_result_view.item_count() == 1
 
-        dialog.highlightGeometryError()
+        index = dialog.validation_result_view._model.index(0, 0)
+        assert index.isValid()
 
-        assert item.isVisible
-
+        dialog.validation_result_view.highlight_geometry_error(index)
+        assert dialog.validation_result_view.rubber_band is not None
+        assert dialog.validation_result_view.rubber_band.geometry().asWkt() == validation_result.geom_wkt
 
 
 class TestXPlanungDialog_createRasterLayer:

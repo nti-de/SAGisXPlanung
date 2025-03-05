@@ -32,6 +32,12 @@ class ValidationResult:
     other_xid: str = None
     other_xtype: type = None
 
+    def __post_init__(self):
+        if self.intersection_type is not None:
+            self.error_msg = self.intersection_type.value
+        elif self.error_msg is None:
+            self.error_msg = 'Fehler in der Geometrievalidierung'
+
 
 def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
     """ validates if any of the plan contents overlap each other"""
@@ -95,12 +101,11 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
     with Session() as session:
         stmt = text(f"""
             SELECT
-                case when ST_IsValid(xp_bereich.geltungsbereich) then
-                    ST_AsText(
-                        ST_CollectionExtract(
-                            ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich")
-                        )
-                ) end as wkt,
+                ST_AsText(
+                    ST_CollectionExtract(
+                        ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich")
+                    )
+                ) as wkt,
                 xp_bereich.id as bereich_id,
                 xp_bereich.type as bereich_type,
                 xp_plan.id as plan_id,
@@ -111,7 +116,8 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             WHERE
                 xp_plan.id = :planid AND
                 ST_IsValid(xp_bereich.geltungsbereich) AND
-                not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich");
+                not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich") AND
+                not ST_IsEmpty(ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich"));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -138,14 +144,11 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 SELECT id, position FROM so_objekt
             )
             SELECT
-                case when ST_IsValid(a.position) then
-                    ST_AsText(
-                        ST_CollectionExtract(
-                            ST_Difference(a.position, xp_bereich.geltungsbereich)
-                        )
-                    ) 
-                else ST_AsText(a.position)
-                end as wkt,
+                ST_AsText(
+                    ST_CollectionExtract(
+                        ST_Difference(a.position, xp_bereich.geltungsbereich)
+                    )
+                )  as wkt,
                 xp_a.id AS a_xid,
                 xp_a.type AS a_type,
                 {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id,
@@ -158,7 +161,8 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             WHERE
                 {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
                 ST_IsValid(a.position) AND
-                NOT ST_Within(a.position, xp_bereich.geltungsbereich);
+                NOT ST_Within(a.position, xp_bereich.geltungsbereich) AND
+                not ST_IsEmpty(ST_Difference(a.position, xp_bereich.geltungsbereich));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -198,7 +202,7 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
                     xp_bereich.type
                 FROM xp_bereich
                 JOIN {short_plan_type}_bereich ON {short_plan_type}_bereich.id = xp_bereich.id
-                WHERE fp_bereich."gehoertZuPlan_id" = :planid
+                WHERE {short_plan_type}_bereich."gehoertZuPlan_id" = :planid
             ),
             objects AS (
                 SELECT
