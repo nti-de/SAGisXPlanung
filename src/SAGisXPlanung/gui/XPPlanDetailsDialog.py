@@ -9,8 +9,9 @@ from typing import List, Tuple, Union
 import qasync
 import yaml
 
-from qgis.PyQt import QtWidgets, QtGui
-from qgis.PyQt.QtWidgets import QAbstractItemView
+from qgis.PyQt import QtWidgets
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSettings
 from qgis.gui import QgsDockWidget
 from qgis.core import (Qgis)
@@ -41,6 +42,7 @@ from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
+from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationState
 from SAGisXPlanung.utils import OBJECT_BASE_TYPES, full_version_required_warning
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
@@ -66,8 +68,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.setAllowedAreas(self.allowedAreas() | Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.setObjectName('xplanung-details')
 
-        self.deleteIcon = QtGui.QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
-        self.bMap.setIcon(QtGui.QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/map.svg'))))
+        self.deleteIcon = QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
+        self.bMap.setIcon(QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/map.svg'))))
 
         self.bMap.clicked.connect(lambda state: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
@@ -78,12 +80,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.Save)
         self.bSave.setVisible(False)
 
-        self.bEditMain.setIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'gui/resources/edit.svg')))
+        self.bEditMain.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit.svg')))
         self.bEditMain.clicked.connect(self.onEditMainClicked)
 
-        self.bSortHierarchy.setIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
-        self.bSortCategory.setIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_category.svg')))
-        self.bSortName.setIcon(QtGui.QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_alpha.svg')))
+        self.bSortHierarchy.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
+        self.bSortCategory.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_category.svg')))
+        self.bSortName.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_alpha.svg')))
         self.sortButtons.setId(self.bSortCategory, 2)
         self.sortButtons.setId(self.bSortName, 1)
         self.sortButtons.setId(self.bSortHierarchy, 0)
@@ -243,19 +245,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             obj = session.query(xplan_item.xtype).get(xplan_item.xid)
             self.iterateRelation(obj, node)
 
-    def show_geometry_validation_contextmenu(self, point):
-        item = self.log.itemAt(point)
-        if not item:
-            return
-
-        menu = QtWidgets.QMenu()
-        flash_action = QtWidgets.QAction(QtGui.QIcon(':/images/themes/default/mActionScaleHighlightFeature.svg'),
-                                         'Geometriefehler auf Karte hervorheben')
-        flash_action.triggered.connect(self.highlightGeometryError)
-        menu.addAction(flash_action)
-
-        menu.exec_(self.log.mapToGlobal(point))
-
     def showObjectTreeContextMenu(self, point):
 
         selected_indices = self.objectTree.selectionModel().selectedIndexes()
@@ -266,7 +255,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         menu.setToolTipsVisible(True)
 
         if len(selected_indices) > 1:
-            delete_action = QtWidgets.QAction(QtGui.QIcon(self.deleteIcon), 'Markierte Planinhalte löschen')
+            delete_action = QtWidgets.QAction(QIcon(self.deleteIcon), 'Markierte Planinhalte löschen')
             delete_action.triggered.connect(lambda state, indices=selected_indices: self.delete_indices(indices))
             menu.addAction(delete_action)
             menu.exec_(self.objectTree.mapToGlobal(point))
@@ -624,10 +613,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     @qasync.asyncSlot()
     async def startValidation(self):
-        from timeit import default_timer as timer
-        from datetime import timedelta
-
-        start = timer()
         self.validation_spinner.start()
 
         self.bValidate.setEnabled(False)
@@ -645,16 +630,21 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             logger.error(e)
         finally:
             error_count = self.validation_result_view.item_count()
-            self.lFinished.setVisible(True)
+            if internal_error:
+                self.validation_result_view.clear()
+                self.validation_result_view.set_validation_state(ValidationState.ERROR)
+            elif error_count == 0:
+                self.validation_result_view.set_validation_state(ValidationState.SUCCESS)
+            else:
+                self.validation_result_view.set_validation_state(ValidationState.UNKNOWN)
+
             self.lErrorCount.setText(f'{error_count} Fehler gefunden' if error_count else 'Keine Fehler gefunden')
             if error_count:
                 self.reset_label.setVisible(True)
+
+            self.lFinished.setVisible(True)
             self.bValidate.setEnabled(True)
-
             self.validation_spinner.stop()
-
-            end = timer()
-            print(timedelta(seconds=end - start))
 
     def validate_plan_geometric(self):
         """

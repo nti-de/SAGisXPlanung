@@ -283,18 +283,15 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
             INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
             WHERE xp_plan.id = '{plan_id}';
         """
-        try:
-            res = session.execute(stmt)
-            for row in res:
-                validation_result = ValidationResult(
-                    xid=str(row.id),
-                    xtype=XP_Plan,
-                    geom_wkt=row.wkt,
-                    intersection_type=GeometryIntersectionType.NotCovered
-                )
-                result.append(validation_result)
-        except Exception as e:
-            logger.error(e)
+        res = session.execute(stmt)
+        for row in res:
+            validation_result = ValidationResult(
+                xid=str(row.id),
+                xtype=XP_Plan,
+                geom_wkt=row.wkt,
+                intersection_type=GeometryIntersectionType.NotCovered
+            )
+            result.append(validation_result)
 
         return result
 
