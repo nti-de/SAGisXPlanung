@@ -29,10 +29,13 @@ from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
 # don't remove following dependency, it is needed for promoting a ComboBox to QPlanComboBox via qt designer
 from SAGisXPlanung.gui.widgets.QPlanComboBox import QPlanComboBox
 
-uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_dialog_base.ui')
+logger = logging.getLogger(__name__)
+
+uifile = os.path.join(BASE_DIR, 'ui/XPlanung_dialog_base.ui')
 FORM_CLASS = compile_ui_file(uifile)
 
-logger = logging.getLogger(__name__)
+logger.debug(uifile)
+logger.debug(FORM_CLASS)
 
 style = """
 QToolButton {{
@@ -55,6 +58,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     def __init__(self, parent=None):
         super(XPlanungDialog, self).__init__(parent)
         self.setupUi(self)
+        logger.debug('setup ui called')
         self.setAllowedAreas(self.allowedAreas() | Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.iface = iface
         self.export_task = None
@@ -108,6 +112,8 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             ApplicationColor.Secondary
         ], class_='QPushButton')
         apply_color(self.button_show_all, ApplicationColor.Secondary)
+
+        logger.debug('setup init completed')
 
     def __del__(self):
         try:
@@ -277,7 +283,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     @pyqtSlot()
     def openDetails(self):
         self.details_dialog.show()
-        self.details_dialog.setUserVisible(True)
+        self.details_dialog.raise_()
 
     @qasync.asyncSlot(XPlanungItem)
     async def showObjectAttributes(self, xplan_item: XPlanungItem):

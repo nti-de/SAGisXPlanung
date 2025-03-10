@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>XPlanungDialogBase</class>
- <widget class="QgsDockWidget" name="XPlanungDialogBase">
+ <widget class="QDockWidget" name="XPlanungDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -21,6 +21,9 @@
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_3">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="title">
@@ -471,12 +474,6 @@ QPushButton:hover { background-color: #d1d5db; color: #172554;}</string>
   </widget>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>QgsDockWidget</class>
-   <extends>QDockWidget</extends>
-   <header>qgsdockwidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>QgsFileWidget</class>
    <extends>QWidget</extends>
