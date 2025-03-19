@@ -87,14 +87,10 @@ def import_plan(filepath: str, progress_callback: Callable[[Tuple[int, int]], No
     else:
         raise ValueError('Dateipfad muss mit .gml oder .zip enden.')
 
-    reader = GMLReader(gml_file_content, files=files, progress_callback=progress_callback)
-    result = ImportResult(reader.plan.name, reader.warnings)
+    with Session.begin() as session:
+        reader = GMLReader(gml_file_content, files=files, progress_callback=progress_callback, session=session)
+        result = ImportResult(reader.plan.name, reader.warnings)
 
-    save_plan(reader.plan)
+        session.add(reader.plan)
 
     return result
-
-
-def save_plan(plan):
-    with Session.begin() as session:
-        session.add(plan)

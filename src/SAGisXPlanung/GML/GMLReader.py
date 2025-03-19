@@ -9,6 +9,7 @@ from sqlalchemy import ARRAY
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
+from SAGisXPlanung.XPlan.codelists import CodeListValue, is_codelist_attribute
 from SAGisXPlanung.XPlan.types import RefURL
 from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES, OBJECT_BASE_TYPES
 
@@ -21,10 +22,9 @@ class GMLReader:
     Der XP_Plan-Objekt kann über das Attribut 'plan' abgerufen werden.
     """
 
-    def __init__(self, gml, files=None, progress_callback=None):
+    def __init__(self, gml, files=None, progress_callback=None, session=None):
 
-        from timeit import default_timer as timer
-
+        self.session = session
         self.warnings = []
         self.files = files if files else {}
 
@@ -112,11 +112,13 @@ class GMLReader:
                              'gehoertZuPlan']:
                 continue
 
-            logger.debug(f"find column from name {node_name}")
             node_name = object_type.attribute_by_version(node_name, self.import_version)
-            logger.debug(f"found {node_name}")
 
             if node_name in [r[0] for r in obj.relationships()]:
+                if is_codelist_attribute(object_type, node_name):
+                    codelist = CodeListValue.codelist_class(object_type, node_name)
+                    value = codelist.from_xplan_node(node)
+                    logger.debug(f'found codelist {value}')
                 # find node content if relationship is not immediately child but instead linked via xlink
                 if len(node) == 0:
                     xlink_refs = node.xpath('@xlink:href', namespaces=self.nsmap)
@@ -146,13 +148,16 @@ class GMLReader:
                     continue
 
                 pre_classes = [*PRE_FILLED_CLASSES]
-                if value.__class__ in pre_classes:
-                    obj_from_db = query_existing(value)
+                if self.session is not None and value.__class__ in pre_classes:
+                    obj_from_db = query_existing(value, session=self.session)
                     value = obj_from_db if obj_from_db is not None else value
-                    if obj_from_db is not None and hasattr(obj, f'{node_name}_id'):
-                        # object could already be in session from previous loops, therefore store only id if possible
-                        node_name = f'{node_name}_id'
-                        value = obj_from_db.id
+                    # don't save codelist if it is not loaded database -> set value to None
+                    if value.__class__ in CodeListValue.__subclasses__() and obj_from_db is None:
+                        self.warnings.append(
+                            f'Codelisten-Wert "{value.value}" nicht in Codeliste "{value.__class__.__name__}" gefunden... '
+                            f'Bitte Codelisten-Werte vor Import neu abrufen und sicherstellen, dass "{value.value}" '
+                            f'ein gültiger Auswahlwert ist (Zeile: {gml.sourceline})')
+                        continue
                 if (a := getattr(obj, node_name)) is not None:
                     a.append(value)
                 else:

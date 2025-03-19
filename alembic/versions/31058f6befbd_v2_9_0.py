@@ -259,6 +259,9 @@ def upgrade():
         sa.ForeignKeyConstraint(['biologische_vielfalt_komplex_id'], ['lp_biologische_vielfalt_komplex.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
+
+    # fix codelist reading by also storing keys in database
+    op.add_column('codelist_values', sa.Column('key', sa.String(), nullable=True))
     # ### end Alembic commands ###
 
 
@@ -321,4 +324,5 @@ def downgrade():
     op.execute("DROP TYPE lp_luftart")
     op.execute("DROP TYPE lp_schutzgutart")
 
+    # op.drop_column('codelist_values', 'key')
     # ### end Alembic commands ###

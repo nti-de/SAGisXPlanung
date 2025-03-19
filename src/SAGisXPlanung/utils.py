@@ -258,16 +258,20 @@ async def save_to_db_async(obj):
     await loop.run_in_executor(None, save_to_db, obj)
 
 
-def query_existing(obj):
+def query_existing(obj, session=None):
     """
     Prüft ob ein gegebenes XPlanung-Objekt bereits in der Datenbank existiert.
     Falls ja, wird dieses zurückgegeben, ansonsten None
     """
-    with Session.begin() as session:
-        session.expire_on_commit = False
-        objects_from_db = session.query(obj.__class__).all()
-        obj_from_db = next((x for x in objects_from_db if x == obj), None)
-    return obj_from_db
+    obj_class = obj.__class__
+    if session is None:
+        with Session.begin() as session:
+            session.expire_on_commit = False
+            candidates = session.query(obj_class).all()
+    else:
+        candidates = session.query(obj_class).all()
+
+    return next((x for x in candidates if x == obj), None)
 
 
 def createXPlanungIndicators():
