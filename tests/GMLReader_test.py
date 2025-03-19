@@ -6,11 +6,15 @@ from geoalchemy2 import WKTElement, WKBElement
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
+from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.codelists import BP_DetailZweckbestGruenFlaeche
+from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
 from SAGisXPlanung.GML.GMLReader import GMLReader
+from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr
+from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PPO, XP_PTO, XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_VerbundenerPlan
-from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzTyp, XP_ExterneReferenzArt
+from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzTyp, XP_ExterneReferenzArt, XP_ZweckbestimmungGruen
 
 
 def side_effect(*args):
@@ -40,7 +44,7 @@ class TestGMLReader_read_data_object:
                  '</xplan:XP_Gemeinde>'
         gml = etree.fromstring(string)
 
-        obj = GMLReader.read_data_object(gml)
+        obj = gml_reader.read_xp_object(gml)
 
         assert obj.__class__.__name__ == "XP_Gemeinde"
         assert obj.ags == '4326436'
@@ -59,11 +63,35 @@ class TestGMLReader_read_data_object:
 
         gml = etree.fromstring(string)
 
-        obj = GMLReader.read_data_object(gml)
+        obj = gml_reader.read_xp_object(gml)
 
         assert obj.__class__.__name__ == "XP_SpezExterneReferenz"
         assert obj.art == XP_ExterneReferenzArt.Dokument
         assert obj.typ == XP_ExterneReferenzTyp.Beschreibung
+
+    @pytest.mark.parametrize('gml_reader', ['bp_plan.gml'], indirect=True)
+    def test_read_data_objects_nested(self, gml_reader):
+        string = """
+        <xplan:BP_Dachgestaltung xmlns:xplan="http://www.xplanung.de/xplangml/6/0">
+          <xplan:DN uom="grad">20</xplan:DN>
+          <xplan:dachform>1000</xplan:dachform>
+          <xplan:hoehenangabe>
+            <xplan:XP_Hoehenangabe>
+              <xplan:hoehenbezug>1000</xplan:hoehenbezug>
+              <xplan:bezugspunkt>1000</xplan:bezugspunkt>
+              <xplan:h uom="m">2.0</xplan:h>
+            </xplan:XP_Hoehenangabe>
+          </xplan:hoehenangabe>
+        </xplan:BP_Dachgestaltung>
+        """
+
+        gml = etree.fromstring(string)
+
+        obj = gml_reader.read_xp_object(gml)
+
+        assert obj.__class__.__name__ == "BP_Dachgestaltung"
+        assert obj.DN == '20'
+        assert obj.hoehenangabe.h == '2.0'
 
 
 class TestGMLReader_readPlan:
@@ -108,6 +136,11 @@ class TestGMLReader_readPlan:
 
         assert plan.rel_veraenderungssperre
         assert plan.rel_veraenderungssperre.verlaengerung == BP_VerlaengerungVeraenderungssperre.Keine
+
+        gruenflaeche = next(p for p in plan.bereich[0].planinhalt if isinstance(p, BP_GruenFlaeche))
+        assert gruenflaeche.rel_zweckbestimmung[0].allgemein == XP_ZweckbestimmungGruen.Naturerfahrungsraum
+        assert isinstance(gruenflaeche.rel_zweckbestimmung[0].detail[0], BP_DetailZweckbestGruenFlaeche)
+        assert gruenflaeche.rel_zweckbestimmung[0].detail[0].key == "2400_10"
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan1.gml'], indirect=True)
     def test_readPlan_top_level_ns_issue24(self, gml_reader):

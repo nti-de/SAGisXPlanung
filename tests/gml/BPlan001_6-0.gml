@@ -142,6 +142,7 @@
       <xplan:zweckbestimmung>
         <xplan:BP_KomplexeZweckbestGruen>
           <xplan:allgemein>2700</xplan:allgemein>
+          <xplan:detail>2400_10</xplan:detail>
           <xplan:aufschrift>Grüne Hölle</xplan:aufschrift>
         </xplan:BP_KomplexeZweckbestGruen>
       </xplan:zweckbestimmung>
@@ -228,6 +229,7 @@
       <xplan:zweckbestimmung>
         <xplan:BP_KomplexeZweckbestGruen>
           <xplan:allgemein>2700</xplan:allgemein>
+          <xplan:detail>2400_10</xplan:detail>
         </xplan:BP_KomplexeZweckbestGruen>
       </xplan:zweckbestimmung>
       <xplan:nutzungsform>1000</xplan:nutzungsform>

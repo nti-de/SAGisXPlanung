@@ -44,19 +44,6 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     grundstueck_ueberbaubar = relationship('BP_UeberbaubareGrundstuecksFlaeche', back_populates='dachgestaltung')
 
     @classmethod
-    def from_xplan_node(cls, node):
-        from SAGisXPlanung.GML.GMLReader import GMLReader
-
-        this = GMLReader.read_data_object(node, only_attributes=True)
-
-        hoehenangabe_node = node.find('.//xplan:hoehenangabe', namespaces=node.nsmap)
-        if hoehenangabe_node is not None:
-            hoehenangabe = GMLReader.read_data_object(hoehenangabe_node[0])
-            setattr(this, 'hoehenangabe', hoehenangabe)
-
-        return this
-
-    @classmethod
     def avoid_export(cls):
         return ['baugebiet_id', 'besondere_nutzung_id', 'gemeinbedarf_id', 'grundstueck_ueberbaubar_id',
                 'detaillierteDachform_id']

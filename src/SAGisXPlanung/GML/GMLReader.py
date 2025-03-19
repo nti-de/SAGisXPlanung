@@ -100,9 +100,13 @@ class GMLReader:
                                  f'Fachobjekt oder generisches Objekt verwenden (Zeile: {gml.sourceline})')
             return
 
+        if hasattr(object_type, 'from_xplan_node'):
+            return object_type.from_xplan_node(gml)
+
         obj = object_type()
-        obj_id = gml.xpath('@gml:id', namespaces=self.nsmap)[0]
-        obj.id = obj_id[obj_id.find('_') + 1:]
+        if id_nodes := gml.xpath('@gml:id', namespaces=self.nsmap):
+            obj_id = id_nodes[0]
+            obj.id = obj_id[obj_id.find('_') + 1:]
 
         for node in gml.iterchildren():
             node_name = etree.QName(node).localname
@@ -118,7 +122,6 @@ class GMLReader:
                 if is_codelist_attribute(object_type, node_name):
                     codelist = CodeListValue.codelist_class(object_type, node_name)
                     value = codelist.from_xplan_node(node)
-                    logger.debug(f'found codelist {value}')
                 # find node content if relationship is not immediately child but instead linked via xlink
                 if len(node) == 0:
                     xlink_refs = node.xpath('@xlink:href', namespaces=self.nsmap)
@@ -141,7 +144,7 @@ class GMLReader:
                         getattr(obj, node_name).append(value)
                         continue
                 else:
-                    value = self.read_data_object(node[0], files=self.files)
+                    value = self.read_xp_object(node[0])
 
                 # skip if no value is read, e.g. when reading a class that is not present in schema
                 if value is None:
@@ -176,6 +179,9 @@ class GMLReader:
                 col_type = getattr(obj.__class__, node_name).property.columns[0].type
 
             GMLReader.read_attribute(col_type, node_name, obj, node)
+
+            if isinstance(col_type, RefURL) and hasattr(obj, 'file') and node.text in self.files:
+                setattr(obj, 'file', self.files[node.text])
 
         self.setProgress(self.current_progress + 1)
         return obj
@@ -212,50 +218,3 @@ class GMLReader:
             getattr(obj, node_name).append(datetime.datetime.strptime(value, '%Y-%m-%d'))
         else:
             setattr(obj, node_name, value)
-
-    @staticmethod
-    def read_data_object(gml, files=None, only_attributes=False):
-        """
-        Wandelt ein XPlanGML-Datatype in ein ORM-Objekt des gleichen Typs um.
-
-        Parameters
-        ----------
-        gml: lxml.etree.Element
-            XPlanGML-Knoten eines XPlanGML-Datatype
-        files: dict
-            Dictionary aus Dateiname und Datei
-        only_attributes: bool
-            Wenn falsch, kein Aufruf der klasssenspezifischen XPlan-Import Routinen (from_xplan_node)
-        Returns
-        -------
-        any:
-            ORM-Objekt vom Typ des XPlanGML-Knoten
-
-        """
-        if files is None:
-            files = {}
-
-        type_name = etree.QName(gml).localname
-        object_type = CLASSES[type_name]
-
-        if not only_attributes and hasattr(object_type, 'from_xplan_node'):
-            return object_type.from_xplan_node(gml)
-
-        obj = object_type()
-        for node in gml.iterchildren():
-            node_name = etree.QName(node).localname
-            value = node.text
-
-            if hasattr(obj, node_name):
-                try:
-                    col_type = getattr(object_type, node_name).property.columns[0].type
-                except AttributeError as e:
-                    # continue when property is not a column (but a relation instead)
-                    # this fail check is a lot faster than doing a lookup whether attr is in relationship properties
-                    continue
-                GMLReader.read_attribute(col_type, node_name, obj, node)
-
-                if isinstance(col_type, RefURL) and hasattr(obj, 'file') and value in files:
-                    setattr(obj, 'file', files[value])
-
-        return obj
