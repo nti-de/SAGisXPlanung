@@ -46,6 +46,8 @@ class RelationshipMixin:
                 continue
             if not self.__class__.attr_fits_version(rel[0], export_version()):
                 continue
+            if rel[1].info.get('link') == 'xlink-only':
+                continue
             rel_items = getattr(self, rel[0])
             if rel_items is None:
                 continue
@@ -186,7 +188,7 @@ class ElementOrderMixin:
                     # only display relationships per declaration of form-type
                     if isinstance(mapper_property, RelationshipProperty):
                         form_type = mapper_property.info.get('form-type')
-                        if hasattr(cls, '__avoidRelation__') and mapper_property.key in cls.__avoidRelation__:
+                        if not export and hasattr(cls, '__avoidRelation__') and mapper_property.key in cls.__avoidRelation__:
                             continue
                         if relations == 'inline' and form_type != 'inline':
                             continue

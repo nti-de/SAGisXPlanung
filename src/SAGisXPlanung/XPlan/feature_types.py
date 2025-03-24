@@ -205,7 +205,8 @@ class XP_Bereich(RendererMixin, PolygonGeometry, ElementOrderMixin, Relationship
                               })
     praesentationsobjekt = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="gehoertZuBereich",
                                         cascade="all, delete", passive_deletes=True, info={
-                                            'form-type': 'hidden'
+                                            'form-type': 'hidden',
+                                            'link': 'xlink-only'
                                         })
     aendertPlan = relationship("XP_VerbundenerPlan", back_populates="aendertPlan_verbundenerPlan",
                                cascade="all, delete", passive_deletes=True,

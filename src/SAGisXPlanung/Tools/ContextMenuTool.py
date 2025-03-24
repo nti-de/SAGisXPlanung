@@ -15,7 +15,7 @@ from qgis.PyQt.QtGui import QIcon, QColor, QTransform
 from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateItem
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
-from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.po_annotations_dialog import CreateAnnotateDialog
 from SAGisXPlanung.gui.actions import EditBuildingTemplateAction, MoveAnnotationItemAction
@@ -142,7 +142,7 @@ class ContextMenuTool(QgsMapToolIdentify):
             return
 
         # if plan content is an area, add option to annotate with PO
-        if issubclass(xplan_item.xtype, PolygonGeometry) and issubclass(xplan_item.xtype, XP_Objekt):
+        if issubclass(xplan_item.xtype, (PolygonGeometry, MixedGeometry)) and issubclass(xplan_item.xtype, XP_Objekt):
             annotate_action = menu.addAction('Präsentationsobjekt hinzufügen')
             annotate_action.triggered.connect(
                 functools.partial(self.menu_action_triggered, ActionType.AddAnnotationItem, xplan_item))
