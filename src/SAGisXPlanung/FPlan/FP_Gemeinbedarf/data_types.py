@@ -27,7 +27,7 @@ class FP_KomplexeZweckbestGemeinbedarf(RelationshipMixin, ElementOrderMixin, Bas
 
     @classmethod
     def avoid_export(cls):
-        return ['gemeinbedarf_id']
+        return ['gemeinbedarf']
 
 
 class FP_KomplexeZweckbestSpielSportanlage(RelationshipMixin, ElementOrderMixin, Base):
@@ -48,4 +48,4 @@ class FP_KomplexeZweckbestSpielSportanlage(RelationshipMixin, ElementOrderMixin,
 
     @classmethod
     def avoid_export(cls):
-        return ['sportanlage_id']
+        return ['sportanlage']

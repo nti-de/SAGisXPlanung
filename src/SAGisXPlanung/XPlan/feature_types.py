@@ -96,7 +96,7 @@ class XP_Plan(RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMix
 
     @classmethod
     def avoid_export(cls):
-        return ['plangeber_id', '_sa_search_col']
+        return ['_sa_search_col']
 
     @classmethod
     def hidden_inputs(cls):
@@ -332,8 +332,7 @@ class XP_Objekt(RendererMixin, RelationshipMixin, ElementOrderMixin, MapCanvasMi
 
     @classmethod
     def avoid_export(cls):
-        return ['hidden', 'drehwinkel', 'skalierung', 'gesetzlicheGrundlage_id', 'annotation_delete_queue',
-                'xp_versions']
+        return ['hidden', 'drehwinkel', 'skalierung', 'annotation_delete_queue', 'xp_versions']
 
     def displayName(self):
         return self.__class__.__name__

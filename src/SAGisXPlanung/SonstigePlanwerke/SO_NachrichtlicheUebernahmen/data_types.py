@@ -28,7 +28,7 @@ class SO_KomplexeZweckbestStrassenverkehr(RelationshipMixin, ElementOrderMixin, 
 
     @classmethod
     def avoid_export(cls):
-        return ['strassenverkehr_id']
+        return ['strassenverkehr']
 
 
 class SO_KomplexeFestlegungGewaesser(RelationshipMixin, ElementOrderMixin, Base):
@@ -49,4 +49,4 @@ class SO_KomplexeFestlegungGewaesser(RelationshipMixin, ElementOrderMixin, Base)
 
     @classmethod
     def avoid_export(cls):
-        return ['gewaesser_id']
+        return ['gewaesser']

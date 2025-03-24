@@ -27,7 +27,7 @@ class BP_KomplexeZweckbestSpielSportanlage(RelationshipMixin, ElementOrderMixin,
 
     @classmethod
     def avoid_export(cls):
-        return ['spiel_sportanlage_id']
+        return ['spiel_sportanlage']
 
 
 class BP_KomplexeZweckbestGemeinbedarf(RelationshipMixin, ElementOrderMixin, Base):
@@ -48,4 +48,4 @@ class BP_KomplexeZweckbestGemeinbedarf(RelationshipMixin, ElementOrderMixin, Bas
 
     @classmethod
     def avoid_export(cls):
-        return ['gemeinbedarf_id']
+        return ['gemeinbedarf']

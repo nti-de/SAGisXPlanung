@@ -28,7 +28,7 @@ class LP_EingriffsregelungKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['eingriffsregelung_id']
+        return ['eingriffsregelung']
 
 
 class LP_TypBioVerbundKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -49,4 +49,4 @@ class LP_TypBioVerbundKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['biotopverbund_biotopvernetzung_id']
+        return ['biotopverbund_biotopvernetzung']

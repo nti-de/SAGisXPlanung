@@ -135,11 +135,6 @@ class BP_Plan(XP_Plan):
     bereich = relationship("BP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
 
     @classmethod
-    def avoid_export(cls):
-        return super().avoid_export() + ['plangeber_id', 'versionBauNVO_id', 'versionBauGB_id',
-                                        'versionSonstRechtsgrundlage_id']
-
-    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)

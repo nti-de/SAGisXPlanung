@@ -27,4 +27,4 @@ class FP_KomplexeSondernutzung(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['baugebiet_id']
+        return ['baugebiet']

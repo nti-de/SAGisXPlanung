@@ -27,4 +27,4 @@ class FP_KomplexeZweckbestVerEntsorgung(RelationshipMixin, ElementOrderMixin, Ba
 
     @classmethod
     def avoid_export(cls):
-        return ['versorgung_id']
+        return ['versorgung']

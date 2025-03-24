@@ -27,7 +27,7 @@ class BP_KomplexeZweckbestGruen(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['gruenflaeche_id']
+        return ['gruenflaeche']
 
 
 class BP_KomplexeZweckbestLandwirtschaft(RelationshipMixin, ElementOrderMixin, Base):
@@ -48,7 +48,7 @@ class BP_KomplexeZweckbestLandwirtschaft(RelationshipMixin, ElementOrderMixin, B
 
     @classmethod
     def avoid_export(cls):
-        return ['landwirtschaft_id']
+        return ['landwirtschaft']
 
 
 class BP_KomplexeZweckbestWald(RelationshipMixin, ElementOrderMixin, Base):

@@ -45,8 +45,7 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['baugebiet_id', 'besondere_nutzung_id', 'gemeinbedarf_id', 'grundstueck_ueberbaubar_id',
-                'detaillierteDachform_id']
+        return ['baugebiet', 'besondere_nutzung', 'gemeinbedarf', 'grundstueck_ueberbaubar']
 
     def validate(self):
         if self.DNmin and (not self.DNmax and not self.DN and not self.DNZwingend):
@@ -82,7 +81,7 @@ class BP_KomplexeSondernutzung(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['baugebiet_id']
+        return ['baugebiet']
 
 class BP_KomplexeZweckbestNebenanlagen(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Zweckbestimmung einer Nebenanlagenfläche. """
@@ -102,4 +101,4 @@ class BP_KomplexeZweckbestNebenanlagen(RelationshipMixin, ElementOrderMixin, Bas
 
     @classmethod
     def avoid_export(cls):
-        return ['nebenanlage_id']
+        return ['nebenanlage']

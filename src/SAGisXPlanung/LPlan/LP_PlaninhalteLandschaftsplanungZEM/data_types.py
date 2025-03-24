@@ -32,7 +32,7 @@ class LP_AdressatKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 #region LP_BiologischeVielfaltKomplex
@@ -70,7 +70,7 @@ class LP_BiologischeVielfaltKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_BiologischeVielfaltTypKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -91,7 +91,7 @@ class LP_BiologischeVielfaltTypKomplex(RelationshipMixin, ElementOrderMixin, Bas
 
     @classmethod
     def avoid_export(cls):
-        return ['biologische_vielfalt_komplex_id']
+        return ['biologische_vielfalt_komplex']
 
 
 class LP_BioVfBiotoptypKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -126,7 +126,7 @@ class LP_BioVfBiotoptypKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['biologische_vielfalt_komplex_id']
+        return ['biologische_vielfalt_komplex']
 
 
 class LP_BioVfPflanzenArtKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -152,7 +152,7 @@ class LP_BioVfPflanzenArtKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['biologische_vielfalt_komplex_id']
+        return ['biologische_vielfalt_komplex']
 
 
 class LP_BioVfTiereArtKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -181,7 +181,7 @@ class LP_BioVfTiereArtKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['biologische_vielfalt_komplex_id']
+        return ['biologische_vielfalt_komplex']
 #endregion
 
 
@@ -204,7 +204,7 @@ class LP_BodenKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_ErholungKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -226,7 +226,7 @@ class LP_ErholungKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_KlimaKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -248,7 +248,7 @@ class LP_KlimaKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_LandschaftsbildKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -270,7 +270,7 @@ class LP_LandschaftsbildKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_LuftKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -292,7 +292,7 @@ class LP_LuftKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_NutzungseinschraenkungKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -313,7 +313,7 @@ class LP_NutzungseinschraenkungKomplex(RelationshipMixin, ElementOrderMixin, Bas
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_SchutzgutKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -335,7 +335,7 @@ class LP_SchutzgutKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_SPEKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -356,7 +356,7 @@ class LP_SPEKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_WasserKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -378,7 +378,7 @@ class LP_WasserKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']
 
 
 class LP_ZielDimNatSchLaPflKomplex(RelationshipMixin, ElementOrderMixin, Base):
@@ -400,4 +400,4 @@ class LP_ZielDimNatSchLaPflKomplex(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['ziele_erfordernisse_massnahmen_id']
+        return ['ziele_erfordernisse_massnahmen']

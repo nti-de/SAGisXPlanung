@@ -54,6 +54,10 @@ class XP_Gemeinde(RelationshipMixin, ElementOrderMixin, Base):
             raise ConformityException('Die Attribute <code>ags</code> und <code>rs</code> dürfen nicht beide unbelegt sein',
                                       '3.2.5.1', self.__class__.__name__)
 
+    @classmethod
+    def avoid_export(cls):
+        return ['bp_plans', 'fp_plans', 'lp_plans']
+
 
 @event.listens_for(XP_Gemeinde, 'before_insert')
 @event.listens_for(XP_Gemeinde, 'before_update')
@@ -133,8 +137,8 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['file', 'baugebiet_id', 'bereich_id', 'bereich', 'bp_schutzflaeche_massnahme_id',
-                'bp_schutzflaeche_plan_id', 'veraenderungssperre_id', 'grundstueck_ueberbaubar_id']
+        return ['file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+                'veraenderungssperre', 'grundstueck_ueberbaubar']
 
 
 class XP_SpezExterneReferenz(XP_ExterneReferenz):
@@ -155,7 +159,7 @@ class XP_SpezExterneReferenz(XP_ExterneReferenz):
     @classmethod
     def avoid_export(cls):
         base = super(XP_SpezExterneReferenz, cls).avoid_export()
-        return base + ['plan_id']
+        return base + ['plan']
 
 
 class XP_Plangeber(RelationshipMixin, ElementOrderMixin, Base):
@@ -179,6 +183,10 @@ class XP_Plangeber(RelationshipMixin, ElementOrderMixin, Base):
         if type(other) is type(self):
             return self.name == other.name
         return False
+
+    @classmethod
+    def avoid_export(cls):
+        return ['bp_plans', 'fp_plans', 'lp_plans']
 
 
 @event.listens_for(XP_Plangeber, 'before_insert')
@@ -205,7 +213,7 @@ class XP_VerfahrensMerkmal(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['plan_id']
+        return ['plan']
 
 
 class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
@@ -228,7 +236,7 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['bp_schutzflaeche_id']
+        return ['bp_schutzflaeche', 'fp_schutzflaeche']
 
 
 class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):
@@ -264,6 +272,10 @@ class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):
         if type(other) is type(self):
             return self.name == other.name and str(self.datum) == str(other.datum)
         return False
+
+    @classmethod
+    def avoid_export(cls):
+        return ['xp_objekts', 'fp_bau_nvo', 'fp_bau_gb', 'fp_bau_sonst', 'bp_bau_nvo', 'bp_bau_gb', 'bp_bau_sonst']
 
 
 class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
@@ -304,7 +316,7 @@ class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['xp_objekt_id', 'dachgestaltung_id']
+        return ['xp_objekt', 'dachgestaltung']
 
     @classmethod
     def hidden_inputs(cls):
@@ -347,8 +359,8 @@ class XP_VerbundenerPlan(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['aendert_verbundenerPlan_id', 'wurdeGeaendertVon_verbundenerPlan_id',
-                'aendertPlan_verbundenerPlan_id', 'wurdeGeaendertVonPlan_verbundenerPlan_id']
+        return ['aendert_verbundenerPlan', 'wurdeGeaendertVon_verbundenerPlan',
+                'aendertPlan_verbundenerPlan', 'wurdeGeaendertVonPlan_verbundenerPlan']
 
     @classmethod
     def hidden_inputs(cls):

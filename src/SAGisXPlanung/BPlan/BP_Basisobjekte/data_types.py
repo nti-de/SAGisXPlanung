@@ -30,4 +30,4 @@ class BP_VeraenderungssperreDaten(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['plan_id']
+        return ['plan']
