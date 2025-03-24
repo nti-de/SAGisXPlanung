@@ -5,7 +5,7 @@ import inspect
 from geoalchemy2 import Geometry, WKTElement
 from lxml import etree
 from osgeo import ogr
-from sqlalchemy import ARRAY
+from sqlalchemy import ARRAY, String
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
@@ -188,7 +188,6 @@ class GMLReader:
 
     @staticmethod
     def read_attribute(col_type, node_name, obj, node):
-        logger.debug(f"read attribute {node_name}, {col_type}, {obj.__class__}")
         if isinstance(col_type, Geometry):
             value = GMLReader.readGeometry(node[0])
             if value is None:
@@ -209,6 +208,11 @@ class GMLReader:
         elif isinstance(col_type, ARRAY) and hasattr(col_type.item_type, 'enums'):
             try:
                 value = col_type.item_type.enum_class(int(value))
+                getattr(obj, node_name).append(value)
+            except Exception as e:
+                setattr(obj, node_name, [value])
+        elif isinstance(col_type, ARRAY) and isinstance(col_type.item_type, String):
+            try:
                 getattr(obj, node_name).append(value)
             except Exception as e:
                 setattr(obj, node_name, [value])
