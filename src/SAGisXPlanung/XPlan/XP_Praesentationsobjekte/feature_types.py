@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 from qgis.core import (QgsGeometry, QgsAnnotationPointTextItem, QgsAnnotationLayer, QgsTextFormat, QgsUnitTypes,
                        QgsTextBackgroundSettings, QgsPointXY, QgsCoordinateReferenceSystem, QgsProject)
 
-from SAGisXPlanung import Base, BASE_DIR
+from SAGisXPlanung import Base, BASE_DIR, XPlanVersion
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
@@ -20,19 +20,17 @@ from SAGisXPlanung.XPlan.types import Angle
 
 
 class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Base):
-    """ Abstrakte Basisklasse für alle Präsentationsobjekt
-
-        Notiz: alle Präsentationsobjektklassen weichen von der vorgegebenen Vererbungshierarchie von XPlanung ab.
-        Die vorgegebenen Klassen sind in diesem XPlanung-Modul recht unpassend strukturiert. Viele Attribute werden
-        in den Basisklassen nicht verwendet oder sind einfach nicht benötigt. Außerdem sind die Vererbungshierarchien
-        zu tief angelegt, was die Struktur der Anwendung verkompliziert. Dadurch entstehen unnötig viele Tabellen in
-        der Datenbank. (bspw. durch 4-fache Vererbung: PO -> TPO -> PTO -> Nutzungschablone)"""
+    """ Abstrakte Basisklasse für alle Präsentationsobjekt """
 
     __tablename__ = 'xp_po'
 
     __LAYER_PRIORITY__ = LayerPriorityType.Top
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    darstellungsprioritaet = Column(Integer)
+    art = Column(ARRAY(String))
+    index = Column(ARRAY(Integer), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     gehoertZuBereich = relationship('XP_Bereich', back_populates='praesentationsobjekt', info={

@@ -262,6 +262,11 @@ def upgrade():
 
     # fix codelist reading by also storing keys in database
     op.add_column('codelist_values', sa.Column('key', sa.String(), nullable=True))
+
+    # some more ppo columns
+    op.add_column('xp_po', sa.Column('darstellungsprioritaet', sa.Integer(), nullable=True))
+    op.add_column('xp_po', sa.Column('art', sa.ARRAY(sa.String()), nullable=True))
+    op.add_column('xp_po', sa.Column('index', sa.ARRAY(sa.Integer()), nullable=True))
     # ### end Alembic commands ###
 
 
@@ -324,5 +329,9 @@ def downgrade():
     op.execute("DROP TYPE lp_luftart")
     op.execute("DROP TYPE lp_schutzgutart")
 
-    # op.drop_column('codelist_values', 'key')
+    op.drop_column('codelist_values', 'key')
+
+    op.drop_column('xp_po', 'index')
+    op.drop_column('xp_po', 'art')
+    op.drop_column('xp_po', 'darstellungsprioritaet')
     # ### end Alembic commands ###
