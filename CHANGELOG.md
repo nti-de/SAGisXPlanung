@@ -1,5 +1,28 @@
 ## Changelog
 
+### [2.9.0] - 24.03.2025
+
+#### Neue Funktionen
+
+- Unterstützung für neues Schema Landschaftsplan in XPlan-Version 6.0
+
+#### Veränderungen
+
+- verbesserte Validierungshinweise beim Ausführen der Geometrievalidierung 
+  - bessere Meldungen zur Unterscheidung von Geometriefehlern und internen Fehler
+  - neue Fehlerbedingungen zum Angleich mit XPlan-Validator der XLeitstelle
+  - vereinfachte Navigation zur Fehlermeldung auf der Karte
+
+#### Fehlerbehebungen
+
+- fehlendes Eingabeelement für Attribute mit CharacterString 0..* -Definition
+- Fehler beim Abrufen der GDI-DE Codelisten, wenn einzelne Codelisten nicht erreichbar sind (396a50f2)
+- Anzeigefehler des Hauptdialogs auf Linux-Systemen (dc7ca87d)
+- Fehler beim GML-Import von Codelisten-Werten, mit abweichenden Angaben von GDI-DE Definition (ece8a5e0)
+- Fehler beim GML-Import von DataType-Objekten mit Codelist-Attribut (f6be5024)
+- Fehler beim GML-Import von Attributen mit mehrfacher Textbelegung (e0fb5618)
+- Fehler beim Export von Präsentationsobjekten (e63c902d)
+
 ### [2.8.1] - 14.01.2025
 
 #### Fehlerbehebungen
