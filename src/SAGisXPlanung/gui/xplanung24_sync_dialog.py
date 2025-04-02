@@ -69,11 +69,13 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.selected_plan_list.setStyle(self.list_proxy_style)
 
         self.check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'), color=ApplicationColor.Success))
+        self.error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'), color=ApplicationColor.Error))
         self.upload_status_icon.setIcon(self.check_icon)
         self.upload_status_icon.setVisible(False)
 
         self.update_upload_button_state()
         self.button_upload.clicked.connect(self.on_upload_clicked)
+        self.button_cancel.clicked.connect(self.reject)
 
         self.tab_upload.setStyleSheet(style.format(
             _label_color_mute=ApplicationColor.Grey600,
@@ -100,6 +102,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                     self.upload_status_icon.setVisible(True)
                     self.upload_status_label.setText(f'Plan "{plan_name}" erfolgreich hochgeladen!')
                 else:
+                    self.upload_status_icon.setIcon(self.error_icon)
                     self.upload_status_icon.setVisible(True)
                     self.upload_status_label.setText(f'Upload des Plans "{plan_name}" fehlgeschlagen: {response.text}')
 

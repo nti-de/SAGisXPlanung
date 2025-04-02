@@ -75,6 +75,7 @@ except Exception as e:
 VERSION = '2.11.1'
 COMPATIBLE_DB_REVISIONS = ['315e0f69004f']
 DEPENDENCIES = [
+    'requests',
     'packaging',
     'lxml',
     'SQLAlchemy==1.4.49',
