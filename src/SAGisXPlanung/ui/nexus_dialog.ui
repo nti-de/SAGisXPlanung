@@ -49,6 +49,15 @@
       </spacer>
      </item>
      <item>
+      <widget class="QToolButton" name="button_xplan24">
+       <property name="toolTip">
+        <string>Pläne mit XPlanung24 synchronisieren</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
       <widget class="QToolButton" name="button_settings">
        <property name="toolTip">
         <string>Einstellungen</string>

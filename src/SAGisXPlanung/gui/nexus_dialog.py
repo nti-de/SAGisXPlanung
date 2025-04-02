@@ -28,6 +28,7 @@ from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg, HighlightRowProxyStyle, \
     HighlightRowDelegate
 from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle
+from SAGisXPlanung.gui.xplanung24_sync_dialog import XPlanung24SyncDialog
 from SAGisXPlanung.utils import PLAN_BASE_TYPES
 
 FORM_CLASS_NEXUS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/nexus_dialog.ui'))
@@ -139,6 +140,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                                             color=ApplicationColor.Tertiary))
         self.button_next.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'),
                                           color=ApplicationColor.Tertiary))
+        self.button_xplan24.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
         self.button_reload.setCursor(Qt.PointingHandCursor)
         self.button_xplan_export.setCursor(Qt.PointingHandCursor)
@@ -160,6 +162,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_edit.clicked.connect(self.on_edit_clicked)
         self.button_reload.clicked.connect(self.on_reload_clicked)
         self.button_delete.clicked.connect(self.on_delete_clicked)
+        self.button_xplan24.clicked.connect(self.on_xplan24_sync_clicked)
 
         self.enable_plan_actions(0)
 
@@ -408,6 +411,15 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         plan_xid = str(selected_indices[0].data(XID_ROLE))
         xplan_item = XPlanungItem(xid=plan_xid, xtype=XP_Plan, plan_xid=plan_xid)
         self.accessAttributesRequested.emit(xplan_item)
+
+    @pyqtSlot()
+    def on_xplan24_sync_clicked(self):
+        selected_indices = self.nexus_view.selectionModel().selectedRows()
+
+        selected_plans = {str(i.data(XID_ROLE)): i.data(NAME_ROLE) for i in selected_indices}
+
+        settings_dialog = XPlanung24SyncDialog(self, selected_plans)
+        settings_dialog.exec()
 
     @pyqtSlot()
     def on_settings_clicked(self):

@@ -63,17 +63,21 @@ async def export_action(parent: QWidget, plan_xid: str, out_file_format: str = '
     return export_filename[0]
 
 
-def export_plan(out_file_format: str, export_filepath: str, plan_xid: str = None):
+def export_plan(out_file_format: str, export_filepath: str = None, plan_xid: str = None, raw=False):
     with Session.begin() as session:
         plan = session.get(XP_Plan, plan_xid)
         writer = GMLWriter(plan, version=export_version())
 
         if out_file_format == "gml":
             gml = writer.toGML()
+            if raw:
+                return gml
             with open(export_filepath, 'wb') as f:
                 f.write(gml)
         elif out_file_format == "zip":
             archive = writer.toArchive()
+            if raw:
+                return archive.getvalue()
             with open(export_filepath, 'wb') as f:
                 f.write(archive.getvalue())
 
