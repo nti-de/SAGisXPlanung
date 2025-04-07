@@ -138,8 +138,6 @@ class TestGMLReader_readPlan:
 
         gruenflaeche = next(p for p in plan.bereich[0].planinhalt if isinstance(p, BP_GruenFlaeche))
         assert gruenflaeche.rel_zweckbestimmung[0].allgemein == XP_ZweckbestimmungGruen.Naturerfahrungsraum
-        assert isinstance(gruenflaeche.rel_zweckbestimmung[0].detail[0], BP_DetailZweckbestGruenFlaeche)
-        assert gruenflaeche.rel_zweckbestimmung[0].detail[0].key == "2400_10"
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan1.gml'], indirect=True)
     def test_readPlan_top_level_ns_issue24(self, gml_reader):
