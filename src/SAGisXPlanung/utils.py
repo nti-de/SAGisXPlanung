@@ -1,3 +1,7 @@
+import asyncio
+import inspect
+import logging
+import os
 import subprocess
 import sys
 from typing import Union, Type
@@ -57,14 +61,18 @@ from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.data_types import LP_E
     LP_TypBioVerbundKomplex
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.feature_types import LP_BiotopverbundBiotopvernetzung, \
     LP_Eingriffsregelung
+from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.codelists import LP_BioVfBiotoptyp_BKompV, \
+    LP_BioVfBiotoptyp_LandesKS, LP_BioVf_FFH_LRT
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.data_types import LP_AdressatKomplex, \
     LP_BiologischeVielfaltKomplex, LP_BiologischeVielfaltTypKomplex, LP_BioVfBiotoptypKomplex, \
     LP_BioVfPflanzenArtKomplex, LP_BioVfTiereArtKomplex, LP_BodenKomplex, LP_ErholungKomplex, LP_KlimaKomplex, \
     LP_LandschaftsbildKomplex, LP_LuftKomplex, LP_NutzungseinschraenkungKomplex, LP_SchutzgutKomplex, LP_SPEKomplex, \
     LP_WasserKomplex, LP_ZielDimNatSchLaPflKomplex
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanungZEM.feature_types import LP_ZieleErfordernisseMassnahmen
+from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.codelists import LP_DetailGesetzlGeschBiotopLR
 from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.feature_types import \
     LP_SchutzBestimmterTeileVonNaturUndLandschaft
+from SAGisXPlanung.LPlan.LP_Sonstiges.codelists import LP_ZweckbestimmungGenerischeObjekte
 from SAGisXPlanung.LPlan.LP_Sonstiges.feature_types import LP_TextAbschnittObjekt, LP_GenerischesObjekt
 from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Plan
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
@@ -85,6 +93,7 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
 from SAGisXPlanung.XPlan.simple_depth import XP_SimpleGeometry
 
 logger = logging.getLogger(__name__)
+
 CLASSES = {
     'XP_Plan': XP_Plan,
     'BP_Plan': BP_Plan,

@@ -144,8 +144,8 @@ class ContextMenuTool(QgsMapToolIdentify):
         # if plan content is an area, add option to annotate with PO
         if issubclass(xplan_item.xtype, (PolygonGeometry, MixedGeometry)) and issubclass(xplan_item.xtype, XP_Objekt):
             annotate_action = menu.addAction('Präsentationsobjekt hinzufügen')
-            annotate_action.triggered.connect(
-                functools.partial(self.menu_action_triggered, ActionType.AddAnnotationItem, xplan_item))
+            annotate_action.triggered.connect(lambda checked, xitem=xplan_item:
+                                              self.menu_action_triggered(ActionType.AddAnnotationItem, xitem))
 
     def menu_action_hovered(self, layer: QgsMapLayer, feature: Union[QgsFeature, QgsGeometry]):
         self.delete_highlight()

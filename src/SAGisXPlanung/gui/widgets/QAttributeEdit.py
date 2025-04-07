@@ -17,6 +17,7 @@ from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
+from SAGisXPlanung.core.helper import update_field_value
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -162,34 +163,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
             self.nameChanged.emit(value)
 
     def update_layer_field_value(self, attr, value):
-        layer = MapLayerRegistry().layerByXid(self._xplanung_item)
-        if not layer:
-            logger.warning(f"QAttributeEdit::update_layer_field_value: layer is None")
-            return
-
-        cp = layer.customProperties()
-        for feat in layer.getFeatures(QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry).setNoAttributes()):
-            id_prop = cp.value(f'xplanung/feat-{feat.id()}')
-            if id_prop == self._xplanung_item.xid:
-
-                _self = self._xplanung_item.xtype()
-                setattr(_self, attr, value)
-                value = getattr(_self, attr)
-
-                if hasattr(_self, 'layer_fields'):
-                    legacy_fields = _self.layer_fields()
-                    if attr in legacy_fields:
-                        value = legacy_fields[attr]
-
-                if type(value) is list:
-                    value = ', '.join(str(v) for v in value)
-
-                layer.commitChanges(True)
-                with edit(layer):
-                    feat[attr] = str(value) if value is not None else None
-                    layer.updateFeature(feat)
-
-                return
+        update_field_value(self._xplanung_item, attr, value)
 
     def onAttributeChanged(self, index, attr, value):
         with Session.begin() as session:

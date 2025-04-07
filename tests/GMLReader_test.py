@@ -6,7 +6,6 @@ from geoalchemy2 import WKTElement, WKBElement
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
-from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.codelists import BP_DetailZweckbestGruenFlaeche
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
 from SAGisXPlanung.GML.GMLReader import GMLReader
