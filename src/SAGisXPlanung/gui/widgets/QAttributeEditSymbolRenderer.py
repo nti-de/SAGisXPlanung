@@ -5,6 +5,7 @@ from qgis.core import edit, QgsFeatureRequest, QgsProject
 
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from SAGisXPlanung.core.helper import safe_edit
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ class QAttributeEditSymbolRenderer(QAttributeEdit):
             return
 
         field_idx = self._layer.fields().indexOf(self.ATTRIBUTE_SIZE)
-        with edit(self._layer):
+        with safe_edit(self._layer):
             self._layer.changeAttributeValue(self._feature.id(), field_idx, str(scale))
 
     @pyqtSlot(int)
@@ -59,5 +60,5 @@ class QAttributeEditSymbolRenderer(QAttributeEdit):
             return
 
         field_idx = self._layer.fields().indexOf(self.ATTRIBUTE_ANGLE)
-        with edit(self._layer):
+        with safe_edit(self._layer):
             self._layer.changeAttributeValue(self._feature.id(), field_idx, str(value))

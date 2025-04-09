@@ -25,6 +25,7 @@ from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry,
     RendererMixin
 from .types import LargeString, Angle, Length, GeometryType
 from ..MapLayerRegistry import MapLayerRegistry
+from ..core.helper import safe_edit
 
 logger = logging.getLogger(__name__)
 
@@ -387,7 +388,7 @@ def receive_after_delete(mapper, connection, target: XP_Objekt):
     for feature in layer.getFeatures(fr):
         id_prop = layer.customProperties().value(f'xplanung/feat-{feature.id()}')
         if id_prop == str(target.id):
-            with edit(layer):
+            with safe_edit(layer):
                 res = layer.deleteFeature(feature.id())
                 if not res:
                     logger.warning(f'{target.displayName()}:{target.id} Feature wurde nicht von der Karte entfernt')
