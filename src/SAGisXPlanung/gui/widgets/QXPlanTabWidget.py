@@ -1,5 +1,6 @@
 import itertools
 
+from PyQt5.QtWidgets import QStyle
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt import QtWidgets
 
@@ -77,7 +78,8 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         self.setCurrentIndex(self.currentIndex() + 1)
 
         if not closable:
-            self.tabBar().tabButton(self.currentIndex(), QtWidgets.QTabBar.RightSide).resize(0, 0)
+            close_side = self.style().styleHint(QStyle.SH_TabBar_CloseButtonPosition)
+            self.tabBar().tabButton(self.currentIndex(), close_side).resize(0, 0)
 
     def onAddRelationRequested(self, cls, cls_type, uselist, parent_attribute):
         tab_exists = any([self.widget(index).parent_attribute == parent_attribute for index in range(self.count())])
