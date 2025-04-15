@@ -81,6 +81,11 @@ class RelationshipMixin:
         return xplan_attribute_name, xplan_tooltip(cls, xplan_attribute_name)
 
 
+class FeatureType:
+    """ Mixin to declare class as a gml::FeatureType """
+    pass
+
+
 class GeometryObject:
     """ Abstrakte Oberklasse für XPlanung-Geometrietypen """
     __geometry_type__ = QgsWkbTypes.UnknownGeometry

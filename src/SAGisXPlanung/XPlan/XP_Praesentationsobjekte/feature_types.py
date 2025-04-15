@@ -15,11 +15,12 @@ from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCe
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.core import LayerPriorityType
-from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, RelationshipMixin, MapCanvasMixin, PointGeometry
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, RelationshipMixin, MapCanvasMixin, PointGeometry, \
+    FeatureType
 from SAGisXPlanung.XPlan.types import Angle
 
 
-class XP_AbstraktesPraesentationsobjekt(RelationshipMixin, ElementOrderMixin, Base):
+class XP_AbstraktesPraesentationsobjekt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     """ Abstrakte Basisklasse für alle Präsentationsobjekt """
 
     __tablename__ = 'xp_po'

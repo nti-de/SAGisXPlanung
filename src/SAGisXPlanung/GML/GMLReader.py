@@ -11,6 +11,7 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.codelists import CodeListValue, is_codelist_attribute
 from SAGisXPlanung.XPlan.types import RefURL
+from SAGisXPlanung.core.mixins.mixins import FeatureType
 from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES, OBJECT_BASE_TYPES
 
 logger = logging.getLogger(__name__)
@@ -183,7 +184,8 @@ class GMLReader:
             if isinstance(col_type, RefURL) and hasattr(obj, 'file') and node.text in self.files:
                 setattr(obj, 'file', self.files[node.text])
 
-        self.setProgress(self.current_progress + 1)
+        if issubclass(object_type, FeatureType):
+            self.setProgress(self.current_progress + 1)
         return obj
 
     @staticmethod
