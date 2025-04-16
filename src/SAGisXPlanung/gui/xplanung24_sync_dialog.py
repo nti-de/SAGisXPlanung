@@ -1,30 +1,21 @@
 import asyncio
 import os
-import sys
-from dataclasses import dataclass
 
 import qasync
 import requests
-from PyQt5.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QMessageBox
+from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtCore import QStringListModel
 from qgis.PyQt.QtWidgets import QDialog, QAbstractItemView, QListView
 from qgis.PyQt import uic
 from qgis.utils import iface
 
 from SAGisXPlanung import BASE_DIR
+from SAGisXPlanung.config.qgis_config import QgsConfig
 from SAGisXPlanung.core.converter_tasks import export_plan
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import HighlightRowDelegate, HighlightRowProxyStyle, load_svg, ApplicationColor
 
 FORM_CLASS_XPLAN24, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/xplan24-sync-dialog.ui'))
-
-API_KEY = 'a50d8f2b1fa8fb44a94b1c24ff7b30b921dbae6a5f813bbd66653606c373ac7ecf60ccc788a178fb9e336bb171faf377c10fdda5bee57212009f95c59e3e1ac96f2b01e915cab847a6340a096a58335bb71caaceff4e3250fbb28c494451b5abff86c1a21e41db6f4daa6eaf34262cda6eb10a868a18d1f677aff938e7c2d42a'
-
-@dataclass
-class XPlanung24Account:
-    name: str
-    api_key: str
 
 
 style = """
@@ -46,9 +37,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.setupUi(self)
         self.selected_plans = selected_plans or {}
 
-        self.accounts = [
-            XPlanung24Account(name="NTI Deutschland", api_key=API_KEY)
-        ]
+        self.accounts = QgsConfig.xplan24_accounts()
 
         for account in self.accounts:
             self.select_account.addItem(account.name, account.api_key)

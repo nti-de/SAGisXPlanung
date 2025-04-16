@@ -9,7 +9,7 @@ from SAGisXPlanung import XPlanVersion, Base
 from qgis.PyQt.QtCore import QSettings
 
 try:
-    from .qgis_config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod
+    from .qgis_config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, XPlanung24Account
 except ImportError:
     pass
 

@@ -72,9 +72,9 @@
           <property name="geometry">
            <rect>
             <x>0</x>
-            <y>-81</y>
+            <y>-65</y>
             <width>437</width>
-            <height>428</height>
+            <height>430</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -245,17 +245,31 @@
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_9">
               <item>
-               <widget class="QLabel" name="label_17">
-                <property name="styleSheet">
-                 <string notr="true">color: #4b5563;</string>
+               <layout class="QHBoxLayout" name="horizontalLayout_10">
+                <property name="spacing">
+                 <number>10</number>
                 </property>
-                <property name="text">
-                 <string>Hinterlegen Sie hier ihre API Schlüssel um Pläne mit der Plattform XPlanung24 auszutauschen.</string>
-                </property>
-                <property name="wordWrap">
-                 <bool>true</bool>
-                </property>
-               </widget>
+                <item>
+                 <widget class="QToolButton" name="xplan24_icon">
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_17">
+                  <property name="styleSheet">
+                   <string notr="true">color: #4b5563;</string>
+                  </property>
+                  <property name="text">
+                   <string>Hinterlegen Sie hier ihre API Schlüssel um Pläne mit der Plattform XPlanung24 auszutauschen.</string>
+                  </property>
+                  <property name="wordWrap">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_9">
@@ -278,7 +292,7 @@
                    </font>
                   </property>
                   <property name="text">
-                   <string>Verknüpfte Accounts</string>
+                   <string>Verbundene Accounts</string>
                   </property>
                  </widget>
                 </item>

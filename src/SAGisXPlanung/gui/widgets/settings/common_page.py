@@ -2,21 +2,21 @@ import logging
 import os
 
 import qasync
-from PyQt5.QtCore import QSize, pyqtSignal
-from PyQt5.QtGui import QPen, QColor, QFontMetrics
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel, QHBoxLayout
-from qgis.PyQt.QtGui import QClipboard
-from qgis.PyQt.QtGui import QCloseEvent, QIcon
-from qgis.PyQt.QtCore import QSettings
-from qgis.PyQt.QtWidgets import QTreeView, QStyledItemDelegate, QStyle, QApplication, QListView
+from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard
+from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal
+from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout,
+                                 QApplication)
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
+from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter, HighlightRowProxyStyle
-from SAGisXPlanung.config import QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, export_version
+from SAGisXPlanung.gui.widgets.inputs.input_widgets import QStringInput
+from SAGisXPlanung.config import (QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, export_version,
+                                  XPlanung24Account)
+
 from .basepage import SettingsPage
-from ..inputs.input_widgets import QTextInput, QStringInput
-from ...xplanung24_sync_dialog import XPlanung24Account
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,26 +51,22 @@ class CommonConfigPage(SettingsPage):
             '<qt>Die Geometriebereinigung erhält die topologische Struktur der Geometrien. Es werden nur doppelte, aufeinanderfolgende Stützpunkte entfernt.</qt>')
         self.ui.info_repeated_points.setToolTip(
             '<qt>Eine genauere Erkennung doppelter Stützpunkte wird angewendet. Die Geometriebereinigung entfernt auch doppelte Stützpunkte, die nicht aufeinanderfolgend sind. Dies kann jedoch zu Änderungen in der Topologie führen.</qt>')
-        self.set_validation_options()
-
         self.ui.status_label.hide()
 
-        self.ui.validation_options_group.setStyleSheet('''
+        self.set_validation_options()
+
+
+        button_style = '''
             QToolButton {
                 border: 0px;
             }
-        ''')
+        '''
+        self.ui.validation_options_group.setStyleSheet(button_style)
+        self.ui.xplan24_group.setStyleSheet(button_style)
 
-        accounts = [
-            XPlanung24Account("Main Account", "1234567890abcdef"),
-            XPlanung24Account("Backup Account", "abcdef1234567890")
-        ]
+        self.ui.xplan24_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
-        for i in range(self.ui.xplan24_page_stack.count()):
-            widget = self.ui.xplan24_page_stack.widget(0)
-            self.ui.xplan24_page_stack.removeWidget(widget)
-            widget.deleteLater()
-
+        accounts = QgsConfig.xplan24_accounts()
         self.list_page = AccountListView(accounts, self)
         self.list_page.editClicked.connect(self.edit_xplan24_item)
         self.form_page = AccountEditForm()
@@ -81,8 +77,6 @@ class CommonConfigPage(SettingsPage):
         self.ui.xplan24_page_stack.setCurrentIndex(0)
 
         self.ui.add_account_button.clicked.connect(self.on_add_xplan24account_clicked)
-
-        self.ui.setMouseTracking(True)
 
     def setup_data(self):
         self.set_xplan_version()
@@ -132,7 +126,7 @@ class CommonConfigPage(SettingsPage):
         if self.ui.checkPath.isChecked():
             qs.setValue(f"plugins/xplanung/export_path", '')
         else:
-            qs.setValue(f"plugins/xplanung/export_path", self.tbPath.text())
+            qs.setValue(f"plugins/xplanung/export_path", self.ui.tbPath.text())
 
         validation_config = GeometryValidationConfig(
             correct_geometries=self.ui.checkbox_clean_geometry.isChecked(),
@@ -169,6 +163,7 @@ class CommonConfigPage(SettingsPage):
             model._accounts.append(new_account)
             model.endInsertRows()
 
+        QgsConfig.set_xplan24_accounts(model._accounts)
         self.ui.xplan24_page_stack.setCurrentIndex(0)
 
 
@@ -186,7 +181,7 @@ class AccountListView(QListView):
         delegate = AccountDelegate(self)
         self.setItemDelegate(delegate)
 
-        delegate.copyClicked.connect(lambda index: print(f"Copy key: {index.data().api_key}"))
+        delegate.copyClicked.connect(self.copy_api_key)
         delegate.editClicked.connect(self.editClicked.emit)
         delegate.deleteClicked.connect(self.remove_account)
 
@@ -206,11 +201,15 @@ class AccountListView(QListView):
         if index.isValid():
             self.model().removeRow(index.row())
 
-    def get_selected_account(self):
-        selected = self.currentIndex()
-        if selected.isValid():
-            return self.model_.accounts[selected.row()]
-        return None
+        QgsConfig.set_xplan24_accounts(self.model()._accounts)
+
+    def copy_api_key(self, index):
+        account = index.data(Qt.DisplayRole)
+        QApplication.clipboard().setText(account.api_key, QClipboard.Clipboard)
+
+        Toaster.showMessage(self, message='API Schlüssel kopiert!', corner=Qt.BottomRightCorner,
+                            margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
+                            timeout=3000)
 
 
 # --- Custom Model ---

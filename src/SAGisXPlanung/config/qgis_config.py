@@ -1,6 +1,7 @@
+import json
 import logging
 import typing
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from enum import Enum
 from typing import Union
 
@@ -29,6 +30,19 @@ class GeometryValidationConfig:
     correct_method: GeometryCorrectionMethod
 
 
+@dataclass
+class XPlanung24Account:
+    name: str
+    api_key: str
+
+    def to_dict(self):
+        return asdict(self)
+
+    @staticmethod
+    def from_dict(data):
+        return XPlanung24Account(**data)
+
+
 class QgsConfig:
 
     STYLES = 'plugins/xplanung/styles'
@@ -37,6 +51,7 @@ class QgsConfig:
     CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
     NEXUS_SETTINGS = 'plugins/xplanung/nexus/settings'
     LAST_EXPORT_PATH = 'plugins/xplanung/last_export_dir'
+    XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -143,3 +158,23 @@ class QgsConfig:
     def set_last_export_directory(directory: str):
         qs = QSettings()
         qs.setValue(QgsConfig.LAST_EXPORT_PATH, directory)
+
+    @staticmethod
+    def xplan24_accounts() -> typing.List[XPlanung24Account]:
+        qs = QSettings()
+        raw = qs.value(QgsConfig.XPLAN24_ACCOUNT, "")
+        if not raw:
+            return []
+        try:
+            data = json.loads(raw)
+            return [XPlanung24Account.from_dict(item) for item in data]
+        except Exception as e:
+            logger.error(e)
+            return []
+
+    @staticmethod
+    def set_xplan24_accounts(account_data: typing.List[XPlanung24Account]):
+        qs = QSettings()
+        data = [account.to_dict() for account in account_data]
+        qs.setValue(QgsConfig.XPLAN24_ACCOUNT, json.dumps(data))
+
