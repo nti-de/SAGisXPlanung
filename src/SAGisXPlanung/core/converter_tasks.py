@@ -9,7 +9,6 @@ from zipfile import ZipFile
 from lxml import etree
 from qgis.PyQt.QtWidgets import QFileDialog, QWidget
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
 
 from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.GML.GMLReader import GMLReader

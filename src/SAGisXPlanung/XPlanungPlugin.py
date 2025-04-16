@@ -18,7 +18,7 @@ import qasync
 
 from SAGisXPlanung.core.buildingtemplate import BuildingTemplateItem, BuildingTemplateRendererMetadata
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
-from SAGisXPlanung.Settings import Settings
+from SAGisXPlanung.gui.settings_dialog import Settings
 from SAGisXPlanung.core.connection import attempt_connection, verify_db_connection
 from SAGisXPlanung.gui.XPEditPreFilledObjects import XPEditPreFilledObjectsDialog
 from SAGisXPlanung.core.canvas_display import plan_to_map, load_on_canvas
@@ -315,7 +315,7 @@ class XPlanung(QObject):
         if msg_box.clickedButton() == settings_button:
             db_page = self.settings.navigate_to_page(DatabaseConfigPage)
             if db_page:
-                db_page.setupData()
+                db_page.setup_data()
                 asyncio.create_task(db_page.test_connection())
             self.settings.exec()
         return False

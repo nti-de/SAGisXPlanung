@@ -83,7 +83,7 @@ class DatabaseConfigPage(SettingsPage):
         self.check_icon_base = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                               color=ApplicationColor.Grey400))
 
-    def setupUi(self, ui):
+    def setup_ui(self, ui):
         self.ui = ui
 
         self.ui.tab_database_actions.tabBar().setCursor(Qt.PointingHandCursor)
@@ -117,7 +117,7 @@ class DatabaseConfigPage(SettingsPage):
             ApplicationColor.Primary, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
         ], class_='QLabel')
 
-    def setupData(self):
+    def setup_data(self):
         self.fill_connections()
 
     def closeEvent(self, event: QCloseEvent):

@@ -25,7 +25,7 @@ class AttributeConfigPage(SettingsPage):
         super(AttributeConfigPage, self).__init__(parent)
         self.ui = None
 
-    def setupUi(self, ui):
+    def setup_ui(self, ui):
         self.ui = ui
         self.ui.attribute_view = QAttributeConfigView()
         self.ui.tab_attributes.layout().addWidget(self.ui.attribute_view)
@@ -33,7 +33,7 @@ class AttributeConfigPage(SettingsPage):
         self.ui.filter_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
         self.ui.filter_edit.textChanged.connect(self.ui.attribute_view.onFilterTextChanged)
 
-    def setupData(self):
+    def setup_data(self):
         self.ui.attribute_view.setupModelData()
 
     def closeEvent(self, event: QCloseEvent):

@@ -8,10 +8,10 @@ class SettingsPage(QWidget):
     # signal to notify parent dialog to refresh a settings page of given type
     requestPageRefresh = pyqtSignal(object)  # parameter of type SettingsPage
 
-    def setupUi(self, ui):
+    def setup_ui(self, ui):
         raise NotImplementedError('Abstract. Should be implemented in subclass.')
 
-    def setupData(self):
+    def setup_data(self):
         raise NotImplementedError('Abstract. Should be implemented in subclass.')
 
     def closeEvent(self, event: QCloseEvent):
