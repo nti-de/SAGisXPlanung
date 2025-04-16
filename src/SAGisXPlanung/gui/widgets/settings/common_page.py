@@ -211,6 +211,10 @@ class AccountListView(QListView):
                             margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
                             timeout=3000)
 
+    def leaveEvent(self, event):
+        QApplication.restoreOverrideCursor()
+        super().leaveEvent(event)
+
 
 # --- Custom Model ---
 class AccountListModel(QAbstractListModel):
@@ -250,6 +254,17 @@ class AccountDelegate(QStyledItemDelegate):
                                         color=ApplicationColor.Grey600))
         self.delete_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
                                         color=ApplicationColor.Grey600))
+
+        # Hover versions (darker icons)
+        self.copy_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/copy.svg'),
+                                              color=ApplicationColor.Tertiary))
+        self.edit_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
+                                              color=ApplicationColor.Tertiary))
+        self.delete_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
+                                                color=ApplicationColor.Tertiary))
+
+        self._hovered_icon = None
+        self._hovered_index = None
 
     def paint(self, painter, option, index):
         account = index.data(Qt.DisplayRole)
@@ -305,11 +320,19 @@ class AccountDelegate(QStyledItemDelegate):
         painter.drawText(subtitle_rect, Qt.AlignLeft | Qt.AlignVCenter, api_text)
 
         # --- Draw Icon ---
-        self.copy_icon.paint(painter, icon_rects['copy'])
-        self.edit_icon.paint(painter, icon_rects['edit'])
-        self.delete_icon.paint(painter, icon_rects['delete'])
+        self.get_hover_icon("copy").paint(painter, icon_rects["copy"])
+        self.get_hover_icon("edit").paint(painter, icon_rects["edit"])
+        self.get_hover_icon("delete").paint(painter, icon_rects["delete"])
 
         painter.restore()
+
+    def get_hover_icon(self, name):
+        if name == "copy":
+            return self.copy_icon_hover if self._hovered_icon == "copy" else self.copy_icon
+        elif name == "edit":
+            return self.edit_icon_hover if self._hovered_icon == "edit" else self.edit_icon
+        elif name == "delete":
+            return self.delete_icon_hover if self._hovered_icon == "delete" else self.delete_icon
 
     def sizeHint(self, option, index):
         # Use consistent font for both lines
@@ -322,10 +345,30 @@ class AccountDelegate(QStyledItemDelegate):
         return QSize(option.rect.width(), height)
 
     def editorEvent(self, event, model, option, index):
-        if event.type() == event.MouseButtonRelease and event.button() == Qt.LeftButton:
-            icon_rects = self.get_icon_rects(option, index)
-            pos = event.pos()
+        icon_rects = self.get_icon_rects(option, index)
+        pos = event.pos()
 
+        if event.type() == event.MouseMove:
+            hovered_icon = None
+            for name, rect in icon_rects.items():
+                if rect.contains(pos):
+                    hovered_icon = name
+                    break
+
+            if hovered_icon != self._hovered_icon or index != self._hovered_index:
+                self._hovered_icon = hovered_icon
+                self._hovered_index = index
+
+                self.parent().viewport().update(option.rect)
+            return True
+
+        if event.type() == event.Leave:
+            self._hovered_icon = None
+            self._hovered_index = None
+            self.parent().viewport().update(option.rect)
+            return True
+
+        if event.type() == event.MouseButtonRelease and event.button() == Qt.LeftButton:
             if icon_rects["copy"].contains(pos):
                 self.copyClicked.emit(index)
                 return True
@@ -345,7 +388,7 @@ class AccountDelegate(QStyledItemDelegate):
         icon_size = text_height
         padding = 10
         spacing = 6
-        icon_gap = 8
+        icon_gap = 10
 
         redacted = index.data(Qt.DisplayRole).api_key[:6] + "..."
         api_text_width = text_metrics.width(f"API-Key: {redacted}")
@@ -421,5 +464,3 @@ class AccountEditForm(QWidget):
         self._index = index
         self.name_input.setText(account.name if account else "")
         self.api_key_input.setText(account.api_key if account else "")
-
-
