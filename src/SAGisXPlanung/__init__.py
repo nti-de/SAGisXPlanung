@@ -125,6 +125,9 @@ class XPlanVersion(Enum):
     def short_id(self) -> str:
         return str(self.value).replace('.', '')
 
+    def __str__(self):
+        return self.value
+
 
 def system_info():
     try:

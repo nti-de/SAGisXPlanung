@@ -5,6 +5,7 @@ import threading
 from asyncio import CancelledError
 
 import qasync
+from PyQt5.QtWidgets import QMessageBox
 
 from qgis.core import Qgis
 from qgis.PyQt import QtWidgets, sip
@@ -15,7 +16,8 @@ from qgis.gui import QgsDockWidget
 from qgis.utils import iface
 
 from SAGisXPlanung import compile_ui_file, BASE_DIR
-from SAGisXPlanung.core.converter_tasks import import_plan, export_action, ActionCanceledException
+from SAGisXPlanung.core.converter_tasks import import_plan, export_action, ActionCanceledException, \
+    run_import_prechecks, prepare_gml_input
 from SAGisXPlanung.Tools.ContextMenuTool import ContextMenuTool
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.ext.spinner import loading_animation
@@ -68,7 +70,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         self.bCreate.clicked.connect(lambda: self.showCreateForm())
         self.bExport.clicked.connect(lambda: self.export())
-        self.bImport.clicked.connect(lambda: self.importGML())
+        self.bImport.clicked.connect(self.on_import_clicked)
         self.bInfo.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/info.svg')))
         self.bInfo.clicked.connect(self.openDetails)
         self.button_cancel_import.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/cancel.svg'),
@@ -224,10 +226,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             QtWidgets.QApplication.restoreOverrideCursor()
 
     @qasync.asyncSlot()
-    async def importGML(self):
+    async def on_import_clicked(self):
         """
-        Wandelt ein XPlanGML-Dokument in einen PostgreSQL-Datensatz um.
-        Nutzt die aktive PostgreSQL-Verbindung die über das XPLanung-Einstellungsmenü konfiguriert wurde.
+        import XPlanGML file into database
         """
         filepath = self.fwImportPath.filePath()
         if not filepath:
@@ -236,13 +237,31 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             return
 
         self.bImport.setEnabled(False)
-        prev_cursor = self.cursor()
-        self.setCursor(Qt.BusyCursor)
         self.bImport.repaint()
         self.progress_widget.setVisible(True)
+        prev_cursor = self.cursor()
 
         try:
-            coro = asyncio.to_thread(import_plan, filepath, self.import_progress)
+            input_data = await asyncio.to_thread(prepare_gml_input, filepath)
+
+            warnings = await asyncio.to_thread(run_import_prechecks, input_data)
+            if warnings:
+                warning_text = "\n\n".join(f"{w.title}:\n{w.message}" for w in warnings)
+
+                result = QMessageBox.warning(
+                    self,
+                    "XPlanGML-Import unterbrochen",
+                    f"{warning_text}\n\nImport trotzdem fortsetzen?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.No
+                )
+                if result == QMessageBox.No:
+                    return
+
+            # start import
+            self.setCursor(Qt.BusyCursor)
+
+            coro = asyncio.to_thread(import_plan, input_data, self.import_progress)
             self.import_task = asyncio.create_task(coro)
             import_result = await self.import_task
 

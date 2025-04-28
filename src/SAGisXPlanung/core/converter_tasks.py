@@ -1,18 +1,19 @@
 import asyncio
 import logging
 from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import PurePath, Path
-from typing import Callable, Tuple
+from typing import Callable, Tuple, Dict, List
 from zipfile import ZipFile
 
+from lxml import etree
 from qgis.PyQt.QtWidgets import QFileDialog, QWidget
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
-from SAGisXPlanung import Session
+from SAGisXPlanung import Session, XPlanVersion
 from SAGisXPlanung.GML.GMLReader import GMLReader
 from SAGisXPlanung.GML.GMLWriter import GMLWriter
-from SAGisXPlanung.Settings import Settings
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.config import export_version, QgsConfig
 
@@ -20,6 +21,19 @@ logger = logging.getLogger(__name__)
 
 
 ImportResult = namedtuple('ImportResult', ['plan_name', 'warnings'])
+
+
+@dataclass
+class GMLInputData:
+    gml_content: bytes
+    files: Dict[str, bytes]  # referenced files from ZIP if any
+    filepath: str            # original file path
+
+
+@dataclass
+class PrecheckWarning:
+    title: str
+    message: str
 
 
 class ActionCanceledException(Exception):
@@ -64,33 +78,61 @@ def export_plan(out_file_format: str, export_filepath: str, plan_xid: str = None
                 f.write(archive.getvalue())
 
 
-def import_plan(filepath: str, progress_callback: Callable[[Tuple[int, int]], None]) -> ImportResult:
-    extension = PurePath(filepath).suffix
-    files = {}
-
-    # read contents of gml file
-    if extension == '.gml':
-        with open(filepath, 'rb') as f:
-            gml_file_content = f.read()
-
-    # extract gml and references from zip archive
-    elif extension == '.zip':
-        archive = ZipFile(filepath, mode='r')
-        if not archive.namelist():
-            raise ValueError('ZIP-Archiv enthält keine Dateien.')
-        if not any(PurePath(file_name).suffix == '.gml' for file_name in archive.namelist()):
-            raise ValueError('ZIP-Archiv enthält keine XPlanGML Datei.')
-        gml_file_index = next(i for i, name in enumerate(archive.namelist()) if PurePath(name).suffix == '.gml')
-        gml_file_content = archive.read(archive.namelist()[gml_file_index])
-
-        files = {file: archive.read(file) for i, file in enumerate(archive.namelist()) if i != gml_file_index}
-    else:
-        raise ValueError('Dateipfad muss mit .gml oder .zip enden.')
-
+def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int, int]], None]) -> ImportResult:
     with Session.begin() as session:
-        reader = GMLReader(gml_file_content, files=files, progress_callback=progress_callback, session=session)
+        reader = GMLReader(
+            input_data.gml_content,
+            files=input_data.files,
+            progress_callback=progress_callback,
+            session=session
+        )
         result = ImportResult(reader.plan.name, reader.warnings)
-
         session.add(reader.plan)
 
     return result
+
+
+def prepare_gml_input(filepath: str) -> GMLInputData:
+    extension = PurePath(filepath).suffix.lower()
+    files = {}
+
+    if extension == '.gml':
+        with open(filepath, 'rb') as f:
+            gml_content = f.read()
+    elif extension == '.zip':
+        with ZipFile(filepath, mode='r') as archive:
+            gml_name = next((name for name in archive.namelist() if name.endswith('.gml')), None)
+            if not gml_name:
+                raise ValueError('ZIP-Archiv enthält keine XPlanGML-Datei.')
+            gml_content = archive.read(gml_name)
+            files = {name: archive.read(name) for name in archive.namelist() if name != gml_name}
+    else:
+        raise ValueError("Dateiendung muss .gml oder .zip sein.")
+
+    return GMLInputData(gml_content=gml_content, files=files, filepath=filepath)
+
+
+def run_import_prechecks(input_data: GMLInputData) -> List[PrecheckWarning]:
+    warnings = []
+
+    try:
+        parser = etree.XMLParser(remove_blank_text=True)
+        tree = etree.fromstring(input_data.gml_content, parser=parser)
+        xplan_ns = tree.nsmap.get('xplan')
+        version = XPlanVersion.from_namespace(xplan_ns)
+
+        if version != export_version():
+            warnings.append(PrecheckWarning(
+                title="Abweichende XPlanGML Version",
+                message=f"Die Datei verwendet XPlan-Version {version}, die Anwendung verwendet Version {export_version()}. "
+                        f"Möglicherweise wird der Datensatz nach Import nicht vollständig dargestellt. Zur korrekten "
+                        f"Darstellung die XPlan-Version in den Einstellungen anpassen."
+            ))
+
+    except Exception as e:
+        warnings.append(PrecheckWarning(
+            title="Interner Fehler",
+            message=f"Fehler beim Interpretieren der Datei: {str(e)}"
+        ))
+
+    return warnings
