@@ -69,8 +69,8 @@ class SO_SchutzgebietWasserrecht(PolygonGeometry, SO_Objekt):
 
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    artDerFestlegung = Column(Enum(SO_KlassifizSchutzgebietWasserrecht))
-    zone = Column(Enum(SO_SchutzzonenWasserrecht))
+    artDerFestlegung = Column(XPEnum(SO_KlassifizSchutzgebietWasserrecht, include_default=True))
+    zone = Column(XPEnum(SO_SchutzzonenWasserrecht, include_default=True))
     name = Column(String)
     nummer = Column(String)
 
