@@ -1,4 +1,6 @@
-from qgis.core import QgsSymbol, QgsSingleSymbolRenderer
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QColor
+from qgis.core import QgsSymbol, QgsSingleSymbolRenderer, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsUnitTypes
 
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -9,6 +11,7 @@ from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Objekt
 from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.enums import LP_KlassifizierungNaturschutzrecht, \
     LP_RechtsstandSchutzGeb, LP_GesGeschBiotopTyp, LP_SchutzzonenNaturschutzrecht
 from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 
@@ -47,5 +50,30 @@ class LP_SchutzBestimmterTeileVonNaturUndLandschaft(MixedGeometry, LP_Objekt):
     schutzzonenText = Column(String)
 
     @classmethod
-    def renderer(cls, geom_type: GeometryType):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        border = QgsSimpleLineSymbolLayer(QColor('black'))
+        border.setWidth(0.5)
+        border.setOffset(0.25)
+        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        symbol.appendSymbolLayer(border)
+
+        outline_strip = QgsSimpleLineSymbolLayer(QColor('#0df919'))
+        outline_strip.setWidth(8)
+        outline_strip.setOffset(4.25)
+        outline_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        outline_strip.setPenJoinStyle(Qt.MiterJoin)
+        symbol.appendSymbolLayer(outline_strip)
+        symbol.setOpacity(0.75)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
