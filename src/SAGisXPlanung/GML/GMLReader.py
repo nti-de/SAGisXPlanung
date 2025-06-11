@@ -153,7 +153,8 @@ class GMLReader:
 
                 pre_classes = [*PRE_FILLED_CLASSES]
                 if self.session is not None and value.__class__ in pre_classes:
-                    obj_from_db = query_existing(value, session=self.session)
+                    with self.session.no_autoflush:
+                        obj_from_db = query_existing(value, session=self.session)
                     value = obj_from_db if obj_from_db is not None else value
                     # don't save codelist if it is not loaded database -> set value to None
                     if value.__class__ in CodeListValue.__subclasses__() and obj_from_db is None:
