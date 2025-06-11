@@ -5,15 +5,18 @@ from qgis.core import (QgsSymbol, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkb
 
 from sqlalchemy import Column, ForeignKey, Enum, String
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzgebietWasserrecht, SO_SchutzzonenWasserrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.enums import SO_SchutzzonenNaturschutzrecht
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.enums import XP_KlassifizSchutzgebietNaturschutzrecht
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
 class SO_SchutzgebietNaturschutzrecht(MixedGeometry, SO_Objekt):
     """ Schutzgebiet nach Naturschutzrecht """
 
