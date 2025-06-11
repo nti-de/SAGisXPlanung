@@ -1,5 +1,19 @@
 ## Changelog
 
+### [2.9.1] - 11.06.2025
+
+#### Neue Funktionen
+
+- Überprüfung und Warnung bei abweichender XPlan-Version beim XPlanGML-Import (24e693ee)
+
+#### Fehlerbehebungen
+
+- Fehler im Fortschrittsinfikator beim XPlanGML-Import (726073ff)
+- falsche Pflichtattribute in Klasse `SO_SchutzgebietWasserrecht` (a1c03a95)
+- Fehler bei Anzeige der Validierungshinweise beim Hinzufügen neuer Objekte (f5c673de)
+- Autoflush-Fehler bei XPlanGML-Import (1f4e885b)
+- Verfügbarkeit der Klasse `SO_SchutzgebietNaturschutzrecht` in falscher XPlan-Version (e0c2087f)
+
 ### [2.9.1] - 14.04.2025
 
 #### Fehlerbehebungen
