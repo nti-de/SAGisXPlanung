@@ -219,7 +219,8 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
                 type,
                 ST_IsValid(geom) AS is_valid,
                 ST_IsValidReason(geom) AS invalid_reason,
-                NOT ST_OrderingEquals(geom, ST_RemoveRepeatedPoints(geom)) AS has_duplicate_vertices
+                NOT ST_OrderingEquals(geom, ST_RemoveRepeatedPoints(geom)) AS has_duplicate_vertices,
+                ST_IsPolygonCCW(geom) AS is_ccw
             FROM (
                 SELECT id, position AS geom, type FROM objects
                 UNION ALL
@@ -233,7 +234,6 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
 
         res = session.execute(stmt).all()
         for row in res:
-            validation_result = None
             if row.is_valid is False:
                 validation_result = ValidationResult(
                     xid=str(row.id),
@@ -241,6 +241,15 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
                     geom_wkt=row.wkt,
                     error_msg=row.invalid_reason
                 )
+                result.append(validation_result)
+            if row.is_ccw is False:
+                validation_result = ValidationResult(
+                    xid=str(row.id),
+                    xtype=table_name_to_class(row.type),
+                    geom_wkt=row.wkt,
+                    error_msg='Falscher Polygon-Umlaufsinn'
+                )
+                result.append(validation_result)
             if row.has_duplicate_vertices is True:
                 validation_result = ValidationResult(
                     xid=str(row.id),
@@ -248,8 +257,6 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
                     geom_wkt=row.wkt,
                     error_msg='Planinhalt besitzt doppelte Stützpunkte'
                 )
-
-            if validation_result is not None:
                 result.append(validation_result)
 
         return result
