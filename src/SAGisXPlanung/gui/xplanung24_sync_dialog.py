@@ -96,6 +96,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                     self.upload_status_label.setText(f'Upload des Plans "{plan_name}" fehlgeschlagen: {response.text}')
 
         except Exception as e:
+            self.upload_status_icon.setIcon(self.error_icon)
             self.upload_status_label.setText(f'Upload des Plans fehlgeschlagen: {str(e)}')
 
     def upload_selected_plans(self):
