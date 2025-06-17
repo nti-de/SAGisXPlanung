@@ -72,7 +72,7 @@ except Exception as e:
 
 # =========================================================
 
-VERSION = '2.9.2'
+VERSION = '2.9.3'
 COMPATIBLE_DB_REVISIONS = ['31058f6befbd']
 DEPENDENCIES = [
     'packaging',

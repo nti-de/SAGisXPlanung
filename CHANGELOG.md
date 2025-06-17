@@ -1,6 +1,12 @@
 ## Changelog
 
-### [2.9.1] - 11.06.2025
+### [2.9.3] - 17.06.2025
+
+#### Fehlerbehebungen
+
+- Fehler in Validierung des Polygon-Umlaufsinns korrigiert (24e693ee)
+
+### [2.9.2] - 11.06.2025
 
 #### Neue Funktionen
 
@@ -20,7 +26,6 @@
 
 - Fehler beim Löschen von XPlan-Objekten, die in einem Layer mit aktive Bearbeitungsmodus liegen (6b36c283)
 - Fehler beim Öffnen des Dialogs zum Planwerk erfassen (bc2f88e1)
-
 
 ### [2.9.0] - 24.03.2025
 
