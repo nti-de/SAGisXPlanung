@@ -23,7 +23,7 @@ from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_ge
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
     RendererMixin, FeatureType
-from .types import LargeString, Angle, Length, GeometryType
+from .types import LargeString, Angle, Length, GeometryType, XPEnum
 from ..MapLayerRegistry import MapLayerRegistry
 from ..core.helper import safe_edit
 
@@ -281,7 +281,7 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
 
     uuid = Column(String)
     text = Column(String)
-    rechtsstand = Column(Enum(XP_Rechtsstand))
+    rechtsstand = Column(XPEnum(XP_Rechtsstand, include_default=True))
 
     gesetzlicheGrundlage_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'))
     gesetzlicheGrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="xp_objekts", info={
