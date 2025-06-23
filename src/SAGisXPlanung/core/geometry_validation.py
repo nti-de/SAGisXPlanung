@@ -11,6 +11,8 @@ from SAGisXPlanung.config import table_name_to_class
 
 logger = logging.getLogger(__name__)
 
+GRID_TOLERANCE = 0.001
+
 
 class GeometryIntersectionType(Enum):
     """ Gibt an, welcher Grund einen Überschneidungsfehler hevorgerufen hat. """
@@ -55,7 +57,7 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 SELECT id, flaechenschluss, position FROM so_objekt
             )
             SELECT
-                ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position))) AS wkt,
+                ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position, {GRID_TOLERANCE}))) AS wkt,
                 xp_a.id AS a_xid, xp_a.type AS a_type,
                 xp_b.id AS b_xid, xp_b.type AS b_type,
                 st_within(a.position, b.position) as is_within
@@ -103,7 +105,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             SELECT
                 ST_AsText(
                     ST_CollectionExtract(
-                        ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich")
+                        ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE})
                     )
                 ) as wkt,
                 xp_bereich.id as bereich_id,
@@ -117,7 +119,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 xp_plan.id = :planid AND
                 ST_IsValid(xp_bereich.geltungsbereich) AND
                 not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich") AND
-                not ST_IsEmpty(ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich"));
+                not ST_IsEmpty(ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE}));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -162,7 +164,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
                 ST_IsValid(a.position) AND
                 NOT ST_Within(a.position, xp_bereich.geltungsbereich) AND
-                not ST_IsEmpty(ST_Difference(a.position, xp_bereich.geltungsbereich));
+                not ST_IsEmpty(ST_Difference(a.position, xp_bereich.geltungsbereich, {GRID_TOLERANCE}));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -268,7 +270,7 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
     with Session.begin() as session:
         stmt = f"""
             SELECT 
-                ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
+                ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united, {GRID_TOLERANCE}))).geom) as wkt, xp_plan.id
             FROM
                 (
                 SELECT ST_union(objects.position) as united, {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id
