@@ -57,7 +57,7 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 SELECT id, flaechenschluss, position FROM so_objekt
             )
             SELECT
-                ST_AsText(ST_CollectionExtract(ST_Intersection(a.position, b.position, {GRID_TOLERANCE}))) AS wkt,
+                ST_AsText(polygon_geom) AS wkt,
                 xp_a.id AS a_xid, xp_a.type AS a_type,
                 xp_b.id AS b_xid, xp_b.type AS b_type,
                 st_within(a.position, b.position) as is_within
@@ -67,6 +67,12 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 INNER JOIN xp_objekt xp_b ON b.id = xp_b.id
                 INNER JOIN {short_plan_type}_bereich ON xp_a."gehoertZuBereich_id" = {short_plan_type}_bereich.id
                                       AND xp_b."gehoertZuBereich_id" = {short_plan_type}_bereich.id
+                CROSS JOIN LATERAL (
+                    SELECT ST_CollectionExtract(
+                        ST_Intersection(a.position, b.position, {GRID_TOLERANCE}), 
+                        GREATEST(st_dimension(a.position), st_dimension(b.position)) + 1
+                    ) AS polygon_geom
+                ) AS intersection_geom
             WHERE
                 a.id < b.id
                 AND ST_IsValid(a.position)
@@ -77,7 +83,8 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 AND (
                     ST_Overlaps(a.position, b.position)
                     OR st_within(a.position, b.position)
-                );
+                )
+                AND NOT ST_IsEmpty(polygon_geom);
         """
 
         res = session.execute(stmt).all()
@@ -105,7 +112,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             SELECT
                 ST_AsText(
                     ST_CollectionExtract(
-                        ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE})
+                        ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich")
                     )
                 ) as wkt,
                 xp_bereich.id as bereich_id,
