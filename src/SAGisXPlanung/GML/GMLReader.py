@@ -29,7 +29,7 @@ class GMLReader:
         self.warnings = []
         self.files = files if files else {}
 
-        parser = etree.XMLParser(remove_blank_text=True)
+        parser = etree.XMLParser(remove_blank_text=True, remove_comments=True)
         self.root = etree.fromstring(gml, parser=parser)
 
         self.nsmap = self.root.nsmap
