@@ -125,8 +125,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             WHERE
                 xp_plan.id = :planid AND
                 ST_IsValid(xp_bereich.geltungsbereich) AND
-                not st_within(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich") AND
-                not ST_IsEmpty(ST_Difference(xp_bereich.geltungsbereich, xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE}));
+                NOT st_coveredby(xp_bereich.geltungsbereich, st_buffer(xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE}));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -170,8 +169,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
             WHERE
                 {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
                 ST_IsValid(a.position) AND
-                NOT ST_Within(a.position, xp_bereich.geltungsbereich) AND
-                not ST_IsEmpty(ST_Difference(a.position, xp_bereich.geltungsbereich, {GRID_TOLERANCE}));
+                NOT st_coveredby(a.position, st_buffer(xp_bereich.geltungsbereich, {GRID_TOLERANCE}));
         """)
         stmt = stmt.bindparams(planid=plan_id)
 
@@ -277,7 +275,7 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
     with Session.begin() as session:
         stmt = f"""
             SELECT 
-                ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united, {GRID_TOLERANCE}))).geom) as wkt, xp_plan.id
+                ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
             FROM
                 (
                 SELECT ST_union(objects.position) as united, {short_plan_type}_bereich."gehoertZuPlan_id" AS plan_id
