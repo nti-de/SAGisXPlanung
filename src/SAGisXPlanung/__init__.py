@@ -11,7 +11,7 @@ from io import StringIO
 from pathlib import Path
 
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsApplication
 from qgis.PyQt.uic import compiler
 
 import SAGisXPlanung
@@ -72,7 +72,7 @@ except Exception as e:
 
 # =========================================================
 
-VERSION = '2.9.3'
+VERSION = '2.9.4'
 COMPATIBLE_DB_REVISIONS = ['31058f6befbd']
 DEPENDENCIES = [
     'packaging',
@@ -85,6 +85,10 @@ DEPENDENCIES = [
 ]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PERSISTENT_CONFIG_DIR = os.path.join(QgsApplication.qgisSettingsDirPath(), "NTI", "SAGisXPlanung")
+
+if not os.path.exists(PERSISTENT_CONFIG_DIR):
+    os.makedirs(PERSISTENT_CONFIG_DIR)
 
 Base = None
 Session = None

@@ -1,5 +1,14 @@
 ## Changelog
 
+### [2.9.4] - 01.07.2025
+
+#### Fehlerbehebungen
+
+- GML-Import aus Dateien mit Kommentaren (4918d4e4)
+- Überschneidung die keine Polygone ergeben werden ignoriert (d395bf89)
+- Toleranz bei Geometrievalidierung (0d9d046c, fb4fab88)
+- Rechtsstand-Attribut sollte optional sein (bd3148b1)
+
 ### [2.9.3] - 17.06.2025
 
 #### Fehlerbehebungen
