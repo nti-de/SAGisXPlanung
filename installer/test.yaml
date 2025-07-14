@@ -10,6 +10,8 @@ strategy:
   matrix:
     qgis34:
       containerImage: qgis/qgis:release-3_34
+    ltr:
+      containerImage: qgis/qgis:ltr-jammy
 
 container: $[ variables['containerImage'] ]
 
