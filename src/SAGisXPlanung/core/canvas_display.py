@@ -82,6 +82,10 @@ def load_on_canvas(plan_xid, layer_group=None):
         else:
             for tree_layer in layer_group.findLayers():  # type: QgsLayerTreeLayer
                 map_layer = tree_layer.layer()
+                is_xplan_layer = map_layer.customProperty('xplanung/type') is not None
+                if not is_xplan_layer:
+                    continue
+
                 if isinstance(map_layer, QgsVectorLayer):
                     truncate_success = map_layer.dataProvider().truncate()
                     if not truncate_success:
