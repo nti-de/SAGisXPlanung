@@ -4,7 +4,7 @@
 	xmlns:gml="http://www.opengis.net/gml/3.2"
 	version="3.2.1" elementFormDefault="qualified" targetNamespace="http://www.opengis.net/gml/3.2">
 	
-	<import schemaLocation="http://www.w3.org/1999/xlink.xsd" namespace="http://www.w3.org/1999/xlink"/>
+	<import schemaLocation="xlink.xsd" namespace="http://www.w3.org/1999/xlink"/>
 	<!-- ================================================= -->
 	<complexType name="AbstractMetadataPropertyType" abstract="true">
 		<sequence/>

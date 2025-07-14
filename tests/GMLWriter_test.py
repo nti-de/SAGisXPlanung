@@ -249,7 +249,8 @@ def xplan_schemas():
     for version in versions:
         schema_path = os.path.join(schema_dir, version, "XPlanung-Operationen.xsd")
         if os.path.exists(schema_path):
-            schemas[version] = etree.XMLSchema(etree.parse(schema_path))
+            schema_root = etree.parse(schema_path)
+            schemas[version] = etree.XMLSchema(schema_root)
 
     return schemas
 
