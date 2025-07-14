@@ -13,12 +13,20 @@ strategy:
     ltr:
       containerImage: qgis/qgis:ltr-jammy
 
-container: $[ variables['containerImage'] ]
+container:
+  image: $[ variables['containerImage'] ]
+  options: "--name ci-container -v /usr/bin/docker:/tmp/docker:ro"
 
 steps:
 
 - script: |
+    /tmp/docker exec -t -u 0 ci-container \
+    sh -c "apt-get update && DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confold" -y install sudo"
+  displayName: 'Install Sudo in container (thanks Microsoft! https://github.com/microsoft/azure-pipelines-agent/issues/2043)'
+
+- script: |
     python3 -m pip install --upgrade pip
+    sudo apt-get install libgeos-dev
     pip install numpy==1.26.4 pytest pytest-azurepipelines pytest-cov pytest-qt pytest-mock pytest-asyncio pytest-qgis nest-asyncio
     pip install -r requirements.txt
   displayName: 'Install dependencies'
