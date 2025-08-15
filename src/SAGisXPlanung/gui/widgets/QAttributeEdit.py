@@ -4,32 +4,62 @@ import logging
 import os
 from collections import namedtuple
 
+import qasync
 from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
 from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon, QRegExpValidator
-from sqlalchemy import update
+from qgis.utils import iface
+from sqlalchemy import update, select
 
-from SAGisXPlanung import BASE_DIR, Session, Base
+from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
 from SAGisXPlanung.core.helper import update_field_value
-from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin
+from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
 FORM_CLASS, CLS = uic.loadUiType(os.path.join(BASE_DIR, 'ui/attribute_edit.ui'))
 logger = logging.getLogger(__name__)
 
 ObjectRole = Qt.UserRole + 1
+
+style = """
+QToolButton {{
+    background: palette(window); 
+    border: 0px;
+    padding: 5px;
+    border-radius: 5px;
+}}
+QToolButton:hover {{
+    background-color: {_button_hover_bg};
+}}
+
+#title-label {{
+    font-size: 12px;
+    font-family: 'Consolas', 'Monaco', 'Lucida Console', 'Liberation Mono', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Courier New', monospace;
+    font-weight: 600;
+    margin: 0px;
+    padding: 0px;
+}}
+
+#subtitle-label {{
+    font-weight: 400;
+    color: {_label_color_mute};
+    margin: 0px;
+    padding: 0px;
+}}
+"""
 
 
 class QAttributeEdit(CLS, FORM_CLASS):
@@ -57,7 +87,36 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.parent = parent
         self._xplanung_item = xplanung_item
 
+        # info header setup
+        def _object_category_name(xtype: type) -> str:
+            if issubclass(xtype, XP_AbstraktesPraesentationsobjekt):
+                return 'Präsentationsobjekt'
+            elif issubclass(xtype, FeatureType):
+                return 'FeatureType'
+            else:
+                return 'DataType'
+
+        self.label_object_name.setObjectName("title-label")
+        self.label_object_type.setObjectName("subtitle-label")
+        self.label_object_name.setText(self._xplanung_item.xtype.__name__)
+        self.label_object_type.setText(_object_category_name(xplanung_item.xtype))
+
+        enabled = issubclass(self._xplanung_item.xtype, FeatureType)
+        self.button_flash.setEnabled(enabled)
+        self.button_zoom.setEnabled(enabled)
+
+        self.button_flash.setToolTip("Objekt auf Karte aufleuchten lassen")
+        self.button_zoom.setToolTip("Zu Objekt zoomen")
+        self.button_flash.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/flare.svg'),
+                                            color=ApplicationColor.Tertiary))
+        self.button_zoom.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/zoom-to.svg'),
+                                                  color=ApplicationColor.Tertiary))
+        self.button_zoom.clicked.connect(self.on_button_zoom_clicked)
+        self.button_flash.clicked.connect(self.on_button_flash_clicked)
+
+        # search setup
         self.editSearch.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.editSearch.textChanged.connect(self.onFilterTextChanged)
         reg_ex = QRegExp(r'\d{1,3}°?')
         self.angleEdit.setValidator(QRegExpValidator(reg_ex, self.angleEdit))
 
@@ -78,7 +137,12 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.styleGroup.setVisible(False)
 
         self.tableView.doubleClicked.connect(self.onDoubleClicked)
-        self.editSearch.textChanged.connect(self.onFilterTextChanged)
+
+        # -------------- STYLE -------------
+        self.setStyleSheet(style.format(
+            _button_hover_bg=ApplicationColor.Grey300,
+            _label_color_mute=ApplicationColor.Grey600
+        ))
 
     def set_form_values(self):
         with Session.begin() as session:
@@ -101,6 +165,32 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if not indices:
             return QModelIndex()
         return indices[0].siblingAtColumn(1)
+
+    @qasync.asyncSlot(bool)
+    async def on_button_zoom_clicked(self, checked: bool):
+        async with SessionAsync.begin() as session:
+            xtype = self._xplanung_item.xtype
+            orm_id = self._xplanung_item.xid
+            stmt = select(getattr(xtype, xtype.__geometry_column_name__)).filter_by(id=orm_id)
+            res = await session.execute(stmt)
+            db_result = res.scalar_one()
+
+            geom = geometry_from_spatial_element(db_result)
+            iface.mapCanvas().zoomToFeatureExtent(geom.boundingBox())
+            iface.mapCanvas().refresh()
+
+    @qasync.asyncSlot(bool)
+    async def on_button_flash_clicked(self, checked: bool):
+        async with SessionAsync.begin() as session:
+            xtype = self._xplanung_item.xtype
+            orm_id = self._xplanung_item.xid
+            stmt = select(getattr(xtype, xtype.__geometry_column_name__)).filter_by(id=orm_id)
+            res = await session.execute(stmt)
+            db_result = res.scalar_one()
+
+            geom = geometry_from_spatial_element(db_result)
+            iface.mapCanvas().flashGeometries([geom])
+
 
     @pyqtSlot()
     def onAngleTextEdited(self):
