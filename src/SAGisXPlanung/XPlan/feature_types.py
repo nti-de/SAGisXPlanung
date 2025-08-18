@@ -6,6 +6,7 @@ from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QIcon
 
 from geoalchemy2 import Geometry, WKTElement
+from qgis._core import QgsCategorizedSymbolRenderer
 
 from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
@@ -354,16 +355,24 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
     @classmethod
     def preview_icon(cls, geom_type: GeometryType):
         renderer = cls.renderer(geom_type)
-        if isinstance(renderer, QgsRuleBasedRenderer):
-            symbol = renderer.rootRule().children()[0].symbol()
-            if symbol is None:
-                child_symbols = renderer.rootRule().children()[0].symbols()
-                if child_symbols:
-                    symbol = child_symbols[0]
-                else:
-                    return QIcon()
-        else:
-            symbol = renderer.symbol()
+        try:
+            if isinstance(renderer, QgsRuleBasedRenderer):
+                symbol = renderer.rootRule().children()[0].symbol()
+                if symbol is None:
+                    child_symbols = renderer.rootRule().children()[0].symbols()
+                    if child_symbols:
+                        symbol = child_symbols[0]
+            elif isinstance(renderer, QgsCategorizedSymbolRenderer):
+                symbol = renderer.sourceSymbol()
+            else:
+                symbol = renderer.symbol()
+        except Exception as e:
+            logger.exception(f'Error while getting symbol for {cls.__name__}')
+            logger.exception(e)
+            symbol = None
+
+        if symbol is None:
+            return QIcon()
 
         icon = QgsSymbolLayerUtils.symbolPreviewIcon(symbol, QSize(16, 16))
         return icon
