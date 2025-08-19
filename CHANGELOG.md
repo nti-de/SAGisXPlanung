@@ -1,5 +1,16 @@
 ## Changelog
 
+### [2.9.5] - 19.08.2025
+
+#### Neue Funktionen
+
+- Zoom/Aufleuchten von XPlan-Objekten aus Bearbeitungsansicht (24e693ee)
+
+#### Fehlerbehebungen
+
+- Auswahl von Bundesland `BW` korrigiert (c5f3b64f)
+- Darstellung von regelbasierten/kategorisierten Symbolen in Einstellungen (f14c2d5c)
+
 ### [2.9.4] - 01.07.2025
 
 #### Fehlerbehebungen
