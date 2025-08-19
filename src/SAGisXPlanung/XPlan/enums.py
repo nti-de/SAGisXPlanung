@@ -414,7 +414,7 @@ class XP_Bundeslaender(XPlanungEnumMixin, Enum):
     """ Zuständige Bundesländer für den Plan """
 
     BB = 1000
-    BE = 1200
+    BE = 1100
     BW = 1200
     BY = 1300
     HB = 1400
