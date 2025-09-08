@@ -37,16 +37,17 @@ def vl(feat) -> QgsVectorLayer:
 
 
 @pytest.fixture()
-def al() -> QgsAnnotationLayer:
+def tpo_layer() -> QgsVectorLayer:
     tpo = XP_PTO()
     tpo.id = uuid.uuid4()
     tpo.position = WKTElement('POINT (1 1)', srid=25833)
     tpo.schriftinhalt = 'test'
+    tpo.art = 'xplan:text'
     tpo.skalierung = 0.5
     tpo.drehwinkel = 0
-    layer: QgsAnnotationLayer = tpo.asLayer(tpo.position.srid, uuid.uuid4(), 'TestLayer')
-    item = tpo.asFeature()
-    layer.addItem(item)
+    layer: QgsVectorLayer = tpo.asLayer(tpo.position.srid, uuid.uuid4(), 'TestLayer')
+    item = tpo.asFeature(layer.fields())
+    layer.addFeature(item)
     return layer
 
 
@@ -74,17 +75,15 @@ class TestContextMenuTool:
         tool.menu_action_triggered(ActionType.HighlightObjectTreeItem, XPlanungItem(xid='1', xtype=None, plan_xid='2'))
         assert len(spy) == 1
 
-    def test_menu(self, tool: ContextMenuTool, vl, feat, al):
+    def test_menu(self, tool: ContextMenuTool, vl, feat, tpo_layer):
         xplan_layer = vl.clone()
         xplan_layer.setCustomProperty('xplanung/type', 'BP_BauGrenze')
         xplan_layer.setCustomProperty('xplanung/plan-name', 'Plan1')
         xplan_layer.setCustomProperty('xplanung/feat-1', '14356316-413643-46136-413')
         results = [QgsMapToolIdentify.IdentifyResult(vl, feat, {'test': '1'}),
                    QgsMapToolIdentify.IdentifyResult(xplan_layer, feat, {'test': '2'})]
-        QgsProject().instance().addMapLayer(al)
 
-        a_items = [QgsRenderedAnnotationItemDetails(al.id(), item_id) for item_id in al.items().keys()]
-        menu = tool.menu(results, annotation_items=a_items)
+        menu = tool.menu(results)
 
-        assert len(menu.actions()) == 3
-        assert len(menu.actions()[0].menu().actions()) == 3
+        assert len(menu.actions()) == 2
+        assert len(menu.actions()[0].menu().actions()) == 1

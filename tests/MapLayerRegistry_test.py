@@ -63,7 +63,7 @@ def vl2() -> QgsVectorLayer:
 
 
 @pytest.fixture()
-def al(xitem) -> QgsVectorLayer:
+def pto_layer(xitem) -> QgsVectorLayer:
     tpo = XP_PTO()
     tpo.id = xitem.xid
     tpo.position = WKTElement('POINT (1 1)', srid=25833)
@@ -101,27 +101,27 @@ def clear_registry_after_test(registry):
 class TestMapLayerRegistry:
 
     @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
-    def test_add_layer(self, registry, vl, al):
+    def test_add_layer(self, registry, vl, pto_layer):
         registry.addLayer(vl)
-        registry.addLayer(al)
-        registry.addLayer(al)
+        registry.addLayer(pto_layer)
+        registry.addLayer(pto_layer)
 
-        assert al in registry.layers
+        assert pto_layer in registry.layers
         assert vl in registry.layers
-        # verify that duplicate isn't  added to registry
+        # verify that duplicate isn't added to registry
         assert len(registry.layers) == 2
         assert len(QgsProject().instance().mapLayersByName("BP_BaugebietsTeilFlaeche")) == 1
 
     @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
-    def test_add_layer_into_group(self, registry, vl, al):
+    def test_add_layer_into_group(self, registry, vl, pto_layer):
         root = QgsProject.instance().layerTreeRoot()
         layer_group = root.addGroup("Test_Group")
 
         registry.addLayer(vl, layer_group)
-        registry.addLayer(al, layer_group)
+        registry.addLayer(pto_layer, layer_group)
 
         assert len(layer_group.children()) == 2
-        assert layer_group.children()[0].layerId() == al.id()
+        assert layer_group.children()[0].layerId() == pto_layer.id()
         assert layer_group.children()[1].layerId() == vl.id()
 
     def test_add_layer_with_priority(self, registry):
@@ -164,22 +164,22 @@ class TestMapLayerRegistry:
         assert layer_group.children()[0].layerId() == layer1.id()
 
     @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
-    def test_remove_layer(self, registry, vl, al):
+    def test_remove_layer(self, registry, vl, pto_layer):
         registry.addLayer(vl)
 
         # remove non existent layer
-        registry.removeLayer(al.id())
+        registry.removeLayer(pto_layer.id())
         # remove valid layer
         registry.removeLayer(vl.id())
 
         assert len(registry.layers) == 0
 
-    def test_get_layer_by_xid(self, registry, al, xitem):
-        registry.addLayer(al)
+    def test_get_layer_by_xid(self, registry, pto_layer, xitem):
+        registry.addLayer(pto_layer)
 
         layer = registry.layerByXid(xitem)
 
-        assert isinstance(layer, QgsAnnotationLayer)
+        assert isinstance(layer, QgsVectorLayer)
 
     def test_get_layer_by_xid_with_geomtype(self, registry, vl1, vl2):
         registry.addLayer(vl1)
