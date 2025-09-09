@@ -3773,12 +3773,16 @@ CREATE TABLE fp_text_abschnitt (
     FOREIGN KEY(id) REFERENCES xp_text_abschnitt (id) ON DELETE CASCADE
 );
 
+CREATE TYPE lp_rechtscharakter AS ENUM ('Festsetzung', 'Geplant', 'NachrichtlicheUebernahme', 'DarstellungKennzeichnung', 'FestsetzungInBPlan', 'Unbekannt', 'SonstigerStatus');
+
 CREATE TABLE lp_text_abschnitt (
     id UUID NOT NULL, 
     rechtscharakter lp_rechtscharakter NOT NULL, 
     PRIMARY KEY (id), 
     FOREIGN KEY(id) REFERENCES xp_text_abschnitt (id) ON DELETE CASCADE
 );
+
+CREATE TYPE rp_rechtscharakter AS ENUM ('ZielDerRaumordnung', 'GrundsatzDerRaumordnung', 'NachrichtlicheUebernahme', 'NachrichtlicheUebernahmeZiel', 'NachrichtlicheUebernahmeGrundsatz', 'NurInformationsgehalt', 'TextlichesZiel', 'ZielundGrundsatz', 'Vorschlag', 'Unbekannt');
 
 CREATE TABLE rp_text_abschnitt (
     id UUID NOT NULL, 

@@ -104,14 +104,14 @@ def upgrade():
         'Festsetzung', 'Geplant', 'NachrichtlicheUebernahme',
         'DarstellungKennzeichnung', 'FestsetzungInBPlan',
         'Unbekannt', 'SonstigerStatus',
-        name='lp_rechtscharakter', create_type=False
+        name='lp_rechtscharakter'
     )
     rp_rechtscharakter_enum = postgresql.ENUM(
         'ZielDerRaumordnung', 'GrundsatzDerRaumordnung', 'NachrichtlicheUebernahme',
         'NachrichtlicheUebernahmeZiel', 'NachrichtlicheUebernahmeGrundsatz',
         'NurInformationsgehalt', 'TextlichesZiel', 'ZielundGrundsatz',
         'Vorschlag', 'Unbekannt',
-        name='rp_rechtscharakter', create_type=False
+        name='rp_rechtscharakter'
     )
     so_rechtscharakter_enum = postgresql.ENUM(
         'FestsetzungBPlan', 'DarstellungFPlan', 'InhaltLPlan',
@@ -125,8 +125,7 @@ def upgrade():
             bp_zulaessigkeit_enum, bauweise_enum, bebauungsart_enum,
             grenzbebauung_enum, abweichung_baunvo_enum,
             xp_rechtscharakter_enum, bp_rechtscharakter_enum,
-            fp_rechtscharakter_enum, lp_rechtscharakter_enum,
-            rp_rechtscharakter_enum, so_rechtscharakter_enum
+            fp_rechtscharakter_enum, so_rechtscharakter_enum
         ]:
             enum.create(op.get_bind(), checkfirst=True)
 
@@ -341,6 +340,8 @@ def downgrade():
     # drop types separately: https://github.com/sqlalchemy/alembic/issues/886
     op.execute('DROP TYPE bp_nebenanlagenausschlusstyp;')
     op.execute('DROP TYPE bp_typwohngebaeudeflaeche;')
+    op.execute('DROP TYPE lp_rechtscharakter;')
+    op.execute('DROP TYPE rp_rechtscharakter;')
 
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('so_bodenschutz', 'fp_wasserwirtschaft', "
                "'bp_wohngebaeude_flaeche', 'bp_nebenanlagen_ausschluss_flaeche');")

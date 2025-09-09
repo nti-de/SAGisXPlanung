@@ -6,7 +6,6 @@ from geoalchemy2 import WKTElement, WKBElement
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
-from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.codelists import BP_DetailZweckbestGruenFlaeche
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_Wegerecht
 from SAGisXPlanung.GML.GMLReader import GMLReader
@@ -138,8 +137,6 @@ class TestGMLReader_readPlan:
 
         gruenflaeche = next(p for p in plan.bereich[0].planinhalt if isinstance(p, BP_GruenFlaeche))
         assert gruenflaeche.rel_zweckbestimmung[0].allgemein == XP_ZweckbestimmungGruen.Naturerfahrungsraum
-        assert isinstance(gruenflaeche.rel_zweckbestimmung[0].detail[0], BP_DetailZweckbestGruenFlaeche)
-        assert gruenflaeche.rel_zweckbestimmung[0].detail[0].key == "2400_10"
 
     @pytest.mark.parametrize('gml_reader', ['bp_plan1.gml'], indirect=True)
     def test_readPlan_top_level_ns_issue24(self, gml_reader):

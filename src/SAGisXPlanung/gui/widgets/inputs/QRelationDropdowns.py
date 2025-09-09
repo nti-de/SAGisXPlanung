@@ -9,6 +9,7 @@ from qgis.gui import QgsCheckableComboBox
 from qgis.utils import iface
 
 from SAGisXPlanung import Session, BASE_DIR
+from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.style import load_svg
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll
