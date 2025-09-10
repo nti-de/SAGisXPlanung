@@ -1,7 +1,6 @@
 import functools
 import html
 import logging
-from enum import Enum
 import yaml
 
 from qgis.PyQt.QtGui import QFontMetrics, QIcon, QCloseEvent

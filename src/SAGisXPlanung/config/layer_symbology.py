@@ -1,17 +1,27 @@
 import glob
+import logging
 import os
+import re
 from dataclasses import dataclass
 from typing import List
 
-from qgis.core import QgsWkbTypes, QgsVectorLayer
+from qgis.core import QgsWkbTypes, QgsVectorLayer, QgsApplication
 
-from SAGisXPlanung import BASE_DIR
+from SAGisXPlanung import BASE_DIR, PERSISTENT_CONFIG_DIR
 from SAGisXPlanung.GML.geometry import geom_type_as_layer_url
 from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.config import QgsConfig
 from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, GeometryObject, MixedGeometry
 from SAGisXPlanung.utils import OBJECT_BASE_TYPES, CLASSES
+
+logger = logging.getLogger(__name__)
+
+GEOMETRY_ORDER = {
+    GeometryType.PointGeometry: 0,
+    GeometryType.LineGeometry: 1,
+    GeometryType.PolygonGeometry: 2
+}
 
 
 @dataclass
@@ -26,21 +36,22 @@ class StyleItem:
 def load_symbol_defaults():
     """ loads the default layer symbology and priority into the QgsConfig data store (if not already set)"""
     # load all file-based styles into the QgsConfig if they are not already present
-    folder_path = os.path.join(BASE_DIR, 'symbole/')
-    qml_files = glob.glob(os.path.join(folder_path, "**/*.qml"))
+    default_folder_path = os.path.join(BASE_DIR, 'styles/default/')
+    override_folder_path = os.path.join(PERSISTENT_CONFIG_DIR, 'styles/')
 
-    for qml_file in qml_files:
-        base_name = os.path.basename(qml_file)
-        class_name, geometry_type = os.path.splitext(base_name)[0].rsplit('-', 1)
+    qml_files = {os.path.basename(f): f for f in glob.glob(os.path.join(default_folder_path, "*.qml"))}
+    qml_files.update({os.path.basename(f): f for f in glob.glob(os.path.join(override_folder_path, "*.qml"))})
 
-        if QgsConfig.class_renderer(CLASSES[class_name], geometry_type):
-            continue
+    for base_name, qml_file in qml_files.items():
+        match = re.match(r'^(.*?)-(\d+)', base_name)
+        if not match:
+            return
+
+        class_name, geometry_type = match.group(1), int(match.group(2))
 
         qgs_geom_type = GeometryType(int(geometry_type))
-        layer = QgsVectorLayer(geom_type_as_layer_url(qgs_geom_type), "result", "memory")
-        layer.loadNamedStyle(qml_file)
-
-        QgsConfig.set_class_renderer(CLASSES[class_name], geometry_type, layer.renderer())
+        renderer = _load_renderer_from_file(qml_file, qgs_geom_type)
+        QgsConfig.set_class_renderer(CLASSES[class_name], geometry_type, renderer)
 
     # set display priority -> order of layers in layertree
     display_priority = 1
@@ -50,6 +61,25 @@ def load_symbol_defaults():
         if stored_priority is None:
             QgsConfig.set_layer_priority(style_item.xtype, style_item.geometry_type, display_priority)
         display_priority += 1
+
+
+def find_file_based_renderer(xplan_class, geometry_type):
+    """ search style file for given xplan type and geometry dimension"""
+    default_folder_path = os.path.join(BASE_DIR, 'styles/default/')
+    override_folder_path = os.path.join(PERSISTENT_CONFIG_DIR, 'styles/')
+
+    geometry_type_num = GEOMETRY_ORDER[geometry_type]
+    # File naming pattern: {xplan_class.__name__}-{geometry_type_num}_{any-text}.qml
+    pattern = rf"{xplan_class.__name__}-{geometry_type_num}_.*\.qml"
+
+    # Check if the file exists in the override folder first, then the default folder
+    for folder_path in [override_folder_path, default_folder_path]:
+        if not os.path.exists(folder_path):
+            continue
+        for file_name in os.listdir(folder_path):
+            if re.match(pattern, file_name):
+                file_path = os.path.join(folder_path, file_name)
+                return _load_renderer_from_file(file_path, geometry_type)
 
 
 def generate_default_style_items():
@@ -80,20 +110,22 @@ def generate_default_style_items():
 
 
 def _sort_style_items(style_items: List[StyleItem]) -> List[StyleItem]:
-    geometry_order = {
-        GeometryType.PointGeometry: 0,
-        GeometryType.LineGeometry: 1,
-        GeometryType.PolygonGeometry: 2
-    }
 
     def sort_key(item: StyleItem):
         has_mixin = issubclass(item.xtype, FlaechenschlussObjekt)
         is_outlined_style = LayerPriorityType.OutlineStyle in item.layer_priority
         return (
             # item.base_xtype.__name__,  # sort by category TODO: does it make more sense to group by category first?
-            geometry_order[item.geometry_type],  # First, sort by geometry type
+            GEOMETRY_ORDER[item.geometry_type],  # First, sort by geometry type
             not is_outlined_style,  # Second, objects with outlined style should appear above
             has_mixin  # Third, sort by presence of the FlaechenschlussObjekt mixin (False before True)
         )
 
     return sorted(style_items, key=sort_key)
+
+
+def _load_renderer_from_file(qml_file: str, geometry_type: GeometryType):
+    layer = QgsVectorLayer(geom_type_as_layer_url(geometry_type), "result", "memory")
+    layer.loadNamedStyle(qml_file)
+
+    return layer.renderer().clone()

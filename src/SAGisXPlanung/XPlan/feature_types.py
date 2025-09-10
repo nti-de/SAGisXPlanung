@@ -1,4 +1,5 @@
 import logging
+import traceback
 from typing import List
 from uuid import uuid4
 
@@ -6,7 +7,7 @@ from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QIcon
 
 from geoalchemy2 import Geometry, WKTElement
-from qgis._core import QgsCategorizedSymbolRenderer
+from qgis.core import QgsSingleSymbolRenderer, QgsCategorizedSymbolRenderer, QgsSymbol
 
 from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
@@ -23,7 +24,7 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
-    RendererMixin, FeatureType
+    RendererMixin, MixedGeometry, FeatureType
 from .types import LargeString, Angle, Length, GeometryType, XPEnum
 from ..MapLayerRegistry import MapLayerRegistry
 from ..core.helper import safe_edit
@@ -75,6 +76,10 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
     externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
                                    passive_deletes=True)
 
+    # XP_TextAbschnitt [0..*]
+    texte = relationship("XP_TextAbschnitt", back_populates="xp_plan",
+                         cascade="all, delete", passive_deletes=True)
+
     _sa_search_col = Column(TSVECTOR, Computed("""to_tsvector('german',
             xp_plan.id::text || ' ' ||
             xp_plan.name || ' ' ||
@@ -116,10 +121,6 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
     def setGeometry(self, geom: QgsGeometry):
         self.raeumlicherGeltungsbereich = WKTElement(geom.asWkt(), srid=self.raeumlicherGeltungsbereich.srid)
 
-    def toCanvas(self, layer_group, plan_xid=None):
-        MapLayerRegistry().remove_canvas_items(str(self.id))
-
-        super(XP_Plan, self).toCanvas(layer_group, plan_xid)
 
     def enforceFlaechenschluss(self):
         """ Abstrakte Methode zum Erzwingen des Flächenschluss. Muss in jeder konkreten Klasse implementiert werden."""
@@ -219,6 +220,11 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
                                          foreign_keys='XP_VerbundenerPlan.wurdeGeaendertVonPlan_verbundenerPlan_id',
                                          info={'xplan_version': XPlanVersion.SIX})
 
+    # XP_TextAbschnitt [0..*] (v6)
+    texte = relationship("XP_TextAbschnitt", back_populates="xp_bereich",
+                         cascade="all, delete", passive_deletes=True,
+                         info={'xplan_version': XPlanVersion.SIX})
+
     # non XPlanung attributes
     simple_geometry = relationship("XP_SimpleGeometry", back_populates="gehoertZuBereich", cascade="all, delete",
                                    passive_deletes=True)
@@ -244,7 +250,7 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
 
     def toCanvas(self, layer_group, plan_xid=None):
         """ Override custom toCanvas behaviour, because each XP_Bereich object should get its own layer
-            instead of merging geometries as feautures into one layer"""
+            instead of merging geometries as features into one layer"""
         if plan_xid is None:
             raise ValueError("plan_xid cant be None when displaying XP_Bereich")
 
@@ -310,6 +316,11 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
     rechtscharakter = Column(XP_Rechtscharakter_EnumType(XP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
                              info={'xplan_version': XPlanVersion.SIX})
 
+    # XP_TextAbschnitt [0..*] (v6)
+    refTextInhalt = relationship("XP_TextAbschnitt", back_populates="xp_objekt",
+                                 cascade="all, delete", passive_deletes=True,
+                                 info={'xplan_version': XPlanVersion.SIX})
+
     # non xplanung attributes
     drehwinkel = Column(Angle, default=0)
     skalierung = Column(Length, default=0.5)
@@ -343,11 +354,11 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
 
         # display all associated annotation items
         for po in self.wirdDargestelltDurch:
-            if isinstance(po, XP_Nutzungsschablone):
-                continue
             try:
                 po.toCanvas(layer_group, plan_xid)
-            except TypeError:
+            except TypeError as e:
+                logger.debug(e)
+                logger.debug(traceback.format_exc())
                 pass
 
         super(XP_Objekt, self).toCanvas(layer_group, plan_xid)
@@ -378,18 +389,11 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
         return icon
 
 
-@event.listens_for(XP_Objekt, 'before_delete', propagate=True)
-def receive_before_delete(mapper, connection, target: XP_Objekt):
-    """ Removes feature from canvas if it is currently visible """
-    # populate the delete queue, the items get consumed in `receive_after_delete` to remove all visible annotations
-    target.annotation_delete_queue = target.wirdDargestelltDurch
-
-
 @event.listens_for(XP_Objekt, 'after_delete', propagate=True)
 def receive_after_delete(mapper, connection, target: XP_Objekt):
     """ Removes feature from canvas if it is currently visible """
 
-    layer: QgsVectorLayer = MapLayerRegistry().layerByFeature(str(target.id))
+    layer: QgsVectorLayer = MapLayerRegistry().layer_by_orm_id(str(target.id))
     if not layer:
         return
 
@@ -401,10 +405,6 @@ def receive_after_delete(mapper, connection, target: XP_Objekt):
                 res = layer.deleteFeature(feature.id())
                 if not res:
                     logger.warning(f'{target.displayName()}:{target.id} Feature wurde nicht von der Karte entfernt')
-
-            while len(target.annotation_delete_queue) > 0:
-                po = target.annotation_delete_queue.pop(0)
-                po.remove_from_canvas()
 
             break
 
@@ -423,3 +423,87 @@ def correct_geometry_trigger(mapper, connection, target):
     corrected_geom = correct_geometry(connection, target.geometry(), geom_element)
     if corrected_geom is not None:
         setattr(target, target.__geometry_column_name__, corrected_geom)
+
+
+class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
+    """ Ein Abschnitt der textlich formulierten Inhalte des Plans. """
+
+    __tablename__ = 'xp_text_abschnitt'
+    __avoidRelation__ = ['xp_bereich', 'xp_objekt', 'xp_plan', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
+                         'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    type = Column(String())
+
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+        "polymorphic_on": type,
+    }
+
+    schluessel = Column(String)
+    gesetzlicheGrundlage = Column(String)
+    text = Column(LargeString)
+
+    # [0..1]
+    refText = relationship("XP_ExterneReferenz", back_populates="xp_text_abschnitt",
+                           cascade="all, delete", passive_deletes=True, uselist=False)
+
+    rechtscharakter = Column(XP_Rechtscharakter_EnumType(XP_Rechtscharakter), nullable=False,
+                             doc='Rechtscharakter', default='Unbekannt',
+                             info={'xplan_version': XPlanVersion.SIX})
+
+    # XP_Bereich [0..*] (v6)
+    xp_bereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
+    xp_bereich = relationship("XP_Bereich", back_populates="texte",
+                              info={'xplan_version': XPlanVersion.SIX})
+
+    # XP_Objekt [0..*] (v6)
+    xp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('xp_objekt.id', ondelete='CASCADE'))
+    xp_objekt = relationship("XP_Objekt", back_populates="refTextInhalt",
+                             info={'xplan_version': XPlanVersion.SIX})
+
+    # XP_Plan [0..*]
+    xp_plan_id = Column(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'))
+    xp_plan = relationship("XP_Plan", back_populates="texte")
+
+    # BP_Objekt [0..*] (v5.3)
+    bp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('bp_objekt.id', ondelete='CASCADE'))
+    bp_objekt = relationship("BP_Objekt", back_populates="refTextInhalt",
+                             foreign_keys=[bp_objekt_id],
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    # FP_Objekt [0..*] (v5.3)
+    fp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('fp_objekt.id', ondelete='CASCADE'))
+    fp_objekt = relationship("FP_Objekt", back_populates="refTextInhalt",
+                             foreign_keys=[fp_objekt_id],
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    # BP_BaugebietsTeilFlaeche [0..*] (v6)
+    bp_baugebiet_id = Column(UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
+    bp_baugebiet = relationship("BP_BaugebietsTeilFlaeche", back_populates="abweichungText_v6",
+                                foreign_keys=[bp_baugebiet_id],
+                                info={'xplan_version': XPlanVersion.SIX})
+
+    # BP_NebenanlagenAusschlussFlaeche [0..*] (v6)
+    bp_nebenanlagen_ausschluss_flaeche_id = Column(UUID(as_uuid=True),
+                                                   ForeignKey('bp_nebenanlagen_ausschluss_flaeche.id',
+                                                              ondelete='CASCADE'))
+    bp_nebenanlagen_ausschluss_flaeche = relationship("BP_NebenanlagenAusschlussFlaeche",
+                                                      back_populates="abweichungText_v6",
+                                                      foreign_keys=[bp_nebenanlagen_ausschluss_flaeche_id],
+                                                      info={'xplan_version': XPlanVersion.SIX})
+
+    # BP_WohngebaeudeFlaeche [0..*] (v6)
+    bp_wohngebaeude_flaeche_id = Column(UUID(as_uuid=True),
+                                        ForeignKey('bp_wohngebaeude_flaeche.id', ondelete='CASCADE'))
+    bp_wohngebaeude_flaeche = relationship("BP_WohngebaeudeFlaeche", back_populates="abweichungText",
+                                           foreign_keys=[bp_wohngebaeude_flaeche_id])
+
+    @classmethod
+    def avoid_export(cls):
+        return ['xp_plan', 'xp_bereich', 'xp_objekt', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
+                'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche']
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

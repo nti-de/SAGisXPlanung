@@ -4,9 +4,10 @@ import os
 from qgis.PyQt import QtWidgets, uic, QtCore
 from sqlalchemy.orm.exc import DetachedInstanceError
 
+from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput
-from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
+from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, WidgetContext
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/XPlanung_edit_attribute.ui'))
 logger = logging.getLogger(__name__)
@@ -19,22 +20,10 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
     attributeChanged = QtCore.pyqtSignal(object, object)  # old_value, new_value
     fileChanged = QtCore.pyqtSignal(object)
 
-    def __init__(self, attribute_name, field_type, original_value, parent_xtype, set_default=True, parent=None):
-        """
-        Parameters
-        ----------
-        attribute_name: str
-            Name des XPlanung-Attributs
-        field_type: any
-            Spaltentyp, entweder aus sqlalchemy.types oder XPlanung.XPlan.types
-        original_value:
-            Wert des Attributs vor einer Änderung
-        parent_xtype:
-            XPlanung-Objektklasse
-        """
+    def __init__(self, attribute_name, field_type, original_value, xplan_item: XPlanungItem, set_default=True, parent=None):
         super(XPEditAttributeDialog, self).__init__(parent)
 
-        self.parent_xtype = parent_xtype
+        self.xplan_item = xplan_item
         self.setupUi(self)
         self.attribute_name = attribute_name
         self.field_type = field_type
@@ -43,7 +32,12 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.discard_button = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
         self.discard_button.clicked.connect(lambda s: self.setOriginalValue())
 
-        self.control: BaseInputElement = BaseInputElement.create(self.field_type, self)
+        context = WidgetContext(
+            xplan_item=self.xplan_item,
+            attribute_name=attribute_name
+        )
+
+        self.control: BaseInputElement = BaseInputElement.create(self.field_type, self, context)
         if set_default:
             self.setOriginalValue()
 
@@ -52,8 +46,8 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.gbAttribute.setTitle(self.attribute_name)
         self.gbAttribute.installEventFilter(self)
 
-        if self.parent_xtype and self.attribute_name:
-            tooltip = xplan_tooltip(self.parent_xtype, self.attribute_name)
+        if self.xplan_item and self.attribute_name:
+            tooltip = xplan_tooltip(self.xplan_item.xtype, self.attribute_name)
             self.gbAttribute.setToolTip(tooltip)
 
     def setOriginalValue(self):

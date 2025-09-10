@@ -56,3 +56,44 @@ class RP_Rechtsstand(XPlanungEnumMixin, Enum):
     TeilweiseAusserKraft = 5500, XPlanVersion.SIX
     AusserKraft = 6000
     PlanUngueltig = 7000
+
+
+# 5.3
+class RP_Rechtscharakter(XPlanungEnumMixin, Enum):
+    """ Rechtliche Charakterisierung des Planinhaltes """
+
+    ZielDerRaumordnung = 1000
+    GrundsatzDerRaumordnung = 2000
+    NachrichtlicheUebernahme = 3000
+    NachrichtlicheUebernahmeZiel = 4000
+    NachrichtlicheUebernahmeGrundsatz = 5000
+    NurInformationsgehalt = 6000
+    TextlichesZiel = 7000
+    ZielundGrundsatz = 8000
+    Vorschlag = 9000
+    Unbekannt = 9998
+
+    def to_xp_rechtscharakter(self):
+        from SAGisXPlanung.XPlan.enums import XP_Rechtscharakter
+
+        if self.value == 1000:
+            return XP_Rechtscharakter.ZielDerRaumordnung
+        elif self.value == 2000:
+            return XP_Rechtscharakter.GrundsatzDerRaumordnung
+        elif self.value == 3000:
+            return XP_Rechtscharakter.NachrichtlicheUebernahme
+        elif self.value == 4000:
+            return XP_Rechtscharakter.NachrichtlicheUebernahmeZiel
+        elif self.value == 5000:
+            return XP_Rechtscharakter.NachrichtlicheUebernahmeGrundsatz
+        elif self.value == 6000:
+            return XP_Rechtscharakter.NurInformationsgehaltRPlan
+        elif self.value == 7000:
+            return XP_Rechtscharakter.TextlichesZielRaumordnung
+        elif self.value == 8000:
+            return XP_Rechtscharakter.ZielUndGrundsatzRaumordnung
+        elif self.value == 9000:
+            return XP_Rechtscharakter.VorschlagRaumordnung
+        elif self.value == 9998:
+            return XP_Rechtscharakter.Unbekannt
+

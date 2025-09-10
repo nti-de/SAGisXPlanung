@@ -70,7 +70,7 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
         if geom_type == QgsWkbTypes.PointGeometry:
             return icon_renderer('Gruen', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Landwirtschaft_Wald_und_Gruenflaechen', geometry_type=geom_type,
-                                 symbol_size=30)
+                                 scale_factor=5)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

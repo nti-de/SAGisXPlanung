@@ -15,10 +15,11 @@ from qgis.PyQt.QtCore import Qt
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import BP_Rechtscharakter_EnumType
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
-from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
+from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_GesetzlicheGrundlageAssoc
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Verfahren, BP_Rechtsstand, BP_PlanArt, BP_Rechtscharakter
 from SAGisXPlanung.XPlan.types import XPEnum, GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -123,10 +124,9 @@ class BP_Plan(XP_Plan):
                                     'xplan_version': XPlanVersion.SIX,
                                     'form-type': 'inline'
                                 })
-    versionSonstRechtsgrundlage_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                           info={'xplan_version': XPlanVersion.SIX})
+
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="bp_bau_sonst",
-                                               foreign_keys=[versionSonstRechtsgrundlage_id],
+                                               secondary=XP_PlanXP_GesetzlicheGrundlageAssoc,
                                                info={
                                                    'xplan_version': XPlanVersion.SIX,
                                                    'form-type': 'inline'
@@ -248,6 +248,11 @@ class BP_Objekt(XP_Objekt):
     rechtscharakter = Column(BP_Rechtscharakter_EnumType(BP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
+    # XP_TextAbschnitt [0..*] (v5.3)
+    refTextInhalt = relationship("XP_TextAbschnitt", back_populates="bp_objekt",
+                                 cascade="all, delete", passive_deletes=True,
+                                 info={'xplan_version': XPlanVersion.FIVE_THREE})
+
     position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
                                                         name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
@@ -270,3 +275,39 @@ class BP_Objekt(XP_Objekt):
     def hidden_inputs(cls):
         h = super(BP_Objekt, cls).hidden_inputs()
         return h + ['position']
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class BP_TextAbschnitt(XP_TextAbschnitt):
+    """ Texlich formulierter Inhalt eines Bebauungsplans, der einen anderen Rechtscharakter als das zugrunde liegende
+        Fachobjekt hat (Attribut rechtscharakter des Fachobjektes), oder dem Plan als Ganzes zugeordnet ist. """
+
+    __tablename__ = 'bp_text_abschnitt'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+    __avoidRelation__ = ['bp_baugebiet', 'bp_nebenanlagen_ausschluss_flaeche']
+
+    id = Column(ForeignKey("xp_text_abschnitt.id", ondelete='CASCADE'), primary_key=True)
+
+    rechtscharakter = Column(BP_Rechtscharakter_EnumType(BP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    # BP_BaugebietsTeilFlaeche [0..*] (v5.3)
+    bp_baugebiet_id = Column(UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
+    bp_baugebiet = relationship("BP_BaugebietsTeilFlaeche", back_populates="abweichungText_v5",
+                                foreign_keys=[bp_baugebiet_id],
+                                info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    # BP_NebenanlagenAusschlussFlaeche [0..*] (v5.3)
+    bp_nebenanlagen_ausschluss_flaeche_id = Column(UUID(as_uuid=True),
+                                                   ForeignKey('bp_nebenanlagen_ausschluss_flaeche.id',
+                                                              ondelete='CASCADE'))
+    bp_nebenanlagen_ausschluss_flaeche = relationship("BP_NebenanlagenAusschlussFlaeche",
+                                                      back_populates="abweichungText_v5",
+                                                      foreign_keys=[bp_nebenanlagen_ausschluss_flaeche_id],
+                                                      info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

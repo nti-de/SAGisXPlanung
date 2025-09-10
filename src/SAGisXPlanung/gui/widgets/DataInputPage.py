@@ -176,7 +176,8 @@ class DataInputPage(QtWidgets.QScrollArea):
 
             if form_type == 'inline' or mapper_property.secondary:
                 stub = namedtuple('stub', ['cls_type'])
-                control = QAddRelationDropdown(stub(cls_type=self.cls_type), (attr_name, mapper_property))
+                control = QAddRelationDropdown(stub(cls_type=self.cls_type), (attr_name, mapper_property),
+                                               parent=self)
 
                 return label, control
 

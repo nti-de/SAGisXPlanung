@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from enum import Flag, auto
 from typing import List
@@ -5,6 +6,8 @@ from typing import List
 from sqlalchemy import Column
 
 from SAGisXPlanung import XPlanVersion
+
+logger = logging.getLogger(__name__)
 
 
 class LayerPriorityType(Flag):

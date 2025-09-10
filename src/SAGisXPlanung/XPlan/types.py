@@ -28,6 +28,13 @@ class XPlanungMeasureType:
     pass
 
 
+class XPathField(types.TypeDecorator):
+    """ Datentyp für XPath-Attribut """
+    impl = types.String
+    python_type = str
+    cache_ok = True
+
+
 class LargeString(types.TypeDecorator):
     """ Datentyp für lange textliche Beschreibungen """
     impl = types.String
@@ -37,7 +44,6 @@ class LargeString(types.TypeDecorator):
 
 class RefURL(types.TypeDecorator):
     """ Datentyp für URLs zu externen Referenzen """
-
     impl = types.String
     python_type = str
     cache_ok = True

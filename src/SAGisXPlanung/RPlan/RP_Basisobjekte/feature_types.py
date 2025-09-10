@@ -6,10 +6,13 @@ from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, Integer
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from SAGisXPlanung.RPlan.RP_Basisobjekte.enums import RP_Art, RP_Rechtsstand, RP_Verfahren
+from SAGisXPlanung import XPlanVersion
+from SAGisXPlanung.RPlan.RP_Basisobjekte.enums import RP_Art, RP_Rechtsstand, RP_Verfahren, RP_Rechtscharakter
+from SAGisXPlanung.XPlan.conversions import RP_Rechtscharakter_EnumType
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.types import GeometryType
 
 
@@ -91,3 +94,22 @@ class RP_Bereich(XP_Bereich):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         return QgsSingleSymbolRenderer(symbol)
 
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class RP_TextAbschnitt(XP_TextAbschnitt):
+    """ Texlich formulierter Inhalt eines Raumordnungsplans, der einen anderen Rechtscharakter als das zugrunde
+        liegende Fachobjekt hat (Attribut rechtscharakter des Fachobjektes), oder dem Plan als Ganzes zugeordnet ist. """
+
+    __tablename__ = 'rp_text_abschnitt'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("xp_text_abschnitt.id", ondelete='CASCADE'), primary_key=True)
+
+    rechtscharakter = Column(RP_Rechtscharakter_EnumType(RP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

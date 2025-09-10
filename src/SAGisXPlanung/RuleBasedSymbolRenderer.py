@@ -7,8 +7,8 @@ from qgis.core import QgsRuleBasedRenderer
 
 class RuleBasedSymbolRenderer(QgsRuleBasedRenderer):
 
-    def __init__(self, icon_map, base_symbology: QgsSymbol, category: str, symbol_size=12,
-                 geometry_type=QgsWkbTypes.PolygonGeometry):
+    def __init__(self, icon_map, base_symbology: QgsSymbol, category: str, symbol_size=6,
+                 geometry_type=QgsWkbTypes.PolygonGeometry, scale_factor=1):
         super().__init__(QgsSymbol.defaultSymbol(geometry_type))
 
         root_rule = self.rootRule()
@@ -24,8 +24,8 @@ class RuleBasedSymbolRenderer(QgsRuleBasedRenderer):
                 rule.setFilterExpression(expression)
 
                 path = os.path.abspath(os.path.join(os.path.dirname(__file__), f'symbole/{category}/{svg_file}'))
-                svg_symbol_layer = QgsSvgMarkerSymbolLayer(path, size=self.symbol_size)
-                size_prop = QgsProperty.fromExpression(f'"skalierung" * 2 * {self.symbol_size}')
+                svg_symbol_layer = QgsSvgMarkerSymbolLayer(path)
+                size_prop = QgsProperty.fromExpression(f'coalesce("skalierung", 1) * {self.symbol_size} * {scale_factor}')
                 angle_prop = QgsProperty.fromField("drehwinkel")
                 svg_symbol_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertySize, size_prop)
                 svg_symbol_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyAngle, angle_prop)

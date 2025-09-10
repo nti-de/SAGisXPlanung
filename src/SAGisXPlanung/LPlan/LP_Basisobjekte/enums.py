@@ -33,3 +33,33 @@ class LP_Raumkonkretisierung(XPlanungEnumMixin, Enum):
     Raumunkonkret = 5000
     Unbekannt = 9998
 
+
+# 5.3
+class LP_Rechtscharakter(XPlanungEnumMixin, Enum):
+    """ Rechtliche Charakterisierung des Planinhaltes """
+
+    Festsetzung = 1000
+    Geplant = 2000
+    NachrichtlicheUebernahme = 3000
+    DarstellungKennzeichnung = 4000
+    FestsetzungInBPlan = 5000
+    Unbekannt = 9998
+    SonstigerStatus = 9999
+
+    def to_xp_rechtscharakter(self):
+        from SAGisXPlanung.XPlan.enums import XP_Rechtscharakter
+
+        if self.value == 1000:
+            return XP_Rechtscharakter.FestsetzungImLP
+        elif self.value == 2000:
+            return XP_Rechtscharakter.GeplanteFestsetzungImLP
+        elif self.value == 3000:
+            return XP_Rechtscharakter.NachrichtlicheUebernahme
+        elif self.value == 4000:
+            return XP_Rechtscharakter.DarstellungKennzeichnungImLP
+        elif self.value == 5000:
+            return XP_Rechtscharakter.FestsetzungBPlan
+        elif self.value == 9998:
+            return XP_Rechtscharakter.Unbekannt
+        elif self.value == 9998:
+            return XP_Rechtscharakter.Sonstiges

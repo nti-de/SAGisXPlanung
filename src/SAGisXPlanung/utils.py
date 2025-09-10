@@ -16,11 +16,12 @@ from SAGisXPlanung import Session, Base
 from SAGisXPlanung.BPlan.BP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import BP_AbgrabungsFlaeche, \
     BP_AufschuettungsFlaeche
 from SAGisXPlanung.BPlan.BP_Basisobjekte.data_types import BP_VeraenderungssperreDaten
-from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt
+from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt, BP_TextAbschnitt
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
     BP_KomplexeZweckbestNebenanlagen
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
-    BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche
+    BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche, \
+    BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -40,7 +41,7 @@ from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlae
     BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt
 from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche
 from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import FP_Abgrabung, FP_Aufschuettung
-from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt
+from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt, FP_TextAbschnitt
 from SAGisXPlanung.FPlan.FP_Bebauung.data_types import FP_KomplexeSondernutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.data_types import FP_KomplexeZweckbestGemeinbedarf, \
@@ -55,8 +56,8 @@ from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt,
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
-from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser
-from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich, LP_Objekt
+from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser, FP_Wasserwirtschaft
+from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich, LP_Objekt, LP_TextAbschnitt
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.data_types import LP_EingriffsregelungKomplex, \
     LP_TypBioVerbundKomplex
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.feature_types import LP_BiotopverbundBiotopvernetzung, \
@@ -74,13 +75,15 @@ from SAGisXPlanung.LPlan.LP_SchutzgebieteBestandteileNaturschutzrecht.feature_ty
     LP_SchutzBestimmterTeileVonNaturUndLandschaft
 from SAGisXPlanung.LPlan.LP_Sonstiges.codelists import LP_ZweckbestimmungGenerischeObjekte
 from SAGisXPlanung.LPlan.LP_Sonstiges.feature_types import LP_TextAbschnittObjekt, LP_GenerischesObjekt
-from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Plan
+from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Plan, RP_TextAbschnitt
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
+from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte.feature_types import SO_TextAbschnitt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import SO_Schienenverkehrsrecht, SO_Denkmalschutzrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.data_types import SO_KomplexeZweckbestStrassenverkehr, \
     SO_KomplexeFestlegungGewaesser
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr, SO_Gewaesser, \
-    SO_Wasserwirtschaft, SO_Luftverkehrsrecht, SO_SonstigesRecht, SO_Strassenverkehrsrecht, SO_Wasserrecht
+    SO_Wasserwirtschaft, SO_Luftverkehrsrecht, SO_SonstigesRecht, SO_Strassenverkehrsrecht, SO_Wasserrecht, \
+    SO_Bodenschutzrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
@@ -89,7 +92,7 @@ from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneRe
                                             XP_Gemeinde,
                                             XP_Plangeber, XP_GesetzlicheGrundlage, XP_SPEMassnahmenDaten,
                                             XP_Hoehenangabe, XP_VerbundenerPlan)
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.simple_depth import XP_SimpleGeometry
 
 logger = logging.getLogger(__name__)
@@ -121,6 +124,7 @@ CLASSES = {
     'XP_Nutzungsschablone': XP_Nutzungsschablone,
     'XP_Hoehenangabe': XP_Hoehenangabe,
     'XP_SimpleGeometry': XP_SimpleGeometry,
+    'XP_TextAbschnitt': XP_TextAbschnitt,
 
     'BP_Objekt': BP_Objekt,
     'BP_GenerischesObjekt': BP_GenerischesObjekt,
@@ -161,6 +165,9 @@ CLASSES = {
     'BP_AufschuettungsFlaeche': BP_AufschuettungsFlaeche,
     'BP_KennzeichnungsFlaeche': BP_KennzeichnungsFlaeche,
     'BP_UeberbaubareGrundstuecksFlaeche': BP_UeberbaubareGrundstuecksFlaeche,
+    'BP_TextAbschnitt': BP_TextAbschnitt,
+    'BP_NebenanlagenAusschlussFlaeche': BP_NebenanlagenAusschlussFlaeche,
+    'BP_WohngebaeudeFlaeche': BP_WohngebaeudeFlaeche,
 
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,
@@ -173,6 +180,7 @@ CLASSES = {
     'FP_WaldFlaeche': FP_WaldFlaeche,
     'FP_Strassenverkehr': FP_Strassenverkehr,
     'FP_Gewaesser': FP_Gewaesser,
+    'FP_Wasserwirtschaft': FP_Wasserwirtschaft,
     'FP_VerEntsorgung': FP_VerEntsorgung,
     'FP_Abgrabung': FP_Abgrabung,
     'FP_Aufschuettung': FP_Aufschuettung,
@@ -185,11 +193,13 @@ CLASSES = {
     'FP_KomplexeZweckbestWald': FP_KomplexeZweckbestWald,
     'FP_KomplexeZweckbestVerEntsorgung': FP_KomplexeZweckbestVerEntsorgung,
     'FP_PrivilegiertesVorhaben': FP_PrivilegiertesVorhaben,
+    'FP_TextAbschnitt': FP_TextAbschnitt,
 
     'SO_Objekt': SO_Objekt,
     'SO_Strassenverkehrsrecht': SO_Strassenverkehrsrecht,
     'SO_Schienenverkehrsrecht': SO_Schienenverkehrsrecht,
     'SO_Denkmalschutzrecht': SO_Denkmalschutzrecht,
+    'SO_Bodenschutzrecht': SO_Bodenschutzrecht,
     'SO_Luftverkehrsrecht': SO_Luftverkehrsrecht,
     'SO_SchutzgebietWasserrecht': SO_SchutzgebietWasserrecht,
     'SO_SchutzgebietNaturschutzrecht': SO_SchutzgebietNaturschutzrecht,
@@ -200,9 +210,11 @@ CLASSES = {
     'SO_Strassenverkehr': SO_Strassenverkehr,
     'SO_KomplexeZweckbestStrassenverkehr': SO_KomplexeZweckbestStrassenverkehr,
     'SO_SonstigesRecht': SO_SonstigesRecht,
+    'SO_TextAbschnitt': SO_TextAbschnitt,
 
     # 5.1 LP_Basisobjekte
     'LP_Objekt': LP_Objekt,
+    'LP_TextAbschnitt': LP_TextAbschnitt,
     # 5.2 LP_SchutzgebieteBestandteileNaturschutzrecht
     'LP_SchutzBestimmterTeileVonNaturUndLandschaft': LP_SchutzBestimmterTeileVonNaturUndLandschaft,
     'LP_DetailGesetzlGeschBiotopLR': LP_DetailGesetzlGeschBiotopLR,
@@ -236,7 +248,10 @@ CLASSES = {
     'LP_GenerischesObjekt': LP_GenerischesObjekt,
     'LP_TextAbschnittObjekt': LP_TextAbschnittObjekt,
     'LP_ZweckbestimmungGenerischeObjekte': LP_ZweckbestimmungGenerischeObjekte,
+
+    'RP_TextAbschnitt': RP_TextAbschnitt,
 }
+
 
 PRE_FILLED_CLASSES = [
     XP_Gemeinde,
@@ -250,7 +265,7 @@ OBJECT_BASE_TYPES = [
 ]
 
 PLAN_BASE_TYPES = [
-    BP_Plan, FP_Plan, RP_Plan, LP_Plan
+    BP_Plan, FP_Plan, LP_Plan, RP_Plan
 ]
 
 
@@ -350,3 +365,46 @@ def is_url(url):
         return all([result.scheme, result.netloc])
     except ValueError:
         return False
+
+
+def caller_name(skip=1):
+    """Get a name of a caller in the format module.class.method
+
+       `skip` specifies how many levels of stack to skip while getting caller
+       name. skip=1 means "who calls me", skip=2 "who calls my caller" etc.
+
+       An empty string is returned if skipped levels exceed stack height
+    """
+    stack = inspect.stack()
+    start = 0 + skip
+    if len(stack) < start + 1:
+        return ''
+    parentframe = stack[start][0]
+
+    name = []
+    module = inspect.getmodule(parentframe)
+    if module:
+        name.append(module.__name__)
+    # detect classname
+    if 'self' in parentframe.f_locals:
+        name.append(parentframe.f_locals['self'].__class__.__name__)
+    codename = parentframe.f_code.co_name
+    if codename != '<module>':  # top level usually
+        name.append(codename)  # function or a method
+    # Avoid circular refs and frame leaks
+    #  https://docs.python.org/2.7/library/inspect.html#the-interpreter-stack
+    del parentframe, stack
+
+    return ".".join(name)
+
+
+def open_directory_explorer(dir_path: str, create_dir=False):
+    if create_dir:
+        os.makedirs(dir_path, exist_ok=True)
+
+    if sys.platform == "win32":  # win
+        os.startfile(dir_path)
+    elif sys.platform == "darwin":  # mac
+        subprocess.Popen(["open", dir_path])
+    else:  # linux
+        subprocess.Popen(["xdg-open", dir_path])

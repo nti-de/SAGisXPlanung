@@ -13,10 +13,11 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_PlanArt, FP_Verfahren, FP_Rechtsstand, FP_Rechtscharakter
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.conversions import FP_Rechtscharakter_EnumType
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
-from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
+from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_GesetzlicheGrundlageAssoc
 from SAGisXPlanung.XPlan.enums import XP_Rechtscharakter
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.config import export_version
 
@@ -90,12 +91,12 @@ class FP_Plan(XP_Plan):
                                     'xplan_version': XPlanVersion.SIX,
                                     'form-type': 'inline'
                                 })
-    versionSonstRechtsgrundlage_id = Column(UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'),
-                                           info={'xplan_version': XPlanVersion.SIX})
+
     versionSonstRechtsgrundlage = relationship("XP_GesetzlicheGrundlage", back_populates="fp_bau_sonst",
-                                               foreign_keys=[versionSonstRechtsgrundlage_id], info={
-                                                    'xplan_version': XPlanVersion.SIX,
-                                                    'form-type': 'inline'
+                                               secondary=XP_PlanXP_GesetzlicheGrundlageAssoc,
+                                               info={
+                                                   'xplan_version': XPlanVersion.SIX,
+                                                   'form-type': 'inline'
                                                })
 
     bereich = relationship("FP_Bereich", back_populates="gehoertZuPlan", cascade="all, delete", doc='Bereich')
@@ -163,6 +164,12 @@ class FP_Objekt(XP_Objekt):
 
     rechtscharakter = Column(FP_Rechtscharakter_EnumType(FP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    # XP_TextAbschnitt [0..*] (v5.3)
+    refTextInhalt = relationship("XP_TextAbschnitt", back_populates="fp_objekt",
+                                 cascade="all, delete", passive_deletes=True,
+                                 info={'xplan_version': XPlanVersion.FIVE_THREE})
+
     vonGenehmigungAusgenommen = Column(Boolean)
 
     position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
@@ -197,3 +204,23 @@ class FP_Objekt(XP_Objekt):
     def hidden_inputs(cls):
         h = super(FP_Objekt, cls).hidden_inputs()
         return h + ['position']
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class FP_TextAbschnitt(XP_TextAbschnitt):
+    """ Texlich formulierter Inhalt eines Flächennutzungsplans, der einen anderen Rechtscharakter als das zugrunde
+        liegende Fachobjekt hat (Attribut rechtscharakter des Fachobjektes), oder dem Plan als Ganzes zugeordnet ist """
+
+    __tablename__ = 'fp_text_abschnitt'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("xp_text_abschnitt.id", ondelete='CASCADE'), primary_key=True)
+
+    rechtscharakter = Column(FP_Rechtscharakter_EnumType(FP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

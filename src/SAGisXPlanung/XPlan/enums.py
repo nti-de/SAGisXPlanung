@@ -257,6 +257,18 @@ class XP_ZweckbestimmungGewaesser(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
 
 
+class XP_ZweckbestimmungWasserwirtschaft(XPlanungEnumMixin, Enum):
+    """ Zweckbestimmungen für Wasserwirtschaft"""
+
+    HochwasserRueckhaltebecken = 1000
+    Ueberschwemmgebiet = 1100
+    Versickerungsflaeche = 1200
+    Entwaesserungsgraben = 1300
+    Deich = 1400
+    RegenRueckhaltebecken = 1500
+    Sonstiges = 9999
+
+
 class XP_ZweckbestimmungVerEntsorgung(XPlanungEnumMixin, Enum):
     """ Zweckbestimmungen für Ver-/Entsorgungsflächen"""
 
@@ -348,7 +360,7 @@ class XP_ABEMassnahmenTypen(XPlanungEnumMixin, Enum):
 
     BindungErhaltung = 1000
     Anpflanzung = 2000
-    # AnpflanzungBindungErhaltung = 3000  # TODO: does this even make sense?
+    AnpflanzungBindungErhaltung = 3000
 
 
 class XP_AnpflanzungBindungErhaltungsGegenstand(XPlanungEnumMixin, Enum):
@@ -617,6 +629,19 @@ class XP_ArtHoehenbezug(XPlanungEnumMixin, Enum):
     relativBezugshoehe = 3000
     relativStrasse = 3500
     relativEFH = 4000, XPlanVersion.SIX
+
+    def short_desc(self):
+        _abbreviation_map = {
+            XP_ArtHoehenbezug.absolutNHN: 'NHN',
+            XP_ArtHoehenbezug.absolutNN: 'NN',
+            XP_ArtHoehenbezug.absolutDHHN: 'DHHN',
+            XP_ArtHoehenbezug.relativGelaendeoberkante: 'GOK',
+            XP_ArtHoehenbezug.relativGehwegOberkante: 'Gehweg',
+            XP_ArtHoehenbezug.relativBezugshoehe: '',
+            XP_ArtHoehenbezug.relativStrasse: 'Straße',
+            XP_ArtHoehenbezug.relativEFH: 'EFH'
+        }
+        return _abbreviation_map.get(self, None)
 
 
 class XP_ArtHoehenbezugspunkt(XPlanungEnumMixin, Enum):

@@ -43,6 +43,12 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     grundstueck_ueberbaubar_id = Column(UUID(as_uuid=True), ForeignKey('bp_grundstueck_ueberbaubar.id', ondelete='CASCADE'))
     grundstueck_ueberbaubar = relationship('BP_UeberbaubareGrundstuecksFlaeche', back_populates='dachgestaltung')
 
+    # BP_WohngebaeudeFlaeche [0..*] (v6)
+    bp_wohngebaeude_flaeche_id = Column(UUID(as_uuid=True),
+                                        ForeignKey('bp_wohngebaeude_flaeche.id', ondelete='CASCADE'))
+    bp_wohngebaeude_flaeche = relationship('BP_WohngebaeudeFlaeche', back_populates='dachgestaltung',
+                                           info={'xplan_version': XPlanVersion.SIX})
+
     @classmethod
     def avoid_export(cls):
         return ['baugebiet', 'besondere_nutzung', 'gemeinbedarf', 'grundstueck_ueberbaubar']
@@ -82,6 +88,7 @@ class BP_KomplexeSondernutzung(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['baugebiet']
+
 
 class BP_KomplexeZweckbestNebenanlagen(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Zweckbestimmung einer Nebenanlagenfläche. """

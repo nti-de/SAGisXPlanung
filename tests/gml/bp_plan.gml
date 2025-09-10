@@ -75,6 +75,7 @@
         </xplan:XP_Plangeber>
       </xplan:plangeber>
       <xplan:planArt>1000</xplan:planArt>
+      <xplan:sonstPlanArt codeSpace="https://registry.gdi-de.org/codelist/de.xleitstelle.xplanung/BP_SonstPlanArt">FluchtlinienPlan</xplan:sonstPlanArt>
       <xplan:verfahren>1000</xplan:verfahren>
       <xplan:rechtsstand>1000</xplan:rechtsstand>
       <xplan:verlaengerungVeraenderungssperre>1000</xplan:verlaengerungVeraenderungssperre>

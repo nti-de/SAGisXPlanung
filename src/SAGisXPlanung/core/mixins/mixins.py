@@ -2,7 +2,7 @@ import logging
 from inspect import signature
 from typing import Tuple, Union, Any, Iterator, Iterable
 
-from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsEditorWidgetSetup, QgsAnnotationLayer,
+from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsAnnotationLayer,
                        QgsWkbTypes)
 from qgis.PyQt.QtCore import QVariant
 from sqlalchemy.orm import RelationshipProperty, interfaces, ColumnProperty
@@ -14,6 +14,7 @@ from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
+from SAGisXPlanung.core.helper import find_true_class
 
 try:
     from functools import cache
@@ -44,7 +45,8 @@ class RelationshipMixin:
         for rel in self.__class__.relationships():
             if next(iter(rel[1].remote_side)).primary_key or rel[1].secondary is not None:
                 continue
-            if not self.__class__.attr_fits_version(rel[0], export_version()):
+            cls = find_true_class(self.__class__, rel[0])
+            if cls is None or not cls.attr_fits_version(rel[0], export_version()):
                 continue
             if rel[1].info.get('link') == 'xlink-only':
                 continue
@@ -234,6 +236,8 @@ class ElementOrderMixin:
 
         if ret_fmt == 'sqla':
             return [(ins.key, ins.property) for ins in result_order]
+        elif ret_fmt == 'xplan':
+            return [cls.xplan_attribute_name(ins.key) for ins in result_order]
         else:
             return [ins.key for ins in result_order]
 
@@ -373,11 +377,7 @@ class MapCanvasMixin:
         layer.setCustomProperty("skipMemoryLayersCheck", 1)
         layer.setCustomProperty('xplanung/type', cls.__name__)
         layer.setCustomProperty('xplanung/plan-xid', str(plan_xid))
-
-        from SAGisXPlanung.XPlan.feature_types import XP_Objekt
-
-        if issubclass(cls, XP_Objekt):
-            layer.setReadOnly(True)
+        layer.setCustomProperty('xplanung/layer-priority', cls.__LAYER_PRIORITY__)
 
         if hasattr(cls, 'renderer'):
             if signature(cls.renderer).parameters.get("geom_type"):
@@ -394,12 +394,13 @@ class MapCanvasMixin:
         layer.dataProvider().addAttributes(fields)
         layer.updateFields()
 
-        for i, field_name in enumerate(field_names):
-            # exclude relationship columns
-            if (rel := next((r for r in cls.relationships() if r[0] == field_name), None)) is not None:
-                continue
+        form_config = layer.editFormConfig()
+        for i in range(len(fields)):
+            form_config.setReadOnly(i, True)
+        layer.setEditFormConfig(form_config)
 
-            widget_setup = QgsEditorWidgetSetup('Hidden', {})
-            layer.setEditorWidgetSetup(i, widget_setup)
+        # allow class to attach event listeners or customize the layer in a custom hook
+        if hasattr(cls, 'on_layer_created'):
+            cls.on_layer_created(layer)
 
         return layer

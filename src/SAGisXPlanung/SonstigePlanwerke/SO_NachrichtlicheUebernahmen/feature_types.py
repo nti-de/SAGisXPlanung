@@ -1,5 +1,6 @@
 from qgis.PyQt.QtCore import Qt, QSize
 from qgis.PyQt.QtGui import QColor
+from qgis._core import QgsMarkerSymbolLayer
 from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes, Qgis,
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase)
@@ -16,7 +17,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, \
     SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht, \
-    SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht
+    SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht, SO_KlassifizNachBodenschutzrecht
 from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
@@ -69,6 +70,72 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(48, 48))
 
 
+class SO_Bodenschutzrecht(MixedGeometry, SO_Objekt):
+    """ Festlegung nach Bodenschutzrecht """
+
+    __tablename__ = 'so_bodenschutz'
+    __mapper_args__ = {
+        'polymorphic_identity': 'so_bodenschutz',
+    }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizNachBodenschutzrecht, include_default=True))
+
+    istVerdachtsflaeche = Column(Boolean)
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        border.setWidth(0.5)
+        border.setOffset(0.25)
+        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        border.setPenJoinStyle(Qt.MiterJoin)
+
+        if Qgis.versionInt() >= 32400:
+            shape = Qgis.MarkerShape.Cross
+        else:
+            shape = QgsSimpleMarkerSymbolLayerBase.Cross
+
+        cross_symbol = QgsSimpleMarkerSymbolLayer(
+            shape=shape,
+            color=QColor('#000000'),
+            strokeColor=QColor('#000000'),
+            size=5
+        )
+        cross_symbol.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        cross_symbol.setVerticalAnchorPoint(QgsMarkerSymbolLayer.Bottom)
+        cross_symbol.setStrokeWidth(0.5)
+        cross_symbol.setAngle(45)
+
+        marker_line = QgsMarkerLineSymbolLayer(interval=10)
+        marker_line.setAverageAngleLength(0)
+        marker_line.setOffset(2)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_symbol = QgsMarkerSymbol()
+        marker_symbol.deleteSymbolLayer(0)
+        marker_symbol.appendSymbolLayer(cross_symbol)
+        marker_line.setSubSymbol(marker_symbol)
+
+        symbol.appendSymbolLayer(border)
+        symbol.appendSymbolLayer(marker_line)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
 class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     """ Festlegung nach Denkmalschutzrecht """
 
@@ -81,6 +148,7 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     artDerFestlegung = Column(Enum(SO_KlassifizNachDenkmalschutzrecht))
+
     weltkulturerbe = Column(Boolean)
     name = Column(String)
     nummer = Column(String)
@@ -116,7 +184,7 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
         if geom_type == QgsWkbTypes.PointGeometry:
             return icon_renderer('Denkmalschutz', QgsSymbol.defaultSymbol(geom_type),
                                  'SO_SonstigeGebiete', geometry_type=geom_type,
-                                 symbol_size=30)
+                                 scale_factor=5)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
@@ -343,7 +411,7 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
-            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser', symbol_size=20)
+            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser')
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
@@ -398,6 +466,8 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': 'so_luftverkehr',
     }
+
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 

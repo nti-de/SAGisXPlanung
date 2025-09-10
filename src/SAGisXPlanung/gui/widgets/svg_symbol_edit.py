@@ -11,7 +11,7 @@ from qgis.core import QgsApplication
 from qgis.gui import QgsSvgSelectorWidget
 
 from SAGisXPlanung import BASE_DIR
-from SAGisXPlanung.config import SVG_CONFIG
+from SAGisXPlanung.config import PPO_CONFIG
 
 
 class SVGSymbolDisplayWidget(QGroupBox):
@@ -31,7 +31,7 @@ class SVGSymbolDisplayWidget(QGroupBox):
         self.svg_widget.svg_selection_rejected.connect(self.onSvgSelectionRejected)
 
         file_name = Path(svg_path).name
-        symbol_node = SVG_CONFIG.get(file_name, "")
+        symbol_node = PPO_CONFIG.get(file_name, "")
         self.current_name = symbol_node['name'] if symbol_node else 'Fehlerhaftes Symbol'
         self.current_category = symbol_node['category'] if symbol_node else ''
         self.label_name = QLabel(self.current_name)
@@ -72,7 +72,7 @@ class SVGSymbolDisplayWidget(QGroupBox):
     @qasync.asyncSlot(str)
     async def onSvgSelectionSaved(self, path):
         file_name = Path(path).name
-        symbol_node = SVG_CONFIG.get(file_name, "")
+        symbol_node = PPO_CONFIG.get(file_name, "")
         if not symbol_node:
             return
         self.current_name = symbol_node['name']
@@ -82,7 +82,7 @@ class SVGSymbolDisplayWidget(QGroupBox):
     @qasync.asyncSlot(str)
     async def onSvgSelected(self, path: str):
         file_name = Path(path).name
-        symbol_node = SVG_CONFIG.get(file_name, "")
+        symbol_node = PPO_CONFIG.get(file_name, "")
         if not symbol_node:
             return
 
@@ -197,7 +197,7 @@ class QSymbolSelectionDialog(QDialog):
     @qasync.asyncSlot(str)
     async def onSvgSelected(self, path: str):
         file_name = Path(path).name
-        symbol_node = SVG_CONFIG.get(file_name, "")
+        symbol_node = PPO_CONFIG.get(file_name, "")
         if not symbol_node:
             self.error_label.setText('Dieses Symbol gehört nicht zum Symbolkatalog von SAGis XPlanung!')
             self.buttons.button(QDialogButtonBox.Save).setEnabled(False)
@@ -209,7 +209,7 @@ class QSymbolSelectionDialog(QDialog):
 
     def accept(self):
         file_name = Path(self.svg_widget.currentSvgPath()).name
-        symbol_node = SVG_CONFIG[file_name]
+        symbol_node = PPO_CONFIG[file_name]
 
         self.svg_selection_saved.emit(os.path.join('symbole', symbol_node['category'], file_name))
 

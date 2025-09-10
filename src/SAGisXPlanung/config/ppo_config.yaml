@@ -1,0 +1,1228 @@
+
+#region BP_Bebauung
+
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_1.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 1
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_2.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 2
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_3.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 3
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_4.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 4
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_5.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 5
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_6.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 6
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_7.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 7
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_8.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 8
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_9.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 9
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_10.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 10
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_11.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 11
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_12.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 12
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_13.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 13
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_14.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 14
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_15.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 15
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_16.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 16
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_17.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 17
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_18.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 18
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_19.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 19
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_20.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 20
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_21.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 21
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_22.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 22
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_23.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 23
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_24.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 24
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_25.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 25
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_26.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 26
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_27.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 27
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_28.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 28
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_29.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 29
+Beschraenkung_der_Zahl_der_Wohnungen_SW_Kreis_30.svg:
+  category: BP_Bebauung
+  name: Zahl der Wohnungen 30
+
+wohnbauflaechen:
+  type:
+    circle:
+      static-text: W
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Wohnbauflächen
+  attribute:
+    - xpath: allgArtDerBaulNutzung
+      type: XP_AllgArtDerBaulNutzung
+      value: 1000
+allgemeines_wohngebiet:
+  type:
+    circle:
+      static-text: WA
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Allgemeines Wohngebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1200
+reines_wohngebiet:
+  type:
+    circle:
+      static-text: WR
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Reines Wohngebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1100
+kleinsiedlung:
+  type:
+    circle:
+      static-text: WS
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Kleinsiedlungsgebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1000
+besonderes_wohngebiet:
+  type:
+    circle:
+      static-text: WS
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Besonderes Wohngebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1300
+gemischte_bauflaechen:
+  type:
+    circle:
+      static-text: M
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Gemischte Bauflächen
+  attribute:
+    - xpath: allgArtDerBaulNutzung
+      type: XP_AllgArtDerBaulNutzung
+      value: 2000
+dorfgebiet:
+  type:
+    circle:
+      static-text: MD
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Dorfgebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1400
+kerngebiet:
+  type:
+    circle:
+      static-text: MK
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Kerngebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1600
+mischgebiet:
+  type:
+    circle:
+      static-text: MI
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Mischgebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1500
+urbanesgebiet:
+  type:
+    circle:
+      static-text: MU
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Urbanes Gebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1550
+gewerbe:
+  type:
+    circle:
+      static-text: G
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Gewerbliche Baufläche
+  attribute:
+    - xpath: allgArtDerBaulNutzung
+      type: XP_AllgArtDerBaulNutzung
+      value: 3000
+gewerbegebiet:
+  type:
+    circle:
+      static-text: GE
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Gewerbegebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1700
+industriegebiet:
+  type:
+    circle:
+      static-text: GI
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Industriegebiet
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      type: XP_BesondereArtDerBaulNutzung
+      value: 1800
+sonderbauflaechen:
+  type:
+    circle:
+      static-text: S
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  category: BP_Bebauung
+  name: Sondergebiet
+  attribute:
+    - xpath: allgArtDerBaulNutzung
+      type: XP_AllgArtDerBaulNutzung
+      value: 4000
+Sondergebiet_Camping.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Camping
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value: 1200
+Sondergebiet_Ferienhaus.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Ferienhäuser
+  attribute:
+    - xpath:
+        - sondernutzung
+        - sondernutzung/BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - sonderNutzung/FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value: 1100
+Sondergebiet_Woch.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Wochenendhäuser
+  attribute:
+    - xpath: besondereArtDerBaulNutzung
+      value: 3000
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value: 1000
+Sondergebiet_EEG.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Erneurbare Energien
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value: 1900
+Sondergebiet_Einzelhandel.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Einzelhandel
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value:
+        - 1500
+        - 1600
+
+bauliche_nutzung_dachform:
+  type:
+    text:
+      stroke: black
+  name: Dachform
+  attribute:
+    - xpath: dachgestaltung/BP_Dachgestaltung/dachform
+bauliche_nutzung_vollgeschosse:
+  type:
+    text:
+      pattern: "{Z|roman}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Zahl der Vollgeschosse (Höchstmaß)
+  attribute:
+    - xpath: Z
+bauliche_nutzung_vollgeschosse_min_max:
+  type:
+    text:
+      pattern: "{Zmin|roman} - {Zmax|roman}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Zahl der Vollgeschosse (als Mindest- und Höchstmaß)
+  attribute:
+    - xpath:
+        - Zmin
+        - Zmax
+      match: 'all'
+bauliche_nutzung_vollgeschosse_zwingend:
+  type:
+    circle:
+      pattern: "{Zzwingend|roman}"
+      fill: transparent
+      stroke: black
+      stroke-width: 0.25
+  name: Maß der baulichen Nutzung/ Zahl der Vollgeschosse (zwingend)
+  attribute:
+    - xpath: Zzwingend
+bauliche_nutzung_grz:
+  type:
+    text:
+      pattern: "GRZ {GRZ}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Grundflächenzahl
+  attribute:
+    - xpath: GRZ
+bauliche_nutzung_grz_min_max:
+  type:
+    text:
+      pattern: "GRZ {GRZmin} - {GRZmax}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Grundflächenzahl (als Mindest- und Höchstmaß)
+  attribute:
+    - xpath:
+        - GRZmin
+        - GRZmax
+      match: 'all'
+bauliche_nutzung_grundflaeche:
+  type:
+    text:
+      pattern: "GR {GR}m²"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Grundfläche
+  attribute:
+    - xpath: GR
+bauliche_nutzung_baumasse:
+  type:
+    text:
+      pattern: "BM {BM}m³"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Baumasse
+  attribute:
+    - xpath: BM
+bauliche_nutzung_baumassenzahl:
+  type:
+    text:
+      pattern: "BMZ {BMZ}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Baumassenzahl
+  attribute:
+    - xpath: BMZ
+bauliche_nutzung_geschossflaeche:
+  type:
+    text:
+      pattern: "GF {GF}m²"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Geschossfläche
+  attribute:
+    - xpath: GF
+bauliche_nutzung_geschossflaeche_min_max:
+  type:
+    text:
+      pattern: "GF {GFmin}m² - {GFmax}m²"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Geschossfläche (als Mindest- und Höchstmaß)
+  attribute:
+    - xpath:
+        - GFmin
+        - GFmax
+      match: 'all'
+bauliche_nutzung_geschossflaechenzahl:
+  type:
+    text:
+      pattern: "GFZ {GFZ}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Geschossflächenzahl
+  attribute:
+    - xpath: GFZ
+bauliche_nutzung_geschossflaechenzahl_min_max:
+  type:
+    text:
+      pattern: "GFZ {GFZmin} - {GFZmax}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Geschossflächenzahl (als Mindest- und Höchstmaß)
+  attribute:
+    - xpath:
+        - GFZmin
+        - GFZmax
+      match: 'all'
+
+hoehe_baulicher_anlagen_komplett:
+  type:
+    text:
+      pattern: "{hoehenbezug} {h}m über {bezugspunkt}"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Höhe baulicher Anlagen
+  attribute:
+    - xpath:
+        - hoehenangabe/XP_Hoehenangabe/bezugspunkt
+        - hoehenangabe/XP_Hoehenangabe/h
+        - hoehenangabe/XP_Hoehenangabe/hoehenbezug
+      match: 'all'
+hoehe_baulicher_anlagen:
+  type:
+    text:
+      pattern: "{h}m"
+      stroke: black
+  name: Maß der baulichen Nutzung/ Höhe baulicher Anlagen
+  attribute:
+    - xpath:
+        - hoehenangabe/XP_Hoehenangabe/hZwingend
+        - hoehenangabe/XP_Hoehenangabe/h
+
+bauweise_offen:
+  type:
+    svg:
+      path: Bauweise_Offene_Bauweise.svg
+      category: BP_Bebauung
+  name: Offene Bauweise
+  attribute:
+    - xpath: bauweise
+      type: BP_Bauweise
+      value: 1000
+bauweise_geschlossen:
+  type:
+    svg:
+      path: Bauweise_Geschlossene_Bauweise.svg
+      category: BP_Bebauung
+  name: Geschlossene Bauweise
+  attribute:
+    - xpath: bauweise
+      type: BP_Bauweise
+      value: 2000
+bauweise_einzelhaeuser:
+  type:
+    svg:
+      path: Bauweise_Nur_Einzelhaeuser_zulaessig.svg
+      category: BP_Bebauung
+  name: Bauweise, nur Einzelhäuser zulässig
+  attribute:
+    - xpath: bebauungsArt
+      type: BP_BebauungsArt
+      value: 1000
+bauweise_doppelhaeuser:
+  type:
+    svg:
+      path: Bauweise_Nur_Doppelhaeuser_zulaessig.svg
+      category: BP_Bebauung
+  name: Bauweise, nur Doppelhäuser zulässig
+  attribute:
+    - xpath: bebauungsArt
+      type: BP_BebauungsArt
+      value: 2000
+bauweise_hausgruppen:
+  type:
+    svg:
+      path: Bauweise_Nur_Hausgruppen_zulaessig.svg
+      category: BP_Bebauung
+  name: Bauweise, nur Hausgruppen zulässig
+  attribute:
+    - xpath: bebauungsArt
+      type: BP_BebauungsArt
+      value: 3000
+bauweise_einzelhaeuser_doppelhaeuser:
+  type:
+    svg:
+      path: Bauweise_Nur_Einzel-_und_Doppelhaeuser_zulaessig.svg
+      category: BP_Bebauung
+  name: Bauweise, nur Einzel- und Doppelhäuser zulässig
+  attribute:
+    - xpath: bebauungsArt
+      type: BP_BebauungsArt
+      value: 4000
+# endregion
+
+# region BP_Gemeinbedarf_Spiel_und_Sportanlagen
+Allgemeinbildende_Schule.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Allgemeinbildende Schule
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 12000
+Alteneinrichtung.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Alteneinrichtung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 16003
+Anlage_Spielanlage.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Spielanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestSpielSportanlage/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestSpielSportanlage/allgemein
+      type: XP_ZweckbestimmungSpielSportanlage
+      value: 2000
+Anlage_Sportanlage.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Sportanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestSpielSportanlage/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestSpielSportanlage/allgemein
+      type: XP_ZweckbestimmungSpielSportanlage
+      value: 1000
+sportanlage_gemeinbedarf:
+  type:
+    svg:
+      path: Anlage_Sportanlage.svg
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Sportanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 2200
+Berufsbildende_Schule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Berufsbildende Schule
+Bildung_Forschung.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Bildung und Forschung
+Einrichtung_Kultur.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kulturelle Einrichtung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 2000
+Feuerwehr.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Feuerwehr
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 24000
+Gemeindebehoerde.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Gemeindebehörde
+Gericht.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Gericht
+Hallenbad.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Hallenbad
+Hochschule.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Hochschule
+Jugendfreizeitheim.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Jugendfreizeitheim
+Jugendheim.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Jugendheim
+Justizvollzug.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Justizvollzug
+Einrichtung_Kinder.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Einrichtung Kinder
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 16000
+Kirche.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kirche
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 1400
+Kirchliche_Einrichtung.svg:
+  svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kirchliche Einrichtung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value:
+        - 14000
+        - 14001
+        - 14002
+Krankenhaus.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Krankenhaus
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 18000
+Oeffentliche_Verwaltung.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Öffentliche Verwaltung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 1000
+Kreisbehoerde.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Kommunale Einrichtung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 10000
+Landesbehoerde.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Landes- oder Bundesbehörde
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 10002
+Polizei.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Polizei
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 2400
+Post.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Post
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 26000
+Schule.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Schule
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 12000
+Einrichtung_Soziales.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Einrichtung Soziales
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 1600
+Schutzbauwerk.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Museum
+Theater.svg:
+  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Theater
+
+# endregion
+
+# region BP_Landwirtschaft_Wald_und_Gruenflaechen
+Erholungswald_Kreis_SW.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Erholungswald
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestWald/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestWald/allgemein
+      type: XP_ZweckbestimmungWald
+      value: 1400
+Badeplatz.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Badeplatz
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1500
+Dauerkleingärten.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Dauerkleingärten
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1200
+Parkanlage.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Parkanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1000
+Friedhof.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Friedhof
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 2600
+Spielplatz.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Spielplatz
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1600
+Sportplatz.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Sportplatz
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1400
+Anlage_Wassersportanlage.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Wasserportanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 14002
+Zeltplatz.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Zeltplatz
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 1800
+Anlage_Tennis.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Tennisanlage
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 14006
+# endregion
+
+# region BP_Naturschutz_Landschaftsbild_Naturhaushalt
+Anpflanzen_Baum.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Bäume
+Anpflanzen_Baum_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Bäume (SW)
+Anpflanzen_Sonstiges.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sonstiges
+Anpflanzen_Sonstiges_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sonstiges (SW)
+Anpflanzen_Straeucher.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sträucher
+Anpflanzen_Straeucher_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Anpflanzen, Sträucher (SW)
+Erhaltung_Baum.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Bäume
+Erhaltung_Baum_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Bäume (SW)
+Erhaltung_Sonstiges.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sonstiges
+Erhaltung_Sonstiges_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sonstiges (SW)
+Erhaltung_Straeucher.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sträucher
+Erhaltung_Straeucher_SW.svg:
+  category: BP_Naturschutz_Landschaftsbild_Naturhaushalt
+  name: Erhaltung, Sträucher (SW)
+geschuetzter_landschaftsbestandteil:
+  type:
+    circle:
+      static-text: LB
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Geschützter Landschaftsbestandteil
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1600
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1600
+landschaftsschutzgebiet:
+  type:
+    circle:
+      static-text: L
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Landschaftsschutzgebiet
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1300
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1300
+nationalpark:
+  type:
+    circle:
+      static-text: NLP
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Nationalpark
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1100
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1100
+naturdenkmal:
+  type:
+    circle:
+      static-text: NP
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Naturdenkmal
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1500
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1500
+naturpark:
+  type:
+    circle:
+      static-text: NP
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Naturpark
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1400
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1400
+naturschutzgebiet:
+  type:
+    circle:
+      static-text: N
+      fill: white
+      stroke: black
+      stroke-width: 0.25
+  name: Naturschutzgebiet
+  attribute:
+    - xpath: artDerFestlegung
+      type: XP_KlassifizSchutzgebietNaturschutzrecht
+      value: 1000
+    - xpath: artDerFestlegung
+      type: LP_KlassifizierungNaturschutzrecht
+      value: 1000
+# endregion
+
+# region BP_Ver_und_Entsorgung
+Abfall.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Abfallentsorgung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 2200
+Ablagerung.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Ablagerung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 2400
+Abwasser.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Abwasser
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value:
+        - 1800
+        - 18001
+        - 18002
+        - 18003
+        - 18004
+        - 18005
+        - 18006
+Elektrizitaet.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Elektrizität
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value:
+       - 1000
+       - 10001
+Erneuerbare_Energien.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Erneuerbare Energien
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 1800
+Fernwaerme.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Wärmeversorgung
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value:
+        - 1400
+        - 14000
+        - 14001
+        - 14002
+Gas.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Gas
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 1200
+Kraft_Waerme_Kopplung.svg:
+  type:
+    svg:
+      category: Fläche/Anlage für Kraft-Wärme Kopplung
+  name: Gas
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 3000
+Wasser.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Wasser
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value: 1600
+# endregion
+
+# region BP_Verkehr
+Fussgaengerbereich.svg:
+  category: BP_Verkehr
+  name: Fußgängerbereich
+Parkierungsflaeche.svg:
+  category: BP_Verkehr
+  name: Fläche zum Parken von Fahrzeugen
+VerkehrsberuhigterBereich.svg:
+  category: BP_Verkehr
+  name: Verkehrsberuhigte Zone
+# endregion
+
+# region BP_Wasser
+Hafen.svg:
+  category: BP_Wasser
+  name: Hafen
+Hochwasserrueckhaltebecken.svg:
+  category: BP_Wasser
+  name: Hochwasser-Rückhaltebecken
+Schutzgebiet_fuer_Grund-_und_Quellwassergewinnung.svg:
+  category: BP_Wasser
+  name: Schutzgebiet Grund- oder Quellwasser
+Schutzgebiet_fuer_Oberflaechenwasser.svg:
+  category: BP_Wasser
+  name: Schutzgebiet Oberflächenwasser
+Ueberschwaemmungsgebiet.svg:
+  category: BP_Wasser
+  name: Überschwemmungsgefährdetes Gebiet
+# endregion
+
+# region SO_SonstigeGebiete
+Denkmalschutz_Einzelanlagen.svg:
+  category: SO_SonstigeGebiete
+  name: Denkmalschutz Einzelanlage
+Denkmalschutz_Ensemble.svg:
+  category: SO_SonstigeGebiete
+  name: Denkmalschutz Ensemble
+# endregion
+
+# region Sonstiges
+Kennzeichnung_Schadstoffe.svg:
+  category: Sonstiges
+  name: Schadsfoffbelasteter Boden
+Hoehenlage_SW.svg:
+  category: Sonstiges
+  name: Höhenlage bei Festsetzungen
+# endregion

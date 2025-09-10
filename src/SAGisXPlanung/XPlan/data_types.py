@@ -1,7 +1,8 @@
 from uuid import uuid4
 
 from lxml import etree
-from sqlalchemy import Column, String, Enum, Date, ForeignKey, CheckConstraint, Boolean, Table, event
+from sqlalchemy import Column, String, Enum, Date, ForeignKey, CheckConstraint, Boolean, Table, event, \
+    PrimaryKeyConstraint
 from sqlalchemy.dialects.postgresql import UUID, BYTEA
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, deferred
@@ -20,6 +21,12 @@ XP_PlanXP_GemeindeAssoc = Table('xp_plan_gemeinde', Base.metadata,
         'xplan_version': XPlanVersion.SIX
     }),
     Column('gemeinde_id', UUID(as_uuid=True), ForeignKey('xp_gemeinde.id'))
+)
+
+XP_PlanXP_GesetzlicheGrundlageAssoc = Table('xp_plan_gesetzlichegrundlage', Base.metadata,
+    Column('bp_plan_id', UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE'), nullable=True),
+    Column('fp_plan_id', UUID(as_uuid=True), ForeignKey('fp_plan.id', ondelete='CASCADE'), nullable=True),
+    Column('gesetzlichegrundlage_id', UUID(as_uuid=True), ForeignKey('xp_gesetzliche_grundlage.id'), nullable=False)
 )
 
 
@@ -83,7 +90,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                         'veraenderungssperre', 'grundstueck_ueberbaubar']
+                         'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -118,6 +125,16 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     veraenderungssperre_id = Column(UUID(as_uuid=True), ForeignKey('bp_veraenderungssperre_daten.id', ondelete='CASCADE'))
     veraenderungssperre = relationship("BP_VeraenderungssperreDaten", back_populates="refBeschluss")
 
+    # XP_TextAbschnitt [0..1]
+    xp_text_abschnitt_id = Column(UUID(as_uuid=True), ForeignKey('xp_text_abschnitt.id', ondelete='CASCADE'))
+    xp_text_abschnitt = relationship("XP_TextAbschnitt", back_populates="refText")
+
+    # BP_WohngebaeudeFlaeche [0..*] (v6)
+    bp_wohngebaeude_flaeche_id = Column(UUID(as_uuid=True),
+                                        ForeignKey('bp_wohngebaeude_flaeche.id', ondelete='CASCADE'))
+    bp_wohngebaeude_flaeche = relationship('BP_WohngebaeudeFlaeche', back_populates='refGebaeudequerschnitt',
+                                           info={'xplan_version': XPlanVersion.SIX})
+
     type = Column(String(50))
 
     __mapper_args__ = {
@@ -138,7 +155,8 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                'veraenderungssperre', 'grundstueck_ueberbaubar']
+                'veraenderungssperre', 'grundstueck_ueberbaubar',
+                'xp_text_abschnitt', 'bp_wohngebaeude_flaeche']
 
 
 class XP_SpezExterneReferenz(XP_ExterneReferenz):
@@ -253,13 +271,15 @@ class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):
 
     fp_bau_nvo = relationship("FP_Plan", back_populates="versionBauNVO", foreign_keys='FP_Plan.versionBauNVO_id')
     fp_bau_gb = relationship("FP_Plan", back_populates="versionBauGB", foreign_keys='FP_Plan.versionBauGB_id')
-    fp_bau_sonst = relationship("FP_Plan", back_populates="versionSonstRechtsgrundlage",
-                                foreign_keys='FP_Plan.versionSonstRechtsgrundlage_id')
+    fp_bau_sonst = relationship('FP_Plan', secondary=XP_PlanXP_GesetzlicheGrundlageAssoc,
+                                back_populates='versionSonstRechtsgrundlage',
+                                info={'xplan_version': XPlanVersion.SIX})
 
     bp_bau_nvo = relationship("BP_Plan", back_populates="versionBauNVO", foreign_keys='BP_Plan.versionBauNVO_id')
     bp_bau_gb = relationship("BP_Plan", back_populates="versionBauGB", foreign_keys='BP_Plan.versionBauGB_id')
-    bp_bau_sonst = relationship("BP_Plan", back_populates="versionSonstRechtsgrundlage",
-                                foreign_keys='BP_Plan.versionSonstRechtsgrundlage_id')
+    bp_bau_sonst = relationship('BP_Plan', secondary=XP_PlanXP_GesetzlicheGrundlageAssoc,
+                                back_populates='versionSonstRechtsgrundlage',
+                                info={'xplan_version': XPlanVersion.SIX})
 
     name = Column(String)
     datum = Column(Date)

@@ -27,6 +27,16 @@ class SO_KlassifizNachSchienenverkehrsrecht(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
 
 
+class SO_KlassifizNachBodenschutzrecht(XPlanungEnumMixin, Enum):
+    """ Rechtliche Klassifizierung der Festlegung nach Bodenschutzrecht"""
+
+    SchaedlicheBodenveraenderung = 1000
+    Altlast = 2000
+    Altablagerung = 20000
+    Altstandort = 20001
+    AltstandortAufAltablagerung = 20002
+
+
 class SO_KlassifizNachDenkmalschutzrecht(XPlanungEnumMixin, Enum):
     """ Rechtliche Klassifizierung der Festlegung nach Denkmalschutzrecht"""
 

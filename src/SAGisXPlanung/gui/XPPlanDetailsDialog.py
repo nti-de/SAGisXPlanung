@@ -30,12 +30,12 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzun
     XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.core.helper import base_models, find_true_class
 from SAGisXPlanung.core.mixins.mixins import GeometryObject
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
-from SAGisXPlanung.gui.actions import EnableBuldingTemplateAction, EditBuildingTemplateAction
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
@@ -74,7 +74,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bMap.clicked.connect(lambda state: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
         self.bDelete.clicked.connect(self.deletePlanContent)
-        self.bEdit.clicked.connect(self.showAttributesPage)
+        self.bEdit.clicked.connect(self.show_attribute_page)
         # self.bEdit.setDisabled(True)
         self.bPrev.clicked.connect(self.prevPage)
         self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.Save)
@@ -84,7 +84,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bEditMain.clicked.connect(self.onEditMainClicked)
 
         self.bSortHierarchy.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
-        self.bSortCategory.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_category.svg')))
+        self.bSortCategory.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/category.svg')))
         self.bSortName.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_alpha.svg')))
         self.sortButtons.setId(self.bSortCategory, 2)
         self.sortButtons.setId(self.bSortName, 1)
@@ -108,7 +108,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         # self.objectTree.selectionModel().currentChanged.connect(lambda: self.bEdit.setDisabled(False))
         self.objectTree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.objectTree.customContextMenuRequested.connect(self.showObjectTreeContextMenu)
-        self.objectTree.doubleClicked.connect(self.showAttributesPage)
+        self.objectTree.doubleClicked.connect(self.show_attribute_page)
         self.objectTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.stackedWidget.currentChanged.connect(self.updateButtons)
 
@@ -255,9 +255,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         menu.setToolTipsVisible(True)
 
         if len(selected_indices) > 1:
-            delete_action = QtWidgets.QAction(QIcon(self.deleteIcon), 'Markierte Planinhalte löschen')
-            delete_action.triggered.connect(lambda state, indices=selected_indices: self.delete_indices(indices))
-            menu.addAction(delete_action)
+            self.create_multi_selection_menu(menu, selected_indices)
             menu.exec_(self.objectTree.mapToGlobal(point))
             return
 
@@ -276,13 +274,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             delete_action.triggered.connect(lambda state, item_to_delete=item: self.onDeleteClick(item_to_delete))
             menu.addAction(delete_action)
 
-        if item.xplanItem().xtype == BP_BaugebietsTeilFlaeche:
-            menu.addSeparator()
-            menu.addAction(EnableBuldingTemplateAction(item.xplanItem(), parent=menu))
-            edit_template_action = EditBuildingTemplateAction(item.xplanItem(), parent=menu)
-            edit_template_action.editFormCreated.connect(self.insertWidgetIntoNewPage)
-            menu.addAction(edit_template_action)
-
         data_class_menu = QtWidgets.QMenu('Neues Datenobjekt hinzufügen')
         for rel in item._data.xtype.relationships():
             rel_class = rel[1].entity.class_
@@ -292,12 +283,16 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 continue
             if hasattr(item._data.xtype, '__avoidRelation__') and rel[0] in item._data.xtype.__avoidRelation__:
                 continue
-            if not item.xplanItem().xtype.attr_fits_version(rel[0], export_version()):
+
+            cls = find_true_class(item.xplanItem().xtype, rel[0])
+            if cls is None or not cls.attr_fits_version(rel[0], export_version()):
                 continue
 
             action_name = item.xplanItem().xtype.xplan_attribute_name(rel[0])
 
             for entity_class in [rel_class, *rel_class.__subclasses__()]:
+                if hasattr(entity_class, 'xp_versions') and export_version() not in entity_class.xp_versions:
+                    continue
 
                 data_class_action = QtWidgets.QAction(f'{action_name} ({entity_class.__name__})', self)
                 data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=entity_class:
@@ -319,6 +314,15 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.addMenu(data_class_menu)
 
         menu.exec_(self.objectTree.viewport().mapToGlobal(point))
+
+    def create_multi_selection_menu(self, menu: QMenu, selected_indices: List[QModelIndex]):
+        # edit
+        # not in community-edition
+
+        # delete
+        delete_action = QAction(QIcon(self.deleteIcon), 'Markierte Planinhalte löschen', menu)
+        delete_action.triggered.connect(lambda state, indices=selected_indices: self.delete_indices(indices))
+        menu.addAction(delete_action)
 
     @pyqtSlot()
     def highlightPlanContent(self):
@@ -383,9 +387,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
                 data_obj.id = uuid.uuid4()
 
-                stmt = select(parent_item._data.xtype).filter_by(id=parent_item._data.xid).options(
+                true_class = find_true_class(parent_item._data.xtype, attribute)
+                stmt = select(true_class).filter_by(id=parent_item._data.xid).options(
                     load_only(parent_item._data.xtype.id),
-                    selectinload(getattr(parent_item._data.xtype, attribute))
+                    selectinload(getattr(true_class, attribute))
                 )
                 result = await session.execute(stmt)
                 parent_obj = result.scalar_one()
@@ -415,15 +420,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def iterateRelation(self, obj, root_node):
         try:
             for rel_item in obj.related():
-                if isinstance(rel_item, XP_AbstraktesPraesentationsobjekt):
-                    # don't show Nutzungsschablone in object tree, access via context menu instead
-                    if rel_item.__class__ == XP_Nutzungsschablone:
-                        continue
-                    # only show PO objects as child node of their parent object (if they have any)
-                    # TODO 2024-07-17: is this condition ever hit? it causes a lot of additional sql...
-                    # if rel_item.dientZurDarstellungVon_id and str(rel_item.dientZurDarstellungVon_id) != str(
-                    #         obj.id):
-                    #     continue
                 xplan_item = XPlanungItem(
                     xid=str(rel_item.id),
                     xtype=rel_item.__class__,
@@ -437,7 +433,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             logger.exception(f"Exception on filling object explorer: {e}")
 
     @pyqtSlot()
-    def showAttributesPage(self):
+    def show_attribute_page(self):
         """ Zeigt ein QTreeWidget mit den Attributen und Werten des aktuell im Objektbaum gewählten Objekts an """
         item = self.objectTree.selectedItems()[0]
         attribute_config = yaml.safe_load(QSettings().value(f"plugins/xplanung/attribute_config", '')) or {}
@@ -446,7 +442,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             session.expire_on_commit = False
             plan_content = session.query(item._data.xtype).get(item._data.xid)
 
-            base_classes = [c for c in list(inspect.getmro(item._data.xtype)) if issubclass(c, Base)]
+            xtype = item._data.xtype
+            plan_content = session.query(xtype).get(item._data.xid)
+            base_classes = base_models(xtype)
 
             def skip_column():
                 for mro_member in base_classes:
@@ -455,13 +453,13 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 return False
 
             data = []
-            for attr in item._data.xtype.element_order(version=export_version(), relations='inline'):
+            for attr in xtype.element_order(version=export_version(), relations='inline'):
 
                 if skip_column():
                     continue
 
                 # edge case where same named column exists in base class which should be used
-                if not item._data.xtype.attr_fits_version(attr, export_version()):
+                if not xtype.attr_fits_version(attr, export_version()):
                     cls = next(c for c in reversed(base_classes) if hasattr(c, attr))
                     stmt = select(cls.__table__.c[attr]).where(cls.__table__.c.id == item._data.xid)
                     value = session.execute(stmt).scalar_one()
@@ -477,8 +475,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             else:
                 geom_type = None
 
-            xplanung_item = XPlanungItem(xid=item._data.xid, xtype=item._data.xtype, plan_xid=self.plan_xid,
-                                         geom_type=geom_type)
+            xplanung_item = XPlanungItem(xid=item._data.xid, xtype=xtype, plan_xid=self.plan_xid, geom_type=geom_type)
             attribute_edit_widget = QAttributeEdit.create(xplanung_item, data, self)
             attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
 
@@ -486,7 +483,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 if undo_command.xplan_item.xid == xplanung_item.xid:
                     new_index = attribute_edit_widget.model_index(undo_command.attribute)
                     undo_command.setModelIndex(new_index)
-                    undo_command.signal_proxy.changeApplied.connect(attribute_edit_widget.onChangeApplied)
+                    undo_command.signal_proxy.changeApplied.connect(attribute_edit_widget.apply_field_change)
 
             self.insertWidgetIntoNewPage(attribute_edit_widget)
 

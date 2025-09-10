@@ -7,7 +7,6 @@ from qgis.PyQt.QtGui import QIcon, QMouseEvent
 
 from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType
-from .po_styling_options import QCommonStylingOptions
 
 
 class QBuildingTemplateEdit(QWidget):
@@ -16,7 +15,7 @@ class QBuildingTemplateEdit(QWidget):
     rowCountChanged = pyqtSignal(int, list)  # row count, cell types
     styleChanged = pyqtSignal(str, object)  # style attribute, value
 
-    def __init__(self, cells, rows, scale=0.5, angle=0, parent=None):
+    def __init__(self, cells, rows, parent=None):
         super(QBuildingTemplateEdit, self).__init__(parent)
 
         self.cells = cells
@@ -24,6 +23,7 @@ class QBuildingTemplateEdit(QWidget):
         self.rows = rows
 
         self._layout = QVBoxLayout()
+        self._layout.setContentsMargins(0, 0, 0, 0)
         self.template_form = SelectTemplateFormWidget(default_rows=self.rows)
         self.template_form.rowCountChanged.connect(self.onRowCountChanged)
 
@@ -33,17 +33,6 @@ class QBuildingTemplateEdit(QWidget):
         self.template_grid = QGridLayout()
         self.build_template()
         self._layout.addWidget(self.template_grid_container)
-
-        self.common_style_container = QGroupBox('Allgemeine Darstellungsoptionen')
-        self.common_style_container.setLayout(QVBoxLayout())
-        self.common_styling_opt = QCommonStylingOptions()
-        self.common_styling_opt.setSize(scale)
-        self.common_styling_opt.setAngle(angle)
-        self.common_styling_opt.styleChanged.connect(lambda k, v: self.styleChanged.emit(k, v))
-        self.common_style_container.layout().addWidget(self.common_styling_opt)
-
-        self._layout.addItem((QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Expanding)))
-        self._layout.addWidget(self.common_style_container)
 
         self.setLayout(self._layout)
 

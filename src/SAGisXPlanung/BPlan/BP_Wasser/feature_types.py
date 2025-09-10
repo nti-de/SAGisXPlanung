@@ -52,7 +52,7 @@ class BP_GewaesserFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Wasser', symbol_size=20)
+        renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.symbol(), 'BP_Wasser')
         return renderer
 
     @classmethod

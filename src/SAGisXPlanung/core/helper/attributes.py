@@ -17,7 +17,7 @@ def base_models(_class: type):
 def find_true_class(_class: type, attribute_name: str):
     version = export_version()
     base_classes = base_models(_class)
-    true_cls = next(c for c in reversed(base_classes) if hasattr(c, attribute_name) and c.attr_fits_version(attribute_name, version))
+    true_cls = next((c for c in reversed(base_classes) if hasattr(c, attribute_name) and c.attr_fits_version(attribute_name, version)), None)
     return true_cls
 
 

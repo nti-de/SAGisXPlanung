@@ -61,7 +61,7 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
         if geom_type == QgsWkbTypes.PointGeometry:
             return icon_renderer('Versorgung', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Ver_und_Entsorgung', geometry_type=geom_type,
-                                 symbol_size=30)
+                                 scale_factor=5)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

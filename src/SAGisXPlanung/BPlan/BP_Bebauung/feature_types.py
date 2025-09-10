@@ -8,22 +8,19 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingl
                        QgsSimpleFillSymbolLayer)
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt, QSize
-from qgis.utils import iface
 
-from geoalchemy2 import WKBElement
 from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, Boolean, event
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.orm import relationship, load_only, joinedload, declared_attr
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.orm import relationship
 
-from SAGisXPlanung import Session, XPlanVersion
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
-                                                   BP_ZweckbestimmungNebenanlagen)
-from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, BuildingTemplateItem, \
-    TableCellFactory
+                                                   BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
+                                                   BP_TypWohngebaeudeFlaeche)
+from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, TableCellFactory
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
-from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
-from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import (XP_AllgArtDerBaulNutzung, XP_BesondereArtDerBaulNutzung, XP_AbweichungBauNVOTypen,
                                        XP_Sondernutzungen)
@@ -54,7 +51,21 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
                                   passive_deletes=True)
 
     FR = Column(Angle)
-    # abweichungText [BP_TextAbschnitt]
+
+    # BP_TextAbschnitt [0..*] (v5.3)
+    abweichungText_v5 = relationship("BP_TextAbschnitt", back_populates="bp_baugebiet",
+                                     cascade="all, delete", passive_deletes=True,
+                                     foreign_keys="BP_TextAbschnitt.bp_baugebiet_id",
+                                     info={'xplan_version': XPlanVersion.FIVE_THREE,
+                                           'xplan_attribute': 'abweichungText'})
+
+    # XP_TextAbschnitt [0..*] (v6)
+    abweichungText_v6 = relationship("XP_TextAbschnitt", back_populates="bp_baugebiet",
+                                     cascade="all, delete", passive_deletes=True,
+                                     foreign_keys="XP_TextAbschnitt.bp_baugebiet_id",
+                                     info={'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'abweichungText'})
+
     MaxZahlWohnungen = Column(Integer)
     MinGRWohneinheit = Column(Area)
     Fmin = Column(Area)
@@ -170,56 +181,7 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         return QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__),
                                                   '../../symbole/BP_Bebauung/BP_BaugebietsTeilFlaeche.svg')))
 
-    def toCanvas(self, layer_group, plan_xid=None):
-        self.xplan_item.plan_xid = str(plan_xid)
-        super(BP_BaugebietsTeilFlaeche, self).toCanvas(layer_group, plan_xid)
-
-    def asFeature(self, fields=None):
-        feat = super(BP_BaugebietsTeilFlaeche, self).asFeature(fields)
-
-        # return early when `XP_Nutzungsschablone` should not be shown
-        template = self.template()
-        if template.hidden:
-            return feat
-
-        if not template.position:
-            geom = feat.geometry().centroid()
-            point = geom.asPoint()
-            template.position = WKBElement(geom.asWkb(), srid=self.position.srid)
-        else:
-            point = template.geometry().asPoint()
-
-        cell_data = self.usage_cell_data(template.data_attributes)
-        rows = template.zeilenAnz
-        scale = template.skalierung
-        angle = template.drehwinkel
-        table = BuildingTemplateItem(iface.mapCanvas(), point, rows, cell_data,
-                                     parent=self.xplan_item, scale=scale, angle=angle)
-        # connect to signal on event filter, because QGraphicsItems can't emit signals
-        table.event_filter.positionUpdated.connect(lambda p: self.onTemplatePositionUpdated(p))
-        MapLayerRegistry().add_canvas_item(table, str(self.id), self.xplan_item.plan_xid)
-
-        return feat
-
-    def onTemplatePositionUpdated(self, pos: QgsPointXY):
-        with Session.begin() as session:
-            _self = session.query(self.xplan_item.xtype).options(
-                load_only('position'),
-                joinedload('wirdDargestelltDurch')
-            ).get(self.xplan_item.xid)
-            geom = QgsGeometry.fromPointXY(pos)
-            _self.template().position = WKBElement(geom.asWkb(), srid=_self.position.srid)
-
-    def template(self) -> XP_Nutzungsschablone:
-        template = next((x for x in self.wirdDargestelltDurch if isinstance(x, XP_Nutzungsschablone)), None)
-        if template is None:
-            template = XP_Nutzungsschablone()
-            template.dientZurDarstellungVon_id = self.id
-            self.wirdDargestelltDurch.append(template)
-
-        return template
-
-    def usage_cell_data(self, cells: List[BuildingTemplateCellDataType] = None) -> List[TableCell]:
+    def template_cell_data(self, cells: List[BuildingTemplateCellDataType] = None) -> List[TableCell]:
         if cells is None:
             cells = BuildingTemplateCellDataType.as_default()
 
@@ -552,6 +514,38 @@ class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, FlaechenschlussObjekt, 
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
+class BP_NebenanlagenAusschlussFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festsetzung einer Fläche für die Einschränkung oder den Ausschluss von Nebenanlagen nach §14 Absatz 1 Satz
+        3 BauNVO. """
+
+    __tablename__ = 'bp_nebenanlagen_ausschluss_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    typ = Column(XPEnum(BP_NebenanlagenAusschlussTyp, include_default=True))
+
+    # BP_TextAbschnitt [0..*] (v5.3)
+    abweichungText_v5 = relationship("BP_TextAbschnitt", back_populates="bp_nebenanlagen_ausschluss_flaeche",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys="BP_TextAbschnitt.bp_nebenanlagen_ausschluss_flaeche_id",
+                                     info={'xplan_version': XPlanVersion.FIVE_THREE,
+                                           'xplan_attribute': 'abweichungText'})
+
+    # XP_TextAbschnitt [0..*] (v6)
+    abweichungText_v6 = relationship("XP_TextAbschnitt", back_populates="bp_nebenanlagen_ausschluss_flaeche",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys="XP_TextAbschnitt.bp_nebenanlagen_ausschluss_flaeche_id",
+                                     info={'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'abweichungText'})
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
 class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Fläche für Nebenanlagen, die auf Grund anderer Vorschriften für die Nutzung von Grundstücken erforderlich sind,
     wie Spiel-, Freizeit- und Erholungsflächen sowie die Fläche für Stellplätze und Garagen mit ihren Einfahrten
@@ -601,3 +595,90 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
+
+@xp_version(versions=[XPlanVersion.SIX])
+class BP_WohngebaeudeFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
+    """ Fläche für die Errichtung von Wohngebäuden in einem Bebauungsplan zur Wohnraumversorgung gemäß §9 Absatz 2d
+        BauGB. """
+
+    __tablename__ = 'bp_wohngebaeude_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    dachgestaltung = relationship("BP_Dachgestaltung", back_populates="bp_wohngebaeude_flaeche", cascade="all, delete",
+                                  passive_deletes=True)
+
+    FR = Column(Angle)
+
+    # XP_TextAbschnitt [0..*]
+    abweichungText = relationship("XP_TextAbschnitt", back_populates="bp_baugebiet",
+                                     cascade="all, delete", passive_deletes=True, uselist=False)
+
+    MaxZahlWohnungen = Column(Integer)
+    MinGRWohneinheit = Column(Area)
+    Fmin = Column(Area)
+    Fmax = Column(Area)
+    Bmin = Column(Length)
+    Bmax = Column(Length)
+    Tmin = Column(Length)
+    Tmax = Column(Length)
+    GFZmin = Column(Float)
+    GFZmax = Column(Float)
+    GFZ = Column(Float)
+    GFZ_Ausn = Column(Float)
+    GFmin = Column(Area)
+    GFmax = Column(Area)
+    GF = Column(Area)
+    GF_Ausn = Column(Area)
+    BMZ = Column(Float)
+    BMZ_Ausn = Column(Float)
+    BM = Column(Volume)
+    BM_Ausn = Column(Volume)
+    GRZmin = Column(Float)
+    GRZmax = Column(Float)
+    GRZ = Column(Float)
+    GRZ_Ausn = Column(Float)
+    GRmin = Column(Area)
+    GRmax = Column(Area)
+    GR = Column(Area)
+    GR_Ausn = Column(Area)
+    Zmin = Column(Integer)
+    Zmax = Column(Integer)
+    Zzwingend = Column(Integer)
+    Z = Column(Integer)
+    Z_Ausn = Column(Integer)
+    Z_Staffel = Column(Integer)
+    Z_Dach = Column(Integer)
+    ZUmin = Column(Integer)
+    ZUmax = Column(Integer)
+    ZUzwingend = Column(Integer)
+    ZU = Column(Integer)
+    ZU_Ausn = Column(Integer)
+    wohnnutzungEGStrasse = Column(XPEnum(BP_Zulaessigkeit, include_default=True))
+    ZWohn = Column(Integer)
+    GFAntWohnen = Column(Scale)
+    GFWohnen = Column(Area)
+    GFAntGewerbe = Column(Scale)
+    GFGewerbe = Column(Area)
+    VF = Column(Area)
+
+    # BP_TypWohngebaeudeFlaeche [1]
+    typ = Column(XPEnum(BP_TypWohngebaeudeFlaeche), nullable=False)
+
+    abweichungBauNVO = Column(Enum(XP_AbweichungBauNVOTypen))
+    bauweise = Column(XPEnum(BP_Bauweise, include_default=True))
+    vertikaleDifferenzierung = Column(Boolean)
+    bebauungsArt = Column(XPEnum(BP_BebauungsArt, include_default=True))
+    bebauungVordereGrenze = Column(Enum(BP_GrenzBebauung))
+    bebauungRueckwaertigeGrenze = Column(Enum(BP_GrenzBebauung))
+    bebauungSeitlicheGrenze = Column(Enum(BP_GrenzBebauung))
+    refGebaeudequerschnitt = relationship("XP_ExterneReferenz", back_populates="bp_wohngebaeude_flaeche",
+                                          cascade="all, delete", passive_deletes=True)
+    zugunstenVon = Column(String)
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="34" height="20" viewBox="0 0 200 120">
+  <rect x="0" y="0" width="200" height="120" fill="white" stroke="black" stroke-width="4"/>
+  <rect x="25" y="30" width="150" height="60" rx="30" ry="30" fill="white" stroke="black" stroke-width="4"/>
+  <text x="100" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" fill="black">Tennis</text>
+</svg>
+

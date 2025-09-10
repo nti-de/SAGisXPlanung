@@ -1,6 +1,7 @@
 import logging
 import os
 
+from PyQt5.QtWidgets import QComboBox
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QWidget, QHBoxLayout, QToolButton, QMenu, QDialog
 from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize, QEvent
@@ -19,10 +20,11 @@ logger = logging.getLogger(__name__)
 
 class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMeta):
 
-    def __init__(self, parent, relation, *args, **kwargs):
+    def __init__(self, parent_type, relation, *args, **kwargs):
         super(QAddRelationDropdown, self).__init__(*args, **kwargs)
         self.relation = relation
-        self.parent = parent
+        self.parent_widget = kwargs.get('parent')
+        self.parent_type = parent_type
         self.cls = self.relation[1].mapper.class_
 
         self.has_secondary = bool(self.relation[1].secondary is not None)
@@ -42,24 +44,34 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
                 self.cb.checkedItemsChanged.connect(lambda items: self.setInvalid(not bool(items)))
             self.cb.view().customContextMenuRequested.disconnect()
         else:
-            self.cb = QComboBoxNoScroll()
+            self.cb = QComboBoxNoScroll(self.parent_widget)
         self.cb.setFocusPolicy(Qt.StrongFocus)
+
+        # weird fix for combobox growing larger than parent layout
+        # https://www.qtcentre.org/threads/11092-QCombobox-contents-not-adjusting-itself-properly
+        self.cb.setMinimumContentsLength(20)
+        self.cb.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+
+        self.container.layout().addWidget(self.cb)
+        self.layout.addWidget(self.container)
 
         self.refreshComboBox()
 
-        self.plus_icon_path = os.path.abspath(os.path.join(BASE_DIR, 'gui/resources/plus.svg'))
-        self.b_plus = QToolButton()
-        self.b_plus.setIcon(load_svg(self.plus_icon_path))
-        self.b_plus.installEventFilter(self)
-        self.b_plus.setCursor(Qt.PointingHandCursor)
-        self.b_plus.setToolTip('Neues Objekt hinzufügen')
-        self.b_plus.clicked.connect(self.addRelation)
-        self.b_plus.setStyleSheet('''
-            QToolButton {
-                background: palette(window); 
-                border: 0px; 
-            }
-            ''')
+        if not issubclass(self.cls, CodeListValue):
+            self.plus_icon_path = os.path.abspath(os.path.join(BASE_DIR, 'gui/resources/plus.svg'))
+            self.b_plus = QToolButton()
+            self.b_plus.setIcon(load_svg(self.plus_icon_path))
+            self.b_plus.installEventFilter(self)
+            self.b_plus.setCursor(Qt.PointingHandCursor)
+            self.b_plus.setToolTip('Neues Objekt hinzufügen')
+            self.b_plus.clicked.connect(self.addRelation)
+            self.b_plus.setStyleSheet('''
+                QToolButton {
+                    background: palette(window); 
+                    border: 0px; 
+                }
+                ''')
+            self.layout.addWidget(self.b_plus)
 
         self.cb.view().setContextMenuPolicy(Qt.CustomContextMenu)
         self.cb.view().customContextMenuRequested.connect(self.onContextMenuRequested)
@@ -120,7 +132,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
     @pyqtSlot()
     def addRelation(self):
         from SAGisXPlanung.gui.XPCreatePlanDialog import XPCreatePlanDialog
-        d = XPCreatePlanDialog(iface=iface, cls_type=self.cls, parent_type=self.parent.cls_type)
+        d = XPCreatePlanDialog(iface=iface, cls_type=self.cls, parent_type=self.parent_type.cls_type)
         d.contentSaved.connect(self.refreshComboBox)
         d.exec_()
 

@@ -10,7 +10,7 @@ from sqlalchemy import ARRAY, String
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.codelists import CodeListValue, is_codelist_attribute
-from SAGisXPlanung.XPlan.types import RefURL
+from SAGisXPlanung.XPlan.types import RefURL, XPathField
 from SAGisXPlanung.core.mixins.mixins import FeatureType
 from SAGisXPlanung.utils import CLASSES, query_existing, PRE_FILLED_CLASSES, OBJECT_BASE_TYPES
 
@@ -50,7 +50,7 @@ class GMLReader:
     def setProgress(self, progress):
         if not self.progress_callback:
             return
-        self.progress_callback((self.current_progress, self.object_count))
+        self.progress_callback((progress, self.object_count))
         self.current_progress = progress
 
     @staticmethod
@@ -124,7 +124,7 @@ class GMLReader:
                     codelist = CodeListValue.codelist_class(object_type, node_name)
                     value = codelist.from_xplan_node(node)
                 # find node content if relationship is not immediately child but instead linked via xlink
-                if len(node) == 0:
+                elif len(node) == 0:
                     xlink_refs = node.xpath('@xlink:href', namespaces=self.nsmap)
                     if not xlink_refs:
                         continue
@@ -139,11 +139,8 @@ class GMLReader:
                     value = self.read_xp_object(linked_node[0])
 
                     if isinstance(value, XP_Nutzungsschablone):
-                        value.hidden = False
                         if value.zeilenAnz is not None:
                             value.set_defaults(int(value.zeilenAnz))
-                        getattr(obj, node_name).append(value)
-                        continue
                 else:
                     value = self.read_xp_object(node[0])
 
@@ -214,7 +211,7 @@ class GMLReader:
                 getattr(obj, node_name).append(value)
             except Exception as e:
                 setattr(obj, node_name, [value])
-        elif isinstance(col_type, ARRAY) and isinstance(col_type.item_type, String):
+        elif isinstance(col_type, ARRAY) and isinstance(col_type.item_type, (String, XPathField)):
             try:
                 getattr(obj, node_name).append(value)
             except Exception as e:

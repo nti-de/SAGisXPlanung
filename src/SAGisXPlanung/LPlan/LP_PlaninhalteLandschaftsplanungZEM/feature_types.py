@@ -22,7 +22,7 @@ class LP_ZieleErfordernisseMassnahmen(MixedGeometry, LP_Objekt):
 
     id = Column(ForeignKey("lp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    artDerFestlegung = Column(ARRAY(Enum(LP_ZEMTyp)), nullable=False)
+    zieleErfordernisseMassnahmen = Column(ARRAY(Enum(LP_ZEMTyp)), nullable=False)
 
     # [1..*]
     schutzgut = relationship("LP_SchutzgutKomplex", back_populates="ziele_erfordernisse_massnahmen",

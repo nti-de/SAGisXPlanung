@@ -1,4 +1,6 @@
 import abc
+import json
+from typing import Dict, Any, List, Type
 
 from qgis.PyQt.QtCore import QRectF, QMarginsF
 from qgis.PyQt.QtGui import QPainter, QPainterPath, QPen, QBrush, QColor
@@ -45,10 +47,38 @@ def stroke_triangle(rect: QRectF, context: QgsRenderContext):
     painter.restore()
 
 
+class EnumJSONEncoder(json.JSONEncoder):
+    """Custom JSON encoder to handle enum values"""
+    def default(self, obj):
+        if hasattr(obj, 'value'):  # Check if it's an enum
+            return {'__enum__': f"{obj.__class__.__module__}.{obj.__class__.__name__}", 'value': obj.value}
+        return super().default(obj)
+
+
+def enum_decode_hook(dct):
+    """JSON decode hook to restore enum values"""
+    if '__enum__' in dct:
+        module_path, class_name = dct['__enum__'].rsplit('.', 1)
+        # Import the module and get the enum class
+        import importlib
+        module = importlib.import_module(module_path)
+        enum_class = getattr(module, class_name)
+        return enum_class(dct['value'])
+    return dct
+
+
+
 class TableCell(abc.ABC):
     # mysterious scaling parameter for drawing inside rect using QgsTextRenderer
     # no clue why that is even needed and why 0.1 works as a value
     FONT_SCALE = 0.1
+
+    _cell_registry: Dict[str, Type['TableCell']] = {}
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        # Register each subclass by its class name
+        TableCell._cell_registry[cls.__name__] = cls
 
     def __init__(self, attributes: dict, text: str = ''):
         self.text = text
@@ -65,6 +95,37 @@ class TableCell(abc.ABC):
     @abc.abstractmethod
     def name(self):
         pass
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert cell to dictionary for JSON serialization"""
+        return {
+            'class_name': self.__class__.__name__,
+            'attributes': self.attributes,
+            'text': self.text
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'TableCell':
+        """Create cell instance from dictionary"""
+        class_name = data['class_name']
+        if class_name not in cls._cell_registry:
+            raise ValueError(f"Unknown cell class: {class_name}")
+
+        cell_class = cls._cell_registry[class_name]
+        # Create instance with original attributes
+        return cell_class(data['attributes'])
+
+    @staticmethod
+    def serialize_cells(cells: List['TableCell']) -> str:
+        """Serialize a list of TableCell objects to JSON string"""
+        cell_dicts = [cell.to_dict() for cell in cells]
+        return json.dumps(cell_dicts, cls=EnumJSONEncoder, indent=2)
+
+    @staticmethod
+    def deserialize_cells(json_string: str) -> List['TableCell']:
+        """Deserialize JSON string to list of TableCell objects"""
+        cell_dicts = json.loads(json_string, object_hook=enum_decode_hook)
+        return [TableCell.from_dict(cell_dict) for cell_dict in cell_dicts]
 
 
 class ArtDerBaulNutzungCell(TableCell):
@@ -99,7 +160,9 @@ class ArtDerBaulNutzungCell(TableCell):
     def __init__(self, attributes: dict):
         super().__init__(attributes)
 
-        self.text = self.nutzungsArten[attributes['allgArtDerBaulNutzung']]
+        self.text = ''
+        if attributes['allgArtDerBaulNutzung'] is not None:
+            self.text += self.nutzungsArten[attributes['allgArtDerBaulNutzung']]
         self.MaxZahlWohnungen = ''
         if isinstance(attributes['besondereArtDerBaulNutzung'], XP_BesondereArtDerBaulNutzung):
             self.text += self.spezNutzungsArten[attributes['besondereArtDerBaulNutzung']]
@@ -129,6 +192,7 @@ class ZahlVollgeschosseCell(TableCell):
 
         self.text = ""
         self.zwingend = False
+        self.staffel = False
         if (Zmin := attributes.get('Zmin')) and (Zmax := attributes.get('Zmax')):
             self.text = f"{to_roman(Zmin)}-{to_roman(Zmax)}"
         elif Zzwingend := attributes.get('Zzwingend'):
@@ -137,6 +201,10 @@ class ZahlVollgeschosseCell(TableCell):
         elif Z := attributes.get('Z'):
             self.text = f"{to_roman(Z)}"
 
+        if Z_Staffel := attributes.get('Z_Staffel'):
+            self.staffel = True
+            self.text += f" + {Z_Staffel} St."
+
     def paint(self, rect: QRectF, context: QgsRenderContext):
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
         QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
@@ -144,7 +212,7 @@ class ZahlVollgeschosseCell(TableCell):
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
-        if self.zwingend:
+        if self.zwingend and not self.staffel:
             stroke_circle(rect, context)
 
 
@@ -463,7 +531,8 @@ class BauHoeheCell(TableCell):
                     items_dict[i] = f'{self.bezugspunkt[i].name or ""} {dn}m'
 
         for i in items_dict.keys():
-            items_dict[i] += f' ü. {self.hoehenbezug_map[self.hoehenbezug[i]]}'
+            if display_hoehenbezug := self.hoehenbezug_map[self.hoehenbezug[i]]:
+                items_dict[i] += f' ü. {display_hoehenbezug}'
 
         self.text = [items_dict[key] for key in sorted(items_dict.keys())]
         self.text = list(filter(None, self.text))

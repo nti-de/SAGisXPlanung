@@ -1,8 +1,16 @@
+import os
+from pathlib import Path
+
+from PyQt5.QtCore import QSortFilterProxyModel, QPoint
+from PyQt5.QtGui import QColor, QPen, QPolygon, QBrush
+from PyQt5.QtWidgets import QCompleter, QTreeView, QAbstractItemView, QStyledItemDelegate, QListView, QProxyStyle
 from qgis.PyQt.QtCore import QSize, Qt
 from qgis.PyQt.QtWidgets import (QLabel, QStyleOptionFrame, QStyle, QComboBox, QStyleOptionComboBox, QStylePainter)
 from qgis.PyQt.QtGui import QStandardItemModel, QStandardItem, QPaintEvent, QPainter
 
-from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle, FixComboStyleDelegate
+from SAGisXPlanung import BASE_DIR
+from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle, FixComboStyleDelegate, HighlightRowDelegate, \
+    HighlightRowProxyStyle
 
 
 class ElideLabel(QLabel):
@@ -111,3 +119,113 @@ class MultiSelectComboBox(QComboBox):
         )
 
 
+class SearchableComboBox(QComboBox):
+    def __init__(self, parent=None):
+        super(SearchableComboBox, self).__init__(parent)
+
+        self.setFocusPolicy(Qt.ClickFocus)
+        self.setEditable(True)
+
+        # prevent insertions into combobox
+        self.setInsertPolicy(QComboBox.NoInsert)
+
+        # filter model for matching items
+        self.filter_model = QSortFilterProxyModel(self)
+        self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filter_model.setSourceModel(self.model())
+
+        # completer that uses filter model
+        self.completer = QCompleter(self.filter_model, self)
+        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.setCompleter(self.completer)
+
+        icon_path = Path(BASE_DIR, 'gui', 'resources', 'arrow_drop_down.svg').as_posix()
+        self.setStyleSheet(f"""
+            QComboBox::drop-down {{
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;      
+                border: none;        
+                background: transparent;
+            }}
+            QComboBox::down-arrow {{
+                image: url({icon_path});
+                width: 24px; 
+                height: 24px;
+            }}
+        """)
+
+        view_sheet_style = """      
+            QAbstractItemView { 
+                background-color: white;
+                selection-background-color: #d1d5db;
+                selection-color: black;
+            }    
+            QAbstractItemView::item { 
+                border: none;
+                padding: 5px; 
+            }
+            
+            QAbstractItemView QScrollBar:vertical {
+                background: #f9fafb;
+                width: 8px;
+                border-radius: 4px;
+                margin: 2px;
+            }
+            
+            QAbstractItemView QScrollBar::handle:vertical {
+                background: #d1d5db;
+                border-radius: 4px;
+                min-height: 20px;
+            }
+            
+            QAbstractItemView QScrollBar::handle:vertical:hover {
+                background: #9ca3af;
+            }
+            
+            QAbstractItemView QScrollBar::add-line:vertical,
+            QAbstractItemView QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """
+        self.view().setStyleSheet(view_sheet_style)
+        self._proxy_style = RemoveFrameFocusProxyStyle('Fusion')
+        self._proxy_style.setParent(self)
+        self.view().setStyle(self._proxy_style)
+
+        self.completer_view = QListView(self)
+        self.completer_view.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.completer_view.setMouseTracking(True)
+        self.completer_view.setStyleSheet(view_sheet_style)
+        self.completer_view.setStyle(self._proxy_style)
+        self.completer.setPopup(self.completer_view)
+
+        # QT-BUG: completer is the parent of the popup view (not the combobox itself)
+        # QCompleter is a QObject subclass and cant be styled however
+        # For stylesheets to take effect, set a custom styled item delegate which can paint the qss
+        self.completer.popup().setItemDelegate(QStyledItemDelegate())
+
+        # QT-BUG: reset item delegate, otherwise stylesheets are not taking effect
+        # similar issue as directly above
+        # https://stackoverflow.com/questions/13308341/qcombobox-abstractitemviewitem
+        self.setItemDelegate(QStyledItemDelegate())
+
+        # connect signals
+        self.lineEdit().textEdited[str].connect(self.filter_model.setFilterFixedString)
+        self.completer.activated.connect(self.on_completer_activated)
+
+    def on_completer_activated(self, text):
+        if text:
+            index = self.findText(text)
+            self.setCurrentIndex(index)
+            self.activated[str].emit(self.itemText(index))
+
+    def setModel(self, model):
+        super(SearchableComboBox, self).setModel(model)
+        self.filter_model.setSourceModel(model)
+        self.completer.setModel(self.filter_model)
+
+    def setModelColumn(self, column):
+        self.completer.setCompletionColumn(column)
+        self.filter_model.setFilterKeyColumn(column)
+        super(SearchableComboBox, self).setModelColumn(column)

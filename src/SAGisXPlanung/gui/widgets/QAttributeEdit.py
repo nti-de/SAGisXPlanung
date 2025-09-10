@@ -18,7 +18,7 @@ from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.core.helper import update_field_value
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
@@ -75,9 +75,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if issubclass(xplanung_item.xtype, XP_AbstraktesPraesentationsobjekt):
             from SAGisXPlanung.gui.widgets.QAttributeEditAnnotationItem import QAttributeEditAnnotationItem
             return QAttributeEditAnnotationItem(xplanung_item, data, parent)
-        elif hasattr(xplanung_item.xtype, 'renderer') and isinstance(xplanung_item.xtype.renderer(xplanung_item.geom_type), RuleBasedSymbolRenderer):
-            from SAGisXPlanung.gui.widgets.QAttributeEditSymbolRenderer import QAttributeEditSymbolRenderer
-            return QAttributeEditSymbolRenderer(xplanung_item, data, parent)
+        # elif hasattr(xplanung_item.xtype, 'renderer') and isinstance(xplanung_item.xtype.renderer(xplanung_item.geom_type), RuleBasedSymbolRenderer):
+        #     from SAGisXPlanung.gui.widgets.QAttributeEditSymbolRenderer import QAttributeEditSymbolRenderer
+        #     return QAttributeEditSymbolRenderer(xplanung_item, data, parent)
         else:
             return QAttributeEdit(xplanung_item, data, parent)
 
@@ -121,7 +121,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.angleEdit.setValidator(QRegExpValidator(reg_ex, self.angleEdit))
 
         # model setup
-        edit_allowed = not issubclass(self._xplanung_item.xtype, XP_Objekt)
+        edit_allowed = not issubclass(self._xplanung_item.xtype, FeatureType)
         self.model = AttributeTableModel(xplanung_item, data, edit=edit_allowed)
         self.proxyModel = QSortFilterProxyModel(self.tableView)
         self.proxyModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
@@ -211,10 +211,12 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
         rel = next((r for r in self._xplanung_item.xtype.relationships() if r[0] == attribute_name), None)
         if rel is not None:
-            dlg = XPEditAttributeDialog(attribute_name, None, index.data(), self._xplanung_item.xtype, parent=self)
+            dlg = XPEditAttributeDialog(attribute_name, None, index.data(role=ObjectRole), self._xplanung_item,
+                                        set_default=False, parent=self)
             stub = namedtuple('stub', ['cls_type'])
-            cb = QAddRelationDropdown(stub(cls_type=self._xplanung_item.xtype), rel)
-            cb.setDefault(index.data(role=ObjectRole))
+            cb = QAddRelationDropdown(stub(cls_type=self._xplanung_item.xtype), rel, parent=self)
+            if (d := index.data(role=ObjectRole)) is not None:
+                cb.setDefault(d)
 
             dlg.control.hide()
             dlg.hl1.addWidget(cb)
@@ -224,11 +226,11 @@ class QAttributeEdit(CLS, FORM_CLASS):
             cls = next(c for c in base_classes if hasattr(c, attribute_name) and c.attr_fits_version(attribute_name, export_version()))
             field_type = getattr(cls, attribute_name).property.columns[0].type
             dlg = XPEditAttributeDialog(attribute_name, field_type, index.data(role=ObjectRole),
-                                        self._xplanung_item.xtype, parent=self)
+                                        self._xplanung_item, parent=self)
 
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.pushAttributeChangedCommand(original, value, a, i))
-        dlg.fileChanged.connect(lambda value: self.onAttributeChanged(None, 'file', value))
+        dlg.fileChanged.connect(lambda value: self.apply_field_change(None, 'file', value))
         dlg.exec_()
 
     def pushAttributeChangedCommand(self, original_value, new_value, attr, index):
@@ -239,23 +241,22 @@ class QAttributeEdit(CLS, FORM_CLASS):
             new_value=new_value,
             model_index=index
         )
-        command.signal_proxy.changeApplied.connect(self.onChangeApplied)
+        command.signal_proxy.changeApplied.connect(self.apply_field_change)
         self.parent.undo_stack.push(command)
 
     @pyqtSlot(QModelIndex, str, object)
-    def onChangeApplied(self, index, attr, value):
+    def apply_field_change(self, index, attr, value):
+        self.update_database_value(attr, value)
+
         if index is not None:
             self.model.setData(index, value)
-            self.update_layer_field_value(attr, value)
+            update_field_value(self._xplanung_item, attr, value)
 
         # send name changes to update other ui components
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
 
-    def update_layer_field_value(self, attr, value):
-        update_field_value(self._xplanung_item, attr, value)
-
-    def onAttributeChanged(self, index, attr, value):
+    def update_database_value(self, attr, value):
         with Session.begin() as session:
             session.expire_on_commit = False
 
@@ -267,8 +268,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
             ).values({attr: value})
             session.execute(stmt)
 
-            self.onChangeApplied(index, attr, value)
-
     def onSliderReleased(self, attr):
         if attr == self.ATTRIBUTE_SIZE:
             slider_value = self.sizeSlider.value()
@@ -279,9 +278,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
         else:
             raise Exception('invalid attribute')
 
-        with Session.begin() as session:
-            plan_content = session.query(self._xplanung_item.xtype).get(self._xplanung_item.xid)
-            setattr(plan_content, attr, value)
+        update_field_value(self._xplanung_item, attr, value)
+        self.update_database_value(attr, value)
 
 
 class AttributeTableModel(QAbstractTableModel):

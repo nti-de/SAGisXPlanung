@@ -55,7 +55,7 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
         if geom_type == QgsWkbTypes.PointGeometry:
             return icon_renderer('Kennzeichnung', QgsSymbol.defaultSymbol(geom_type),
                                  'Sonstiges', geometry_type=geom_type,
-                                 symbol_size=30)
+                                 scale_factor=5)
         return generic_objects_renderer(geom_type)
 
 

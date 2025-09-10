@@ -1,18 +1,25 @@
 import uuid
 
 import pytest
+from PyQt5.QtWidgets import QGraphicsItem
 from geoalchemy2 import WKTElement
 from mock.mock import MagicMock
 from qgis._core import QgsLayerTreeNode, QgsLayerTreeGroup
+from qgis._gui import QgsMapCanvasItem
 
-from qgis.core import QgsVectorLayer, QgsAnnotationLayer, QgsProject, QgsGeometry, QgsWkbTypes
+from qgis.core import QgsVectorLayer, QgsAnnotationLayer, QgsProject, QgsGeometry, QgsWkbTypes, QgsSingleSymbolRenderer
+from qgis.utils import iface
 
-from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
+from SAGisXPlanung import Session
+from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
+from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung
-from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry, CanvasItemRegistryItem
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PTO
+from SAGisXPlanung.XPlan.core import LayerPriorityType
+from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
-
+from SAGisXPlanung.config import QgsConfig
 
 plan_xid = 'c52aeb9d-34e2-4eca-b56b-e3f3752c94dd'
 feat_xid = 'd52aeb9d-34e2-4eca-b56b-e3f3752c94dd'
@@ -31,6 +38,7 @@ def vl(request) -> QgsVectorLayer:
     layer.setCustomProperty('xplanung/type', request.param)
     layer.setCustomProperty('xplanung/plan-xid', plan_xid)
     layer.setCustomProperty(f'xplanung/feat-1', feat_xid)
+    layer.setCustomProperty(f'xplanung/layer-priority', LayerPriorityType.CustomLayerOrder)
     return layer
 
 
@@ -40,6 +48,7 @@ def vl1() -> QgsVectorLayer:
     layer.setCustomProperty('xplanung/type', 'BP_AnpflanzungBindungErhaltung')
     layer.setCustomProperty('xplanung/plan-xid', plan_xid)
     layer.setCustomProperty(f'xplanung/feat-1', feat1_xid)
+    layer.setCustomProperty(f'xplanung/layer-priority', LayerPriorityType.CustomLayerOrder)
     return layer
 
 
@@ -49,6 +58,7 @@ def vl2() -> QgsVectorLayer:
     layer.setCustomProperty('xplanung/type', 'BP_AnpflanzungBindungErhaltung')
     layer.setCustomProperty('xplanung/plan-xid', plan_xid)
     layer.setCustomProperty(f'xplanung/feat-1', feat2_xid)
+    layer.setCustomProperty(f'xplanung/layer-priority', LayerPriorityType.CustomLayerOrder)
     return layer
 
 
@@ -59,6 +69,18 @@ def al(xitem) -> QgsVectorLayer:
     tpo.position = WKTElement('POINT (1 1)', srid=25833)
     tpo.schriftinhalt = 'test'
     return tpo.asLayer(tpo.position.srid, xitem.plan_xid, 'TestLayer')
+
+
+@pytest.fixture
+def mock_iface(monkeypatch):
+    mock_scene = MagicMock()
+    mock_scene.removeItem = MagicMock()
+    mock_canvas = MagicMock()
+    mock_canvas.scene.return_value = mock_scene
+    iface_mock = MagicMock()
+    iface_mock.mapCanvas.return_value = mock_canvas
+    monkeypatch.setattr("SAGisXPlanung.MapLayerRegistry.iface", iface_mock)
+    return iface_mock
 
 
 @pytest.fixture(scope="session")
@@ -101,6 +123,45 @@ class TestMapLayerRegistry:
         assert len(layer_group.children()) == 2
         assert layer_group.children()[0].layerId() == al.id()
         assert layer_group.children()[1].layerId() == vl.id()
+
+    def test_add_layer_with_priority(self, registry):
+        root = QgsProject.instance().layerTreeRoot()
+        layer_group = root.addGroup("Test_Group")
+
+        # setup custom layer order
+        QgsConfig.set_layer_priority(BP_BauGrenze, GeometryType.LineGeometry, 1)
+        QgsConfig.set_layer_priority(BP_BaugebietsTeilFlaeche, GeometryType.PolygonGeometry, 2)
+        QgsConfig.set_layer_priority(BP_Plan, GeometryType.PolygonGeometry, 0)
+
+        layer1 = BP_BauGrenze.asLayer(25833, plan_xid, 'layer1', GeometryType.LineGeometry)
+        layer2 = BP_Plan.asLayer(25833, plan_xid, 'layer2', GeometryType.PolygonGeometry)
+        layer3 = BP_BaugebietsTeilFlaeche.asLayer(25833, plan_xid, 'layer3', GeometryType.PolygonGeometry)
+
+        registry.addLayer(layer1, layer_group)
+        registry.addLayer(layer2, layer_group)
+        registry.addLayer(layer3, layer_group)
+
+        assert len(layer_group.children()) == 3
+        assert layer_group.children()[0].layerId() == layer2.id()
+        assert layer_group.children()[1].layerId() == layer1.id()
+        assert layer_group.children()[2].layerId() == layer3.id()
+
+    def test_add_layer_with_top_priority(self, registry):
+        root = QgsProject.instance().layerTreeRoot()
+        layer_group = root.addGroup("Test_Group")
+
+        layer1 = QgsVectorLayer('polygon?crs=epsg:4326', 'layer1', "memory")
+        layer1.setCustomProperty('xplanung/layer-priority', LayerPriorityType.Top)
+        layer1.setCustomProperty('xplanung/type', BP_BaugebietsTeilFlaeche.__name__)
+
+        layer2 = QgsVectorLayer('polygon?crs=epsg:4326', 'layer2', "memory")
+        layer2.setCustomProperty('xplanung/layer-priority', LayerPriorityType.CustomLayerOrder)
+        layer2.setCustomProperty('xplanung/type', BP_BaugebietsTeilFlaeche.__name__)
+
+        registry.addLayer(layer2, layer_group)
+        registry.addLayer(layer1, layer_group)  # Should be inserted at position 0
+
+        assert layer_group.children()[0].layerId() == layer1.id()
 
     @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_remove_layer(self, registry, vl, al):
@@ -151,8 +212,8 @@ class TestMapLayerRegistry:
     def test_layer_by_feature(self, registry, vl):
         registry.addLayer(vl)
 
-        assert registry.layerByFeature(feat_xid)
-        assert registry.layerByFeature(plan_xid) is None
+        assert registry.layer_by_orm_id(feat_xid)
+        assert registry.layer_by_orm_id(plan_xid) is None
 
     @pytest.mark.parametrize("vl", ['BP_BaugebietsTeilFlaeche'], indirect=True)
     def test_geometries_changed(self, mocker, registry, vl):
@@ -169,46 +230,10 @@ class TestMapLayerRegistry:
 
         obj_mock.setGeometry.assert_not_called()
 
-    def test_add_canvas_item(self, mocker, registry):
-        canvas_item_mock = mocker.patch("SAGisXPlanung.core.buildingtemplate.template_item.BuildingTemplateItem").return_value
 
-        registry.add_canvas_item(canvas_item_mock, feat_xid, plan_xid)
 
-        assert len(registry._canvasItems) == 1
-        assert registry.canvas_items_at_feat(feat_xid)[0] == canvas_item_mock
 
-    def test_on_layer_visibility_changed(self, registry):
-        mock_layer = MagicMock()
-        mock_layer.customPropertyKeys.return_value = ['xplanung/feat-1']
-        mock_layer.customProperty.return_value = 'feat1'
-        mock_node = MagicMock()
-        mock_node.layer.return_value = mock_layer
-        mock_canvas_item = MagicMock()
-        mock_canvas_item.isVisible.return_value = True
-        registry._canvasItems = [
-            CanvasItemRegistryItem(plan_xid='plan1', feat_xid='feat1', canvas_item=mock_canvas_item)
-        ]
 
-        registry.on_layer_visibility_changed(mock_node)
 
-        # Check if the visibility of the canvas item has changed
-        mock_canvas_item.setVisible.assert_called_with(False)
 
-    def test_on_group_node_visibility_changed(self, registry):
-        mock_layer = MagicMock()
-        mock_layer.customPropertyKeys.return_value = ['xplanung/feat-1']
-        mock_layer.customProperty.return_value = 'feat1'
-        mock_node = MagicMock()
-        mock_node.layer.return_value = mock_layer
-        mock_group = MagicMock(spec=QgsLayerTreeGroup)
-        mock_group.children.return_value = [mock_node]
-        mock_canvas_item = MagicMock()
-        mock_canvas_item.isVisible.return_value = True
-        registry._canvasItems = [
-            CanvasItemRegistryItem(plan_xid='plan1', feat_xid='feat1', canvas_item=mock_canvas_item)
-        ]
 
-        registry.on_group_node_visibility_changed(mock_group)
-
-        mock_node.layer.assert_called()
-        mock_canvas_item.setVisible.assert_called_with(False)

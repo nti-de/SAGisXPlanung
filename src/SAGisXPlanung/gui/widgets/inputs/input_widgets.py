@@ -34,8 +34,8 @@ class LineEditMixin:
 
 class QStringInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
-    def __init__(self, regex=None, validation_error=None):
-        super(QStringInput, self).__init__()
+    def __init__(self, regex=None, validation_error=None, *args, **kwargs):
+        super(QStringInput, self).__init__(*args, **kwargs)
         self.regex = regex
         self.validation_error = validation_error
 
@@ -56,6 +56,9 @@ class QStringInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanun
 
 class QFloatInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
+    def __init__(self, *args, **kwargs):
+        super(QFloatInput, self).__init__(*args, **kwargs)
+
     def value(self):
         return float(self.text()) if self.text() else None
 
@@ -73,6 +76,9 @@ class QFloatInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanung
 
 
 class QIntegerInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
+
+    def __init__(self, *args, **kwargs):
+        super(QIntegerInput, self).__init__(*args, **kwargs)
 
     def value(self):
         return int(self.text()) if self.text() else None
@@ -92,8 +98,9 @@ class QIntegerInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanu
 
 class QBooleanInput(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
 
-    def __init__(self):
-        super(QBooleanInput, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(QBooleanInput, self).__init__(*args, **kwargs)
+
         self.layout = QHBoxLayout()
         self.option_yes = QRadioButton('Ja')
         self.option_no = QRadioButton('Nein')
@@ -157,6 +164,9 @@ class QBooleanInput(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
 
 class QFileInput(BaseInputElement, QgsFileWidget, metaclass=XPlanungInputMeta):
 
+    def __init__(self, *args, **kwargs):
+        super(QFileInput, self).__init__(*args, **kwargs)
+
     def value(self):
         return self.filePath() or None
 
@@ -199,6 +209,9 @@ class QFileInput(BaseInputElement, QgsFileWidget, metaclass=XPlanungInputMeta):
 
 class QTextInput(BaseInputElement, QTextEdit, metaclass=XPlanungInputMeta):
 
+    def __init__(self, *args, **kwargs):
+        super(QTextInput, self).__init__(*args, **kwargs)
+
     def value(self):
         return self.toPlainText() or None
 
@@ -211,8 +224,8 @@ class QTextInput(BaseInputElement, QTextEdit, metaclass=XPlanungInputMeta):
 
 class QMeasureTypeInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanungInputMeta):
 
-    def __init__(self, measure_type):
-        super(QMeasureTypeInput, self).__init__()
+    def __init__(self, measure_type, *args, **kwargs):
+        super(QMeasureTypeInput, self).__init__(*args, **kwargs)
         self.measure_type = measure_type
 
     def value(self):
@@ -250,9 +263,9 @@ class QMeasureTypeInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XP
             return False
 
 
-class QMultiInputWidget(QWidget):
-    def __init__(self, input_type='date', placeholder_text='', parent=None):
-        super().__init__(parent)
+class QMultiInputWidget(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
+    def __init__(self, input_type='date', placeholder_text='', *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
         self.layout = QVBoxLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -341,8 +354,8 @@ class QMultiInputWidget(QWidget):
 
 
 class QDateListInput(QMultiInputWidget):
-    def __init__(self, parent=None):
-        super().__init__(input_type='date', parent=parent)
+    def __init__(self, *args, **kwargs):
+        super().__init__('date', *args, **kwargs)
 
     def create_input_field(self, placeholder_text):
         return QDateEditNoScroll(calendarPopup=True)
@@ -360,8 +373,8 @@ class QDateListInput(QMultiInputWidget):
 
 
 class QTextListInput(QMultiInputWidget):
-    def __init__(self, parent=None):
-        super().__init__(input_type='text', parent=parent)
+    def __init__(self, *args, **kwargs):
+        super().__init__('text', *args, **kwargs)
 
     def create_input_field(self, placeholder_text):
         line_edit = QStringInput()
@@ -382,8 +395,8 @@ class QTextListInput(QMultiInputWidget):
 
 class QCheckableComboBoxInput(BaseInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
 
-    def __init__(self, items=None, enum_type=None):
-        super(QCheckableComboBoxInput, self).__init__()
+    def __init__(self, items=None, enum_type=None, *args, **kwargs):
+        super(QCheckableComboBoxInput, self).__init__(*args, **kwargs)
         self.enum_type = enum_type
         if items is not None:
             self.addItems(items)

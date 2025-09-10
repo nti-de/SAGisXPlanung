@@ -12,11 +12,14 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
-from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt, LP_Raumkonkretisierung
+from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtsstand, LP_PlanArt, LP_Raumkonkretisierung, \
+    LP_Rechtscharakter
+from SAGisXPlanung.XPlan.conversions import LP_Rechtscharakter_EnumType
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc
 from SAGisXPlanung.XPlan.enums import XP_Bundeslaender
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.types import GeometryType, Angle
 
 
@@ -163,3 +166,23 @@ class LP_Objekt(XP_Objekt):
     def hidden_inputs(cls):
         h = super(LP_Objekt, cls).hidden_inputs()
         return h + ['position']
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class LP_TextAbschnitt(XP_TextAbschnitt):
+    """ Texlich formulierter Inhalt eines Landschaftsplans, der einen anderen Rechtscharakter als das zugrunde liegende
+        Fachobjekt hat (Attribut status des Fachobjektes), oder dem Plan als Ganzes zugeordnet ist. """
+
+    __tablename__ = 'lp_text_abschnitt'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("xp_text_abschnitt.id", ondelete='CASCADE'), primary_key=True)
+
+    rechtscharakter = Column(LP_Rechtscharakter_EnumType(LP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    @classmethod
+    def renderer(cls, geom_type: GeometryType):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

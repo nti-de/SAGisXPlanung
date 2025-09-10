@@ -1,5 +1,25 @@
 ## Changelog
 
+### [2.10.0] - 08.09.2025
+
+#### Neue Funktionen
+
+- Unterstützung für gebundene Präsentationsobjekte
+- Erfassung von objektbasierten textlichen Festsetzungen
+
+#### Veränderungen
+
+- verbesserte Stilisierungen mehrerer Objektklassen
+- Darstellung von Staffelgeschossen in Nutzungsschablone (e9e4609e)
+- verbesserte Anzeige der Nutzungsschablone bei Nutzung des Attributs `relativerHoehenbezug`(e9e4609e)
+
+#### Fehlerbehebungen
+
+- Breite der Auswahllisten bei langen Einträgen verbessert (9e84d8ba)
+- Fehler im Datenmodell in Relation `versionSonstRechtsgrundlage` (cd5a52c1)
+- falsche Anzahl Objekte beim GML-Import-Zähler (c99a0318) 
+
+
 ### [2.9.5] - 19.08.2025
 
 #### Neue Funktionen
@@ -34,7 +54,7 @@
 
 #### Fehlerbehebungen
 
-- Fehler im Fortschrittsinfikator beim XPlanGML-Import (726073ff)
+- Fehler im Fortschrittsindikator beim XPlanGML-Import (726073ff)
 - falsche Pflichtattribute in Klasse `SO_SchutzgebietWasserrecht` (a1c03a95)
 - Fehler bei Anzeige der Validierungshinweise beim Hinzufügen neuer Objekte (f5c673de)
 - Autoflush-Fehler bei XPlanGML-Import (1f4e885b)

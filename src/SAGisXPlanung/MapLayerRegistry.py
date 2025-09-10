@@ -2,14 +2,13 @@ import logging
 from dataclasses import dataclass
 from typing import Union, List
 
-from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt import QtCore
 from qgis.gui import QgsMapCanvasItem
-from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup, QgsLayerTreeNode,
-                       QgsLayerTreeLayer)
+from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup)
 from qgis.utils import iface
 
 from SAGisXPlanung import Session
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import QgsConfig
@@ -30,16 +29,8 @@ class Singleton(QtCore.QObject):
         pass
 
 
-@dataclass
-class CanvasItemRegistryItem:
-    plan_xid: str
-    feat_xid: str
-    canvas_item: QgsMapCanvasItem
-
-
 class MapLayerRegistry(Singleton):
     _layers = []
-    _canvasItems: List[CanvasItemRegistryItem] = []
 
     def init(self):
         QgsProject.instance().layerStore().layerWillBeRemoved.connect(self.removeLayer)
@@ -54,34 +45,7 @@ class MapLayerRegistry(Singleton):
     def layers(self):
         return self._layers
 
-    def canvas_items_at_feat(self, feat_xid: str):
-        registry_items = list(filter(lambda r_item: r_item.feat_xid == feat_xid, self._canvasItems))
-        return [r.canvas_item for r in registry_items]
-
-    def add_canvas_item(self, item: QgsMapCanvasItem, feat_xid: str, plan_xid: str):
-        # if building template already exists replace with new one
-        canvas_registry_item = CanvasItemRegistryItem(
-            plan_xid=plan_xid,
-            feat_xid=feat_xid,
-            canvas_item=item
-        )
-        self.remove_canvas_items(feat_xid)
-        self._canvasItems.append(canvas_registry_item)
-
-    def remove_canvas_items(self, feat_xid: str):
-        def _should_keep_item(registry_item):
-            if registry_item.feat_xid == feat_xid:
-                iface.mapCanvas().scene().removeItem(registry_item.canvas_item)
-                registry_item.canvas_item.updateCanvas()
-                return False  # canvas item should be removed
-            return True  # canvas item should be kept
-
-        self._canvasItems = list(filter(_should_keep_item, self._canvasItems))
-
     def addLayer(self, layer: QgsMapLayer, group=None, add_to_legend=True):
-        if not (isinstance(layer, QgsVectorLayer) or isinstance(layer, QgsAnnotationLayer)):
-            return
-
         if layer in self._layers:
             return
 
@@ -90,11 +54,14 @@ class MapLayerRegistry(Singleton):
             if group and isinstance(layer, QgsVectorLayer):
                 # respect layer order from config
                 xplan_class = layer.customProperty('xplanung/type')
-                layer_priority = QgsConfig.layer_priority(xplan_class, layer.geometryType())
+                layer_priority_type = layer.customProperty("xplanung/layer-priority")
 
+                layer_priority = QgsConfig.layer_priority(xplan_class, layer.geometryType())
                 layer.setCustomProperty('xplanung/custom-layer-priority', 0 if not layer_priority else int(layer_priority))
 
-                if layer_priority is None:
+                if LayerPriorityType.Top in layer_priority_type:
+                    group.insertLayer(0, layer)
+                elif layer_priority is None or LayerPriorityType.Bottom in layer_priority_type:
                     group.addLayer(layer)
                 else:
                     # find index that corresponds to the layer-priority following the priority of the layer that is
@@ -119,37 +86,10 @@ class MapLayerRegistry(Singleton):
 
         self._layers.append(layer)
 
-    @pyqtSlot(QgsLayerTreeLayer)
-    def on_layer_visibility_changed(self, tree_node: QgsLayerTreeLayer):
-        layer = tree_node.layer()
-        for key in layer.customPropertyKeys():
-            if 'xplanung/feat-' not in key:
-                continue
-            feat_id = layer.customProperty(key)
-            canvas_items = self.canvas_items_at_feat(feat_id)
-            for c_item in canvas_items:
-                c_item.setVisible(not c_item.isVisible())
-
-    @pyqtSlot(QgsLayerTreeNode)
-    def on_group_node_visibility_changed(self, tree_node: QgsLayerTreeNode):
-        if isinstance(tree_node, QgsLayerTreeGroup):
-            for child_node in tree_node.children():
-                self.on_layer_visibility_changed(child_node)
-        elif isinstance(tree_node, QgsLayerTreeLayer):
-            self.on_layer_visibility_changed(tree_node)
-
     def removeLayer(self, layer_id):
         layer = self.layerById(layer_id)
         if not layer:
             return
-
-        # remove template items from canvas
-        if layer.customProperty('xplanung/type') == 'BP_BaugebietsTeilFlaeche':
-            for key in layer.customPropertyKeys():
-                if 'xplanung/feat-' not in key:
-                    continue
-                feat_id = layer.customProperty(key)
-                self.remove_canvas_items(feat_id)
 
         self._layers.remove(layer)
 
@@ -167,13 +107,14 @@ class MapLayerRegistry(Singleton):
                     return True
         return False
 
-    def layerByFeature(self, feat_xid: str) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
+    def layer_by_orm_id(self, orm_xid: str) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
         for lyr in self._layers:
             for key in lyr.customPropertyKeys():
                 if 'xplanung/feat-' not in key:
                     continue
-                if lyr.customProperty(key) == feat_xid:
+                if lyr.customProperty(key) == orm_xid:
                     return lyr
+        return None
 
     def layerByXid(self, xplan_item: XPlanungItem, geom_type: GeometryType = None) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
         # if not already defined, try if geom type is available on the given xplan item

@@ -81,6 +81,7 @@ def upgrade():
             PRIMARY KEY (codelist_id, codelist_user_id)
         );
     """)
+
     # endregion CODELISTS
 
     # region XP_Hoehenangabe

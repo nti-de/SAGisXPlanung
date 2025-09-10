@@ -1,12 +1,27 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Optional, Any, Dict
 
 from qgis.PyQt.QtCore import Qt, QObject
 from qgis.PyQt.QtWidgets import QLabel, QWidget, QVBoxLayout
+
+from SAGisXPlanung.XPlanungItem import XPlanungItem
+
+
+@dataclass
+class WidgetContext:
+    xplan_item: Optional[XPlanungItem] = None
+    attribute_name: Optional[str] = None
+    custom_data: Dict[str, Any] = field(default_factory=dict)
 
 
 class BaseInputElement(ABC):
     """ Abstrakte Basisklasse für alle Eingabeformulare.
         Mit der Factory-Methode `create` kann ein zum Datentyp passendes Eingabefeld genereriert werden"""
+
+    def __init__(self, context: Optional[WidgetContext] = None, **kwargs):
+        super().__init__()
+        self.context = context or WidgetContext()
 
     background_widget = None
     invalid = False
@@ -70,9 +85,14 @@ class BaseInputElement(ABC):
         self.setFocus()
 
     @staticmethod
-    def create(field_type, parent=None) -> 'BaseInputElement':
+    def create(field_type, parent=None, context: Optional[WidgetContext] = None) -> 'BaseInputElement':
         from SAGisXPlanung.gui.widgets.inputs.widget_factory import create_widget
-        return create_widget(field_type, parent)
+        return create_widget(field_type, parent, context)
+
+    def get_context_value(self, key: str, default=None):
+        if hasattr(self.context, key):
+            return getattr(self.context, key, default)
+        return self.context.custom_data.get(key, default)
 
 
 class XPlanungInputMeta(type(QObject), type(BaseInputElement)):

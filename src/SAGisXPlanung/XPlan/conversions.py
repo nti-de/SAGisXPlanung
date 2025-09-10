@@ -57,6 +57,68 @@ class FP_Rechtscharakter_EnumType(types.TypeDecorator):
         return value
 
 
+class RP_Rechtscharakter_EnumType(types.TypeDecorator):
+    impl = types.Enum
+
+    def process_bind_param(self, value, dialect):
+        from SAGisXPlanung.RPlan.RP_Basisobjekte.enums import RP_Rechtscharakter
+        if isinstance(value, RP_Rechtscharakter):
+            return value
+
+        if isinstance(value, XP_Rechtscharakter):
+            value = value.name
+        if value == "NurInformationsgehaltRPlan":
+            return "NurInformationsgehalt"
+        if value == "TextlichesZielRaumordnung":
+            return "TextlichesZiel"
+        if value == "ZielUndGrundsatzRaumordnung":
+            return "ZielundGrundsatz"
+        if value == "VorschlagRaumordnung":
+            return "Vorschlag"
+
+        for rp_enum_item in RP_Rechtscharakter:
+            if rp_enum_item.name == value:
+                return value
+        return RP_Rechtscharakter.Unbekannt
+
+    process_literal_param = process_bind_param
+
+    def process_result_value(self, value, dialect):
+        return value
+
+
+class LP_Rechtscharakter_EnumType(types.TypeDecorator):
+    impl = types.Enum
+
+    def process_bind_param(self, value, dialect):
+        from SAGisXPlanung.LPlan.LP_Basisobjekte.enums import LP_Rechtscharakter
+        if isinstance(value, LP_Rechtscharakter):
+            return value
+
+        if isinstance(value, XP_Rechtscharakter):
+            value = value.name
+        if value == "FestsetzungImLP":
+            return "Festsetzung"
+        if value == "GeplanteFestsetzungImLP":
+            return "Geplant"
+        if value == "DarstellungKennzeichnungImLP":
+            return "DarstellungKennzeichnung"
+        if value == "FestsetzungBPlan":
+            return "FestsetzungInBPlan"
+        if value == "Sonstiges":
+            return "SonstigerStatus"
+
+        for lp_enum_item in LP_Rechtscharakter:
+            if lp_enum_item.name == value:
+                return value
+        return LP_Rechtscharakter.Unbekannt
+
+    process_literal_param = process_bind_param
+
+    def process_result_value(self, value, dialect):
+        return value
+
+
 class SO_Rechtscharakter_EnumType(types.TypeDecorator):
     impl = types.Enum
 

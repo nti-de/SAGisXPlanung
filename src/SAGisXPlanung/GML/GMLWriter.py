@@ -15,8 +15,8 @@ from SAGisXPlanung.GML.geometry import enforce_wkb_constraints
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, \
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
-from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
+from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject, FeatureType
 from SAGisXPlanung.utils import is_url
 
 logger = logging.getLogger(__name__)
@@ -147,12 +147,10 @@ class GMLWriter:
                     value = [value] if value is not None else []
                 for o in value:
                     # other feature types should appear via xlink
-                    if isinstance(o, (XP_Objekt, XP_Plan, XP_Bereich, XP_AbstraktesPraesentationsobjekt)):
+                    if isinstance(o, FeatureType):
                         if hasattr(o, 'xp_versions') and self.version not in o.xp_versions:
                             continue
                         if isinstance(o, XP_AbstraktesPraesentationsobjekt):
-                            if isinstance(o, XP_Nutzungsschablone) and o.hidden:
-                                continue
                             if o.position is None:
                                 continue
 
@@ -177,7 +175,7 @@ class GMLWriter:
 
             self.write_attribute(xp_objekt, xplan_object, attr, self.version)
 
-        if isinstance(xplan_object, (XP_Objekt, XP_Plan, XP_Bereich, XP_AbstraktesPraesentationsobjekt)):
+        if isinstance(xplan_object, FeatureType):
             self.root.append(feature)
 
         return feature

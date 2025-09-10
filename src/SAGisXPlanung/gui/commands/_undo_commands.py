@@ -1,4 +1,5 @@
 import inspect
+import logging
 from typing import List, Iterable
 
 from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject, Qt
@@ -13,6 +14,9 @@ from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
 from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
+
+
+logger = logging.getLogger(__name__)
 
 
 class SignalProxy(QObject):
@@ -66,10 +70,19 @@ class AttributeChangedCommand(QUndoCommand):
                 attr = self.attribute
                 update_value = value
 
-            stmt = update(cls.__table__).where(
-                cls.__table__.c.id == self.xplan_item.xid
-            ).values({attr: update_value})
-            session.execute(stmt)
+            # this is pretty slow since it emits a SELECT and has to populate the ORM instance
+            # but is required to emit mapper-level events after_update/before_update which are used to update visualization
+            orm_instance = session.get(cls, self.xplan_item.xid, [load_only('id')])
+            setattr(orm_instance, attr, update_value)
+
+            # if hasattr(cls, 'FORCE_ORM_UPDATE') and cls.FORCE_ORM_UPDATE:
+            #     orm_instance = session.get(cls, self.xplan_item.xid, [load_only('id')])
+            #     setattr(orm_instance, attr, update_value)
+            # else:
+            #     stmt = update(cls.__table__).where(
+            #         cls.__table__.c.id == self.xplan_item.xid
+            #     ).values({attr: update_value})
+            #     session.execute(stmt)
 
         CallbackRegistry().run_callbacks(self.xplan_item, attr, update_value)
 
@@ -83,40 +96,47 @@ class AttributeChangedCommand(QUndoCommand):
 
 
 class ObjectsDeletedCommand(QUndoCommand):
-    def __init__(self, nodes: List[ClassNode], parent):
-        self.count = len(nodes)
+    def __init__(self, nodes_to_delete: List[ClassNode], parent):
+        self.count = len(nodes_to_delete)
         super().__init__(f'Löschen {self.count} Objekt{"e" if self.count > 1 else ""}')
 
         self.parent = parent
 
-        self.items = nodes
-        self.objects = []
+        self.main_items = nodes_to_delete
+        self.tracked_deletes = []
 
         self.signal_proxy = SignalProxy()
 
-    def make_related_objects_transient(self, obj):
-        for rel_item in obj.related():
-            make_transient(rel_item)
-            self.make_related_objects_transient(rel_item)
-
     def undo(self):
         with Session.begin() as session:
-            for item, obj in zip(self.items, self.objects):
+            for item, obj in self.tracked_deletes:
                 make_transient(obj)
-                self.make_related_objects_transient(obj)
                 session.add(obj)
 
-                self.signal_proxy.deleteReverted.emit(item)
+            main_item, _ = self.tracked_deletes[-1]
+            self.signal_proxy.deleteReverted.emit(main_item)
 
     def redo(self):
-        self.objects = []
+        self.tracked_deletes = []
+
+        def _collect_deletes(item, session):
+            # Collect object instances that will be deleted
+            # The actual deletion happens via cascaded backrefs on the top-level item to be deleted.
+            for i in range(item.childCount()):
+                child = item.child(i)
+                _collect_deletes(child, session)
+
+            # Fetch and record the object for deletion
+            xp_item = item.xplanItem()
+            delete_obj = session.get(xp_item.xtype, xp_item.xid)
+            self.tracked_deletes.append((item, delete_obj))
 
         with Session.begin() as session:
             session.expire_on_commit = False
-            for item in self.items:
-                xp_item = item.xplanItem()
-                obj = session.get(xp_item.xtype, xp_item.xid, [selectinload('*')])
-                session.delete(obj)
 
-                self.objects.append(obj)
-                self.signal_proxy.deleteApplied.emit(item)
+            for main_item in self.main_items:
+                _collect_deletes(main_item, session)
+                # Delete the top-level object (selected item) after all children are collected
+                _, obj = self.tracked_deletes[-1]
+                session.delete(obj)
+                self.signal_proxy.deleteApplied.emit(main_item)

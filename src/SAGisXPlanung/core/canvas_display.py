@@ -72,7 +72,6 @@ def load_on_canvas(plan_xid, layer_group=None):
         if not layer_group:
             layer_group = root.insertGroup(0, plan.name)
             layer_group.setCustomProperty('xplanung_id', str(plan.id))
-            layer_group.visibilityChanged.connect(MapLayerRegistry().on_group_node_visibility_changed)
 
             xp_indicator, reload_indicator = createXPlanungIndicators()
             reload_indicator.clicked.connect(lambda i, p=plan_xid: plan_to_map(p))

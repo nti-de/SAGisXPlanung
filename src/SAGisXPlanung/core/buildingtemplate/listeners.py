@@ -2,6 +2,7 @@ import functools
 
 from sqlalchemy.orm import load_only
 
+from .template_cells import TableCell
 from .template_item import BuildingTemplateCellDataType, BuildingTemplateItem, TableCellFactory
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 
@@ -12,6 +13,8 @@ from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.data_types import XP_Hoehenangabe
 from SAGisXPlanung.XPlanungItem import XPlanungItem
+from ..helper import update_field_value
+from ...XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 
 
 def register_update_listeners():
@@ -44,15 +47,21 @@ def refresh_template(cell_type, target: XPlanungItem, column_name: str, new_valu
         else:
             bp_baugebiet = session.query(BP_BaugebietsTeilFlaeche).options(load_only('id')).get(target.xid)
 
-        template = bp_baugebiet.template()
-        # update map layer registry immediately if template is currently visible
-        if not template.hidden and MapLayerRegistry().featureIsShown(str(bp_baugebiet.id)):
-            canvas_items = MapLayerRegistry().canvas_items_at_feat(str(bp_baugebiet.id))
-            template_canvas_item = next(x for x in canvas_items if isinstance(x, BuildingTemplateItem))
+        if not bp_baugebiet:
+            return
 
-            new_cell = TableCellFactory.create_cell(cell_type, bp_baugebiet)
-            template_canvas_item.replace_cells_of_type(new_cell)
-            template_canvas_item.updateCanvas()
+        template = next((x for x in bp_baugebiet.wirdDargestelltDurch if isinstance(x, XP_Nutzungsschablone)), None)
+        if not template:
+            return
+
+        # update map layer registry immediately if template is currently visible
+        if MapLayerRegistry().featureIsShown(str(template.id)):
+            cell_data = template.dientZurDarstellungVon.template_cell_data(template.data_attributes)
+            update_field_value(
+                XPlanungItem(xtype=template.__class__, xid=str(template.id)),
+      "cell_content",
+                TableCell.serialize_cells(cell_data)
+            )
 
 
 register_update_listeners()

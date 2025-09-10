@@ -2,13 +2,12 @@ import logging
 from enum import Enum
 from typing import List
 
-from qgis.gui import QgsMapCanvasItem, QgsMapCanvas
-from qgis.PyQt.QtWidgets import QGraphicsItem
+from qgis.gui import QgsMapCanvas
 from qgis.PyQt.QtGui import QBrush, QPainterPath, QColor, QPainter
-from qgis.PyQt.QtCore import QPointF, QRectF, QEvent, QObject, Qt, pyqtSignal
-from qgis.core import (QgsPointXY, QgsRenderContext, QgsUnitTypes)
+from qgis.PyQt.QtCore import QPointF, QRectF
+from qgis.core import (QgsPointXY, QgsRenderContext, QgsUnitTypes, QgsFeatureRenderer,  Qgis)
+from qgis.utils import iface
 
-from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.buildingtemplate.template_cells import ArtDerBaulNutzungCell, ZahlVollgeschosseCell, \
     BaumasseCell, GrundGeschossflaecheCell, GrundflaechenzahlCell, GeschossflaechenzahlCell, BebauungsArtCell, \
     BauweiseCell, DachformCell, DachneigungCell, BauHoeheCell, TableCell
@@ -40,7 +39,58 @@ class BuildingTemplateCellDataType(Enum):
 
 
 
-class BuildingTemplateItem(QgsMapCanvasItem):
+class BuildingTemplateRenderer(QgsFeatureRenderer):
+
+    def __init__(self, _type: str):
+        super().__init__(_type)
+
+    def usedAttributes(self, context):
+        return ["id", "skalierung", "drehwinkel", "rows", "cell_content"]
+
+    def symbolForFeature(self, feature, context):
+        return None
+
+    def willRenderFeature(self, feature, context):
+        return True
+
+    def renderFeature(self, feature, context, layer=-1, selected=False, drawVertexMarker=False):
+        painter = context.painter()
+        if not painter:
+            return False
+
+        if not feature.hasGeometry() or feature.geometry().type() != Qgis.GeometryType.Point:
+            return False
+
+        attr_map = dict(feature.attributeMap())
+        table = BuildingTemplateItem(
+            attr_map.get('id'),
+            iface.mapCanvas(),
+            feature.geometry().asPoint(),
+            int(attr_map.get('zeilenAnz', 3)),
+            TableCell.deserialize_cells(str(attr_map.get('cell_content', ''))),
+            scale=float(attr_map.get('skalierung', 0)),
+            angle=int(float((attr_map.get('drehwinkel', 0))))
+        )
+
+        painter.save()
+
+        try:
+            # Check if table position is within current extent
+            if not context.extent().contains(table.position):
+                return False
+
+            table.paint(painter, context)
+
+            return True
+        finally:
+            painter.restore()
+
+    def clone(self):
+        r = BuildingTemplateRenderer(self.type())
+        return r
+
+
+class BuildingTemplateItem:
     """ Dekoriert Punkt mit Nutzungsschablone """
 
     xtype = 'XP_Nutzungsschablone'
@@ -48,53 +98,64 @@ class BuildingTemplateItem(QgsMapCanvasItem):
     _path = None
     _color = QColor('black')
     _center = None
+    _pen_width_map_units = 0.1
 
-    def __init__(self, canvas: QgsMapCanvas, center: QgsPointXY, rows: int, data: List['TableCell'],
-                 parent: XPlanungItem, scale=0.5, angle=0):
-        super().__init__(canvas)
+    def __init__(self, ppo_id, canvas: QgsMapCanvas, center: QgsPointXY, rows: int, data: List['TableCell'],
+                 scale=1, angle=0):
+        self.id = ppo_id
         self.canvas = canvas
         self.data = data
-        self._center = center
+        self.position = center
+
         self._scale = scale
         self._angle = angle
-        self.parent = parent
 
-        self.setFlag(QGraphicsItem.ItemIgnoresTransformations)
         settings = self.canvas.mapSettings()
         self.context = QgsRenderContext.fromMapSettings(settings)
-        self.event_filter = CanvasEventFilter(self)
+
+        map_to_pixel = self.context.mapToPixel()
+        self._center = map_to_pixel.transform(self.position).toQPointF()
 
         self.columns = 2
         self.rows = rows
-        self.cell_width = 10
-        self.cell_height = 5
+        self.cell_width = 8
+        self.cell_height = 4
         self.width = self.cell_width * 2
         self.height = self.cell_height * self.rows
 
         self.updatePath()
-        self.setCenter(center)
-        self.setRotation(self._angle)
-        self.setScale(self._scale)
-
-        self.updateCanvas()
 
     def setItemData(self, data):
         self.data = data
 
-    def paint(self, painter, option=None, widget=None):
-        settings = self.canvas.mapSettings()
-        self.context = QgsRenderContext.fromMapSettings(settings)
-        self.context.setPainter(painter)
-
+    def paint(self, painter, context):
+        self.context = context
         painter.setRenderHint(QPainter.Antialiasing)
 
         brush = QBrush(self._color)
         painter.setBrush(brush)
 
+        map_to_pixel = self.context.mapToPixel()
+        self._center = map_to_pixel.transform(self.position).toQPointF()
+
+        painter.save()
+        painter.translate(self._center)
+        painter.rotate(self._angle)
+        painter.scale(self._scale, self._scale)
+
         self.updatePath()
-        painter.strokePath(self._path, painter.pen())
+        pen = painter.pen()
+        pen.setWidthF(
+            self.context.convertToPainterUnits(
+                self._pen_width_map_units, # * self._scale,
+                QgsUnitTypes.RenderMapUnits
+            )
+        )
+        painter.strokePath(self._path, pen)
 
         self.paint_cell_content(painter)
+
+        painter.restore()
 
     def paint_cell_content(self, painter: QPainter):
         height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
@@ -104,7 +165,12 @@ class BuildingTemplateItem(QgsMapCanvasItem):
 
         for i in range(self.rows):
             for j in range(self.columns):
-                rect = QRectF((j-1)*cell_width, -height / 2 + i*cell_height, cell_width, cell_height)
+                rect = QRectF(
+                    (j - 1) * cell_width,
+                    (-height / 2 + i * cell_height),
+                    cell_width,
+                    cell_height
+                )
 
                 data = self.cell_data(i, j)
                 data.paint(rect, self.context)
@@ -121,16 +187,10 @@ class BuildingTemplateItem(QgsMapCanvasItem):
             if type(cell) is type(new_cell):
                 self.data[i] = new_cell
 
-    def beginMove(self):
-        self.canvas.viewport().installEventFilter(self.event_filter)
-
-    def endMove(self):
-        self.canvas.viewport().removeEventFilter(self.event_filter)
-
     def setCenter(self, point: QgsPointXY):
-        self._center = point
-        pt = self.toCanvasCoordinates(self._center)
-        self.setPos(pt)
+        self.position = point
+        map_to_pixel = self.context.mapToPixel()
+        self._center = map_to_pixel.transform(self.position).toQPointF()
 
     def setRowCount(self, row_count: int):
         self.rows = row_count
@@ -141,14 +201,12 @@ class BuildingTemplateItem(QgsMapCanvasItem):
 
     def setAngle(self, angle: int):
         self._angle = angle
-        self.setRotation(self._angle)
 
     def setScale(self, scale: float):
-        super(BuildingTemplateItem, self).setScale(scale * 2.0)
         self._scale = scale
 
     def updatePath(self):
-        self._path = QPainterPath()
+        self._path = QPainterPath(self._center)
 
         height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
         width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderMapUnits)
@@ -156,48 +214,22 @@ class BuildingTemplateItem(QgsMapCanvasItem):
         top_left = QPointF(-width/2, -height/2)
 
         for i in range(self.rows - 1):
-            self._path.moveTo(QPointF(top_left.x(), top_left.y() + (i+1) * height/self.rows))
-            self._path.lineTo(QPointF(top_left.x() + width, top_left.y() + (i+1) * height/self.rows))
+            y_pos = top_left.y() + (i + 1) * height / self.rows
+            self._path.moveTo(QPointF(top_left.x(), y_pos))
+            self._path.lineTo(QPointF(top_left.x() + width, y_pos))
 
         # vertical bar
-        self._path.moveTo(QPointF(0, height/2))
-        self._path.lineTo(QPointF(0, -height/2))
+        self._path.moveTo(QPointF(0, -height / 2))
+        self._path.lineTo(QPointF(0, height / 2))
 
         # box
         self._path.addRect(top_left.x(), top_left.y(), width, height)
-
-    def updatePosition(self):
-        self.setCenter(self._center)
 
     def boundingRect(self):
         return self._path.boundingRect()
 
     def center(self) -> QgsPointXY:
         return self._center
-
-
-class CanvasEventFilter(QObject):
-    # add signal here, because QGraphicsItems dont inherit from QObject and therefore cant emit any signals themselves!
-    positionUpdated = pyqtSignal(QgsPointXY)
-
-    def __init__(self, canvas_item, parent=None):
-        self.canvas_item = canvas_item
-        super(CanvasEventFilter, self).__init__(parent)
-
-    def eventFilter(self, obj, event):
-        # on mouse move let canvas item follow mouse position
-        if event.type() == QEvent.MouseMove:
-            point = self.canvas_item.toMapCoordinates(event.pos())
-            self.canvas_item.setCenter(point)
-        # on click dont propagate the event and finish moving the canvas item
-        if event.type() == QEvent.MouseButtonRelease:
-            if event.button() == Qt.MiddleButton:
-                return False
-            if event.button() == Qt.LeftButton:
-                self.canvas_item.endMove()
-                self.positionUpdated.emit(self.canvas_item.center())
-            return True
-        return False
 
 
 class TableCellFactory:
@@ -213,3 +245,4 @@ class TableCellFactory:
             attributes[attr_name] = value
 
         return cell_type(attributes)
+

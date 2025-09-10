@@ -24,6 +24,28 @@ class BP_Dachform(XPlanungEnumMixin, Enum):
     Mischform = 5000
     Sonstiges = 9999
 
+    def short_desc(self):
+        _abbreviation_map = {
+            BP_Dachform.Flachdach: 'FD',
+            BP_Dachform.Pultdach: 'PD',
+            BP_Dachform.VersetztesPultdach: 'VPD',
+            BP_Dachform.GeneigtesDach: 'GD',
+            BP_Dachform.Satteldach: 'SD',
+            BP_Dachform.Walmdach: 'WD',
+            BP_Dachform.KrueppelWalmdach: 'KWD',
+            BP_Dachform.Mansarddach: 'MD',
+            BP_Dachform.Zeltdach: 'ZD',
+            BP_Dachform.Kegeldach: 'KeD',
+            BP_Dachform.Kuppeldach: 'KuD',
+            BP_Dachform.Sheddach: 'ShD',
+            BP_Dachform.Bogendach: 'BD',
+            BP_Dachform.Turmdach: 'TuD',
+            BP_Dachform.Tonnendach: 'ToD',
+            BP_Dachform.Mischform: 'GDF',
+            BP_Dachform.Sonstiges: 'SDF',
+        }
+        return _abbreviation_map.get(self, None)
+
 
 class BP_Zulaessigkeit(XPlanungEnumMixin, Enum):
     """ Für urbane Gebiete oder Teile solcher Gebiete kann festgesetzt werden, dass in Gebäuden  im Erdgeschoss an der
@@ -79,3 +101,18 @@ class BP_ZweckbestimmungNebenanlagen(XPlanungEnumMixin, Enum):
     AbfallWertstoffbehaelter = 3600
     Fahrradstellplaetze = 3700
     Sonstiges = 9999
+
+
+class BP_NebenanlagenAusschlussTyp(XPlanungEnumMixin, Enum):
+    """ Art des Ausschlusses. """
+
+    Einschraenkung = 1000
+    Ausschluss = 2000
+
+
+class BP_TypWohngebaeudeFlaeche(XPlanungEnumMixin, Enum):
+    """ Festlegung der zu errichtenden Gebäude gemäß §9 Absatz 2d Nr. 1 - 3 BauGB """
+
+    Wohngebaeude = 1000
+    GebaeudeFoerderung = 2000
+    GebaeudeStaedtebaulicherVertrag = 3000

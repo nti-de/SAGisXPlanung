@@ -29,7 +29,7 @@ class MoveAnnotationItemAction(QAction):
     def onActionTriggered(self, checked: bool):
         self.event_filter = AnnotationMoveEventFilter(iface.mapCanvas(), self)
 
-        self.annotation_layer: QgsAnnotationLayer = MapLayerRegistry().layerByFeature(self.xplan_item.xid)
+        self.annotation_layer: QgsAnnotationLayer = MapLayerRegistry().layer_by_orm_id(self.xplan_item.xid)
 
         if not self.annotation_layer:
             return

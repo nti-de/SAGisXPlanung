@@ -3,6 +3,7 @@ import logging
 import os
 import threading
 from asyncio import CancelledError
+from typing import List
 
 import qasync
 from PyQt5.QtWidgets import QMessageBox
@@ -84,7 +85,6 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.identifyTool.accessAttributesRequested.connect(self.showObjectAttributes)
         self.identifyTool.highlightObjectTreeRequested.connect(self.selectTreeItem)
         self.identifyTool.featureSaved.connect(self.onFeatureSaved)
-        self.identifyTool.editBuildingTemplateRequested.connect(self.showTemplateEdit)
         self.bIdentify.setIcon(QIcon(':/images/themes/default/mActionIdentify.svg'))
         self.bIdentify.clicked.connect(self.onIdentifyClicked)
         self.bIdentify_shortcut = QtWidgets.QShortcut(QKeySequence(Qt.ALT | Qt.Key_Q), self)
@@ -170,7 +170,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         self.nexus_dialog = NexusDialog(self)
         self.nexus_dialog.accessAttributesRequested.connect(self.showObjectAttributes)
-        self.nexus_dialog.deletionOccurred.connect(self.cbPlaene.refresh)
+        self.nexus_dialog.dataUpdated.connect(self.cbPlaene.refresh)
         self.nexus_dialog.show()
 
     def showCreateForm(self):
@@ -310,7 +310,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         # open attributes page
         self.details_dialog.stackedWidget.setCurrentIndex(0)
-        self.details_dialog.showAttributesPage()
+        self.details_dialog.show_attribute_page()
         self.openDetails()
 
     @qasync.asyncSlot(XPlanungItem)
@@ -348,8 +348,3 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             return
 
         await self.details_dialog.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item)
-
-    @qasync.asyncSlot(QBuildingTemplateEdit)
-    async def showTemplateEdit(self, edit_widget: QBuildingTemplateEdit):
-        self.details_dialog.insertWidgetIntoNewPage(edit_widget)
-        self.openDetails()
