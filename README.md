@@ -34,7 +34,7 @@ Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen.
     
 ### Software-Vorraussetzungen
 
-- QGIS >= 3.22
+- QGIS >= 3.28
 - PostgreSQL >= 12 mit PostGIS 3.4
 
 ### Installation 

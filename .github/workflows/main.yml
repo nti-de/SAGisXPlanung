@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ['qgis/qgis:release-3_22', 'qgis/qgis:release-3_28', 'qgis/qgis:release-3_34']
+        container: ['qgis/qgis:release-3_28', 'qgis/qgis:release-3_34']
 
     container: ${{ matrix.container }}
 
