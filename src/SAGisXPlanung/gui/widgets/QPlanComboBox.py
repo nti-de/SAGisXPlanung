@@ -1,4 +1,5 @@
 import logging
+import re
 
 from qgis.PyQt.QtGui import QPaintEvent
 from qgis.PyQt.QtWidgets import QStyleOptionComboBox, QStylePainter, QStyle, QComboBox
@@ -10,6 +11,10 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QComboBoxNoScroll
 
 logger = logging.getLogger(__name__)
+
+
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 
 class QPlanComboBox(QComboBoxNoScroll):
@@ -29,7 +34,8 @@ class QPlanComboBox(QComboBoxNoScroll):
             with Session.begin() as session:
                 plans = session.query(XP_Plan).options(
                     load_only(XP_Plan.id, XP_Plan.name, XP_Plan.type)
-                ).order_by(XP_Plan.name).all()
+                ).all()
+                plans.sort(key=lambda p: natural_sort_key(p.name))
                 for plan in plans:
                     self.addItem(f'{plan.name} ({plan.type})', str(plan.id))
         except Exception as e:
