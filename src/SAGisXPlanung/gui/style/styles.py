@@ -104,6 +104,177 @@ class RemoveFrameFocusProxyStyle(QProxyStyle):
         super(RemoveFrameFocusProxyStyle, self).drawPrimitive(element, option, painter)
 
 
+class EmptyStateFilter(QObject):
+    """
+    An event filter that automatically paints empty states for views.
+    Installs itself on the view's viewport to intercept paint events.
+    """
+
+    def __init__(self, view: QAbstractItemView, parent=None):
+        super().__init__(parent or view)
+        self._view = view
+
+        # Default settings
+        self._icon_path = None
+        self._icon_size = 48
+        self._icon_color = QColor(100, 100, 100)
+        self._title = "No items to display"
+        self._subtitle = None
+        self._title_color = QColor(100, 100, 100)
+        self._subtitle_color = QColor(150, 150, 150)
+        self._spacing = 10
+        self._subtitle_spacing = 8
+        self._title_font = None
+        self._subtitle_font = None
+
+        self._active = True
+
+        # Install event filter to intercept paint events
+        self._view.viewport().installEventFilter(self)
+
+    def set_active(self, active: bool):
+        self._active = active
+        return self
+
+    def set_icon(self, icon_path: str):
+        """Set the path to the SVG icon."""
+        self._icon_path = icon_path
+        return self
+
+    def set_icon_size(self, size: int):
+        """Set the icon size in pixels."""
+        self._icon_size = size
+        return self
+
+    def set_title(self, text: str):
+        """Set the title text."""
+        self._title = text
+        return self
+
+    def set_subtitle(self, text: str):
+        """Set the optional subtitle text."""
+        self._subtitle = text
+        return self
+
+    def set_title_color(self, color: QColor):
+        """Set the title text color."""
+        self._title_color = color
+        self._icon_color = color
+        return self
+
+    def set_subtitle_color(self, color: QColor):
+        """Set the subtitle text color."""
+        self._subtitle_color = color
+        return self
+
+    def set_spacing(self, spacing: int):
+        """Set the spacing between icon and text."""
+        self._spacing = spacing
+        return self
+
+    def set_subtitle_spacing(self, spacing: int):
+        """Set the spacing between title and subtitle."""
+        self._subtitle_spacing = spacing
+        return self
+
+    def set_title_font(self, font: QFont):
+        """Set a custom font for the title."""
+        self._title_font = font
+        return self
+
+    def set_subtitle_font(self, font: QFont):
+        """Set a custom font for the subtitle."""
+        self._subtitle_font = font
+        return self
+
+    def eventFilter(self, obj, event):
+        if sip.isdeleted(self._view) or sip.isdeleted(self._view.viewport()) or not self._active:
+            return super().eventFilter(obj, event)
+
+        if obj == self._view.viewport() and event.type() == QEvent.Paint:
+            model = self._view.model()
+            if model and model.rowCount() == 0:
+                result = super().eventFilter(obj, event)
+
+                painter = QPainter(self._view.viewport())
+                self._draw_empty_state(painter, self._view.viewport().rect())
+                painter.end()
+
+                return True
+
+        return super().eventFilter(obj, event)
+
+    def _draw_empty_state(self, painter: QPainter, viewport_rect: QRect):
+        """Draw the empty state in the center of the viewport."""
+        painter.save()
+
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        # painter.setBrush(Qt.NoBrush)
+
+        # Calculate total height needed
+        total_height = 0
+
+        # Icon height
+        if self._icon_path:
+            total_height += self._icon_size + self._spacing
+
+        # Title height
+        title_font = self._title_font if self._title_font else painter.font()
+        painter.setFont(title_font)
+        title_metrics = painter.fontMetrics()
+        print('painter height', painter.font().pointSize())
+        title_height = title_metrics.height()
+        total_height += title_height
+
+        # Subtitle height
+        subtitle_height = 0
+        if self._subtitle:
+            total_height += self._subtitle_spacing
+            subtitle_font = self._subtitle_font if self._subtitle_font else painter.font()
+            painter.setFont(subtitle_font)
+            subtitle_metrics = painter.fontMetrics()
+            subtitle_height = subtitle_metrics.height()
+            total_height += subtitle_height
+
+        # Starting Y position (centered vertically)
+        current_y = viewport_rect.center().y() - (total_height / 2)
+
+        # Draw icon
+        if self._icon_path:
+            painter.setPen(self._icon_color)
+            painter.setBrush(self._icon_color)
+            renderer = QSvgRenderer(self._icon_path)
+            icon_rect = QRectF(0, 0, self._icon_size, self._icon_size)
+            icon_rect.moveCenter(viewport_rect.center())
+            icon_rect.moveTop(current_y)
+            renderer.render(painter, icon_rect)
+            current_y += self._icon_size + self._spacing
+
+        # Draw title
+        painter.setFont(title_font)
+        painter.setPen(self._title_color)
+        title_rect = title_metrics.boundingRect(self._title)
+        title_rect.moveCenter(viewport_rect.center())
+        title_rect.moveTop(int(current_y))
+        painter.drawText(title_rect, Qt.AlignCenter, self._title)
+        current_y += title_height
+
+        # Draw subtitle
+        if self._subtitle:
+            current_y += self._subtitle_spacing
+            subtitle_font = self._subtitle_font if self._subtitle_font else painter.font()
+            painter.setFont(subtitle_font)
+            painter.setPen(self._subtitle_color)
+            subtitle_rect = subtitle_metrics.boundingRect(self._subtitle)
+            subtitle_rect.moveCenter(viewport_rect.center())
+            subtitle_rect.moveTop(int(current_y))
+            painter.drawText(subtitle_rect, Qt.AlignCenter, self._subtitle)
+
+        painter.restore()
+
+
+
 class SeparatorDelegate(QStyledItemDelegate):
     """Custom delegate that draws separators between rows"""
 

@@ -31,7 +31,7 @@ import math
 from contextlib import asynccontextmanager
 
 from qgis.PyQt.QtCore import QRect, QTimer, Qt
-from qgis.PyQt.QtGui import QColor, QPainter, QPaintEvent
+from qgis.PyQt.QtGui import QColor, QPainter, QPaintEvent, QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import QWidget
 
 
@@ -63,7 +63,8 @@ class WaitingSpinner(QWidget):
 
     def __init__(self, parent, centerOnParent=True, disableParentWhenSpinning=False,
                  modality=Qt.NonModal, roundness=100., opacity=None, fade=80., lines=20,
-                 line_length=10, line_width=2, radius=10, speed=math.pi / 2, color=(0, 0, 0)):
+                 line_length=10, line_width=2, radius=10, speed=math.pi / 2, color=(0, 0, 0),
+                 text='', text_color=None, font_size=8):
         super().__init__(parent)
 
         self._centerOnParent = centerOnParent
@@ -80,6 +81,12 @@ class WaitingSpinner(QWidget):
         self._innerRadius = radius
         self._currentCounter = 0
         self._isSpinning = False
+
+        # Text properties
+        self._text = text
+        self._textColor = QColor(*text_color) if text_color else QColor(*color)
+        self._fontSize = font_size
+        self._textMargin = 8
 
         self._timer = QTimer(self)
         self._timer.timeout.connect(self.rotate)
@@ -99,10 +106,16 @@ class WaitingSpinner(QWidget):
         if self._currentCounter >= self._numberOfLines:
             self._currentCounter = 0
 
+        spinner_diameter = (self._innerRadius + self._lineLength) * 2
+        x_offset = (self.width() - spinner_diameter) / 2
+
         painter.setPen(Qt.NoPen)
         for i in range(self._numberOfLines):
             painter.save()
-            painter.translate(self._innerRadius + self._lineLength, self._innerRadius + self._lineLength)
+            painter.translate(
+                x_offset + self._innerRadius + self._lineLength,
+                self._innerRadius + self._lineLength
+            )
             rotateAngle = float(360 * i) / float(self._numberOfLines)
             painter.rotate(rotateAngle)
             painter.translate(self._innerRadius, 0)
@@ -122,6 +135,19 @@ class WaitingSpinner(QWidget):
                 Qt.RelativeSize
             )
             painter.restore()
+
+        # Draw text below spinner
+        if self._text:
+            painter.setPen(self._textColor)
+            font = QFont()
+            font.setPointSize(self._fontSize)
+            painter.setFont(font)
+
+            spinner_diameter = (self._innerRadius + self._lineLength) * 2
+            text_y = spinner_diameter + self._textMargin
+
+            text_rect = QRect(0, text_y, self.width(), self.height() - text_y)
+            painter.drawText(text_rect, Qt.AlignHCenter | Qt.AlignTop, self._text)
 
     def start(self):
         self.updatePosition()
@@ -145,6 +171,23 @@ class WaitingSpinner(QWidget):
         if self._timer.isActive():
             self._timer.stop()
             self._currentCounter = 0
+
+    def setText(self, text):
+        self._text = text
+        self.updateSize()
+        self.update()
+
+    def setTextColor(self, color):
+        if isinstance(color, tuple):
+            self._textColor = QColor(*color)
+        else:
+            self._textColor = QColor(color)
+        self.update()
+
+    def setFontSize(self, size):
+        self._fontSize = size
+        self.updateSize()
+        self.update()
 
     def setNumberOfLines(self, lines):
         self._numberOfLines = lines
@@ -226,8 +269,20 @@ class WaitingSpinner(QWidget):
         self.update()
 
     def updateSize(self):
-        size = (self._innerRadius + self._lineLength) * 2
-        self.setFixedSize(size, size)
+        spinner_size = (self._innerRadius + self._lineLength) * 2
+
+        if self._text:
+            font = QFont()
+            font.setPointSize(self._fontSize)
+            fm = QFontMetrics(font)
+            text_width = fm.horizontalAdvance(self._text)
+            text_height = fm.height()
+
+            total_width = max(spinner_size, text_width)
+            total_height = spinner_size + self._textMargin + text_height
+            self.setFixedSize(total_width, total_height)
+        else:
+            self.setFixedSize(spinner_size, spinner_size)
 
     def updateTimer(self):
         self._timer.setInterval(int(1000 / (self._numberOfLines * self._revolutionsPerSecond)))

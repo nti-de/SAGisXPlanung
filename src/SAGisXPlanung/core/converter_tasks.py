@@ -81,7 +81,7 @@ def export_plan(out_file_format: str, export_filepath: str = None, plan_xid: str
                 f.write(archive.getvalue())
 
 
-def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int, int]], None]) -> ImportResult:
+def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int, int]], None], overwrite=False) -> ImportResult:
     with Session.begin() as session:
         reader = GMLReader(
             input_data.gml_content,
@@ -90,7 +90,11 @@ def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int
             session=session
         )
         result = ImportResult(reader.plan.name, reader.warnings)
-        session.add(reader.plan)
+        if overwrite:
+            session.expunge_all()
+            session.merge(reader.plan)
+        else:
+            session.add(reader.plan)
 
     return result
 
