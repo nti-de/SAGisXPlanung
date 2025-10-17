@@ -650,8 +650,9 @@ class XP_Nutzungsschablone(PointGeometry, XP_AbstraktesPraesentationsobjekt):
         feat = super().asFeature(fields)
         feat['id'] = str(self.id)
 
-        cell_data = self.dientZurDarstellungVon.template_cell_data(self.data_attributes)
-        feat['cell_content'] = TableCell.serialize_cells(cell_data)
+        if hasattr(self.dientZurDarstellungVon, 'template_cell_data'):
+            cell_data = self.dientZurDarstellungVon.template_cell_data(self.data_attributes)
+            feat['cell_content'] = TableCell.serialize_cells(cell_data)
         return feat
 
     def toCanvas(self, layer_group, plan_xid=None):
