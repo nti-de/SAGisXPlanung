@@ -204,6 +204,16 @@
         </widget>
        </item>
        <item>
+        <widget class="QProgressBar" name="download_progress">
+         <property name="value">
+          <number>24</number>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
           <widget class="QToolButton" name="download_status_icon">

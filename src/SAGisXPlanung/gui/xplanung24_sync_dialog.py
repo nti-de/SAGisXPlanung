@@ -4,6 +4,7 @@ import os
 
 import qasync
 import requests
+from PyQt5.QtCore import QMetaObject, Q_ARG
 from PyQt5.QtWidgets import QMessageBox
 from lxml import etree
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
@@ -59,6 +60,23 @@ QTabBar::tab:hover {{
 QTabBar::tab:selected {{
     border: 1px solid #d1d5db;
     background-color: palette(base);
+}}
+
+QProgressBar {{
+    background-color: {_progress_bg_color};
+    border: none;
+    padding: 0px;
+    border-radius: 2px;
+    max-height: 4px;
+    height: 4px;
+}}
+QProgressBar::chunk {{
+    background: {_progress_chunk_bg_color};
+    border-radius: 2px;
+    max-height: 4px;
+    height: 4px;
+    width: 10px;
+    margin-right: -2px;
 }}
 """
 
@@ -117,6 +135,9 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
         self.upload_count_label.setText(str(len(plan_names)))
         self.available_plan_count_label.setText("0")
+        self.download_progress.setVisible(False)
+        self.download_progress.setMinimum(0)
+        self.download_progress.setMaximum(100)
 
         self.refresh_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Tertiary))
         self.check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'), color=ApplicationColor.Success))
@@ -147,15 +168,14 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.tab_widget.tabBar().setTabIcon(0, upload_icon)
         self.tab_widget.tabBar().setTabIcon(1, download_icon)
 
-        self.setStyleSheet(style.format(
+        qss = style.format(
+            _progress_bg_color=ApplicationColor.Grey300,
+            _progress_chunk_bg_color=ApplicationColor.Secondary,
             _label_color_mute=ApplicationColor.Grey600,
-        ))
-        self.tab_upload.setStyleSheet(style.format(
-            _label_color_mute=ApplicationColor.Grey600,
-        ))
-        self.tab_download.setStyleSheet(style.format(
-            _label_color_mute=ApplicationColor.Grey600,
-        ))
+        )
+        self.setStyleSheet(qss)
+        self.tab_upload.setStyleSheet(qss)
+        self.tab_download.setStyleSheet(qss)
 
     def next_check_state(self):
         if self.select_all_checkbox.checkState() == Qt.Unchecked:
@@ -307,11 +327,9 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
     @qasync.asyncSlot()
     async def on_download_clicked(self):
-        def progress_callback(progress_tuple):
-            current, total = progress_tuple
-            print(f"Import progress: {current}/{total}")
-
         self.download_status_icon.setVisible(False)
+        self.download_progress.setVisible(True)
+        self.download_progress.setValue(0)
 
         model = self.account_plan_list.model()
         checked_plans = []
@@ -328,6 +346,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                 for i, plan in enumerate(checked_plans):
                     plan_id = plan['id']
                     plan_name = plan['name']
+                    self.download_progress.setValue(0)
                     self.download_status_label.setText(f"Plan {i+1}/{len(checked_plans)} wird heruntergeladen...")
 
                     gml_input_data = await asyncio.to_thread(self.download_remote_plan, plan, api_key)
@@ -366,7 +385,20 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                             overwrite = True
 
                     self.download_status_label.setText(f"Plan {i + 1}/{len(checked_plans)} wird importiert...")
+
+                    def progress_callback(progress_tuple):
+                        current, total = progress_tuple
+                        if total > 0:
+                            percentage = int((current / total) * 100)
+                            QMetaObject.invokeMethod(
+                                self.download_progress,
+                                "setValue",
+                                Qt.QueuedConnection,
+                                Q_ARG(int, percentage)
+                            )
+
                     await asyncio.to_thread(import_plan, gml_input_data, progress_callback, overwrite)
+                    self.download_progress.setValue(100)
 
             self.download_status_icon.setIcon(self.check_icon)
             self.download_status_icon.setVisible(True)
@@ -380,6 +412,8 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
             self.download_status_icon.setIcon(self.error_icon)
             self.download_status_icon.setVisible(True)
             self.download_status_label.setText(str(e))
+        finally:
+            self.download_progress.setVisible(False)
 
 
     @qasync.asyncSlot()
