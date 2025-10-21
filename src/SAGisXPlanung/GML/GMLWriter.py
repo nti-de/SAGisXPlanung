@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from enum import Enum
 from io import BytesIO
 from pathlib import PurePath
@@ -10,12 +11,11 @@ from geoalchemy2 import WKBElement, WKTElement
 from osgeo import ogr, osr
 from sqlalchemy.orm import RelationshipProperty
 
-from SAGisXPlanung import XPlanVersion
+from SAGisXPlanung import XPlanVersion, VERSION
 from SAGisXPlanung.GML.geometry import enforce_wkb_constraints
-from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, \
-    XP_Nutzungsschablone
+from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject, FeatureType
 from SAGisXPlanung.utils import is_url
 
@@ -48,6 +48,8 @@ class GMLWriter:
 
         self.root = etree.Element(root_tag if root_tag else f"{{{self.nsmap['xplan']}}}XPlanAuszug",
                                   {f"{{{self.nsmap['gml']}}}id": f"GML_{uuid4()}"}, nsmap=self.nsmap)
+        self.root.addprevious(etree.Comment(f" Erzeugt am {datetime.today().strftime('%d.%m.%Y')}, SAGis XPlanung ({VERSION}) "))
+        self.root.addprevious(etree.Comment(f" NTI Deutschland GmbH https://www.nti-group.com/de/produkte/sagis-loesungen/sagis-xplanung/ "))
 
         self.plan_name = plan.name
 
@@ -55,7 +57,7 @@ class GMLWriter:
         self.write_feature(plan)
 
     def toGML(self) -> bytes:
-        xml = etree.tostring(self.root, pretty_print=True, xml_declaration=True, encoding='UTF-8', standalone=True)
+        xml = etree.tostring(etree.ElementTree(self.root), pretty_print=True, xml_declaration=True, encoding='UTF-8', standalone=True)
         return xml
 
     def toArchive(self) -> BytesIO:
