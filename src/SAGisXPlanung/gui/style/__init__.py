@@ -6,7 +6,7 @@ from .styles import (
     ClearIconProxyStyle,
     EmptyStateFilter,
     RemoveFrameFocusProxyStyle,
-    FixComboStyleDelegate
+    DateTimeDisplayDelegate
 )
 from .svg import SVGButtonEventFilter, load_svg
 from .palette import ApplicationColor, with_color_palette, apply_color

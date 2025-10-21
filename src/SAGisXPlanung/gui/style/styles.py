@@ -12,6 +12,14 @@ logger = logging.getLogger(__name__)
 FlagNewRole = Qt.UserRole + 1
 
 
+class DateTimeDisplayDelegate(QStyledItemDelegate):
+    """
+    Delegate to format a datetime object as readable string.
+    """
+    def displayText(self, value: QVariant, locale):
+        return value.toString('dd.MM.yyyy HH:mm')
+
+
 class FixComboStyleDelegate(QStyledItemDelegate):
     """
     Weird workaround for showing checkboxes in the dropdown view of a combobox

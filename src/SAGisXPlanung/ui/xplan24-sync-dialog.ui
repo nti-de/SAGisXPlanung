@@ -194,7 +194,7 @@
         </layout>
        </item>
        <item>
-        <widget class="QListView" name="account_plan_list">
+        <widget class="QTableView" name="account_plan_table">
          <property name="frameShadow">
           <enum>QFrame::Sunken</enum>
          </property>

@@ -1,15 +1,14 @@
 import asyncio
 import logging
 import os
+from datetime import datetime
 
 import qasync
 import requests
-from PyQt5.QtCore import QMetaObject, Q_ARG
-from PyQt5.QtWidgets import QMessageBox
 from lxml import etree
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
-from qgis.PyQt.QtCore import QStringListModel, Qt
-from qgis.PyQt.QtWidgets import QDialog, QAbstractItemView, QListView
+from qgis.PyQt.QtCore import QStringListModel, Qt, QMetaObject, Q_ARG, QItemSelectionModel, QDateTime
+from qgis.PyQt.QtWidgets import QDialog, QAbstractItemView, QListView, QMessageBox, QHeaderView
 from qgis.PyQt import uic
 from qgis.utils import iface
 from sqlalchemy import select
@@ -19,8 +18,8 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.config.qgis_config import QgsConfig
 from SAGisXPlanung.core.converter_tasks import export_plan, GMLInputData, import_plan
 from SAGisXPlanung.ext.spinner import loading_animation
-from SAGisXPlanung.gui.style import HighlightRowDelegate, HighlightRowProxyStyle, load_svg, ApplicationColor
-from SAGisXPlanung.gui.style.styles import EmptyStateFilter
+from SAGisXPlanung.gui.style import (HighlightRowDelegate, HighlightRowProxyStyle, load_svg, ApplicationColor,
+                                     EmptyStateFilter, RemoveFrameFocusProxyStyle, DateTimeDisplayDelegate)
 
 logger = logging.getLogger(__name__)
 FORM_CLASS_XPLAN24, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/xplan24-sync-dialog.ui'))
@@ -84,6 +83,7 @@ QProgressBar::chunk {{
 class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
     PLAN_ID_ROLE = Qt.UserRole + 1
+    PLAN_DATA_ROLE = Qt.UserRole + 2
 
     def __init__(self, parent=iface.mainWindow(), selected_plans=None):
         super().__init__(parent)
@@ -117,17 +117,25 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
         # Setup account plans list
         account_model = QStandardItemModel()
+        account_model.setHorizontalHeaderLabels(["Bezeichnung", "Nummer", "Erstellt am"])
         account_model.itemChanged.connect(self.on_plan_check_changed)
-        self.account_plan_list.setModel(account_model)
-        self.account_plan_list.setMouseTracking(True)
-        self.account_plan_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.account_plan_list.setSelectionMode(QListView.NoSelection)
-        self.account_plan_list.setStyleSheet("QListView::item { padding: 5px; }")
-        self.account_plan_list.setItemDelegate(HighlightRowDelegate())
-        account_proxy_style = HighlightRowProxyStyle('Fusion')
+        self.account_plan_table.setModel(account_model)
+        self.account_plan_table.setMouseTracking(True)
+        self.account_plan_table.setSortingEnabled(True)
+        self.account_plan_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.account_plan_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.account_plan_table.setSelectionMode(QAbstractItemView.NoSelection)
+        # self.account_plan_table.setStyleSheet("QTableView::item { padding: 5px; }")
+        self.account_plan_table.setItemDelegateForColumn(2, DateTimeDisplayDelegate(self))
+        self.account_plan_table.horizontalHeader().setStretchLastSection(False)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.account_plan_table.verticalHeader().setVisible(False)
+        account_proxy_style = RemoveFrameFocusProxyStyle('Fusion')
         account_proxy_style.setParent(self)
-        self.account_plan_list.setStyle(account_proxy_style)
-        self.account_empty_state = EmptyStateFilter(self.account_plan_list)
+        self.account_plan_table.setStyle(account_proxy_style)
+        self.account_empty_state = EmptyStateFilter(self.account_plan_table)
         self.account_empty_state.set_icon(os.path.join(BASE_DIR, 'gui/resources/download.svg')) \
             .set_icon_size(16) \
             .set_title("Keine Pläne verfügbar") \
@@ -147,6 +155,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.download_status_icon.setIcon(self.check_icon)
         self.download_status_icon.setVisible(False)
         self.refresh_remote_button.setIcon(self.refresh_icon)
+        self.refresh_remote_button.setDisabled(True)
         self.refresh_remote_button.setToolTip("Pläne aus XPlanung24 abrufen...")
         self.refresh_remote_button.clicked.connect(self.on_account_changed)
 
@@ -190,12 +199,12 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.button_upload.setEnabled(has_selected_plans and has_selected_account)
 
     def update_download_button_state(self):
-        model = self.account_plan_list.model()
+        model = self.account_plan_table.model()
         checked_count = 0
 
         for i in range(model.rowCount()):
-            item = model.item(i)
-            if item and item.checkState() == Qt.Checked:
+            checkbox_item = model.item(i, 0)
+            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
                 checked_count += 1
 
         if checked_count > 0:
@@ -205,20 +214,32 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
             self.button_download.setText("Herunterladen")
             self.button_download.setEnabled(False)
 
+        self.refresh_remote_button.setDisabled(self.select_account.currentIndex() == -1)
+
     def on_plan_check_changed(self, item):
+        row = item.row()
+        selection_model = self.account_plan_table.selectionModel()
+        model = self.account_plan_table.model()
+
+        # Select/deselect the entire row based on checkbox state
+        if item.checkState() == Qt.Checked:
+            selection_model.select(model.index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        else:
+            selection_model.select(model.index(row, 0), QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+
         self.update_download_button_state()
         self.update_select_all_checkbox_state()
 
     def update_select_all_checkbox_state(self):
-        model = self.account_plan_list.model()
+        model = self.account_plan_table.model()
         if model.rowCount() == 0:
             self.select_all_checkbox.setChecked(False)
             return
 
         checked_count = 0
         for i in range(model.rowCount()):
-            item = model.item(i)
-            if item and item.checkState() == Qt.Checked:
+            checkbox_item = model.item(i, 0)
+            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
                 checked_count += 1
 
         # Block signals to avoid recursion
@@ -232,26 +253,40 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.select_all_checkbox.blockSignals(False)
 
     def on_select_all_changed(self, state):
-        model = self.account_plan_list.model()
+        model = self.account_plan_table.model()
         check_state = Qt.Checked if state == Qt.Checked else Qt.Unchecked
+        selection_model = self.account_plan_table.selectionModel()
 
         model.itemChanged.disconnect(self.on_plan_check_changed)
         for i in range(model.rowCount()):
-            item = model.item(i)
-            if item:
-                item.setCheckState(check_state)
+            checkbox_item = model.item(i, 0)
+            if checkbox_item:
+                checkbox_item.setCheckState(check_state)
+                if check_state == Qt.Checked:
+                    selection_model.select(model.index(i, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                else:
+                    selection_model.select(model.index(i, 0), QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+
         model.itemChanged.connect(self.on_plan_check_changed)
 
         self.update_download_button_state()
 
+    def format_timestamp(self, timestamp_ms):
+        try:
+            timestamp_sec = int(timestamp_ms) / 1000
+            dt = datetime.fromtimestamp(timestamp_sec)
+            return dt.strftime("%d.%m.%Y %H:%M")
+        except (ValueError, TypeError):
+            return ""
+
     @qasync.asyncSlot()
     async def on_account_changed(self):
-        print("Account changed")
+
         self.update_upload_button_state()
         self.account_empty_state.set_subtitle("Keine Pläne im XPlanung24-Account gefunden.")
 
         if self.select_account.currentIndex() == -1:
-            self.account_plan_list.model().setStringList([])
+            self.account_plan_table.model().clear()
             self.available_plan_count_label.setText("")
             self.account_empty_state.set_subtitle("Wählen Sie einen Account aus, um Pläne anzuzeigen.")
             return
@@ -259,33 +294,41 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         api_key = self.select_account.itemData(self.select_account.currentIndex())
 
         self.account_empty_state.set_active(False)
-        self.account_plan_list.setEnabled(False)
+        self.account_plan_table.setEnabled(False)
 
         try:
-            async with loading_animation(self.account_plan_list, text='Pläne laden...'):
-                self.remote_plans = await asyncio.to_thread(self.fetch_remote_plans, api_key)
+            async with loading_animation(self.account_plan_table, text='Pläne laden...'):
+                remote_plans = await asyncio.to_thread(self.fetch_remote_plans, api_key)
 
-                model = self.account_plan_list.model()
-                model.clear()
+                model = self.account_plan_table.model()
+                # clear the view: don't use model.clear(), as it also removes header setup
+                model.removeRows(0, model.rowCount())
 
-                for plan in self.remote_plans:
-                    display_name = f"{plan['planId']} - {plan['name']}" if plan.get('planId') else plan['name']
-                    item = QStandardItem(display_name)
-                    item.setCheckable(True)
-                    item.setCheckState(Qt.Unchecked)
-                    item.setData(plan['id'], self.PLAN_ID_ROLE)
-                    model.appendRow(item)
+                for plan in remote_plans:
+                    name_item = QStandardItem(plan.get('name', ''))
+                    name_item.setCheckable(True)
+                    name_item.setCheckState(Qt.Unchecked)
+                    name_item.setData(plan['id'], self.PLAN_ID_ROLE)
+                    name_item.setData(plan, self.PLAN_DATA_ROLE)
+                    plan_id_item = QStandardItem(plan.get('planId', ''))
+                    plan_id_item.setEditable(False)
+                    # created_at = self.format_timestamp(plan.get('createdAt', ''))
+                    created_at = QDateTime.fromMSecsSinceEpoch(int(plan.get('createdAt', 0)))
+                    print(created_at)
+                    date_item = QStandardItem()
+                    date_item.setData(created_at, Qt.DisplayRole)
+                    date_item.setEditable(False)
+                    model.appendRow([name_item, plan_id_item, date_item])
 
-                self.available_plan_count_label.setText(str(len(self.remote_plans)))
+                self.available_plan_count_label.setText(str(len(remote_plans)))
 
         except Exception as e:
             logger.error(f"Error fetching remote plans: {str(e)}")
             self.available_plan_count_label.setText("0")
-            self.remote_plans = []
 
         finally:
             self.account_empty_state.set_active(True)
-            self.account_plan_list.setEnabled(True)
+            self.account_plan_table.setEnabled(True)
             self.select_all_checkbox.setCheckState(Qt.Unchecked)
             self.update_download_button_state()
 
@@ -331,18 +374,19 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.download_progress.setVisible(True)
         self.download_progress.setValue(0)
 
-        model = self.account_plan_list.model()
+        model = self.account_plan_table.model()
         checked_plans = []
 
         for i in range(model.rowCount()):
-            item = model.item(i)
-            if item and item.checkState() == Qt.Checked:
-                checked_plans.append(self.remote_plans[i])
+            checkbox_item = model.item(i, 0)
+            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+                plan_data = checkbox_item.data(self.PLAN_DATA_ROLE)
+                checked_plans.append(plan_data)
 
         api_key = self.select_account.itemData(self.select_account.currentIndex())
 
         try:
-            async with loading_animation(self.account_plan_list):
+            async with loading_animation(self.account_plan_table):
                 for i, plan in enumerate(checked_plans):
                     plan_id = plan['id']
                     plan_name = plan['name']
