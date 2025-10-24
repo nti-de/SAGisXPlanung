@@ -71,7 +71,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.deleteIcon = QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
         self.bMap.setIcon(QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/map.svg'))))
 
-        self.bMap.clicked.connect(lambda state: plan_to_map(self.plan_xid))
+        self.bMap.clicked.connect(lambda _: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
         self.bDelete.clicked.connect(self.deletePlanContent)
         self.bEdit.clicked.connect(self.show_attribute_page)

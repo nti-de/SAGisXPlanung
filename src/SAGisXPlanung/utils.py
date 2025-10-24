@@ -268,6 +268,10 @@ PLAN_BASE_TYPES = [
     BP_Plan, FP_Plan, LP_Plan, RP_Plan
 ]
 
+BEREICH_BASE_TYPES = [
+    BP_Bereich, FP_Bereich, LP_Bereich, RP_Bereich
+]
+
 
 def save_to_db(obj, expire_on_commit=True):
     """ Fügt ein Objekt der Datenbank hinzu """

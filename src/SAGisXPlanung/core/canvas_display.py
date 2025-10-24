@@ -1,18 +1,60 @@
 import logging
 import tempfile
+from collections import defaultdict
 
+import qasync
 from qgis.core import QgsRasterLayer, QgsProject, QgsLayerTreeGroup, QgsLayerTreeLayer, QgsVectorLayer, \
-    QgsAnnotationLayer
+    QgsAnnotationLayer, QgsWkbTypes
 from qgis.utils import iface
+from sqlalchemy import select, func, or_
+from sqlalchemy.orm import with_polymorphic, selectin_polymorphic
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
+from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
-from SAGisXPlanung.XPlan.feature_types import XP_Plan
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.config import export_version
-from SAGisXPlanung.utils import createXPlanungIndicators
+from SAGisXPlanung.utils import createXPlanungIndicators, BEREICH_BASE_TYPES, OBJECT_BASE_TYPES
 
 logger = logging.getLogger(__name__)
+
+
+import cProfile
+import pstats
+import io
+from functools import wraps
+
+def profile_it(sort_by='cumtime', lines=30, dump_file=None):
+    """
+    Decorator to profile a function using cProfile.
+
+    Args:
+        sort_by (str): Sorting key for stats (e.g., 'cumtime', 'tottime', 'calls').
+        lines (int): Number of lines to print.
+        dump_file (str): Optional path to dump full profile data for visualization.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            pr = cProfile.Profile()
+            pr.enable()
+            try:
+                return func(*args, **kwargs)
+            finally:
+                pr.disable()
+                s = io.StringIO()
+                ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
+                ps.print_stats(lines)
+
+                print(f"\n[PROFILE] Function: {func.__name__}")
+                print(s.getvalue())
+
+                if dump_file:
+                    ps.dump_stats(dump_file)
+                    print(f"[PROFILE] Full stats saved to {dump_file}")
+        return wrapper
+    return decorator
 
 
 def create_raster_layer(layer_name, file, group=None):
@@ -33,6 +75,7 @@ def create_raster_layer(layer_name, file, group=None):
         tmp.write(file)
 
         layer = QgsRasterLayer(tmp.name, layer_name)
+        layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
         if group:
             QgsProject.instance().addMapLayer(layer, False)
             group.addLayer(layer)
@@ -40,7 +83,8 @@ def create_raster_layer(layer_name, file, group=None):
             QgsProject.instance().addMapLayer(layer)
 
 
-def plan_to_map(plan_xid):
+@qasync.asyncSlot(str)
+async def plan_to_map(plan_xid: str, *_):
     """
     Ein bereits auf der Karte gerenderter Plan wird neu geladen. Sollte der Plan noch nicht auf der Karte bestehen,
     wird er erstmals geladen.
@@ -51,22 +95,21 @@ def plan_to_map(plan_xid):
             continue
 
         if group.customProperty('xplanung_id') == plan_xid:
-            load_on_canvas(plan_xid, layer_group=group)
+            await load_on_canvas(plan_xid, layer_group=group)
             return
 
-    load_on_canvas(plan_xid)
+    await load_on_canvas(plan_xid)
 
 
-def load_on_canvas(plan_xid, layer_group=None):
-    """
-    Fügt den aktuell gewählten Plan als Layer zur Karte hinzu
-    """
+# @profile_it(sort_by='tottime')
+async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
     iface.mainWindow().statusBar().showMessage('Planwerk wird geladen...')
     with Session.begin() as session:
         plan: XP_Plan = session.query(XP_Plan).get(plan_xid)
         if plan is None:
             raise Exception(f'plan with id {plan_xid} not found')
 
+        srid = plan.srs().postgisSrid()
         root = QgsProject.instance().layerTreeRoot()
 
         if not layer_group:
@@ -93,30 +136,75 @@ def load_on_canvas(plan_xid, layer_group=None):
                     map_layer.clear()
                 elif isinstance(map_layer, QgsRasterLayer):
                     QgsProject.instance().removeMapLayer(map_layer)
+                    continue
 
                 for key in map_layer.customPropertyKeys():
                     if 'xplanung/feat-' in key:
                         map_layer.removeCustomProperty(key)
 
-        plan.toCanvas(layer_group)
+        xp_bereich_poly = with_polymorphic(XP_Bereich, BEREICH_BASE_TYPES)
+        stmt = select(xp_bereich_poly).where(
+            or_(*[cls.gehoertZuPlan_id == plan_xid for cls in BEREICH_BASE_TYPES])
+        )
+        bereich_list = session.execute(stmt).scalars().all()
+        bereich_ids = [b.id for b in bereich_list]
 
-        for b in plan.bereich:
-            for planinhalt in b.planinhalt:
-                if not hasattr(planinhalt.__class__, 'xp_versions') or export_version() in planinhalt.__class__.xp_versions:
-                    planinhalt.toCanvas(layer_group, plan_xid=plan.id)
+        grouped_features = defaultdict(lambda: defaultdict(list))
+        all_features_id_list = []
+        for object_base in OBJECT_BASE_TYPES:
+            stmt = select(
+                object_base,
+                func.ST_Dimension(object_base.position)
+            ).where(
+                object_base.gehoertZuBereich_id.in_(bereich_ids)
+            ).options(
+                selectin_polymorphic(object_base, object_base.__subclasses__())
+            )
 
-            # display "free" annotations which are not bound to a 'planinhalt'
-            for po in b.praesentationsobjekt:
-                if po.dientZurDarstellungVon_id:
-                    continue
-                po.toCanvas(layer_group, plan_xid=plan.id)
+            for obj, dim in session.execute(stmt):
+                all_features_id_list.append(obj.id)
+                grouped_features[type(obj)][dim].append(obj)
 
-            for simple_object in b.simple_geometry:
-                simple_object.toCanvas(layer_group, plan_xid=plan.id)
+        for object_base in XP_AbstraktesPraesentationsobjekt.__subclasses__():
+            stmt = select(
+                object_base,
+                func.ST_Dimension(object_base.position)
+            ).where(object_base.dientZurDarstellungVon_id.in_(all_features_id_list))
 
-            if b.geltungsbereich:
-                b.toCanvas(layer_group, plan_xid=plan.id)
+            for obj, dim in session.execute(stmt):
+                grouped_features[type(obj)][dim].append(obj)
 
+        grouped_features[type(plan)][2].append(plan)
+        for b in bereich_list:
+            grouped_features[type(b)][2].append(b)
+
+        for cls, features_by_dim in grouped_features.items():
+            if hasattr(cls, 'xp_versions') and export_version() not in cls.xp_versions:
+                continue
+
+            for geom_dim, orm_features in features_by_dim.items():
+
+                qgs_geom_type = QgsWkbTypes.GeometryType(geom_dim)
+                layer = MapLayerRegistry().layer_by_plan_orm_id(plan_xid=plan_xid, xtype=cls, geom_type=qgs_geom_type)
+                if not layer:
+                    layer = cls.asLayer(srid, plan_xid, name=cls.__name__, geom_type=qgs_geom_type)
+
+                feat_map = {}
+                for orm_feat in orm_features:
+                    qgis_feat = orm_feat.asFeature(layer.fields())
+                    feat_map[orm_feat.id] = qgis_feat
+
+                dp = layer.dataProvider()
+                layer.startEditing()
+                _, new_features = dp.addFeatures(list(feat_map.values()))
+                layer.commitChanges()
+
+                for orm_id, qgis_feat in zip(feat_map.keys(), new_features):
+                    layer.setCustomProperty(f'xplanung/feat-{qgis_feat.id()}', str(orm_id))
+
+                MapLayerRegistry().addLayer(layer, group=layer_group)
+
+        for b in bereich_list:
             for refScan in b.refScan:
                 if refScan.art == XP_ExterneReferenzArt.PlanMitGeoreferenz and refScan.file is not None:
                     create_raster_layer(refScan.referenzName, refScan.file, group=layer_group)

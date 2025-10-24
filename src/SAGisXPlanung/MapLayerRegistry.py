@@ -130,6 +130,18 @@ class MapLayerRegistry(Singleton):
                     continue
                 return lyr
 
+    def layer_by_plan_orm_id(self, plan_xid: str, xtype: type, geom_type: GeometryType) -> Union[None, QgsVectorLayer]:
+        for lyr in self._layers:
+            if lyr is None:
+                continue
+            _xtype = lyr.customProperty('xplanung/type')
+            _xid = lyr.customProperty('xplanung/plan-xid')
+            if _xtype == xtype.__name__ and _xid == plan_xid:
+                # make sure only layers of correct geometry type are returned (for vector layers only)
+                if isinstance(lyr, QgsVectorLayer) and geom_type != lyr.geometryType():
+                    continue
+                return lyr
+
     def layer_by_display_name(self, display_name: str, plan_xid: str) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
         for lyr in self._layers:
             xid = lyr.customProperty('xplanung/plan-xid')

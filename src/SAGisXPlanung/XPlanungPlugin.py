@@ -85,7 +85,7 @@ class XPlanung(QObject):
 
         # TODO: hackish solution, because there currently is no signal on project loaded:
         # see https://github.com/qgis/QGIS/issues/40483
-        QgsProject.instance().homePathChanged.connect(self.onProjectLoaded)
+        QgsProject.instance().homePathChanged.connect(self.on_project_loaded)
 
         self.iface.layerTreeView().layerTreeModel().rowsInserted.connect(self.onRowsInserted)
 
@@ -150,7 +150,7 @@ class XPlanung(QObject):
 
         MapLayerRegistry().unload()
 
-        QgsProject.instance().homePathChanged.disconnect(self.onProjectLoaded)
+        QgsProject.instance().homePathChanged.disconnect(self.on_project_loaded)
         self.iface.layerTreeView().layerTreeModel().rowsInserted.disconnect(self.onRowsInserted)
 
         QgsApplication.rendererRegistry().removeRenderer('sagisxplanung.buildingtemplate')
@@ -266,7 +266,7 @@ class XPlanung(QObject):
                                             f"Kartenausschnitt erfolgreich unter <a href=\"{url}\">{path}</a> gespeichert",
                                             level=Qgis.Success)
 
-    def onProjectLoaded(self):
+    def on_project_loaded(self):
         logger.debug('project loaded')
         layers = QgsProject.instance().layerTreeRoot().findGroups(recursive=True)
         for group in layers:
@@ -275,11 +275,8 @@ class XPlanung(QObject):
 
             try:
                 for tree_layer in group.findLayers():
-                    if isinstance(tree_layer.layer(), QgsAnnotationLayer):
-                        QgsProject().instance().removeMapLayer(tree_layer.layer())
-                        continue
                     MapLayerRegistry().addLayer(tree_layer.layer(), add_to_legend=False)
-                load_on_canvas(group.customProperty('xplanung_id'), layer_group=group)
+                asyncio.create_task(load_on_canvas(group.customProperty('xplanung_id'), layer_group=group))
             except Exception as e:
                 logger.exception(e)
 

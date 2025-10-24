@@ -327,14 +327,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.current_page_index -= 1
         self.paginate()
 
-    @pyqtSlot()
-    def on_map_load_clicked(self):
+    @qasync.asyncSlot()
+    async def on_map_load_clicked(self):
         selected_indices = self.nexus_view.selectionModel().selectedRows()
         if not selected_indices:
             return
 
         plan_xid = selected_indices[0].data(XID_ROLE)
-        plan_to_map(plan_xid)
+        await plan_to_map(plan_xid)
 
     @qasync.asyncSlot()
     async def on_export_clicked(self):

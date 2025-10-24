@@ -32,7 +32,7 @@ class TestXPlanungPlugin_installation:
         plugin.unload()
 
         with pytest.raises(TypeError):
-            QgsProject.instance().homePathChanged.disconnect(plugin.onProjectLoaded)
+            QgsProject.instance().homePathChanged.disconnect(plugin.on_project_loaded)
 
         with pytest.raises(TypeError):
             iface.layerTreeView().layerTreeModel().rowsInserted.disconnect(plugin.onRowsInserted)

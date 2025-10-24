@@ -59,6 +59,10 @@ class ResolvedXPathResult:
     target_xid: str
 
 
+_PREFIX_RE = re.compile(r'\w+:')
+_INDEX_RE = re.compile(r'\[\d+\]')
+
+
 class XPathMatcher:
     """Utility class for matching XPath expressions against config entries"""
 
@@ -66,10 +70,10 @@ class XPathMatcher:
     def normalize_xpath(xpath: str, remove_index=True) -> str:
         """Remove namespace prefixes from xpath for comparison"""
         # Remove namespace prefixes (e.g., "xplan:" -> "")
-        normalized = re.sub(r'\w+:', '', xpath)
+        normalized = _PREFIX_RE.sub('', xpath)
         if remove_index:
             # Remove array indices (e.g., "[1]" -> "")
-            normalized = re.sub(r'\[\d+\]', '', normalized)
+            normalized = _INDEX_RE.sub('', normalized)
         return normalized.strip('/')
 
     @staticmethod
