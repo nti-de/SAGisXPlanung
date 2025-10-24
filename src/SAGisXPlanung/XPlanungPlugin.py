@@ -16,7 +16,7 @@ from qgis import processing
 
 import qasync
 
-from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateItem
+from SAGisXPlanung.core.buildingtemplate import BuildingTemplateItem, BuildingTemplateRendererMetadata
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.Settings import Settings
 from SAGisXPlanung.core.connection import attempt_connection, verify_db_connection
@@ -89,6 +89,9 @@ class XPlanung(QObject):
 
         self.iface.layerTreeView().layerTreeModel().rowsInserted.connect(self.onRowsInserted)
 
+        self.renderer_metdadata = BuildingTemplateRendererMetadata()
+        QgsApplication.rendererRegistry().addRenderer(self.renderer_metdadata)
+
     def initProcessing(self):
         self.menu.addSeparator()
         self.processing_menu = self.menu.addMenu('Verarbeitungswerkzeuge')
@@ -149,6 +152,8 @@ class XPlanung(QObject):
 
         QgsProject.instance().homePathChanged.disconnect(self.onProjectLoaded)
         self.iface.layerTreeView().layerTreeModel().rowsInserted.disconnect(self.onRowsInserted)
+
+        QgsApplication.rendererRegistry().removeRenderer('sagisxplanung.buildingtemplate')
 
         self.iface.removeDockWidget(self.dockWidget.details_dialog)
         self.iface.removeDockWidget(self.dockWidget)

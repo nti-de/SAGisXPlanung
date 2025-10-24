@@ -2,6 +2,7 @@ import logging
 from enum import Enum
 from typing import List
 
+from qgis.core import QgsRendererAbstractMetadata
 from qgis.gui import QgsMapCanvas
 from qgis.PyQt.QtGui import QBrush, QPainterPath, QColor, QPainter
 from qgis.PyQt.QtCore import QPointF, QRectF
@@ -88,6 +89,25 @@ class BuildingTemplateRenderer(QgsFeatureRenderer):
     def clone(self):
         r = BuildingTemplateRenderer(self.type())
         return r
+
+    def save(self, doc, context):
+        elem = doc.createElement('renderer-v2')
+        elem.setAttribute('type', self.type())
+        return elem
+
+    def load(self, symbology_elem, context):
+        r_type = symbology_elem.attribute('type')
+        r = BuildingTemplateRenderer(r_type)
+        return r
+
+
+class BuildingTemplateRendererMetadata(QgsRendererAbstractMetadata):
+    def __init__(self):
+        super().__init__('sagisxplanung.buildingtemplate', 'SAGis XPlanung: Nutzungsschablone')
+
+    def createRenderer(self, element, context):
+        r_type = element.attribute('type')
+        return BuildingTemplateRenderer(r_type)
 
 
 class BuildingTemplateItem:

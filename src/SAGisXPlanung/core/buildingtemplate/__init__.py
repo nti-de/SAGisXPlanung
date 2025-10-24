@@ -4,3 +4,5 @@ import os
 # TODO: why is this only problematic on revision updates?
 if not os.environ.get('CI'):
     from . import listeners
+
+from .template_item import BuildingTemplateItem, BuildingTemplateRendererMetadata
