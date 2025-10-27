@@ -92,6 +92,9 @@ class XPlanung(QObject):
         self.renderer_metdadata = BuildingTemplateRendererMetadata()
         QgsApplication.rendererRegistry().addRenderer(self.renderer_metdadata)
 
+        # initialize MapLayerRegistry to current thread
+        MapLayerRegistry()
+
     def initProcessing(self):
         self.menu.addSeparator()
         self.processing_menu = self.menu.addMenu('Verarbeitungswerkzeuge')

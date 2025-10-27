@@ -16,17 +16,19 @@ from SAGisXPlanung.config import QgsConfig
 logger = logging.getLogger(__name__)
 
 
-class Singleton(QtCore.QObject):
-    def __new__(cls, *args, **kwargs):
-        it = cls.__dict__.get("__it__")
-        if it is not None:
-            return it
-        cls.__it__ = it = QtCore.QObject.__new__(cls)
-        it.init(*args, **kwargs)
-        return it
+class Singleton:
+    _instances = {}
 
-    def init(self, *args, **kwargs):
-        pass
+    def __new__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            if issubclass(cls, QtCore.QObject):
+                instance = QtCore.QObject.__new__(cls)
+            else:
+                instance = super().__new__(cls)
+            cls._instances[cls] = instance
+            if hasattr(instance, "init"):
+                instance.init(*args, **kwargs)
+        return cls._instances[cls]
 
 
 class MapLayerRegistry(Singleton):
@@ -87,7 +89,9 @@ class MapLayerRegistry(Singleton):
         self._layers.append(layer)
 
     def removeLayer(self, layer_id):
+        print(f'remove layer: count {len(self._layers)}, layer_id: {layer_id}')
         layer = self.layerById(layer_id)
+        print(f'Removing layer {layer_id} {layer.name() if layer else "not found"}')
         if not layer:
             return
 
