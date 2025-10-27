@@ -231,7 +231,6 @@ class EmptyStateFilter(QObject):
         title_font = self._title_font if self._title_font else painter.font()
         painter.setFont(title_font)
         title_metrics = painter.fontMetrics()
-        print('painter height', painter.font().pointSize())
         title_height = title_metrics.height()
         total_height += title_height
 

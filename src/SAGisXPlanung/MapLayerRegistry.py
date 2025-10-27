@@ -87,7 +87,9 @@ class MapLayerRegistry(Singleton):
         self._layers.append(layer)
 
     def removeLayer(self, layer_id):
+        print(f'remove layer: count {len(self._layers)}, layer_id: {layer_id}')
         layer = self.layerById(layer_id)
+        print(f'Removing layer {layer_id} {layer.name() if layer else "not found"}')
         if not layer:
             return
 
