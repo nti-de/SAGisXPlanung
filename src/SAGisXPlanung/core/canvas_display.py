@@ -24,43 +24,6 @@ from SAGisXPlanung.utils import createXPlanungIndicators, BEREICH_BASE_TYPES, OB
 logger = logging.getLogger(__name__)
 
 
-import cProfile
-import pstats
-import io
-from functools import wraps
-
-def profile_it(sort_by='cumtime', lines=30, dump_file=None):
-    """
-    Decorator to profile a function using cProfile.
-
-    Args:
-        sort_by (str): Sorting key for stats (e.g., 'cumtime', 'tottime', 'calls').
-        lines (int): Number of lines to print.
-        dump_file (str): Optional path to dump full profile data for visualization.
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            pr = cProfile.Profile()
-            pr.enable()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                pr.disable()
-                s = io.StringIO()
-                ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
-                ps.print_stats(lines)
-
-                print(f"\n[PROFILE] Function: {func.__name__}")
-                print(s.getvalue())
-
-                if dump_file:
-                    ps.dump_stats(dump_file)
-                    print(f"[PROFILE] Full stats saved to {dump_file}")
-        return wrapper
-    return decorator
-
-
 def create_raster_layer(layer_name, file) -> QgsRasterLayer:
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp.write(file)
@@ -128,9 +91,9 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
                             QgsProject.instance().removeMapLayer(map_layer)
                             continue
 
-                for key in map_layer.customPropertyKeys():
-                    if 'xplanung/feat-' in key:
-                        map_layer.removeCustomProperty(key)
+                        for key in map_layer.customPropertyKeys():
+                            if 'xplanung/feat-' in key:
+                                map_layer.removeCustomProperty(key)
 
                 new_layers = await asyncio.to_thread(collect_layers, plan, plan_xid, session)
 
@@ -207,13 +170,13 @@ def collect_layers(plan, plan_xid, session):
                 qgis_feat = orm_feat.asFeature(layer.fields())
                 feat_map[orm_feat.id] = qgis_feat
 
-                dp = layer.dataProvider()
-                layer.startEditing()
-                _, new_features = dp.addFeatures(list(feat_map.values()))
-                layer.commitChanges()
+            dp = layer.dataProvider()
+            layer.startEditing()
+            _, new_features = dp.addFeatures(list(feat_map.values()))
+            layer.commitChanges()
 
-                for orm_id, qgis_feat in zip(feat_map.keys(), new_features):
-                    layer.setCustomProperty(f'xplanung/feat-{qgis_feat.id()}', str(orm_id))
+            for orm_id, qgis_feat in zip(feat_map.keys(), new_features):
+                layer.setCustomProperty(f'xplanung/feat-{qgis_feat.id()}', str(orm_id))
 
             # move layer to main thread (otherwise causes some non-stable issues with geometry editing)
             layer.moveToThread(QApplication.instance().thread())
