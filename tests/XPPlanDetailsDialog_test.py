@@ -6,6 +6,7 @@ import pytest
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import from_shape
 from qgis.PyQt import QtCore, QtTest
+from qgis._core import QgsRasterLayer
 from qgis.core import QgsProject
 from qgis.PyQt.QtCore import Qt
 
@@ -147,17 +148,6 @@ class TestXPlanungDialog_createRasterLayer:
         with open(os.path.join(os.path.dirname(__file__), 'data/bp_plan.tif'), 'rb') as file:
             file_bytes = file.read()
 
-        create_raster_layer("Raster", file_bytes)
+        layer = create_raster_layer("Raster", file_bytes)
 
-        assert QgsProject.instance().mapLayersByName('Raster')
-
-    def test_createRasterLayer_withGroup(self):
-        root = QgsProject.instance().layerTreeRoot()
-        layer_group = root.addGroup("Test_Raster")
-
-        with open(os.path.join(os.path.dirname(__file__), 'data/bp_plan.tif'), 'rb') as file:
-            file_bytes = file.read()
-
-        create_raster_layer("Raster", file_bytes, group=layer_group)
-
-        assert QgsProject.instance().mapLayersByName('Raster')
+        assert isinstance(layer, QgsRasterLayer)

@@ -159,8 +159,6 @@ class Toaster(QFrame):
             self = Toaster(parent)
             parentRect = parent.rect()
 
-        self.timer.setInterval(timeout)
-
         # use Qt standard icon pixmaps; see:
         # https://doc.qt.io/qt-5/qstyle.html#StandardPixmap-enum
         if isinstance(icon, QStyle.StandardPixmap):
@@ -192,7 +190,9 @@ class Toaster(QFrame):
         if color is not None:
             self.setStyleSheet(self.styleSheet() + f'QLabel {{ color: {color}; }}')
 
-        self.timer.start()
+        if timeout and timeout > 0:
+            self.timer.setInterval(timeout)
+            self.timer.start()
 
         # raise the widget and adjust its size to the minimum
         self.raise_()

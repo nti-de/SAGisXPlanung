@@ -4,9 +4,6 @@ import tempfile
 from collections import defaultdict
 
 import qasync
-from PyQt5.QtCore import QCoreApplication, QMetaObject, Qt, Q_ARG
-from PyQt5.QtWidgets import QDockWidget, QWidget
-from qgis._gui import QgsStatusBar
 from qgis.core import QgsRasterLayer, QgsProject, QgsLayerTreeGroup, QgsLayerTreeLayer, QgsVectorLayer, \
     QgsAnnotationLayer, QgsWkbTypes
 from qgis.utils import iface
@@ -20,47 +17,9 @@ from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.ext.spinner import loading_animation
-from SAGisXPlanung.gui.widgets import ProgressBar
 from SAGisXPlanung.utils import createXPlanungIndicators, BEREICH_BASE_TYPES, OBJECT_BASE_TYPES
 
 logger = logging.getLogger(__name__)
-
-
-import cProfile
-import pstats
-import io
-from functools import wraps
-
-def profile_it(sort_by='cumtime', lines=30, dump_file=None):
-    """
-    Decorator to profile a function using cProfile.
-
-    Args:
-        sort_by (str): Sorting key for stats (e.g., 'cumtime', 'tottime', 'calls').
-        lines (int): Number of lines to print.
-        dump_file (str): Optional path to dump full profile data for visualization.
-    """
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            pr = cProfile.Profile()
-            pr.enable()
-            try:
-                return func(*args, **kwargs)
-            finally:
-                pr.disable()
-                s = io.StringIO()
-                ps = pstats.Stats(pr, stream=s).sort_stats(sort_by)
-                ps.print_stats(lines)
-
-                print(f"\n[PROFILE] Function: {func.__name__}")
-                print(s.getvalue())
-
-                if dump_file:
-                    ps.dump_stats(dump_file)
-                    print(f"[PROFILE] Full stats saved to {dump_file}")
-        return wrapper
-    return decorator
 
 
 def create_raster_layer(layer_name, file) -> QgsRasterLayer:
@@ -149,8 +108,6 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
     except Exception as e:
         logger.debug(f'Error while loading plan: {e}')
         iface.statusBarIface().showMessage(f'Fehler beim Laden des Plans: {e}')
-    finally:
-        pass
 
 
 def collect_layers(plan, plan_xid, session):
