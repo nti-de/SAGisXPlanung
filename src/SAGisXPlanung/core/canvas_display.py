@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import tempfile
+import traceback
 from collections import defaultdict
 
 import qasync
@@ -107,6 +108,7 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
 
     except Exception as e:
         logger.debug(f'Error while loading plan: {e}')
+        logger.error(traceback.format_exc())
         iface.statusBarIface().showMessage(f'Fehler beim Laden des Plans: {e}')
 
 
@@ -145,7 +147,8 @@ def collect_layers(plan, plan_xid, session):
 
     grouped_features[type(plan)][2].append(plan)
     for b in bereich_list:
-        grouped_features[type(b)][2].append(b)
+        if b.geltungsbereich is not None:
+            grouped_features[type(b)][2].append(b)
 
     new_layers = []
 

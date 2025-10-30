@@ -130,9 +130,9 @@ class GMLWriter:
 
         # if feature has a geometry, write envelope
         if isinstance(xplan_object, GeometryObject):
-            xp_objekt.append(
-                self.writeEnvelope(getattr(xplan_object, xplan_object.__geometry_column_name__))
-            )
+            geom = getattr(xplan_object, xplan_object.__geometry_column_name__)
+            if geom is not None:
+                xp_objekt.append(self.writeEnvelope(geom))
 
         # if feature is a reference, load its reference
         if isinstance(xplan_object, XP_ExterneReferenz):
