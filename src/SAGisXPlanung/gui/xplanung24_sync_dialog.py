@@ -89,6 +89,10 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         super().__init__(parent)
         self.setupUi(self)
         self.selected_plans = selected_plans or {}
+        if self.selected_plans:
+            self.tab_widget.setCurrentIndex(0)
+        else:
+            self.tab_widget.setCurrentIndex(1)
 
         self.accounts = QgsConfig.xplan24_accounts()
 
