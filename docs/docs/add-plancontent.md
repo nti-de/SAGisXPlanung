@@ -33,24 +33,30 @@ enthält. Dies kann ein Layer aus beliebiger Datenquelle oder auch ein Temporär
 
     <table>
         <tr>
-            <th>Gewählte Geometrien</th>
-            <td>Diese Sektion erlaubt es, weitere Geometrien auf der Karte anzuwählen, die ebenfalls als gleiche
-                Objektart mit gleichen Sachdaten erfasst werden soll. Durch das Anwählen der Checkbox <b>Alle Auswählen</b>
-                können alle Objekte im gewählten Layer markiert werden. Über das Abfrage-Symbol kann der Abfrageeditor 
-                vom QGIS geöffnet werden. Dies ermöglicht das Auswählen von Objekten nach bestimmten Filter-Abfragen.
-            </td>
-        </tr>
-        <tr>
             <th>Zuordnung zu einem Plan</th>
             <td>Auswahl eines Planwerks aus der Datenbank, zu dem die neu konfigurierten Planinhalte zugeordnet werden 
                 sollen. 
             </td>
         </tr>
         <tr>
+            <th>Gewählte Geometrien</th>
+            <td>Diese Sektion erlaubt es, weitere Geometrien auf der Karte anzuwählen, die ebenfalls als gleiche
+                Objektart mit gleichen Sachdaten erfasst werden soll. Die Auswahl der Geometrien kann über die
+                folgenden Optionen stattfinden:
+               <ul>
+                  <li>Auswahl von Einzelobjekten durch Klick in die Karte</li>
+                  <li>Checkbox <b>Alle Auswählen</b>: Alle Objekte des gewählten Layers werden zur Auswahl hinzugefügt</li>
+                  <li><b>QGIS Abfrageeditor</b>: Auswählen von Objekten nach bestimmten Filter-Abfragen über QGIS-Ausdrücke</li>
+               </ul>
+            </td>
+        </tr>
+        <tr>
             <th>XPlanung-Objektart wählen</th>
             <td>Auswahl einer Objektart aus dem XPlanung-Schema, die den gewählten Geometrien zugeordnet werden.
                 Die verfügbaren Objekte sind abgestimmt auf den Geometrietyp (Punkt, Linie, Polygon) des gewählten
-                Layers und die Art des bei Sektion <b>Zuordnung zu einem Plan</b> gewählten Planwerks.
+                Layers und die Art des bei Sektion <b>Zuordnung zu einem Plan</b> gewählten Planwerks.  <br><br>
+                Mit dem Auswahlmenü neben dem Suchfeld, kann die Liste der Objektklassen mit weiteren Objekten aus
+                anderen XPlan-Fachbereichen erweitert werden.
             </td>
         </tr>
     </table>
@@ -60,9 +66,15 @@ enthält. Dies kann ein Layer aus beliebiger Datenquelle oder auch ein Temporär
         Für größere Layer muss zunächst ein Ausschnitt erstellt werden (Objekte mit QGIS Werkzeugen wählen, 
         dann mit Funktion <b>gewählte Objekte exportieren</b> neu speichern)
 
-    <figure markdown="span">
-        ![Neuen Planinhalt hinzufügen](assets/config-plan-content.png)
-    </figure>
+    !!! warning "Geometrievalidierung"
+      
+        Bei der Auswahl von Geometrien findet eine Prüfung auf Gültigkeit und Lage innerhalb des gewählten Bereichs statt.
+        Sobald eine Geometrie mit einer Warnung versehen ist, wird diese bei einer Geometrieprüfung einen Fehler hervorrufen.
+        Siehe [Geometrieprüfung](elements/plan-details.md#geometrieprufung) für Anforderungen an geometrische Korrektheit.
+
+       <figure markdown="span">
+           ![Neuen Planinhalt hinzufügen](assets/config-plan-content.png)
+       </figure>
     
 4. Mit dem Button <b>Weiter</b> in das Sachdaten-Formular der gewählten Objektart wechseln
 5. Nach Eingabe der Sachdaten für die neu zu erstellenden Objekte, mit dem Button <b>Speichern</b> 

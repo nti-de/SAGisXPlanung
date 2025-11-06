@@ -201,18 +201,4 @@ ausgeführt werden.
          </ul>
       </td>
    </tr>
-   <tr markdown="span">
-      <th><code>BP_BaugebietsTeilFlaeche</code></th>
-      <td>
-         <ul>
-            <li>
-               <i>Nutzungsschablone anzeigen</i>: Gibt an, ob für die diese Fläche eine Nutzungsschablone auf der Karte
-               angezeigt werden soll
-            </li>
-            <li>
-               <i>[Nutzungsschablone bearbeiten](../map-display.md#nutzungschablone-edit)</i>: Öffnet einen Dialog zur Konfiguration der Nutzungschablone
-            </li>
-         </ul>
-      </td>
-   </tr>
 </table>

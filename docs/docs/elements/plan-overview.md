@@ -68,5 +68,5 @@ weiteren Seiten navigiert werden, wenn mehr als die initial geladenen Pläne in 
 
 Über das Zahnradsymbol kann der Dialog _Planübersicht_ konfiguriert werden.
 Im Abschnitt **Allgemein** besteht die Möglichkeit, die Anzahl der Pläne pro Seite festzulegen.
-Im Abschnitt **Tabllenspalten anordnene** können einzelne Spalten ausgeblendet und per drag-and-drop die Anzeigereihenfolge
+Im Abschnitt **Tabellenspalten anordnen** können einzelne Spalten ausgeblendet und per drag-and-drop die Anzeigereihenfolge
 der XPlan-Attribute angepasst werden.

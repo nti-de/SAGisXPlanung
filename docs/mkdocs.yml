@@ -48,6 +48,7 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.keys
+  - pymdownx.critic
   - pymdownx.tasklist:
       custom_checkbox: true
   - pymdownx.emoji:
