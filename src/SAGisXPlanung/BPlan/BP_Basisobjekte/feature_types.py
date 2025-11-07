@@ -57,6 +57,7 @@ class BP_Plan(XP_Plan):
     planArt = Column(ARRAY(Enum(BP_PlanArt)),
                      CheckConstraint('"planArt" <> \'{}\' and array_position("planArt", null) is null',
                                      name='ck_planart_not_empty_no_nulls'),
+                     nullable=False,
                      doc='Art des Planwerks')
     # sonstPlanArt: BP_SonstPlanArt[0..1]
     verfahren = Column(XPEnum(BP_Verfahren, include_default=True), doc='Verfahren',
