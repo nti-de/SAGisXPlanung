@@ -1,5 +1,20 @@
 ## Changelog
 
+### [2.11.0] - 10.11.2025
+
+#### Veränderungen
+
+- verbesserte Sortierung der Liste alle Planwerke
+- schnelleres Laden der Pläne bei Anzeige auf der Karte
+
+#### Fehlerbehebungen
+
+- Fehler bei Kartenanzeige durch ungültige Objekte vom Typ `XP_Nutzungsschablone` (6099360b)
+- GML-Import bei gebrochenen Zahlen in Winkelangaben (221209a2)
+- Mehrfachauswahl im Attribut `planArt` (221209a2)
+- diverse Fehler bei `XP_Bereich`-Objekten ohne Geometrie korrigiert (0bc1e5be)
+- fehlende Nutzungsschablonen beim Laden von Projekten (c99a0318) 
+
 ### [2.10.0] - 08.09.2025
 
 #### Neue Funktionen
