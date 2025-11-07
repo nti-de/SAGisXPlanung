@@ -52,7 +52,7 @@ class RefURL(types.TypeDecorator):
 class Angle(types.TypeDecorator, XPlanungMeasureType):
     """ Repräsentation des XPlanGML AngleType """
 
-    impl = types.Integer
+    impl = types.Float
     python_type = float
     cache_ok = True
 

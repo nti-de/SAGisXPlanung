@@ -54,10 +54,14 @@ class BP_Plan(XP_Plan):
                                 'form-type': 'inline'
                             })
 
-    planArt = Column(Enum(BP_PlanArt), nullable=False, doc='Art des Planwerks')
+    planArt = Column(ARRAY(Enum(BP_PlanArt)),
+                     CheckConstraint('"planArt" <> \'{}\' and array_position("planArt", null) is null',
+                                     name='ck_planart_not_empty_no_nulls'),
+                     doc='Art des Planwerks')
     # sonstPlanArt: BP_SonstPlanArt[0..1]
-    verfahren = Column(Enum(BP_Verfahren), doc='Verfahren', info={'xplan_version': XPlanVersion.FIVE_THREE})
-    rechtsstand = Column(Enum(BP_Rechtsstand), doc='Rechtsstand')
+    verfahren = Column(XPEnum(BP_Verfahren, include_default=True), doc='Verfahren',
+                       info={'xplan_version': XPlanVersion.FIVE_THREE})
+    rechtsstand = Column(XPEnum(BP_Rechtsstand, include_default=True), doc='Rechtsstand')
     # status: BP_Status[0..1]
     hoehenbezug = Column(String(), doc='Höhenbezug', info={'xplan_version': XPlanVersion.FIVE_THREE})
     aenderungenBisDatum = Column(Date(), doc='Änderungen bis')
