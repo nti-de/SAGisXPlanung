@@ -139,8 +139,6 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                                             color=ApplicationColor.Tertiary))
         self.button_next.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'),
                                           color=ApplicationColor.Tertiary))
-        self.button_excel_import.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xls_import.svg'),
-                                         color=ApplicationColor.Tertiary))
 
         self.button_reload.setCursor(Qt.PointingHandCursor)
         self.button_xplan_export.setCursor(Qt.PointingHandCursor)
@@ -150,7 +148,6 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_settings.setCursor(Qt.PointingHandCursor)
         self.button_before.setCursor(Qt.PointingHandCursor)
         self.button_next.setCursor(Qt.PointingHandCursor)
-        self.button_excel_import.setCursor(Qt.PointingHandCursor)
 
         self.button_before.setDisabled(True)
         self.button_next.setDisabled(True)
