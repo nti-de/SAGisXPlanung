@@ -77,9 +77,6 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         self.cb.view().setContextMenuPolicy(Qt.CustomContextMenu)
         self.cb.view().customContextMenuRequested.connect(self.onContextMenuRequested)
 
-        self.container.layout().addWidget(self.cb)
-        self.layout.addWidget(self.container)
-        self.layout.addWidget(self.b_plus)
         self.setLayout(self.layout)
 
     def onContextMenuRequested(self, point):
