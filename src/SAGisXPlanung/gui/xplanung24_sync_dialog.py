@@ -349,14 +349,13 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         if not plan_id:
             raise ValueError(f"Plan has no ID: {plan}")
 
-        # url = f'https://6tkb6m5vzc.execute-api.eu-central-1.amazonaws.com/dev/rest/public/2.0/plan/{plan_id}/planfile'
-        # headers = {"Authorization": api_key}
-        #
-        # response = requests.get(url, headers=headers)
-        # response.raise_for_status()
-        # data = response.json()
-        # download_url = data.get('data')
-        download_url = "https://gitlab.opencode.de/xleitstelle/xplanung/testdaten/-/raw/main/valide/5_3/bp/BPlan001_5-3.gml"
+        url = f'https://6tkb6m5vzc.execute-api.eu-central-1.amazonaws.com/dev/rest/public/2.0/plan/{plan_id}/planfile'
+        headers = {"Authorization": api_key}
+
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+        data = response.json()
+        download_url = data.get('data')
 
         if not download_url:
             raise ValueError(f"No download URL in response for plan {plan_id}")
