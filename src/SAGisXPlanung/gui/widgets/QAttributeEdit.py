@@ -246,8 +246,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
     @pyqtSlot(QModelIndex, str, object)
     def apply_field_change(self, index, attr, value):
-        self.update_database_value(attr, value)
-
         if index is not None:
             self.model.setData(index, value)
             update_field_value(self._xplanung_item, attr, value)
@@ -255,18 +253,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
         # send name changes to update other ui components
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
-
-    def update_database_value(self, attr, value):
-        with Session.begin() as session:
-            session.expire_on_commit = False
-
-            base_classes = [c for c in list(inspect.getmro(self._xplanung_item.xtype)) if issubclass(c, Base)]
-            cls = next(c for c in reversed(base_classes) if hasattr(c, attr) and c.attr_fits_version(attr, export_version()))
-
-            stmt = update(cls.__table__).where(
-                cls.__table__.c.id == self._xplanung_item.xid
-            ).values({attr: value})
-            session.execute(stmt)
 
     def onSliderReleased(self, attr):
         if attr == self.ATTRIBUTE_SIZE:
