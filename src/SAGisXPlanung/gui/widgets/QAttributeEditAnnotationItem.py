@@ -22,10 +22,6 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
         self._layer = MapLayerRegistry().layerByXid(self._xplanung_item)
         self.annotation_type = self._xplanung_item.xtype.__name__
 
-        # set initial form values
-        self.set_form_values()
-        self.initialize_listeners()
-
         # setup display widget for XP_Nutzungsschablone
         if self.annotation_type == 'XP_Nutzungsschablone':
             with Session.begin() as session:

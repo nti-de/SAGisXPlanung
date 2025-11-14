@@ -17,7 +17,7 @@ from qgis.gui import QgsDockWidget
 from qgis.core import (Qgis)
 from qgis.utils import iface
 from sqlalchemy import select, exists
-from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper
+from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper, RelationshipProperty
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
@@ -38,7 +38,7 @@ from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
 from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
-from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
+from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit, TreeNode
 from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -452,20 +452,28 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         return True
                 return False
 
-            data = []
-            for attr in xtype.element_order(version=export_version(), relations='inline'):
+            root_node = TreeNode("root", node_type="root")
+            for (attr, mapper_property) in xtype.element_order(version=export_version(), ret_fmt='sqla'):
 
                 if skip_column():
                     continue
 
-                # edge case where same named column exists in base class which should be used
-                if not xtype.attr_fits_version(attr, export_version()):
-                    cls = next(c for c in reversed(base_classes) if hasattr(c, attr))
-                    stmt = select(cls.__table__.c[attr]).where(cls.__table__.c.id == item._data.xid)
-                    value = session.execute(stmt).scalar_one()
+                value = getattr(plan_content, attr)
+                xplan_attribute_name = xtype.xplan_attribute_name(attr)
+
+                if isinstance(mapper_property, RelationshipProperty):
+                    form_type = mapper_property.info.get('form-type')
+                    if form_type == 'inline':
+                        root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
+                    elif value is not None and isinstance(value, list):
+                        root_node.add_child(TreeNode.create_section(
+                            xplan_attribute_name,
+                            value
+                        ))
+                    else:
+                        root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="relation"))
                 else:
-                    value = getattr(plan_content, attr)
-                data.append([attr, value])
+                    root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
 
             if isinstance(plan_content, GeometryObject):
                 if hasattr(plan_content, 'geomType'):
@@ -476,7 +484,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 geom_type = None
 
             xplanung_item = XPlanungItem(xid=item._data.xid, xtype=xtype, plan_xid=self.plan_xid, geom_type=geom_type)
-            attribute_edit_widget = QAttributeEdit.create(xplanung_item, data, self)
+            attribute_edit_widget = QAttributeEdit.create(xplanung_item, root_node, self)
             attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
 
             for undo_command in self.undo_stack.iterate(_type=AttributeChangedCommand):

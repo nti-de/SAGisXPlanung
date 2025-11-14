@@ -24,10 +24,6 @@ class QAttributeEditSymbolRenderer(QAttributeEdit):
             QgsProject.instance().layerStore().layerWillBeRemoved.connect(self.onLayerRemoved)
             self.get_feature()
 
-        # set initial form values
-        self.set_form_values()
-        self.initialize_listeners()
-
     def get_feature(self):
         for feat in self._layer.getFeatures(
                 QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry).setNoAttributes()):

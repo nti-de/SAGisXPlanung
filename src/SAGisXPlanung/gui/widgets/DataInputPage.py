@@ -10,12 +10,12 @@ from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
 
 from sqlalchemy import null
-from sqlalchemy.orm import class_mapper, MapperProperty, RelationshipProperty
-from sqlalchemy.orm.exc import UnmappedClassError
+from sqlalchemy.orm import MapperProperty, RelationshipProperty
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.types import InvalidFormException
 from SAGisXPlanung.config import xplan_tooltip, export_version
+from SAGisXPlanung.core.helper.sqlalchemy import is_mapped
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput, QMultiInputWidget
 from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
@@ -275,14 +275,6 @@ class DataInputPage(QtWidgets.QScrollArea):
             self.requestPageToTop.emit()
 
         return is_valid
-
-
-def is_mapped(obj):
-    try:
-        class_mapper(obj)
-    except UnmappedClassError:
-        return False
-    return True
 
 # ****************************************************************
 

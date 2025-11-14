@@ -3,8 +3,12 @@ import inspect
 import logging
 import os
 from collections import namedtuple
+from dataclasses import dataclass
+from typing import Any, List, Optional
 
 import qasync
+from PyQt5.QtCore import QAbstractItemModel
+from PyQt5.QtGui import QColor
 from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
@@ -13,13 +17,16 @@ from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon, QRegExpValidator
 from qgis.utils import iface
 from sqlalchemy import update, select
+from sqlalchemy.orm import class_mapper, RelationshipProperty
+from win32com.client.gencache import is_readonly
 
 from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
+from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.core.helper import update_field_value
+from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -27,12 +34,14 @@ from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor
+from SAGisXPlanung.gui.style.styles import SeparatorDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
 FORM_CLASS, CLS = uic.loadUiType(os.path.join(BASE_DIR, 'ui/attribute_edit.ui'))
 logger = logging.getLogger(__name__)
 
 ObjectRole = Qt.UserRole + 1
+NodeRole = Qt.UserRole + 2
 
 style = """
 QToolButton {{
@@ -75,13 +84,10 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if issubclass(xplanung_item.xtype, XP_AbstraktesPraesentationsobjekt):
             from SAGisXPlanung.gui.widgets.QAttributeEditAnnotationItem import QAttributeEditAnnotationItem
             return QAttributeEditAnnotationItem(xplanung_item, data, parent)
-        # elif hasattr(xplanung_item.xtype, 'renderer') and isinstance(xplanung_item.xtype.renderer(xplanung_item.geom_type), RuleBasedSymbolRenderer):
-        #     from SAGisXPlanung.gui.widgets.QAttributeEditSymbolRenderer import QAttributeEditSymbolRenderer
-        #     return QAttributeEditSymbolRenderer(xplanung_item, data, parent)
         else:
             return QAttributeEdit(xplanung_item, data, parent)
 
-    def __init__(self, xplanung_item: XPlanungItem, data, parent):
+    def __init__(self, xplanung_item: XPlanungItem, root_node, parent):
         super(QAttributeEdit, self).__init__(parent)
         self.setupUi(self)
         self.parent = parent
@@ -117,48 +123,37 @@ class QAttributeEdit(CLS, FORM_CLASS):
         # search setup
         self.editSearch.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
         self.editSearch.textChanged.connect(self.onFilterTextChanged)
-        reg_ex = QRegExp(r'\d{1,3}°?')
-        self.angleEdit.setValidator(QRegExpValidator(reg_ex, self.angleEdit))
 
-        # model setup
-        edit_allowed = not issubclass(self._xplanung_item.xtype, FeatureType)
-        self.model = AttributeTableModel(xplanung_item, data, edit=edit_allowed)
-        self.proxyModel = QSortFilterProxyModel(self.tableView)
+        # model
+        self.model = EntityTreeModel(root_node, self._xplanung_item)
+        self.proxyModel = QSortFilterProxyModel(self.treeView)
         self.proxyModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.proxyModel.setSourceModel(self.model)
-        self.tableView.setModel(self.proxyModel)
+        self.treeView.setModel(self.proxyModel)
 
-        # table header setup
-        header = self.tableView.horizontalHeader()
-        header.setSectionResizeMode(QHeaderView.Stretch)
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.tableView.verticalHeader().hide()
+        # header setup
+        header = self.treeView.header()
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setDefaultAlignment(Qt.AlignCenter)
 
-        self.styleGroup.setVisible(False)
-
-        self.tableView.doubleClicked.connect(self.onDoubleClicked)
+        self.treeView.doubleClicked.connect(self.on_double_clicked)
 
         # -------------- STYLE -------------
+        self.link_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'), color=ApplicationColor.Tertiary)
+        self.delegate = SeparatorDelegate(self.link_icon, self.treeView)
+        self.treeView.setItemDelegate(self.delegate)
+        self.proxy_style = HighlightRowProxyStyle('Fusion')
+        self.proxy_style.setParent(self.treeView)
+        self.treeView.setStyle(self.proxy_style)
+        self.treeView.setMouseTracking(True)
+
         self.setStyleSheet(style.format(
             _button_hover_bg=ApplicationColor.Grey300,
             _label_color_mute=ApplicationColor.Grey600
         ))
-
-    def set_form_values(self):
-        with Session.begin() as session:
-            plan_content = session.query(self._xplanung_item.xtype).get(self._xplanung_item.xid)
-            scale = getattr(plan_content, self.ATTRIBUTE_SIZE)
-            self.sizeSlider.setValue(int(scale * (99 - 1) + 1))
-            angle = getattr(plan_content, self.ATTRIBUTE_ANGLE)
-            self.angleEdit.setText(f'{angle}°')
-            self.angleDial.setValue(int(angle))
-
-    def initialize_listeners(self):
-        self.sizeSlider.valueChanged.connect(self.onSliderValueChanged)
-        self.sizeSlider.sliderReleased.connect(lambda a=self.ATTRIBUTE_SIZE: self.onSliderReleased(a))
-        self.angleDial.valueChanged.connect(self.onDialValueChanged)
-        self.angleDial.sliderReleased.connect(lambda a=self.ATTRIBUTE_ANGLE: self.onSliderReleased(a))
-        self.angleEdit.editingFinished.connect(self.onAngleTextEdited)
+        self.treeView.setStyleSheet("QTreeView::item { padding: 10px;}")
 
     def model_index(self, attr: str):
         indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, attr, 1, Qt.MatchFixedString)
@@ -191,30 +186,26 @@ class QAttributeEdit(CLS, FORM_CLASS):
             geom = geometry_from_spatial_element(db_result)
             iface.mapCanvas().flashGeometries([geom])
 
-
-    @pyqtSlot()
-    def onAngleTextEdited(self):
-        text = self.angleEdit.text().replace('°', '')
-        self.angleDial.setValue(int(text))
-        self.onSliderReleased(self.ATTRIBUTE_ANGLE)
-
     @pyqtSlot(str)
     def onFilterTextChanged(self, text: str):
         self.proxyModel.setFilterFixedString(text)
 
     @pyqtSlot(QModelIndex)
-    def onDoubleClicked(self, index: QModelIndex):
+    def on_double_clicked(self, index: QModelIndex):
         if index.column() == 0:
             return
+        if index.flags() & ~Qt.ItemIsSelectable:
+            return
+
         index = self.proxyModel.mapToSource(index)
         attribute_name = index.siblingAtColumn(0).data()
 
-        rel = next((r for r in self._xplanung_item.xtype.relationships() if r[0] == attribute_name), None)
-        if rel is not None:
+        rel = class_mapper(self._xplanung_item.xtype).get_property(attribute_name)
+        if isinstance(rel, RelationshipProperty):
             dlg = XPEditAttributeDialog(attribute_name, None, index.data(role=ObjectRole), self._xplanung_item,
                                         set_default=False, parent=self)
             stub = namedtuple('stub', ['cls_type'])
-            cb = QAddRelationDropdown(stub(cls_type=self._xplanung_item.xtype), rel, parent=self)
+            cb = QAddRelationDropdown(stub(cls_type=self._xplanung_item.xtype), (attribute_name, rel), parent=self)
             if (d := index.data(role=ObjectRole)) is not None:
                 cb.setDefault(d)
 
@@ -254,24 +245,207 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
 
-    def onSliderReleased(self, attr):
-        if attr == self.ATTRIBUTE_SIZE:
-            slider_value = self.sizeSlider.value()
-            scale = (slider_value - 1) / (99 - 1)
-            value = f'{scale:.2f}'
-        elif attr == self.ATTRIBUTE_ANGLE:
-            value = self.angleDial.value()
+
+@dataclass
+class TreeNode:
+
+    name: str
+    value: Any = None
+    children: List['TreeNode'] = None
+    node_type: str = "attribute"  # "attribute", "relation", "section"
+    icon_type: str = None  # "attribute", "link", "expand"
+
+    def __post_init__(self):
+        if self.children is None:
+            self.children = []
+
+    def child_count(self) -> int:
+        return len(self.children)
+
+    def child(self, row: int) -> Optional['TreeNode']:
+        if 0 <= row < len(self.children):
+            return self.children[row]
+        return None
+
+    def add_child(self, child: 'TreeNode'):
+        self.children.append(child)
+
+    @staticmethod
+    def create_section(name: str, objects: List[Any]) -> 'TreeNode':
+        count = len(objects)
+        section = TreeNode(
+            name=name,
+            value=f"{count} Objekte" if count != 1 else "1 Objekt",
+            node_type="section"
+        )
+
+        # Create child nodes for each object in the array
+        for obj in objects:
+            ref_node = TreeNode(
+                name=obj.__class__.__name__ or "Object",
+                value='Link',
+                node_type="relation"
+            )
+            section.add_child(ref_node)
+
+        return section
+
+
+class EntityTreeModel(QAbstractItemModel):
+    def __init__(self, root_node: TreeNode, xplan_item: XPlanungItem, parent=None):
+        super().__init__(parent)
+        self._root = root_node
+        self._xplanung_item = xplan_item
+
+        self.icon_relation = load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary)
+        self.icon_attribute = load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary)
+        self.icon_section = load_svg(os.path.join(BASE_DIR, 'gui/resources/data_array.svg'), color=ApplicationColor.Tertiary)
+
+    def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        if parent.column() > 0:
+            return 0
+
+        if not parent.isValid():
+            return self._root.child_count()
+
+        node = parent.internalPointer()
+        return node.child_count()
+
+    def columnCount(self, parent: QModelIndex = QModelIndex()) -> int:
+        return 2  # Name and Value columns
+
+    def data(self, index: QModelIndex, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+        if not index.isValid():
+            return None
+
+        node = index.internalPointer()
+
+        if role == Qt.ItemDataRole.DisplayRole:
+            if index.column() == 0:
+                return node.name
+            elif index.column() == 1:
+                value = node.value
+                if node.node_type == 'relation' and is_mapped_instance(value):
+                    return value.__class__.__name__
+                if isinstance(value, (XPlanungEnumMixin, ElementOrderMixin, CodeListValue)):
+                    return str(value)
+                if isinstance(value, (WKBElement, WKTElement)):
+                    return geometry_from_spatial_element(value).asWkt()
+                if isinstance(value, datetime.date):
+                    return value.strftime("%d.%m.%Y")
+                if isinstance(value, list):
+                    return ", ".join(map(EntityTreeModel.parser, value))
+                return value
+
+        elif role == Qt.ItemDataRole.ForegroundRole:
+            # Blue color for links/relations
+            if node.node_type == "relation" and index.column() == 1:
+                return QColor(100, 150, 255)
+
+        elif role == Qt.ToolTipRole:
+            # show tooltips for first column, which are the xplanung attributes
+            if index.column() != 0:
+                return
+            return xplan_tooltip(self._xplanung_item.xtype, node.name)
+
+        elif role == Qt.DecorationRole:
+            if index.column() == 0:
+                if node.node_type == "relation":
+                    return self.icon_relation
+                if node.node_type == "section":
+                    return self.icon_section
+                return self.icon_attribute
+        elif role == ObjectRole:
+            return node.value
+        elif role == NodeRole:
+            return node
+
+        return None
+
+    def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole:
+            node = index.internalPointer()
+            if index.column() == 0:
+                node.name = value
+            elif index.column() == 1:
+                node.value = value
+            self.dataChanged.emit(index, index)
+
+    def headerData(self, section: int, orientation: Qt.Orientation,
+                   role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            if section == 0:
+                return "XPlanung-Attribut"
+            elif section == 1:
+                return "Wert"
+        return None
+
+    def index(self, row: int, column: int, parent: QModelIndex = QModelIndex()) -> QModelIndex:
+        if not self.hasIndex(row, column, parent):
+            return QModelIndex()
+
+        if not parent.isValid():
+            child = self._root.child(row)
         else:
-            raise Exception('invalid attribute')
+            parent_node = parent.internalPointer()
+            child = parent_node.child(row)
 
-        update_field_value(self._xplanung_item, attr, value)
-        self.update_database_value(attr, value)
+        if child:
+            return self.createIndex(row, column, child)
+        return QModelIndex()
 
+    def parent(self, index: QModelIndex) -> QModelIndex:
+        if not index.isValid():
+            return QModelIndex()
+
+        child_node = index.internalPointer()
+        parent_node = self._find_parent(self._root, child_node)
+
+        if parent_node is None or parent_node == self._root:
+            return QModelIndex()
+
+        grandparent = self._find_parent(self._root, parent_node)
+        if grandparent is None:
+            row = self._root.children.index(parent_node)
+        else:
+            row = grandparent.children.index(parent_node)
+
+        return self.createIndex(row, 0, parent_node)
+
+    def _find_parent(self, root: TreeNode, target: TreeNode) -> Optional[TreeNode]:
+        if target in root.children:
+            return root
+
+        for child in root.children:
+            result = self._find_parent(child, target)
+            if result:
+                return result
+
+        return None
+
+    def flags(self, index):
+        current_flags = super(EntityTreeModel, self).flags(index)
+        node = index.internalPointer()
+        if node is None or index.isValid() is False:
+            return current_flags
+        xtype = self._xplanung_item.xtype
+        is_readonly = hasattr(xtype, '__readonly_columns__') and node.name in xtype.__readonly_columns__
+        is_section_head = node.node_type == "section"
+        if is_readonly:
+            return current_flags & ~Qt.ItemIsEnabled
+        if index.column() == 0 or is_section_head:
+            return current_flags & ~Qt.ItemIsSelectable
+        return current_flags
+
+    @staticmethod
+    def parser(value):
+        if isinstance(value, datetime.date):
+            return value.strftime("%d.%m.%Y")
+        return str(value)
 
 class AttributeTableModel(QAbstractTableModel):
-    def __init__(self, xplanung_item: XPlanungItem, data, edit=True):
+    def __init__(self, xplanung_item: XPlanungItem, data):
         super(AttributeTableModel, self).__init__()
-        self.edit_allowed = edit
         self._xplanung_item = xplanung_item
         self._data = data
         self._horizontal_header = ['XPlanung-Attribut', 'Wert']
@@ -287,7 +461,7 @@ class AttributeTableModel(QAbstractTableModel):
             value = self._data[index.row()][index.column()]
             if isinstance(value, (WKBElement, WKTElement)):
                 return geometry_from_spatial_element(value).asWkt()
-            if isinstance(value, (XPlanungEnumMixin, ElementOrderMixin)):
+            if isinstance(value, (XPlanungEnumMixin, ElementOrderMixin, CodeListValue)):
                 return str(value)
             if isinstance(value, datetime.date):
                 return value.strftime("%d.%m.%Y")
@@ -298,8 +472,6 @@ class AttributeTableModel(QAbstractTableModel):
             value = self._data[index.row()][index.column()]
             return value
         if role == Qt.ToolTipRole:
-            if not self.edit_allowed:
-                return "Editieren von Attributen nur in der Vollversion möglich"
             # show tooltips for first column, which are the xplanung attributes
             if index.column() != 0:
                 return
@@ -316,9 +488,6 @@ class AttributeTableModel(QAbstractTableModel):
 
     def flags(self, index):
         current_flags = super(AttributeTableModel, self).flags(index)
-        if not self.edit_allowed:
-            return current_flags & ~Qt.ItemIsEnabled
-
         attribute_name = self._data[index.row()][0]
         xtype = self._xplanung_item.xtype
         if hasattr(xtype, '__readonly_columns__') and attribute_name in xtype.__readonly_columns__:

@@ -103,6 +103,110 @@ class RemoveFrameFocusProxyStyle(QProxyStyle):
         super(RemoveFrameFocusProxyStyle, self).drawPrimitive(element, option, painter)
 
 
+class SeparatorDelegate(QStyledItemDelegate):
+    """Custom delegate that draws separators between rows"""
+
+    def __init__(self, link_icon: QIcon, parent=None):
+        super().__init__(parent)
+        self.separator_color = QColor(200, 200, 200)  # Light gray
+        self.separator_thickness = 1
+
+        self.link_icon = link_icon
+
+        # Badge styling
+        self.badge_bg_color = QColor(220, 220, 220)  # Light gray background
+        self.badge_text_color = QColor(80, 80, 80)   # Dark gray text
+        self.badge_padding = 6
+        self.badge_height = 20
+        self.badge_radius = 10
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
+        option.palette.setBrush(QPalette.HighlightedText, QBrush(Qt.black))
+        option.palette.setBrush(QPalette.Highlight, QColor('#CBD5E1'))
+
+        if not index.isValid():
+            return super().paint(painter, option, index)
+
+        is_last_column = index.column() == index.model().columnCount(index.parent()) - 1
+        node = index.data(Qt.UserRole + 2)
+        index_text = index.data(Qt.DisplayRole)
+
+        if is_last_column and node.node_type == "section" and node.value:
+            # Custom rendering for section badges
+            painter.save()
+
+            # Draw the selection/hover background if needed
+            if option.state & QStyle.State_Selected:
+                painter.fillRect(option.rect, option.palette.highlight())
+
+            # Calculate badge dimensions
+            font_metrics = painter.fontMetrics()
+            text_width = font_metrics.horizontalAdvance(index_text)
+            badge_width = text_width + 2 * self.badge_padding
+
+            # Center the badge vertically in the cell
+            badge_rect = option.rect.adjusted(
+                self.badge_padding,
+                (option.rect.height() - self.badge_height) // 2,
+                -option.rect.width() + badge_width + self.badge_padding,
+                -(option.rect.height() - self.badge_height) // 2
+            )
+
+            # Draw badge background (rounded rectangle)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.setBrush(self.badge_bg_color)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(badge_rect, self.badge_radius, self.badge_radius)
+
+            # Draw badge text
+            painter.setPen(self.badge_text_color)
+            painter.drawText(badge_rect, Qt.AlignmentFlag.AlignCenter, index_text)
+
+            painter.restore()
+
+        elif is_last_column and node and node.node_type == "relation" and node.value:
+            # Custom rendering for relation links with chevron
+            painter.save()
+            super().paint(painter, option, index)
+
+            if self.link_icon:
+                icon_size = 12
+                # Position icon at the right side of the text
+                font_metrics = painter.fontMetrics()
+                text_width = font_metrics.horizontalAdvance(index_text)
+
+                icon_x = option.rect.left() + text_width + 8
+                icon_y = option.rect.top() + (option.rect.height() - icon_size) // 2
+
+                icon_rect = option.rect.adjusted(
+                    icon_x - option.rect.left(),
+                    icon_y - option.rect.top(),
+                    -(option.rect.width() - icon_size - (icon_x - option.rect.left())),
+                    -(option.rect.bottom() - icon_y - icon_size)
+                )
+
+                self.link_icon.paint(painter, icon_rect)
+
+            painter.restore()
+        else:
+            # Standard rendering for other items
+            super().paint(painter, option, index)
+
+        # Only draw the separator in the last column to avoid multiple overlapping lines
+        if is_last_column:
+            painter.save()
+            pen = QPen(self.separator_color, self.separator_thickness)
+            painter.setPen(pen)
+
+            # Get the view to calculate full row width
+            view = self.parent()
+            y = option.rect.bottom()
+            viewport_rect = view.viewport().rect()
+            painter.drawLine(0, y, viewport_rect.right(), y)
+
+            painter.restore()
+
+
 class EmptyStateFilter(QObject):
     """
     An event filter that automatically paints empty states for views.
