@@ -1,5 +1,6 @@
 import logging
 
+from PyQt5.QtCore import pyqtSignal
 from qgis.PyQt import sip
 from qgis.PyQt.QtCore import QModelIndex, Qt, QRectF, QRect, QObject, QEvent, QVariant
 from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush, QIcon
@@ -106,6 +107,8 @@ class RemoveFrameFocusProxyStyle(QProxyStyle):
 class SeparatorDelegate(QStyledItemDelegate):
     """Custom delegate that draws separators between rows"""
 
+    link_clicked = pyqtSignal(QModelIndex)  # index
+
     def __init__(self, link_icon: QIcon, parent=None):
         super().__init__(parent)
         self.separator_color = QColor(200, 200, 200)  # Light gray
@@ -121,11 +124,11 @@ class SeparatorDelegate(QStyledItemDelegate):
         self.badge_radius = 10
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        option.palette.setBrush(QPalette.HighlightedText, QBrush(Qt.black))
-        option.palette.setBrush(QPalette.Highlight, QColor('#CBD5E1'))
-
         if not index.isValid():
             return super().paint(painter, option, index)
+
+        option.palette.setBrush(QPalette.HighlightedText, QBrush(Qt.black))
+        option.palette.setBrush(QPalette.Highlight, QColor('#CBD5E1'))
 
         is_last_column = index.column() == index.model().columnCount(index.parent()) - 1
         node = index.data(Qt.UserRole + 2)
@@ -167,6 +170,11 @@ class SeparatorDelegate(QStyledItemDelegate):
         elif is_last_column and node and node.node_type == "relation" and node.value:
             # Custom rendering for relation links with chevron
             painter.save()
+            option.palette.setBrush(QPalette.HighlightedText, QColor(100, 150, 255))
+            if option.state & QStyle.State_MouseOver:
+                font = option.font
+                font.setUnderline(True)
+                painter.setFont(font)
             super().paint(painter, option, index)
 
             if self.link_icon:
@@ -205,6 +213,17 @@ class SeparatorDelegate(QStyledItemDelegate):
             painter.drawLine(0, y, viewport_rect.right(), y)
 
             painter.restore()
+
+    def editorEvent(self, event, model, option, index):
+        node = index.data(Qt.UserRole + 2)
+        is_relation = node and node.node_type == "relation" and index.column() == 1
+
+        if is_relation and node.value:
+            if event.type() == QEvent.MouseButtonRelease:
+                self.link_clicked.emit(index)
+                return True
+
+        return False
 
 
 class EmptyStateFilter(QObject):

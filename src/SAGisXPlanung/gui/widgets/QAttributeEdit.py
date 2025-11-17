@@ -7,26 +7,25 @@ from dataclasses import dataclass
 from typing import Any, List, Optional
 
 import qasync
-from PyQt5.QtCore import QAbstractItemModel
+import yaml
+from PyQt5.QtCore import QAbstractItemModel, QSettings
 from PyQt5.QtGui import QColor
 from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
+from qgis.PyQt.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
 from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
-from qgis.PyQt.QtGui import QIcon, QRegExpValidator
+from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
-from sqlalchemy import update, select
+from sqlalchemy import select
 from sqlalchemy.orm import class_mapper, RelationshipProperty
-from win32com.client.gencache import is_readonly
 
 from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
-from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance
+from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance, base_models
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -71,6 +70,62 @@ QToolButton:hover {{
 """
 
 
+
+@dataclass
+class TreeNode:
+
+    name: str
+    value: Any = None
+    children: List['TreeNode'] = None
+    node_type: str = "attribute"  # "attribute", "relation", "section"
+    icon_type: str = None  # "attribute", "link", "expand"
+
+    def __post_init__(self):
+        if self.children is None:
+            self.children = []
+
+    def child_count(self) -> int:
+        return len(self.children)
+
+    def child(self, row: int) -> Optional['TreeNode']:
+        if 0 <= row < len(self.children):
+            return self.children[row]
+        return None
+
+    def add_child(self, child: 'TreeNode'):
+        self.children.append(child)
+
+    @staticmethod
+    def create_section(name: str, objects: List[Any]) -> 'TreeNode':
+        count = len(objects)
+        section = TreeNode(
+            name=name,
+            value=f"{count} Objekte" if count != 1 else "1 Objekt",
+            node_type="section"
+        )
+
+        for i, obj in enumerate(objects):
+            ref_node = TreeNode(
+                name=f'Objekt {i + 1}',
+                value=XPlanungItem(xid=str(obj.id), xtype=obj.__class__),
+                node_type="relation"
+            )
+            section.add_child(ref_node)
+
+        return section
+
+
+@dataclass
+class NavigationItem:
+    """Represents a step in the navigation history"""
+    xplan_item: XPlanungItem
+    relation_name: Optional[str] = None  # The relation used to navigate here
+    display_name: Optional[str] = None  # Display name for breadcrumb
+
+    def __str__(self):
+        return self.display_name or self.xplan_item.xtype.__name__
+
+
 class QAttributeEdit(CLS, FORM_CLASS):
     nameChanged = pyqtSignal(str)
 
@@ -80,32 +135,65 @@ class QAttributeEdit(CLS, FORM_CLASS):
     ATTRIBUTE_ANGLE = 'drehwinkel'
 
     @staticmethod
-    def create(xplanung_item: XPlanungItem, data, parent):
+    def create(xplanung_item: XPlanungItem, parent):
         if issubclass(xplanung_item.xtype, XP_AbstraktesPraesentationsobjekt):
             from SAGisXPlanung.gui.widgets.QAttributeEditAnnotationItem import QAttributeEditAnnotationItem
-            return QAttributeEditAnnotationItem(xplanung_item, data, parent)
+            return QAttributeEditAnnotationItem(xplanung_item, parent)
         else:
-            return QAttributeEdit(xplanung_item, data, parent)
+            return QAttributeEdit(xplanung_item, parent)
 
-    def __init__(self, xplanung_item: XPlanungItem, root_node, parent):
+    @staticmethod
+    def _load_tree_node(xplan_item: XPlanungItem) -> TreeNode:
+        with Session() as session:
+            xtype = xplan_item.xtype
+            plan_content = session.query(xtype).get(xplan_item.xid)
+            base_classes = base_models(xtype)
+
+            attribute_config = yaml.safe_load(QSettings().value(f"plugins/xplanung/attribute_config", '')) or {}
+
+            def skip_column(attr):
+                for mro_member in base_classes:
+                    if attr in attribute_config.get(mro_member.__name__, []):
+                        return True
+                return False
+
+            root_node = TreeNode("root", node_type="root")
+            for (attr, mapper_property) in xtype.element_order(version=export_version(), ret_fmt='sqla'):
+                if skip_column(attr):
+                    continue
+
+                value = getattr(plan_content, attr)
+                xplan_attribute_name = xtype.xplan_attribute_name(attr)
+
+                if isinstance(mapper_property, RelationshipProperty):
+                    form_type = mapper_property.info.get('form-type')
+                    if form_type == 'inline':
+                        root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
+                    elif value is not None and isinstance(value, list):
+                        root_node.add_child(TreeNode.create_section(xplan_attribute_name, value))
+                    else:
+                        root_node.add_child(
+                            TreeNode(
+                                xplan_attribute_name,
+                                XPlanungItem(xid=str(value.id), xtype=value.__class__) if value is not None else '',
+                                node_type="relation"
+                            )
+                        )
+                else:
+                    root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
+
+            return root_node
+
+    def __init__(self, xplanung_item: XPlanungItem, parent):
         super(QAttributeEdit, self).__init__(parent)
         self.setupUi(self)
         self.parent = parent
         self._xplanung_item = xplanung_item
 
         # info header setup
-        def _object_category_name(xtype: type) -> str:
-            if issubclass(xtype, XP_AbstraktesPraesentationsobjekt):
-                return 'Präsentationsobjekt'
-            elif issubclass(xtype, FeatureType):
-                return 'FeatureType'
-            else:
-                return 'DataType'
-
         self.label_object_name.setObjectName("title-label")
         self.label_object_type.setObjectName("subtitle-label")
-        self.label_object_name.setText(self._xplanung_item.xtype.__name__)
-        self.label_object_type.setText(_object_category_name(xplanung_item.xtype))
+        self._update_view()
 
         enabled = issubclass(self._xplanung_item.xtype, FeatureType)
         self.button_flash.setEnabled(enabled)
@@ -125,6 +213,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.editSearch.textChanged.connect(self.onFilterTextChanged)
 
         # model
+        root_node = QAttributeEdit._load_tree_node(self._xplanung_item)
         self.model = EntityTreeModel(root_node, self._xplanung_item)
         self.proxyModel = QSortFilterProxyModel(self.treeView)
         self.proxyModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
@@ -143,6 +232,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         # -------------- STYLE -------------
         self.link_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'), color=ApplicationColor.Tertiary)
         self.delegate = SeparatorDelegate(self.link_icon, self.treeView)
+        self.delegate.link_clicked.connect(self.on_relation_clicked)
         self.treeView.setItemDelegate(self.delegate)
         self.proxy_style = HighlightRowProxyStyle('Fusion')
         self.proxy_style.setParent(self.treeView)
@@ -154,6 +244,18 @@ class QAttributeEdit(CLS, FORM_CLASS):
             _label_color_mute=ApplicationColor.Grey600
         ))
         self.treeView.setStyleSheet("QTreeView::item { padding: 10px;}")
+
+    def _update_view(self):
+        def _object_category_name(xtype: type) -> str:
+            if issubclass(xtype, XP_AbstraktesPraesentationsobjekt):
+                return 'Präsentationsobjekt'
+            elif issubclass(xtype, FeatureType):
+                return 'FeatureType'
+            else:
+                return 'DataType'
+
+        self.label_object_name.setText(self._xplanung_item.xtype.__name__)
+        self.label_object_type.setText(_object_category_name(self._xplanung_item.xtype))
 
     def model_index(self, attr: str):
         indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, attr, 1, Qt.MatchFixedString)
@@ -191,10 +293,25 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.proxyModel.setFilterFixedString(text)
 
     @pyqtSlot(QModelIndex)
+    def on_relation_clicked(self, index: QModelIndex):
+        attribute_name = index.siblingAtColumn(0).data()
+        related_xplan_item = index.data(role=ObjectRole)
+        display_name = related_xplan_item.xtype.__name__
+
+        nav_item = NavigationItem(
+            xplan_item=related_xplan_item,
+            relation_name=attribute_name,
+            display_name=display_name
+        )
+
+        self.navigate_to(nav_item)
+
+    @pyqtSlot(QModelIndex)
     def on_double_clicked(self, index: QModelIndex):
         if index.column() == 0:
             return
-        if index.flags() & ~Qt.ItemIsSelectable:
+
+        if not index.flags() & Qt.ItemIsSelectable or not index.flags() & Qt.ItemIsEnabled:
             return
 
         index = self.proxyModel.mapToSource(index)
@@ -245,50 +362,12 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
 
+    def navigate_to(self, nav_item: NavigationItem):
+        root_node = self._load_tree_node(nav_item.xplan_item)
+        self.model.set_source_data(root_node, nav_item.xplan_item)
 
-@dataclass
-class TreeNode:
-
-    name: str
-    value: Any = None
-    children: List['TreeNode'] = None
-    node_type: str = "attribute"  # "attribute", "relation", "section"
-    icon_type: str = None  # "attribute", "link", "expand"
-
-    def __post_init__(self):
-        if self.children is None:
-            self.children = []
-
-    def child_count(self) -> int:
-        return len(self.children)
-
-    def child(self, row: int) -> Optional['TreeNode']:
-        if 0 <= row < len(self.children):
-            return self.children[row]
-        return None
-
-    def add_child(self, child: 'TreeNode'):
-        self.children.append(child)
-
-    @staticmethod
-    def create_section(name: str, objects: List[Any]) -> 'TreeNode':
-        count = len(objects)
-        section = TreeNode(
-            name=name,
-            value=f"{count} Objekte" if count != 1 else "1 Objekt",
-            node_type="section"
-        )
-
-        # Create child nodes for each object in the array
-        for obj in objects:
-            ref_node = TreeNode(
-                name=obj.__class__.__name__ or "Object",
-                value='Link',
-                node_type="relation"
-            )
-            section.add_child(ref_node)
-
-        return section
+        self._xplanung_item = nav_item.xplan_item
+        self._update_view()
 
 
 class EntityTreeModel(QAbstractItemModel):
@@ -300,6 +379,13 @@ class EntityTreeModel(QAbstractItemModel):
         self.icon_relation = load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary)
         self.icon_attribute = load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary)
         self.icon_section = load_svg(os.path.join(BASE_DIR, 'gui/resources/data_array.svg'), color=ApplicationColor.Tertiary)
+
+    def set_source_data(self, root_node: TreeNode, xplan_item: XPlanungItem):
+        self.beginResetModel()
+        self._root = root_node
+        self.endResetModel()
+
+        self._xplanung_item = xplan_item
 
     def rowCount(self, parent: QModelIndex = QModelIndex()) -> int:
         if parent.column() > 0:
@@ -325,8 +411,8 @@ class EntityTreeModel(QAbstractItemModel):
                 return node.name
             elif index.column() == 1:
                 value = node.value
-                if node.node_type == 'relation' and is_mapped_instance(value):
-                    return value.__class__.__name__
+                if node.node_type == 'relation' and isinstance(value, XPlanungItem):
+                    return value.xtype.__name__
                 if isinstance(value, (XPlanungEnumMixin, ElementOrderMixin, CodeListValue)):
                     return str(value)
                 if isinstance(value, (WKBElement, WKTElement)):
@@ -431,9 +517,10 @@ class EntityTreeModel(QAbstractItemModel):
         xtype = self._xplanung_item.xtype
         is_readonly = hasattr(xtype, '__readonly_columns__') and node.name in xtype.__readonly_columns__
         is_section_head = node.node_type == "section"
+        is_link = node.node_type == "relation"
         if is_readonly:
             return current_flags & ~Qt.ItemIsEnabled
-        if index.column() == 0 or is_section_head:
+        if index.column() == 0 or is_section_head or is_link:
             return current_flags & ~Qt.ItemIsSelectable
         return current_flags
 
@@ -442,62 +529,3 @@ class EntityTreeModel(QAbstractItemModel):
         if isinstance(value, datetime.date):
             return value.strftime("%d.%m.%Y")
         return str(value)
-
-class AttributeTableModel(QAbstractTableModel):
-    def __init__(self, xplanung_item: XPlanungItem, data):
-        super(AttributeTableModel, self).__init__()
-        self._xplanung_item = xplanung_item
-        self._data = data
-        self._horizontal_header = ['XPlanung-Attribut', 'Wert']
-
-    @staticmethod
-    def parser(value):
-        if isinstance(value, datetime.date):
-            return value.strftime("%d.%m.%Y")
-        return str(value)
-
-    def data(self, index, role):
-        if role == Qt.DisplayRole:
-            value = self._data[index.row()][index.column()]
-            if isinstance(value, (WKBElement, WKTElement)):
-                return geometry_from_spatial_element(value).asWkt()
-            if isinstance(value, (XPlanungEnumMixin, ElementOrderMixin, CodeListValue)):
-                return str(value)
-            if isinstance(value, datetime.date):
-                return value.strftime("%d.%m.%Y")
-            if isinstance(value, list):
-                return ", ".join(map(AttributeTableModel.parser, value))
-            return value
-        if role == ObjectRole:
-            value = self._data[index.row()][index.column()]
-            return value
-        if role == Qt.ToolTipRole:
-            # show tooltips for first column, which are the xplanung attributes
-            if index.column() != 0:
-                return
-            return xplan_tooltip(self._xplanung_item.xtype, self._data[index.row()][index.column()])
-
-    def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
-            self._data[index.row()][index.column()] = value
-            self.dataChanged.emit(index, index)
-
-    def headerData(self, col, orientation, role):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self._horizontal_header[col]
-
-    def flags(self, index):
-        current_flags = super(AttributeTableModel, self).flags(index)
-        attribute_name = self._data[index.row()][0]
-        xtype = self._xplanung_item.xtype
-        if hasattr(xtype, '__readonly_columns__') and attribute_name in xtype.__readonly_columns__:
-            return current_flags & ~Qt.ItemIsEnabled
-        if index.column() == 0:
-            return current_flags & ~Qt.ItemIsSelectable
-        return current_flags
-
-    def rowCount(self, index):
-        return len(self._data)
-
-    def columnCount(self, index):
-        return 2

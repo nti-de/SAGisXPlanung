@@ -43,7 +43,7 @@ from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationState
-from SAGisXPlanung.utils import OBJECT_BASE_TYPES, full_version_required_warning
+from SAGisXPlanung.gui.widgets.multi_edit import MultiEditWidget
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -297,7 +297,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 data_class_action = QtWidgets.QAction(f'{action_name} ({entity_class.__name__})', self)
                 data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=entity_class:
                                                     self.onCreateDataClass(p_item, d_class, attr))
-                data_class_action.setEnabled(not issubclass(item._data.xtype, XP_Objekt))
                 if not rel[1].uselist and item.childCount():
                     for i in range(item.childCount()):
                         child_item = item.child(i)
@@ -317,7 +316,16 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     def create_multi_selection_menu(self, menu: QMenu, selected_indices: List[QModelIndex]):
         # edit
-        # not in community-edition
+        model = selected_indices[0].model()
+        xp_items = [model.itemAtIndex(m_idx).xplanItem() for m_idx in selected_indices]
+
+        if all(obj.xtype == xp_items[0].xtype for obj in xp_items):
+            multi_edit_action = QAction(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit_note.svg')),
+                                        'Gewählte Objekte bearbeiten', menu)
+            multi_edit_action.triggered.connect(lambda state, items=xp_items:
+                                                self.insertWidgetIntoNewPage(MultiEditWidget(items)))
+            menu.addAction(multi_edit_action)
+            menu.addSeparator()
 
         # delete
         delete_action = QAction(QIcon(self.deleteIcon), 'Markierte Planinhalte löschen', menu)
@@ -332,9 +340,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             iface.mapCanvas().flashGeometries([plan_content.geometry()], plan_content.srs())
 
     def onCreateDataClass(self, parent_item: ClassNode, data_class, attribute):
-        if issubclass(parent_item._data.xtype, XP_Objekt):
-            full_version_required_warning()
-            return
         tab_widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
 
         if self.bSave.receivers(self.bSave.clicked) > 0:
@@ -436,64 +441,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def show_attribute_page(self):
         """ Zeigt ein QTreeWidget mit den Attributen und Werten des aktuell im Objektbaum gewählten Objekts an """
         item = self.objectTree.selectedItems()[0]
-        attribute_config = yaml.safe_load(QSettings().value(f"plugins/xplanung/attribute_config", '')) or {}
 
-        with Session() as session:
-            session.expire_on_commit = False
-            plan_content = session.query(item._data.xtype).get(item._data.xid)
+        xplanung_item = XPlanungItem(xid=item._data.xid, xtype=item._data.xtype, plan_xid=self.plan_xid)
+        attribute_edit_widget = QAttributeEdit.create(xplanung_item, self)
+        attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
 
-            xtype = item._data.xtype
-            plan_content = session.query(xtype).get(item._data.xid)
-            base_classes = base_models(xtype)
+        for undo_command in self.undo_stack.iterate(_type=AttributeChangedCommand):
+            if undo_command.xplan_item.xid == xplanung_item.xid:
+                new_index = attribute_edit_widget.model_index(undo_command.attribute)
+                undo_command.setModelIndex(new_index)
+                undo_command.signal_proxy.changeApplied.connect(attribute_edit_widget.apply_field_change)
 
-            def skip_column():
-                for mro_member in base_classes:
-                    if attr in attribute_config.get(mro_member.__name__, []):
-                        return True
-                return False
-
-            root_node = TreeNode("root", node_type="root")
-            for (attr, mapper_property) in xtype.element_order(version=export_version(), ret_fmt='sqla'):
-
-                if skip_column():
-                    continue
-
-                value = getattr(plan_content, attr)
-                xplan_attribute_name = xtype.xplan_attribute_name(attr)
-
-                if isinstance(mapper_property, RelationshipProperty):
-                    form_type = mapper_property.info.get('form-type')
-                    if form_type == 'inline':
-                        root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
-                    elif value is not None and isinstance(value, list):
-                        root_node.add_child(TreeNode.create_section(
-                            xplan_attribute_name,
-                            value
-                        ))
-                    else:
-                        root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="relation"))
-                else:
-                    root_node.add_child(TreeNode(xplan_attribute_name, value, node_type="attribute"))
-
-            if isinstance(plan_content, GeometryObject):
-                if hasattr(plan_content, 'geomType'):
-                    geom_type = plan_content.geomType()
-                else:
-                    geom_type = plan_content.__geometry_type__
-            else:
-                geom_type = None
-
-            xplanung_item = XPlanungItem(xid=item._data.xid, xtype=xtype, plan_xid=self.plan_xid, geom_type=geom_type)
-            attribute_edit_widget = QAttributeEdit.create(xplanung_item, root_node, self)
-            attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
-
-            for undo_command in self.undo_stack.iterate(_type=AttributeChangedCommand):
-                if undo_command.xplan_item.xid == xplanung_item.xid:
-                    new_index = attribute_edit_widget.model_index(undo_command.attribute)
-                    undo_command.setModelIndex(new_index)
-                    undo_command.signal_proxy.changeApplied.connect(attribute_edit_widget.apply_field_change)
-
-            self.insertWidgetIntoNewPage(attribute_edit_widget)
+        self.insertWidgetIntoNewPage(attribute_edit_widget)
 
     @qasync.asyncSlot(ClassNode)
     async def onDeleteReverted(self, node: ClassNode):
