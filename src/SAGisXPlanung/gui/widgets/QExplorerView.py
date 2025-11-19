@@ -132,7 +132,7 @@ class ExplorerTreeModel(QAbstractItemModel):
         self.beginRemoveRows(parent, row, row + count - 1)
         parent_item = self.itemAtIndex(parent)
         for i in range(count):
-            parent_item.removeChild(row + i)
+            parent_item.removeChild(row)
         self.endRemoveRows()
         return True
 

@@ -1,6 +1,5 @@
 import logging
 import traceback
-from typing import List
 from uuid import uuid4
 
 from qgis.PyQt.QtCore import QSize
@@ -9,14 +8,13 @@ from qgis.PyQt.QtGui import QIcon
 from geoalchemy2 import Geometry, WKTElement
 from qgis.core import QgsSingleSymbolRenderer, QgsCategorizedSymbolRenderer, QgsSymbol
 
-from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed
+from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed, Table
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship
 
-from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest, edit,
+from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest,
                        QgsSymbolLayerUtils, QgsRuleBasedRenderer)
 
-from .XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone
 from .conversions import XP_Rechtscharakter_EnumType
 from .core import LayerPriorityType
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
@@ -24,12 +22,20 @@ from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
-    RendererMixin, MixedGeometry, FeatureType
+    RendererMixin, FeatureType
 from .types import LargeString, Angle, Length, GeometryType, XPEnum
 from ..MapLayerRegistry import MapLayerRegistry
 from ..core.helper import safe_edit
 
 logger = logging.getLogger(__name__)
+
+
+xp_textabschnitt_assoc = Table(
+    "xp_textabschnitt_assoc",
+    Base.metadata,
+    Column("xp_objekt_id", UUID(as_uuid=True), ForeignKey("xp_objekt.id", ondelete="CASCADE")),
+    Column("textabschnitt_id", UUID(as_uuid=True), ForeignKey("xp_text_abschnitt.id", ondelete="CASCADE")),
+)
 
 
 class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
@@ -317,9 +323,13 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
                              info={'xplan_version': XPlanVersion.SIX})
 
     # XP_TextAbschnitt [0..*] (v6)
-    refTextInhalt = relationship("XP_TextAbschnitt", back_populates="xp_objekt",
-                                 cascade="all, delete", passive_deletes=True,
-                                 info={'xplan_version': XPlanVersion.SIX})
+    refTextInhalt_v6 = relationship("XP_TextAbschnitt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="xp_objekte",
+        cascade="all, delete",
+        passive_deletes=True,
+        info={'xplan_version': XPlanVersion.SIX, 'xplan_attribute': 'refTextInhalt'}
+    )
 
     # non xplanung attributes
     drehwinkel = Column(Angle, default=0)
@@ -430,7 +440,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
 
     __tablename__ = 'xp_text_abschnitt'
     __avoidRelation__ = ['xp_bereich', 'xp_objekt', 'xp_plan', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
-                         'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche']
+                         'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     type = Column(String())
@@ -458,9 +468,11 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
                               info={'xplan_version': XPlanVersion.SIX})
 
     # XP_Objekt [0..*] (v6)
-    xp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('xp_objekt.id', ondelete='CASCADE'))
-    xp_objekt = relationship("XP_Objekt", back_populates="refTextInhalt",
-                             info={'xplan_version': XPlanVersion.SIX})
+    xp_objekte = relationship("XP_Objekt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="refTextInhalt_v6",
+        info={'xplan_version': XPlanVersion.SIX}
+    )
 
     # XP_Plan [0..*]
     xp_plan_id = Column(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'))
@@ -502,7 +514,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['xp_plan', 'xp_bereich', 'xp_objekt', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
-                'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche']
+                'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte']
 
     @classmethod
     def renderer(cls, geom_type: GeometryType):

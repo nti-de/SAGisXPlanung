@@ -90,7 +90,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                         'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt']
+                         'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 

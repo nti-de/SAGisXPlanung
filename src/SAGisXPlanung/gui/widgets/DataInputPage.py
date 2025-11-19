@@ -174,7 +174,7 @@ class DataInputPage(QtWidgets.QScrollArea):
             if mapper_property.info.get('nullable') is False:
                 label.setStyleSheet("font-weight: bold")
 
-            if form_type == 'inline' or mapper_property.secondary:
+            if form_type == 'inline':
                 stub = namedtuple('stub', ['cls_type'])
                 control = QAddRelationDropdown(stub(cls_type=self.cls_type), (attr_name, mapper_property),
                                                parent=self)

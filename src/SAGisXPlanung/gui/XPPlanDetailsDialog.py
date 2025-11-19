@@ -18,6 +18,7 @@ from qgis.core import (Qgis)
 from qgis.utils import iface
 from sqlalchemy import select, exists
 from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper, RelationshipProperty
+from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
@@ -29,7 +30,7 @@ from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Plan
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, \
     XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.core.helper import base_models, find_true_class
 from SAGisXPlanung.core.mixins.mixins import GeometryObject
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -44,6 +45,7 @@ from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationState
 from SAGisXPlanung.gui.widgets.multi_edit import MultiEditWidget
+from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -279,7 +281,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             rel_class = rel[1].entity.class_
             if issubclass(rel_class, (XP_Objekt, GeometryObject)) and not issubclass(rel_class, XP_Bereich):
                 continue
-            if next(iter(rel[1].remote_side)).primary_key or rel[1].secondary is not None:
+            form_type = rel[1].info.get('form-type')
+            if next(iter(rel[1].remote_side)).primary_key or form_type == 'inline':
                 continue
             if hasattr(item._data.xtype, '__avoidRelation__') and rel[0] in item._data.xtype.__avoidRelation__:
                 continue
@@ -340,12 +343,15 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             iface.mapCanvas().flashGeometries([plan_content.geometry()], plan_content.srs())
 
     def onCreateDataClass(self, parent_item: ClassNode, data_class, attribute):
-        tab_widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
+        if issubclass(data_class, XP_TextAbschnitt):
+            widget = SelectRelatedWidget(data_class, parent_item._data, attribute)
+        else:
+            widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
 
         if self.bSave.receivers(self.bSave.clicked) > 0:
             self.bSave.clicked.disconnect()
         self.bSave.clicked.connect(functools.partial(self.onSaveClicked, parent_item, attribute))
-        self.stackedWidget.insertWidget(2, tab_widget)
+        self.stackedWidget.insertWidget(2, widget)
         self.stackedWidget.setCurrentIndex(2)
 
     @pyqtSlot(QtWidgets.QWidget)
@@ -386,11 +392,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         try:
             async with SessionAsync.begin() as session:
                 tab_widget = self.stackedWidget.widget(self.stackedWidget.currentIndex())
-                data_obj = tab_widget.populateContent()
-                if not data_obj:
-                    return
-
-                data_obj.id = uuid.uuid4()
 
                 true_class = find_true_class(parent_item._data.xtype, attribute)
                 stmt = select(true_class).filter_by(id=parent_item._data.xid).options(
@@ -399,6 +400,31 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 )
                 result = await session.execute(stmt)
                 parent_obj = result.scalar_one()
+
+                if isinstance(tab_widget, SelectRelatedWidget):
+                    if tab_widget.is_create_new():
+                        data_obj = tab_widget.data_input_widget.populateContent()
+                    else:
+                        selected_ids = tab_widget.get_selected_ids()
+                        attach_objects = []
+                        for selected_id in selected_ids:
+                            o = await session.get(tab_widget.create_type, selected_id, [selectinload('*')])
+                            attach_objects.append(o)
+
+                        if not attach_objects:
+                            getattr(parent_obj, attribute).clear()
+                        else:
+                            setattr(parent_obj, attribute, attach_objects)
+
+                        self.prevPage()
+                        return
+                else:
+                    data_obj = tab_widget.populateContent()
+
+                if not data_obj:
+                    return
+
+                data_obj.id = uuid.uuid4()
 
                 try:
                     getattr(parent_obj, attribute).append(data_obj)
@@ -415,11 +441,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 self.iterateRelation(data_obj, node)
 
             self.prevPage()
-            self.bSave.clicked.disconnect()
 
         except Exception as e:
             logger.exception(e)
         finally:
+            if self.bSave.receivers(self.bSave.clicked) > 0:
+                self.bSave.clicked.disconnect()
             self.init_spinner.stop()
 
     def iterateRelation(self, obj, root_node):

@@ -39,7 +39,7 @@ def create_widget(field_type, parent=None, context: Optional[WidgetContext] = No
         if isinstance(field_type.item_type, Date):
             return QDateListInput(parent=parent, context=context)
         if isinstance(field_type.item_type, XPathField):
-            return XPathListWidget(parent=parent, context=context)  # This now gets the context!
+            return XPathListWidget(parent=parent, context=context)
 
     if hasattr(field_type, 'enums'):
         return QComboBoxNoScroll(
