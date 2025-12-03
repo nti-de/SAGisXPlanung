@@ -216,6 +216,7 @@ class XP_AbstraktesPraesentationsobjekt(FeatureType, RelationshipMixin, ElementO
         self._remove_listeners()
 
         # Create new listeners based on current 'art' value
+        print(self.art)
         for art in self.art:
             xpath_result = XPathMatcher.resolve_xpath_value(self.dientZurDarstellungVon, art)
             if not xpath_result:
@@ -545,6 +546,8 @@ class XP_PTO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
 
         feat['schriftinhalt'] = self.schriftinhalt
         if not self.schriftinhalt:
+            if not self.art:
+                return
             # Collect all matching values from the database
             parent_obj = self.dientZurDarstellungVon
             xpath_results = []
@@ -558,7 +561,7 @@ class XP_PTO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
                 feat['schriftinhalt'] = text_content
 
         # listeners for attribute changes
-        if not update_listener:
+        if not update_listener or not self.art:
             return
 
         self._register_listeners()
