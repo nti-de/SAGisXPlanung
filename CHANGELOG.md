@@ -1,5 +1,13 @@
 ## Changelog
 
+### [2.11.1] - 08.12.2025
+
+#### Fehlerbehebungen
+
+- Ändern komplexer Attribute in der Attribut-Ansicht (da18289e)
+- Fehler bei Plananzeige, wenn Attribut `art` in `XP_PTO`-Objekten unbelegt ist (d758bd92)
+- Hinzufügen/Korrektur weiterer Stildefinitionen (477cd53c, 9ccf2945)
+
 ### [2.11.0] - 10.11.2025
 
 #### Veränderungen
