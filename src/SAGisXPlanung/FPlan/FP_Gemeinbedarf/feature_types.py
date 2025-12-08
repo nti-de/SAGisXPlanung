@@ -134,6 +134,10 @@ class FP_SpielSportanlage(MixedGeometry, FP_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.PointGeometry:
+            return icon_renderer('SpielSportanlage', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Gemeinbedarf_Spiel_und_Sportanlagen', geometry_type=geom_type,
+                                 scale_factor=5)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

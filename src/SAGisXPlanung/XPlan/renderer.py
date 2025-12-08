@@ -87,6 +87,11 @@ _renderer_expressions = {
         ('Friedhof', '"zweckbestimmung" LIKE \'26%\'', 'Friedhof.svg'),
         ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
     ],
+    'SpielSportanlage': [
+        ('Sportanlage', '"zweckbestimmung" LIKE \'Sportanlage\'', 'Anlage_Sportanlage.svg'),
+        ('Spielanlage', '"zweckbestimmung" LIKE \'Spielanlage\'', 'Anlage_Spielanlage.svg'),
+        ('Gemischt/Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
+    ],
     'Denkmalschutz': [
         ('Ensemble', '"artDerFestlegung" = \'DenkmalschutzEnsemble\'', 'Denkmalschutz_Ensemble.svg'),
         ('Einzelanlage', '"artDerFestlegung" = \'DenkmalschutzEinzelanlage\'', 'Denkmalschutz_Einzelanlagen.svg'),

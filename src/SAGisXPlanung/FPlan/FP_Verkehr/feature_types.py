@@ -11,12 +11,12 @@ from SAGisXPlanung.FPlan.FP_Verkehr.enums import FP_ZweckbestimmungStrassenverke
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
-from SAGisXPlanung.core.mixins.mixins import PolygonGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 
 @xp_version(versions=[XPlanVersion.FIVE_THREE])
-class FP_Strassenverkehr(PolygonGeometry, FP_Objekt):
+class FP_Strassenverkehr(MixedGeometry, FP_Objekt):
     """ Darstellung einer Grünfläche nach § 5, Abs. 2, Nr. 5 BauGB """
 
     __tablename__ = 'fp_strassenverkehr'
@@ -30,26 +30,29 @@ class FP_Strassenverkehr(PolygonGeometry, FP_Objekt):
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
 
     @classmethod
-    def symbol(cls) -> QgsSymbol:
+    def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
-        fill = QgsSimpleFillSymbolLayer(QColor('#ffb300'))
+        fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
+
         symbol.appendSymbolLayer(fill)
-
-        line = QgsSimpleLineSymbolLayer.create({})
-        line.setColor(QColor(0, 0, 0))
-        line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
-        symbol.appendSymbolLayer(line)
-
         return symbol
 
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(cls.symbol())
+        if geom_type == QgsWkbTypes.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.PointGeometry:
+            point_symbol = QgsSymbol.defaultSymbol(geom_type)
+            point_symbol.setColor(QColor('#fbdd19'))
+            return QgsSingleSymbolRenderer(point_symbol)
+        elif geom_type is not None:
+            line_symbol = QgsSymbol.defaultSymbol(geom_type)
+            line_symbol.setColor(QColor('#fbdd19'))
+            return QgsSingleSymbolRenderer(line_symbol)
+        raise Exception('parameter geometryType should not be None')
 
     @classmethod
     def previewIcon(cls):
