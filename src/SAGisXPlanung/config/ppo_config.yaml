@@ -279,7 +279,12 @@ sondergebiete:
   attribute:
     - xpath: besondereArtDerBaulNutzung
       type: XP_BesondereArtDerBaulNutzung
-      value: 4000
+      value:
+        - 2100
+        - 4000
+    - xpath: sonderNutzung
+      type: XP_Sondernutzungen
+      value: 9999
 Sondergebiet_Camping.svg:
   type:
     svg:
@@ -353,7 +358,37 @@ Sondergebiet_Einzelhandel.svg:
       type: XP_Sondernutzungen
       value:
         - 1500
+Sondergebiet_grossfl_Einzelhandel.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Einzelhandel
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value:
         - 1600
+        - 16002
+Sondergebiet_EKZ.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Einzelhandel
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value:
+        - 16001
 
 bauliche_nutzung_dachform:
   type:
