@@ -43,13 +43,13 @@ ObjectRole = Qt.UserRole + 1
 NodeRole = Qt.UserRole + 2
 
 style = """
-QToolButton {{
+QToolButton[objectName="button_flash"], QToolButton[objectName="button_zoom"] {{
     background: palette(window); 
     border: 0px;
     padding: 5px;
     border-radius: 5px;
 }}
-QToolButton:hover {{
+QToolButton:hover[objectName="button_flash"], QToolButton:hover[objectName="button_zoom"] {{
     background-color: {_button_hover_bg};
 }}
 
@@ -66,6 +66,30 @@ QToolButton:hover {{
     color: {_label_color_mute};
     margin: 0px;
     padding: 0px;
+}}
+
+QLineEdit[objectName="search_edit"] {{
+    padding: 8px 8px 8px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 3px;
+    background-color: white;
+}}
+QLineEdit:focus[objectName="search_edit"] {{
+    border-color: #3b82f6;
+}}
+
+QToolButton[class=type_button] {{
+    border: none;
+    border-radius: 5px;
+    background-color: palette(window);
+    padding: 5px;
+}}
+QToolButton:checked[class=type_button] {{
+    border: 1px solid #d1d5db;
+    background-color: white;
+}}
+QToolButton[class=type_button]:hover:!checked {{
+    background-color: #e5e7eb;
 }}
 """
 
@@ -209,14 +233,23 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.button_flash.clicked.connect(self.on_button_flash_clicked)
 
         # search setup
-        self.editSearch.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
-        self.editSearch.textChanged.connect(self.onFilterTextChanged)
+        self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.search_edit.textChanged.connect(self.onFilterTextChanged)
+
+        # filter setup
+        self.filter_attribute.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary))
+        self.filter_relation.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary))
+        self.filter_all.setProperty('class', 'type_button')
+        self.filter_attribute.setProperty('class', 'type_button')
+        self.filter_relation.setProperty('class', 'type_button')
+        self.filter_all.clicked.connect(lambda: self.proxyModel.set_node_type_filter(None))
+        self.filter_attribute.clicked.connect(lambda: self.proxyModel.set_node_type_filter("attribute"))
+        self.filter_relation.clicked.connect(lambda: self.proxyModel.set_node_type_filter("relation"))
 
         # model
         root_node = QAttributeEdit._load_tree_node(self._xplanung_item)
         self.model = EntityTreeModel(root_node, self._xplanung_item)
-        self.proxyModel = QSortFilterProxyModel(self.treeView)
-        self.proxyModel.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.proxyModel = AttributeTreeFilterProxyModel(self.treeView)
         self.proxyModel.setSourceModel(self.model)
         self.treeView.setModel(self.proxyModel)
 
@@ -529,3 +562,72 @@ class EntityTreeModel(QAbstractItemModel):
         if isinstance(value, datetime.date):
             return value.strftime("%d.%m.%Y")
         return str(value)
+
+
+class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.setRecursiveFilteringEnabled(True)
+        # TODO: QT6 new property autoAcceptChildRows: self.setAutoAcceptChildRows(True)
+
+        self._node_type_filter = None
+
+    def set_node_type_filter(self, node_type: Optional[str]):
+        self._node_type_filter = node_type
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex) -> bool:
+        if not self.filterRegExp().pattern() and self._node_type_filter is None:
+            return True
+
+        source_model = self.sourceModel()
+
+        index_col0 = source_model.index(source_row, 0, source_parent)
+        index_col1 = source_model.index(source_row, 1, source_parent)
+        # Get node to check its type
+        node = source_model.data(index_col0, NodeRole)
+
+        # Check text filter match
+        text_matches = True
+        if self.filterRegExp().pattern():
+            attribute_name = source_model.data(index_col0, Qt.DisplayRole)
+            value = source_model.data(index_col1, Qt.DisplayRole)
+
+            attribute_text = str(attribute_name) if attribute_name else ""
+            value_text = str(value) if value else ""
+
+            filter_pattern = self.filterRegExp()
+            matches_attribute = filter_pattern.indexIn(attribute_text) >= 0
+            matches_value = filter_pattern.indexIn(value_text) >= 0
+
+            text_matches = matches_attribute or matches_value
+
+        # Check node type filter match
+        type_matches = True
+        if self._node_type_filter is not None and node is not None:
+            if self._node_type_filter == "attribute":
+                type_matches = node.node_type == "attribute"
+            elif self._node_type_filter == "relation":
+                type_matches = node.node_type == "relation"
+
+        # Row must match both filters
+        ret = text_matches and type_matches
+
+        # custom implementation of qt 6.0 autoAcceptChildRows property
+        if not ret:
+            ret = self.recursiveParentAcceptsRow(source_parent)
+        return ret
+
+    def recursiveParentAcceptsRow(self, source_parent):
+        if source_parent.isValid():
+            index = source_parent.parent()
+            if self.filterAcceptsRow(source_parent.row(), index):
+                return True
+            return self.recursiveParentAcceptsRow(index)
+
+        return False
+
+    def setFilterFixedString(self, pattern: str):
+        super().setFilterFixedString(pattern)
+        self.invalidateFilter()
