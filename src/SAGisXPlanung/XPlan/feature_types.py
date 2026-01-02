@@ -34,6 +34,8 @@ xp_textabschnitt_assoc = Table(
     "xp_textabschnitt_assoc",
     Base.metadata,
     Column("xp_objekt_id", UUID(as_uuid=True), ForeignKey("xp_objekt.id", ondelete="CASCADE")),
+    Column("xp_plan_id", UUID(as_uuid=True), ForeignKey("xp_plan.id", ondelete="CASCADE")),
+    Column("xp_bereich_id", UUID(as_uuid=True), ForeignKey("xp_bereich.id", ondelete="CASCADE")),
     Column("textabschnitt_id", UUID(as_uuid=True), ForeignKey("xp_text_abschnitt.id", ondelete="CASCADE")),
 )
 
@@ -83,8 +85,19 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
                                    passive_deletes=True)
 
     # XP_TextAbschnitt [0..*]
-    texte = relationship("XP_TextAbschnitt", back_populates="xp_plan",
-                         cascade="all, delete", passive_deletes=True)
+    texte = relationship("XP_TextAbschnitt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="xp_plaene",
+        cascade="all, delete",
+        passive_deletes=True,
+        info={'xplan_version': XPlanVersion.FIVE_THREE, 'xplan_attribute': 'texte', 'link-type': 'abstract'})
+
+    texte_v6 = relationship("XP_TextAbschnitt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="xp_plaene_v6",
+        cascade="all, delete",
+        passive_deletes=True,
+        info={'xplan_version': XPlanVersion.SIX, 'xplan_attribute': 'texte'})
 
     _sa_search_col = Column(TSVECTOR, Computed("""to_tsvector('german',
             xp_plan.id::text || ' ' ||
@@ -228,6 +241,7 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
 
     # XP_TextAbschnitt [0..*] (v6)
     texte = relationship("XP_TextAbschnitt", back_populates="xp_bereich",
+                         secondary=xp_textabschnitt_assoc,
                          cascade="all, delete", passive_deletes=True,
                          info={'xplan_version': XPlanVersion.SIX})
 
@@ -315,8 +329,15 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
         'form-type': 'hidden'
     })
 
-    wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="dientZurDarstellungVon",
-                                        cascade="all, delete", passive_deletes=True)
+    wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt",
+        back_populates="dientZurDarstellungVon",
+        cascade="all, delete",
+        passive_deletes=True,
+        info={
+            'link': 'xlink-only',
+            'form-type': 'hidden'
+        }
+    )
 
     aufschrift = Column(String)
     rechtscharakter = Column(XP_Rechtscharakter_EnumType(XP_Rechtscharakter), nullable=False, doc='Rechtscharakter',
@@ -440,7 +461,8 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
 
     __tablename__ = 'xp_text_abschnitt'
     __avoidRelation__ = ['xp_bereich', 'xp_objekt', 'xp_plan', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
-                         'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte']
+                         'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte',
+                         'xp_plaene', 'xp_plaene_v6']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
     type = Column(String())
@@ -463,8 +485,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
                              info={'xplan_version': XPlanVersion.SIX})
 
     # XP_Bereich [0..*] (v6)
-    xp_bereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
-    xp_bereich = relationship("XP_Bereich", back_populates="texte",
+    xp_bereich = relationship("XP_Bereich", secondary=xp_textabschnitt_assoc, back_populates="texte",
                               info={'xplan_version': XPlanVersion.SIX})
 
     # XP_Objekt [0..*] (v6)
@@ -475,8 +496,16 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     )
 
     # XP_Plan [0..*]
-    xp_plan_id = Column(UUID(as_uuid=True), ForeignKey('xp_plan.id', ondelete='CASCADE'))
-    xp_plan = relationship("XP_Plan", back_populates="texte")
+    xp_plaene = relationship("XP_Plan",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="texte",
+        info={'xplan_version': XPlanVersion.FIVE_THREE}
+    )
+    xp_plaene_v6 = relationship("XP_Plan",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="texte_v6",
+        info={'xplan_version': XPlanVersion.SIX}
+    )
 
     # BP_Objekt [0..*] (v5.3)
     bp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('bp_objekt.id', ondelete='CASCADE'))
@@ -514,7 +543,8 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['xp_plan', 'xp_bereich', 'xp_objekt', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
-                'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte']
+                'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte',
+                'xp_plaene', 'xp_plaene_v6']
 
     @classmethod
     def renderer(cls, geom_type: GeometryType):

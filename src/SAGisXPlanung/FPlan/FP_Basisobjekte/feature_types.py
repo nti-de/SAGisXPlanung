@@ -166,9 +166,13 @@ class FP_Objekt(XP_Objekt):
                              info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     # XP_TextAbschnitt [0..*] (v5.3)
-    refTextInhalt = relationship("XP_TextAbschnitt", back_populates="fp_objekt",
-                                 cascade="all, delete", passive_deletes=True,
-                                 info={'xplan_version': XPlanVersion.FIVE_THREE})
+    refTextInhalt = relationship("XP_TextAbschnitt",
+         back_populates="fp_objekt",
+         cascade="all, delete", passive_deletes=True,
+         info={
+             'xplan_version': XPlanVersion.FIVE_THREE,
+             'link-type': 'abstract'
+         })
 
     vonGenehmigungAusgenommen = Column(Boolean)
 

@@ -277,34 +277,37 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.addAction(delete_action)
 
         data_class_menu = QtWidgets.QMenu('Neues Datenobjekt hinzufügen')
-        for rel in item._data.xtype.relationships():
-            rel_class = rel[1].entity.class_
+        for (attr, mapper_property) in item.xplanItem().xtype.element_order(version=export_version(), ret_fmt='sqla'):
+            if not isinstance(mapper_property, RelationshipProperty):
+                continue
+            rel_class = mapper_property.entity.class_
             if issubclass(rel_class, (XP_Objekt, GeometryObject)) and not issubclass(rel_class, XP_Bereich):
                 continue
-            form_type = rel[1].info.get('form-type')
-            if next(iter(rel[1].remote_side)).primary_key or form_type == 'inline':
-                continue
-            if hasattr(item._data.xtype, '__avoidRelation__') and rel[0] in item._data.xtype.__avoidRelation__:
+            form_type = mapper_property.info.get('form-type')
+            if form_type == 'inline' or form_type == 'hidden':
                 continue
 
-            cls = find_true_class(item.xplanItem().xtype, rel[0])
-            if cls is None or not cls.attr_fits_version(rel[0], export_version()):
-                continue
+            cls = find_true_class(item.xplanItem().xtype, attr)
+            action_name = cls.xplan_attribute_name(attr)
 
-            action_name = item.xplanItem().xtype.xplan_attribute_name(rel[0])
+            link_type = mapper_property.info.get('link-type')
+            if link_type == 'abstract':
+                class_pool = rel_class.__subclasses__()
+            else:
+                class_pool = [rel_class, *rel_class.__subclasses__()]
 
-            for entity_class in [rel_class, *rel_class.__subclasses__()]:
+            for entity_class in class_pool:
                 if hasattr(entity_class, 'xp_versions') and export_version() not in entity_class.xp_versions:
                     continue
 
                 data_class_action = QtWidgets.QAction(f'{action_name} ({entity_class.__name__})', self)
-                data_class_action.triggered.connect(lambda state, p_item=item, attr=rel[0], d_class=entity_class:
+                data_class_action.triggered.connect(lambda state, p_item=item, attr=attr, d_class=entity_class:
                                                     self.onCreateDataClass(p_item, d_class, attr))
-                if not rel[1].uselist and item.childCount():
+                if not mapper_property.uselist and item.childCount():
                     for i in range(item.childCount()):
                         child_item = item.child(i)
                         with Session() as session:
-                            col = next(iter(rel[1].remote_side)).description
+                            col = next(iter(mapper_property.remote_side)).description
                             ex = session.query(exists().where(getattr(rel_class, col) == item.id())).scalar()
                         if ex and child_item.xplanItem().xtype == rel_class:
                             data_class_action.setToolTip('Objekt existiert bereits!')

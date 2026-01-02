@@ -144,6 +144,8 @@ class GMLWriter:
             value = getattr(xplan_object, attr)
             if isinstance(mapper_property, RelationshipProperty) and only_attributes is True:
                 continue
+            # export with xplan_name instead of attribute name
+            xplan_name = xplan_object.__class__.xplan_attribute_name(attr)
             if isinstance(mapper_property, RelationshipProperty):
                 if not mapper_property.uselist:
                     value = [value] if value is not None else []
@@ -156,7 +158,7 @@ class GMLWriter:
                             if o.position is None:
                                 continue
 
-                        f = etree.SubElement(xp_objekt, f"{{{self.nsmap['xplan']}}}{attr}")
+                        f = etree.SubElement(xp_objekt, f"{{{self.nsmap['xplan']}}}{xplan_name}")
                         f.attrib[f"{{{self.nsmap['xlink']}}}href"] = f"#GML_{o.id}"
                         if mapper_property.info.get('link') == 'xlink-only':
                             continue
@@ -164,8 +166,6 @@ class GMLWriter:
                         self.write_feature(o)
                         continue
 
-                    # export with xplan_name instead of attribute name
-                    xplan_name = xplan_object.__class__.xplan_attribute_name(attr)
                     tag = f"{{{self.nsmap['xplan']}}}{xplan_name}"
                     f = etree.SubElement(xp_objekt, tag)
 
