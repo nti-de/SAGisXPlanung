@@ -221,6 +221,8 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
 
     refScan = relationship("XP_ExterneReferenz", back_populates="bereich", cascade="all, delete",
                            passive_deletes=True)
+    rasterBasis = relationship("XP_Rasterdarstellung", back_populates="bereich", cascade="all, delete",
+                                passive_deletes=True, uselist=False, info={'xplan_version': XPlanVersion.FIVE_THREE})
     planinhalt = relationship("XP_Objekt", back_populates="gehoertZuBereich", cascade="all, delete",
                               passive_deletes=True, info={
                                   'form-type': 'hidden'

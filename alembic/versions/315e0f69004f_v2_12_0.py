@@ -51,6 +51,22 @@ def upgrade():
     op.drop_column("xp_text_abschnitt", "xp_objekt_id")
     op.drop_column("xp_text_abschnitt", "xp_plan_id")
     op.drop_column("xp_text_abschnitt", "xp_bereich_id")
+
+    op.create_table('xp_rasterdarstellung',
+        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('bereich_id', postgresql.UUID(as_uuid=True), nullable=True),
+        sa.ForeignKeyConstraint(['bereich_id'], ['xp_bereich.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.add_column('xp_externe_referenz', sa.Column('xp_rasterdarstellung_scan_id', postgresql.UUID(as_uuid=True), nullable=True))
+    op.add_column('xp_externe_referenz', sa.Column('xp_rasterdarstellung_text_id', postgresql.UUID(as_uuid=True), nullable=True))
+    op.add_column('xp_externe_referenz', sa.Column('xp_rasterdarstellung_legende_id', postgresql.UUID(as_uuid=True), nullable=True))
+    op.create_foreign_key(None, 'xp_externe_referenz', 'xp_rasterdarstellung', ['xp_rasterdarstellung_legende_id'],
+                          ['id'], ondelete='CASCADE')
+    op.create_foreign_key(None, 'xp_externe_referenz', 'xp_rasterdarstellung', ['xp_rasterdarstellung_text_id'], ['id'],
+                          ondelete='CASCADE')
+    op.create_foreign_key(None, 'xp_externe_referenz', 'xp_rasterdarstellung', ['xp_rasterdarstellung_scan_id'], ['id'],
+                          ondelete='CASCADE')
     # ### end Alembic commands ###
 
 
@@ -81,4 +97,9 @@ def downgrade():
                WHERE a.textabschnitt_id = t.id
                """)
     op.drop_table("xp_textabschnitt_assoc")
+
+    op.drop_column('xp_externe_referenz', 'xp_rasterdarstellung_legende_id')
+    op.drop_column('xp_externe_referenz', 'xp_rasterdarstellung_text_id')
+    op.drop_column('xp_externe_referenz', 'xp_rasterdarstellung_scan_id')
+    op.drop_table('xp_rasterdarstellung')
     # ### end Alembic commands ###

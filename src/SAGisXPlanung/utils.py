@@ -15,8 +15,11 @@ from qgis.utils import iface
 from SAGisXPlanung import Session, Base
 from SAGisXPlanung.BPlan.BP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import BP_AbgrabungsFlaeche, \
     BP_AufschuettungsFlaeche
+from SAGisXPlanung.BPlan.BP_Basisobjekte.codelists import BP_SonstPlanArt, BP_Status
 from SAGisXPlanung.BPlan.BP_Basisobjekte.data_types import BP_VeraenderungssperreDaten
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt, BP_TextAbschnitt
+from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailArtDerBaulNutzung, BP_DetailDachform, \
+    BP_DetailSondernutzung
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
     BP_KomplexeZweckbestNebenanlagen
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
@@ -41,9 +44,12 @@ from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlae
     BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt
 from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche
 from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import FP_Abgrabung, FP_Aufschuettung
+from SAGisXPlanung.FPlan.FP_Basisobjekte.codelists import FP_SonstPlanArt, FP_Status
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt, FP_TextAbschnitt
+from SAGisXPlanung.FPlan.FP_Bebauung.codelists import FP_DetailArtDerBaulNutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.data_types import FP_KomplexeSondernutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
+from SAGisXPlanung.FPlan.FP_Gemeinbedarf.codelists import FP_DetailZweckbestGemeinbedarf
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.data_types import FP_KomplexeZweckbestGemeinbedarf, \
     FP_KomplexeZweckbestSpielSportanlage
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.feature_types import FP_Gemeinbedarf, FP_SpielSportanlage
@@ -53,6 +59,7 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import F
 from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
     FP_PrivilegiertesVorhaben
+from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
@@ -79,6 +86,10 @@ from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Bereich, RP_Pla
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte.feature_types import SO_TextAbschnitt
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import SO_Schienenverkehrsrecht, SO_Denkmalschutzrecht
+from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.codelists import \
+    SO_DetailKlassifizNachDenkmalschutzrecht, SO_DetailKlassifizNachSchienenverkehrsrecht, \
+    SO_DetailKlassifizNachLuftverkehrsrecht, SO_DetailKlassifizNachSonstigemRecht, \
+    SO_DetailKlassifizNachBodenschutzrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.data_types import SO_KomplexeZweckbestStrassenverkehr, \
     SO_KomplexeFestlegungGewaesser
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr, SO_Gewaesser, \
@@ -88,6 +99,8 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWass
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
     XP_Nutzungsschablone
+from SAGisXPlanung.XPlan.XP_Raster.feature_types import XP_Rasterdarstellung
+from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneReferenz, XP_VerfahrensMerkmal,
                                             XP_Gemeinde,
                                             XP_Plangeber, XP_GesetzlicheGrundlage, XP_SPEMassnahmenDaten,
@@ -125,6 +138,7 @@ CLASSES = {
     'XP_Hoehenangabe': XP_Hoehenangabe,
     'XP_SimpleGeometry': XP_SimpleGeometry,
     'XP_TextAbschnitt': XP_TextAbschnitt,
+    'XP_Rasterdarstellung': XP_Rasterdarstellung,
 
     'BP_Objekt': BP_Objekt,
     'BP_GenerischesObjekt': BP_GenerischesObjekt,
@@ -250,6 +264,25 @@ CLASSES = {
     'LP_ZweckbestimmungGenerischeObjekte': LP_ZweckbestimmungGenerischeObjekte,
 
     'RP_TextAbschnitt': RP_TextAbschnitt,
+
+    'CodeListValue': CodeListValue,
+    'BP_SonstPlanArt': BP_SonstPlanArt,
+    'BP_Status': BP_Status,
+    'BP_DetailArtDerBaulNutzung': BP_DetailArtDerBaulNutzung,
+    'BP_DetailDachform': BP_DetailDachform,
+    'BP_DetailSondernutzung': BP_DetailSondernutzung,
+
+    'FP_SonstPlanArt': FP_SonstPlanArt,
+    'FP_Status': FP_Status,
+    'FP_DetailArtDerBaulNutzung': FP_DetailArtDerBaulNutzung,
+    'FP_DetailZweckbestVerEntsorgung': FP_DetailZweckbestVerEntsorgung,
+    'FP_DetailZweckbestGemeinbedarf': FP_DetailZweckbestGemeinbedarf,
+
+    'SO_DetailKlassifizNachDenkmalschutzrecht': SO_DetailKlassifizNachDenkmalschutzrecht,
+    'SO_DetailKlassifizNachBodenschutzrecht': SO_DetailKlassifizNachBodenschutzrecht,
+    'SO_DetailKlassifizNachSchienenverkehrsrecht': SO_DetailKlassifizNachSchienenverkehrsrecht,
+    'SO_DetailKlassifizNachLuftverkehrsrecht': SO_DetailKlassifizNachLuftverkehrsrecht,
+    'SO_DetailKlassifizNachSonstigemRecht': SO_DetailKlassifizNachSonstigemRecht,
 }
 
 

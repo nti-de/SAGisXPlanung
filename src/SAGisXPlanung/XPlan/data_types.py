@@ -90,7 +90,9 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                         'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche']
+                         'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt',
+                         'bp_wohngebaeude_flaeche', 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text',
+                         'xp_rasterdarstellung_legende']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -135,6 +137,17 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     bp_wohngebaeude_flaeche = relationship('BP_WohngebaeudeFlaeche', back_populates='refGebaeudequerschnitt',
                                            info={'xplan_version': XPlanVersion.SIX})
 
+    # XP_Rasterdarstellung
+    xp_rasterdarstellung_scan_id = Column(UUID(as_uuid=True), ForeignKey('xp_rasterdarstellung.id', ondelete='CASCADE'))
+    xp_rasterdarstellung_scan = relationship("XP_Rasterdarstellung", foreign_keys=[xp_rasterdarstellung_scan_id],
+                                         back_populates="refScan", info={'xplan_version': XPlanVersion.FIVE_THREE})
+    xp_rasterdarstellung_text_id = Column(UUID(as_uuid=True), ForeignKey('xp_rasterdarstellung.id', ondelete='CASCADE'))
+    xp_rasterdarstellung_text = relationship("XP_Rasterdarstellung", foreign_keys=[xp_rasterdarstellung_text_id],
+                                             back_populates="refText", info={'xplan_version': XPlanVersion.FIVE_THREE})
+    xp_rasterdarstellung_legende_id = Column(UUID(as_uuid=True), ForeignKey('xp_rasterdarstellung.id', ondelete='CASCADE'))
+    xp_rasterdarstellung_legende = relationship("XP_Rasterdarstellung", foreign_keys=[xp_rasterdarstellung_legende_id],
+                                             back_populates="refLegende", info={'xplan_version': XPlanVersion.FIVE_THREE})
+
     type = Column(String(50))
 
     __mapper_args__ = {
@@ -155,8 +168,8 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
-                'veraenderungssperre', 'grundstueck_ueberbaubar',
-                'xp_text_abschnitt', 'bp_wohngebaeude_flaeche']
+                'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche',
+                'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text', 'xp_rasterdarstellung_legende']
 
 
 class XP_SpezExterneReferenz(XP_ExterneReferenz):
