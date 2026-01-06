@@ -336,7 +336,6 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
         cascade="all, delete",
         passive_deletes=True,
         info={
-            'link': 'xlink-only',
             'form-type': 'hidden'
         }
     )

@@ -371,7 +371,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.pushAttributeChangedCommand(original, value, a, i))
-        dlg.fileChanged.connect(lambda value: self.apply_field_change(None, 'file', value))
         dlg.exec_()
 
     def pushAttributeChangedCommand(self, original_value, new_value, attr, index):

@@ -67,6 +67,8 @@ def upgrade():
                           ondelete='CASCADE')
     op.create_foreign_key(None, 'xp_externe_referenz', 'xp_rasterdarstellung', ['xp_rasterdarstellung_scan_id'], ['id'],
                           ondelete='CASCADE')
+
+    op.add_column('xp_externe_referenz', sa.Column('georef_file', postgresql.BYTEA(), nullable=True))
     # ### end Alembic commands ###
 
 
@@ -102,4 +104,6 @@ def downgrade():
     op.drop_column('xp_externe_referenz', 'xp_rasterdarstellung_text_id')
     op.drop_column('xp_externe_referenz', 'xp_rasterdarstellung_scan_id')
     op.drop_table('xp_rasterdarstellung')
+
+    op.drop_column('xp_externe_referenz', 'georef_file')
     # ### end Alembic commands ###

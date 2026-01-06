@@ -252,7 +252,7 @@ class DataInputPage(QtWidgets.QScrollArea):
             setattr(obj, column, input_field.value())
 
             if isinstance(input_field, QFileInput):
-                setattr(obj, 'file', input_field.file())
+                obj.set_file_data(column, input_field.file())
 
         return obj
 

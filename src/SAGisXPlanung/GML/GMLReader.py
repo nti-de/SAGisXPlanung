@@ -179,8 +179,8 @@ class GMLReader:
 
             GMLReader.read_attribute(col_type, node_name, obj, node)
 
-            if isinstance(col_type, RefURL) and hasattr(obj, 'file') and node.text in self.files:
-                setattr(obj, 'file', self.files[node.text])
+            if isinstance(col_type, RefURL) and node.text in self.files:
+                obj.set_file_data(node_name, self.files[node.text])
 
         if issubclass(object_type, FeatureType):
             self.setProgress(self.current_progress + 1)

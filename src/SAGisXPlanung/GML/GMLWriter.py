@@ -61,17 +61,20 @@ class GMLWriter:
         return xml
 
     def toArchive(self) -> BytesIO:
+        from qgis.PyQt.QtCore import QSettings
+        qs = QSettings()
+        path_prefix = qs.value(f"plugins/xplanung/export_path", '')
+
         zip_buffer = BytesIO()
         with ZipFile(zip_buffer, mode='w') as zip_file:
-            for elm in self.root.findall(".//xplan:referenzURL", namespaces=self.root.nsmap):
+            for elm in self.root.xpath(".//xplan:referenzURL | .//xplan:georefURL", namespaces=self.root.nsmap):
                 if not is_url(elm.text):
                     if elm.text not in self.files:
                         raise ValueError(f'Datei {elm.text} konnte nicht gefunden werden')
 
-                    from qgis.PyQt.QtCore import QSettings
-                    qs = QSettings()
-                    path_prefix = qs.value(f"plugins/xplanung/export_path", '')
                     file = self.files[elm.text]
+                    if not file:
+                        raise ValueError(f'Inhalt der Referenz {elm.text} konnte nicht gefunden werden')
                     elm.text = f'{path_prefix}{PurePath(elm.text).name}'
                     zip_file.writestr(elm.text, file)
 
@@ -136,9 +139,7 @@ class GMLWriter:
 
         # if feature is a reference, load its reference
         if isinstance(xplan_object, XP_ExterneReferenz):
-            file = getattr(xplan_object, 'file')
-            if file is not None:
-                self.files[xplan_object.referenzURL] = (getattr(xplan_object, 'file'))
+            self.files.update(xplan_object.get_file_data())
 
         for (attr, mapper_property) in xplan_object.__class__.element_order(version=self.version, ret_fmt='sqla'):
             value = getattr(xplan_object, attr)

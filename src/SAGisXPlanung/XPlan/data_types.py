@@ -1,3 +1,4 @@
+from typing import Optional, Dict, Any
 from uuid import uuid4
 
 from lxml import etree
@@ -96,7 +97,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
-    georefURL = Column(String, doc='Verweis auf Georeferenzierungs-Datei')
+    georefURL = Column(RefURL, doc='Verweis auf Georeferenzierungs-Datei')
     art = Column(Enum(XP_ExterneReferenzArt), doc='Art der Referenz')
     referenzName = Column(String, nullable=False, doc='Name bzw. Titel')
     referenzURL = Column(RefURL, nullable=False, doc='URI der Referenz')
@@ -105,6 +106,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     datum = Column(Date, doc='Datum')
 
     file = deferred(Column(BYTEA))
+    georef_file = deferred(Column(BYTEA))
 
     bereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     bereich = relationship("XP_Bereich", back_populates="refScan")
@@ -161,13 +163,27 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
                                       '<code>referenzURL</code> muss belegt sein.',
                                       '3.2.4.2', self.__class__.__name__)
 
+    def set_file_data(self, attr_name: str, file_data: bytes):
+        if attr_name == 'referenzURL':
+            setattr(self, 'file', file_data)
+        elif attr_name == 'georefURL':
+            setattr(self, 'georef_file', file_data)
+
+    def get_file_data(self) -> Dict[str, Any]:
+        if self.referenzURL or self.georefURL:
+            return {
+                self.referenzURL: self.file,
+                self.georefURL : self.georef_file
+            }
+        return {}
+
     @classmethod
     def hidden_inputs(cls):
-        return ['file']
+        return ['file', 'georef_file']
 
     @classmethod
     def avoid_export(cls):
-        return ['file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+        return ['file', 'georef_file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
                 'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche',
                 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text', 'xp_rasterdarstellung_legende']
 
