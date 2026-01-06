@@ -5,6 +5,7 @@ import pytest
 
 from geoalchemy2 import WKTElement
 from geoalchemy2.shape import from_shape
+from osgeo import gdal
 from qgis.PyQt import QtCore, QtTest
 from qgis._core import QgsRasterLayer
 from qgis.core import QgsProject
@@ -14,7 +15,6 @@ from shapely.geometry import Polygon
 
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.core.canvas_display import create_raster_layer
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
@@ -144,10 +144,15 @@ class TestXPlanungDetailsDialog_GeometryValidation:
 
 class TestXPlanungDialog_createRasterLayer:
 
-    def test_createRasterLayer(self):
+    def test_create_vsi_raster_layer(self):
         with open(os.path.join(os.path.dirname(__file__), 'data/bp_plan.tif'), 'rb') as file:
             file_bytes = file.read()
 
-        layer = create_raster_layer("Raster", file_bytes)
+        vsi_path = f'/vsimem/bp_plan.tif'
+        gdal.FileFromMemBuffer(vsi_path, file_bytes)
 
-        assert isinstance(layer, QgsRasterLayer)
+        raster_layer = QgsRasterLayer(vsi_path, 'bp_plan.tif', "gdal")
+        raster_layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
+
+        assert isinstance(raster_layer, QgsRasterLayer)
+        assert raster_layer.isValid()

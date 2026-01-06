@@ -170,12 +170,14 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
             setattr(self, 'georef_file', file_data)
 
     def get_file_data(self) -> Dict[str, Any]:
-        if self.referenzURL or self.georefURL:
-            return {
-                self.referenzURL: self.file,
-                self.georefURL : self.georef_file
-            }
-        return {}
+        result = {}
+        if self.referenzURL is not None:
+            result[self.referenzURL] = self.file
+            # only try georef file, when the actual raster exists
+            if self.georefURL is not None:
+                result[self.georefURL] = self.georef_file
+
+        return result
 
     @classmethod
     def hidden_inputs(cls):

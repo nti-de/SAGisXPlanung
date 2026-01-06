@@ -3,18 +3,22 @@ import logging
 import tempfile
 import traceback
 from collections import defaultdict
+from urllib.parse import urlencode, quote_plus
 
 import qasync
+from osgeo import gdal
 from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsRasterLayer, QgsProject, QgsLayerTreeGroup, QgsLayerTreeLayer, QgsVectorLayer, \
     QgsAnnotationLayer, QgsWkbTypes
 from qgis.utils import iface
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, and_, exists
 from sqlalchemy.orm import with_polymorphic, selectin_polymorphic
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
+from SAGisXPlanung.XPlan.XP_Raster.feature_types import XP_Rasterdarstellung
+from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz, XP_SpezExterneReferenz
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.config import export_version
@@ -22,16 +26,6 @@ from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.utils import createXPlanungIndicators, BEREICH_BASE_TYPES, OBJECT_BASE_TYPES
 
 logger = logging.getLogger(__name__)
-
-
-def create_raster_layer(layer_name, file) -> QgsRasterLayer:
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
-        tmp.write(file)
-
-        layer = QgsRasterLayer(tmp.name, layer_name)
-        layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
-
-    return layer
 
 
 @qasync.asyncSlot(str)
@@ -182,15 +176,35 @@ def collect_layers(plan, plan_xid, session):
             layer.moveToThread(QApplication.instance().thread())
             new_layers.append(layer)
 
-    for b in bereich_list:
-        for refScan in b.refScan:
-            if refScan.art == XP_ExterneReferenzArt.PlanMitGeoreferenz and refScan.file is not None:
-                l = create_raster_layer(refScan.referenzName, refScan.file)
-                new_layers.append(l)
+    # load external references
+    ref_poly = with_polymorphic(XP_ExterneReferenz, [XP_SpezExterneReferenz])
+    stmt = select(ref_poly).where(
+        and_(
+            ref_poly.art == XP_ExterneReferenzArt.PlanMitGeoreferenz,
+            or_(
+                ref_poly.bereich_id.in_(bereich_ids),
+                ref_poly.XP_SpezExterneReferenz.plan_id == plan_xid,
+                exists(
+                    select(1)
+                    .where(
+                        and_(
+                            XP_Rasterdarstellung.id == ref_poly.xp_rasterdarstellung_scan_id,
+                            XP_Rasterdarstellung.bereich_id.in_(bereich_ids),
+                        )
+                    )
+                )
+            )
+        )
+    )
+    ref_objects = session.scalars(stmt).all()
+    for ref in ref_objects:
+        for filename, file_data in ref.get_file_data().items():
+            if file_data is not None:
+                vsi_path = f'/vsimem/{filename}'
+                gdal.FileFromMemBuffer(vsi_path, file_data)
 
-    for ext_ref in plan.externeReferenz:
-        if ext_ref.art == XP_ExterneReferenzArt.PlanMitGeoreferenz and ext_ref.file is not None:
-            l = create_raster_layer(ext_ref.referenzName, ext_ref.file)
-            new_layers.append(l)
+        raster_layer = QgsRasterLayer(f'/vsimem/{ref.referenzURL}', ref.referenzName or ref.referenzURL, "gdal")
+        raster_layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
+        new_layers.append(raster_layer)
 
     return new_layers
