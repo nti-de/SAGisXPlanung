@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 
-from PyQt5.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel
-from PyQt5.QtGui import QIcon, QPalette
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit,
-                             QListView, QLabel, QStyledItemDelegate, QStyleOptionViewItem)
+from qgis.PyQt.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit,
+                             QListView, QLabel, QStyledItemDelegate, QHBoxLayout)
 from sqlalchemy import select
-from sqlalchemy.orm import load_only, selectinload
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -65,10 +64,18 @@ QLineEdit[objectName="search_edit"] {{
     border: 1px solid #d1d5db;
     border-radius: 6px;
     background-color: white;
+    margin-right: 10px;
 }}
 
 QLineEdit:focus[objectName="search_edit"] {{
     border-color: #3b82f6;
+}}
+
+QLabel[objectName="selected_count"] {{
+    background-color: palette(alternate-base);
+    border-radius: 5px;
+    padding: 8px;
+    font-weight: bold;
 }}
 """
 
@@ -223,14 +230,20 @@ class SelectRelatedWidget(QWidget):
         search_layout = QVBoxLayout(search_existing_widget)
         search_layout.setContentsMargins(0, 10, 0, 10)
 
-        # Search field
+        # header with search field and selection count
+        header_layout = QHBoxLayout()
         self.search_edit = QLineEdit(self)
         self.search_edit.setObjectName("search_edit")
         self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'),
                                    QLineEdit.LeadingPosition)
         self.search_edit.setPlaceholderText('Suchen...')
         self.search_edit.textChanged.connect(self.on_search_filter_changed)
-        search_layout.addWidget(self.search_edit)
+        header_layout.addWidget(self.search_edit)
+        header_layout.addWidget(QLabel("Ausgewählt:"))
+        self.selected_count = QLabel("0")
+        self.selected_count.setObjectName("selected_count")
+        header_layout.addWidget(self.selected_count)
+        search_layout.addLayout(header_layout)
 
         # List view with model
         self.list_view = QListView(self)
@@ -247,6 +260,7 @@ class SelectRelatedWidget(QWidget):
         self.proxy_model.setFilterRole(RelatedObjectModel.CodeRole)
 
         self.list_view.setModel(self.proxy_model)
+        self.list_view.selectionModel().selectionChanged.connect(self.on_view_selection_changed)
 
         # Setup custom delegate
         self.delegate = RelatedObjectDelegate(self)
@@ -262,6 +276,8 @@ class SelectRelatedWidget(QWidget):
         qss = style.format(_label_color_mute=ApplicationColor.Grey600)
         self.setStyleSheet(qss)
 
+        self._selected_ids: set[str] = set()
+        self._syncing_selection = False
         self._load_data()
 
     def _load_data(self):
@@ -273,47 +289,63 @@ class SelectRelatedWidget(QWidget):
             result = session.execute(stmt)
             parent_obj = result.scalar_one()
             selected_orm_objects = getattr(parent_obj, self.orm_attribute)
-            selected_orm_ids = [o.id for o in selected_orm_objects] if selected_orm_objects else []
             for i, o in enumerate(orm_objects):
                 xplan_item = XPlanungItem(xid=str(o.id), xtype=self.create_type)
                 items.append(RelatedObjectItem(o.schluessel, o.gesetzlicheGrundlage, o.text, xplan_item))
 
             self.model.setItems(items)
 
-            if selected_orm_ids:
-                for src_row, o in enumerate(orm_objects):
-                    if o.id in selected_orm_ids:
-                        source_index = self.model.index(src_row, 0)
-                        proxy_index = self.proxy_model.mapFromSource(source_index)
-                        if proxy_index.isValid():
-                            self.list_view.selectionModel().select(proxy_index, QItemSelectionModel.Select)
+            self._selected_ids = {str(o.id) for o in selected_orm_objects}
+            self.restore_view_selection()
+            self.update_selected_count()
+
+    def on_view_selection_changed(self, selected, deselected):
+        if self._syncing_selection:
+            return
+
+        for index in selected.indexes():
+            src = self.proxy_model.mapToSource(index)
+            if src.isValid():
+                item = self.model._items[src.row()]
+                self._selected_ids.add(item.xplan_item.xid)
+
+        for index in deselected.indexes():
+            src = self.proxy_model.mapToSource(index)
+            if src.isValid():
+                item = self.model._items[src.row()]
+                self._selected_ids.discard(item.xplan_item.xid)
+
+        self.update_selected_count()
+
+    def restore_view_selection(self):
+        sel_model = self.list_view.selectionModel()
+        sel_model.blockSignals(True)
+        sel_model.clearSelection()
+        for row in range(self.proxy_model.rowCount()):
+            proxy_index = self.proxy_model.index(row, 0)
+            source_index = self.proxy_model.mapToSource(proxy_index)
+            if not source_index.isValid():
+                continue
+
+            item = self.model._items[source_index.row()]
+            if item.xplan_item.xid in self._selected_ids:
+                sel_model.select(proxy_index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+
+        sel_model.blockSignals(False)
+
+    def update_selected_count(self):
+        self.selected_count.setText(str(len(self._selected_ids)))
 
     def on_search_filter_changed(self, filter_text: str):
-        """Filter the list based on search text"""
+        self._syncing_selection = True
         self.proxy_model.setFilterFixedString(filter_text)
+        self.restore_view_selection()
+        self._syncing_selection = False
+
+        self.update_selected_count()
 
     def is_create_new(self):
         return self.tab_widget.currentIndex() == 0
 
     def get_selected_ids(self):
-        """
-        Return the list of selected ORM ids (native type).
-        We stored xid as string in XPlanungItem; convert back to original id type if needed.
-        """
-        selected = []
-        sel_model = self.list_view.selectionModel()
-        if not sel_model:
-            return selected
-
-        for proxy_index in sel_model.selectedIndexes():
-            # map to source index to access the model._items list
-            source_index = self.proxy_model.mapToSource(proxy_index)
-            if not source_index.isValid():
-                continue
-            row = source_index.row()
-            try:
-                item: RelatedObjectItem = self.model._items[row]
-            except (IndexError, AttributeError):
-                continue
-            selected.append(item.xplan_item.xid)
-        return selected
+        return list(self._selected_ids)
