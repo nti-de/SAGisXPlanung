@@ -8,9 +8,10 @@ from qgis.PyQt.QtGui import QIcon
 from geoalchemy2 import Geometry, WKTElement
 from qgis.core import QgsSingleSymbolRenderer, QgsCategorizedSymbolRenderer, QgsSymbol
 
-from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed, Table
+from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed, Table, \
+    and_
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
 
 from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest,
                        QgsSymbolLayerUtils, QgsRuleBasedRenderer)
@@ -550,3 +551,16 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def renderer(cls, geom_type: GeometryType):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+@event.listens_for(Session, 'after_flush')
+def delete_textabschnitt_orphans(session, ctx):
+    session.query(XP_TextAbschnitt).filter(
+        and_(
+            ~XP_TextAbschnitt.xp_plaene.any(),
+            ~XP_TextAbschnitt.xp_plaene_v6.any(),
+            ~XP_TextAbschnitt.xp_bereich.any(),
+            ~XP_TextAbschnitt.xp_objekte.any(),
+        )
+    ).delete(synchronize_session=False)
+
