@@ -341,6 +341,8 @@ class MapCanvasMixin:
         feat.setGeometry(self.geometry())
         feat.setFields(fields)
 
+        feat['gml_id'] = str(self.id)
+
         legacy_fields = None
         if hasattr(self, 'layer_fields'):
             legacy_fields = self.layer_fields()
@@ -390,6 +392,7 @@ class MapCanvasMixin:
         fields = [QgsField(name, QVariant.String, 'string') for name in field_names]
         fields.extend([QgsField('drehwinkel', QVariant.String, 'string'),
                        QgsField('skalierung', QVariant.String, 'string')])
+        fields.insert(0, QgsField('gml_id', QVariant.String, 'string'))
 
         layer.dataProvider().addAttributes(fields)
         layer.updateFields()
