@@ -5,6 +5,7 @@ import traceback
 from collections import defaultdict
 
 import qasync
+from qgis.PyQt.QtWidgets import QApplication
 from qgis.core import QgsRasterLayer, QgsProject, QgsLayerTreeGroup, QgsLayerTreeLayer, QgsVectorLayer, \
     QgsAnnotationLayer, QgsWkbTypes
 from qgis.utils import iface
@@ -177,6 +178,8 @@ def collect_layers(plan, plan_xid, session):
             for orm_id, qgis_feat in zip(feat_map.keys(), new_features):
                 layer.setCustomProperty(f'xplanung/feat-{qgis_feat.id()}', str(orm_id))
 
+            # move layer to main thread (otherwise causes some non-stable issues with geometry editing)
+            layer.moveToThread(QApplication.instance().thread())
             new_layers.append(layer)
 
     for b in bereich_list:
