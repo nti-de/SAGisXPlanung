@@ -1,5 +1,25 @@
 ## Changelog
 
+### [2.12.0] - 09.01.2025
+
+#### Neue Funktionen
+
+- Anbindung der XPlanung24-API zum Austausch von Plänen zwischen [XPlanung24](https://www.xplanung24.de/) und SAGis XPlanung
+- Anzeige georeferenzierter Rasterdateien (PlanMitGeoreferenz) bestehend aus PNG und externen World File (.pgw)
+
+#### Veränderungen
+
+- Überarbeitung der Attributansicht (Anzeige von Objektrelationen, Links zu verbundenen Objekten,
+  bessere Such- und Filtermöglichkeiten)
+- Verbesserter Dialog beim Zuweisen existierender Objekte aus der Datenbank
+- Anzeige der GML-ID jedes XPlan-Objekts auch in der Attribut-tabelle (8f373717)
+- Fehlermeldung/Abbruch des Imports bei fehlenden Codelisten-Werten zu Warnung abgestuft (e9d8c358)
+
+#### Fehlerbehebungen
+
+- Fehler beim Löschen von XP_TextAbschnitt-Objekten behoben (6b065ca6)
+- Fehler beim Synchronisieren von Geometrieänderung in den XPlan-Layern behoben (0cb692c0)
+
 ### [2.11.1] - 08.12.2025
 
 #### Fehlerbehebungen
