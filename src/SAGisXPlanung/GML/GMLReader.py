@@ -155,9 +155,10 @@ class GMLReader:
                     value = obj_from_db if obj_from_db is not None else value
                     # don't save codelist if it is not loaded database -> set value to None
                     if value.__class__ in CodeListValue.__subclasses__() and obj_from_db is None:
+                        repr_text = value.value or value.key
                         self.warnings.append(
-                            f'Codelisten-Wert "{value.value}" nicht in Codeliste "{value.__class__.__name__}" gefunden... '
-                            f'Bitte Codelisten-Werte vor Import neu abrufen und sicherstellen, dass "{value.value}" '
+                            f'Codelisten-Wert "{repr_text}" nicht in Codeliste "{value.__class__.__name__}" gefunden... '
+                            f'Bitte Codelisten-Werte vor Import neu abrufen und sicherstellen, dass "{repr_text}" '
                             f'ein gültiger Auswahlwert ist (Zeile: {gml.sourceline})')
                         continue
                 if (a := getattr(obj, node_name)) is not None:

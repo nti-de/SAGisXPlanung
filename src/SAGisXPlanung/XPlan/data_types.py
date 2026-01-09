@@ -101,7 +101,12 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     art = Column(Enum(XP_ExterneReferenzArt), doc='Art der Referenz')
     referenzName = Column(String, nullable=False, doc='Name bzw. Titel')
     referenzURL = Column(RefURL, nullable=False, doc='URI der Referenz')
-    referenzMimeType = Column(Enum(*CodeListLegacy.XP_MIME_TYPES, name="xp_mime_types"), doc='Dateityp')
+    # referenzMimeType = Column(Enum(*CodeListLegacy.XP_MIME_TYPES, name="xp_mime_types"), doc='Dateityp')
+    referenzMimeType_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    referenzMimeType = relationship("XP_MimeTypes", back_populates="ext_refs", foreign_keys=[referenzMimeType_id],
+                                    info={
+                                        'form-type': 'inline'
+                                    })
     beschreibung = Column(LargeString, doc='Beschreibung')
     datum = Column(Date, doc='Datum')
 

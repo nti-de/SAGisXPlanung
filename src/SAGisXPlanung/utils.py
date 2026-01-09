@@ -100,7 +100,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_Sc
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.XP_Raster.feature_types import XP_Rasterdarstellung
-from SAGisXPlanung.XPlan.codelists import CodeListValue
+from SAGisXPlanung.XPlan.codelists import CodeListValue, XP_MimeTypes
 from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneReferenz, XP_VerfahrensMerkmal,
                                             XP_Gemeinde,
                                             XP_Plangeber, XP_GesetzlicheGrundlage, XP_SPEMassnahmenDaten,
@@ -266,6 +266,7 @@ CLASSES = {
     'RP_TextAbschnitt': RP_TextAbschnitt,
 
     'CodeListValue': CodeListValue,
+    'XP_MimeTypes': XP_MimeTypes,
     'BP_SonstPlanArt': BP_SonstPlanArt,
     'BP_Status': BP_Status,
     'BP_DetailArtDerBaulNutzung': BP_DetailArtDerBaulNutzung,

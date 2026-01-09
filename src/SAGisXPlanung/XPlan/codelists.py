@@ -143,3 +143,13 @@ class CodeListParser:
             codelist.values.append(codelist_value)
 
         return codelist
+
+
+class XP_MimeTypes(CodeListValue):
+
+    ext_refs = relationship("XP_ExterneReferenz", back_populates="referenzMimeType",
+                            foreign_keys='XP_ExterneReferenz.referenzMimeType_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "XP_MimeTypes",
+    }

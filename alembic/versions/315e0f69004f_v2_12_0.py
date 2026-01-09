@@ -69,6 +69,8 @@ def upgrade():
                           ondelete='CASCADE')
 
     op.add_column('xp_externe_referenz', sa.Column('georef_file', postgresql.BYTEA(), nullable=True))
+
+    op.execute('ALTER TABLE xp_externe_referenz ADD COLUMN "referenzMimeType_id" uuid REFERENCES codelist_values(id);')
     # ### end Alembic commands ###
 
 
@@ -106,4 +108,6 @@ def downgrade():
     op.drop_table('xp_rasterdarstellung')
 
     op.drop_column('xp_externe_referenz', 'georef_file')
+
+    op.drop_column('xp_externe_referenz', 'referenzMimeType_id')
     # ### end Alembic commands ###
