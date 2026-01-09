@@ -407,6 +407,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 if isinstance(tab_widget, SelectRelatedWidget):
                     if tab_widget.is_create_new():
                         data_obj = tab_widget.data_input_widget.populateContent()
+                        # we can append immediately; SelectRelatedWidget is guaranteed to be used with m:n relation
+                        getattr(parent_obj, attribute).append(data_obj)
+                        self.prevPage()
+                        return
                     else:
                         selected_ids = tab_widget.get_selected_ids()
                         attach_objects = []
