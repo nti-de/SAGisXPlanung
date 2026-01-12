@@ -252,7 +252,6 @@ class XPathItemDelegate(HighlightRowDelegate):
     def paint(self, painter, option, index):
         expression = index.data(Qt.UserRole)
         if not expression:
-            print('no expression on row {}'.format(index.row()))
             return
 
         icon_area_width = 90

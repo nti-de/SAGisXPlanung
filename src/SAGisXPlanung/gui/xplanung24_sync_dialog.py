@@ -404,7 +404,6 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                     if id_nodes := plan_element.xpath('@gml:id', namespaces=root.nsmap):
                         gml_id = id_nodes[0]
                         gml_id = gml_id[gml_id.find('_') + 1:]
-                        print(f"GML ID: {gml_id}")
                     else:
                         raise ValueError(f"Fehler beim Auslesen der GML-ID im Plan {plan_name}.")
 

@@ -216,7 +216,6 @@ class XP_AbstraktesPraesentationsobjekt(FeatureType, RelationshipMixin, ElementO
         self._remove_listeners()
 
         # Create new listeners based on current 'art' value
-        print(self.art)
         for art in self.art:
             xpath_result = XPathMatcher.resolve_xpath_value(self.dientZurDarstellungVon, art)
             if not xpath_result:
