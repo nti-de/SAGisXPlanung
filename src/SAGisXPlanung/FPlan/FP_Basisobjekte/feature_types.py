@@ -50,11 +50,20 @@ class FP_Plan(XP_Plan):
                             })
 
     planArt = Column(Enum(FP_PlanArt), nullable=False, doc='Art des Plans')
-    # sonstPlanArt: FP_SonstPlanArt[0..1]
+    sonstPlanArt_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    sonstPlanArt = relationship("FP_SonstPlanArt", back_populates="fp_plans", foreign_keys=[sonstPlanArt_id], info={
+                                     'form-type': 'inline'
+                                 })
+
     sachgebiet = Column(String(), doc='Sachgebiet')
     verfahren = Column(Enum(FP_Verfahren), doc='Verfahren')
     rechtsstand = Column(Enum(FP_Rechtsstand), doc='Rechtsstand')
-    # status: FP_Status[0..1]
+
+    status_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    status = relationship("FP_Status", back_populates="fp_plans", foreign_keys=[status_id], info={
+                              'form-type': 'inline'
+                          })
+
     aufstellungsbeschlussDatum = Column(Date(), doc='Aufstellungsbeschlussdatum')
     auslegungsStartDatum = Column(ARRAY(Date), doc='Startdatum der Auslegung')
     auslegungsEndDatum = Column(ARRAY(Date), doc='Enddatum der Auslegung')

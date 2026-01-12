@@ -3,4 +3,4 @@ from .po_styling_options import QCommonStylingOptions
 from .parish_edit import QParishEdit, QParishLabel
 from .svg_symbol_edit import SVGSymbolDisplayWidget
 from .commons import ElideLabel, MultiSelectComboBox, SearchableComboBox, ProgressBar
-from .settings import (QAttributeConfigView, AttributeConfigPage, DatabaseConfigPage)
+from .settings import (QAttributeConfigView, AttributeConfigPage, DatabaseConfigPage, CommonConfigPage)

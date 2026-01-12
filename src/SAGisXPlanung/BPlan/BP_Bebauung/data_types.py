@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
+from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailSondernutzungCodelistAssoc
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
@@ -26,6 +27,12 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
     DN = Column(Angle, doc='Dachneigung')
     DNZwingend = Column(Angle, doc='Dachneigung, zwingend')
     dachform = Column(Enum(BP_Dachform), doc='Dachform')
+
+    detaillierteDachform_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detaillierteDachform = relationship("BP_DetailDachform", back_populates="bp_dachgestaltung",
+                                        foreign_keys=[detaillierteDachform_id], info={
+                                            'form-type': 'inline'
+                                        })
 
     hoehenangabe = relationship("XP_Hoehenangabe", back_populates="dachgestaltung",
                                 cascade="all, delete", passive_deletes=True, uselist=False,
@@ -78,6 +85,11 @@ class BP_KomplexeSondernutzung(RelationshipMixin, ElementOrderMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     allgemein = Column(Enum(XP_Sondernutzungen), nullable=False)
+
+    detail = relationship('BP_DetailSondernutzung', back_populates='codelist_user',
+                          secondary=BP_DetailSondernutzungCodelistAssoc, info={
+                                'form-type': 'inline'
+                          })
 
     nutzungText = Column(String)
     aufschrift = Column(String)

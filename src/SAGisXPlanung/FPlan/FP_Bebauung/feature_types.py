@@ -8,6 +8,7 @@ from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt
 
 from sqlalchemy import Column, ForeignKey, Float, Enum, String, ARRAY
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
@@ -47,6 +48,12 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
                                            'xplan_version': XPlanVersion.SIX,
                                            'xplan_attribute': 'sondernutzung'
                                        })
+
+    detaillierteArtDerBaulNutzung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detaillierteArtDerBaulNutzung = relationship("FP_DetailArtDerBaulNutzung", back_populates="fp_baugebiet",
+                                                 foreign_keys=[detaillierteArtDerBaulNutzung_id], info={
+                                                     'form-type': 'inline'
+                                                 })
 
     nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     abweichungBauNVO = Column(XPEnum(XP_AbweichungBauNVOTypen, include_default=True),

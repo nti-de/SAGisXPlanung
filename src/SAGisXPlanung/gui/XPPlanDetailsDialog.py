@@ -44,7 +44,6 @@ from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationState
-from SAGisXPlanung.gui.widgets.multi_edit import MultiEditWidget
 from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')

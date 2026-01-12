@@ -59,11 +59,20 @@ class BP_Plan(XP_Plan):
                                      name='ck_planart_not_empty_no_nulls'),
                      nullable=False,
                      doc='Art des Planwerks')
-    # sonstPlanArt: BP_SonstPlanArt[0..1]
+    sonstPlanArt_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    sonstPlanArt = relationship("BP_SonstPlanArt", back_populates="bp_plans", foreign_keys=[sonstPlanArt_id], info={
+                                'form-type': 'inline'
+                                })
+
     verfahren = Column(XPEnum(BP_Verfahren, include_default=True), doc='Verfahren',
                        info={'xplan_version': XPlanVersion.FIVE_THREE})
     rechtsstand = Column(XPEnum(BP_Rechtsstand, include_default=True), doc='Rechtsstand')
-    # status: BP_Status[0..1]
+
+    status_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    status = relationship("BP_Status", back_populates="bp_plans", foreign_keys=[status_id], info={
+                              'form-type': 'inline'
+                          })
+
     hoehenbezug = Column(String(), doc='Höhenbezug', info={'xplan_version': XPlanVersion.FIVE_THREE})
     aenderungenBisDatum = Column(Date(), doc='Änderungen bis')
     aufstellungsbeschlussDatum = Column(Date(), doc='Aufstellungsbeschlussdatum')

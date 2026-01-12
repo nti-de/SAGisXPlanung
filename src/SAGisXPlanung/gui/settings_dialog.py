@@ -12,7 +12,6 @@ from SAGisXPlanung.config.layer_symbology import load_symbol_defaults
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
 from SAGisXPlanung.gui.widgets.settings.basepage import SettingsPage
-from SAGisXPlanung.gui.widgets.settings.codelist_config import QCodelistConfigView
 
 FORM_CLASS, _ = uic.loadUiType(os.path.join(BASE_DIR, 'ui/settings.ui'))
 logger = logging.getLogger(__name__)

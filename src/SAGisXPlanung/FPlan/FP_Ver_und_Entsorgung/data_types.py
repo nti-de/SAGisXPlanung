@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
+from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgungCodelistAssoc
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
@@ -18,6 +19,11 @@ class FP_KomplexeZweckbestVerEntsorgung(RelationshipMixin, ElementOrderMixin, Ba
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     allgemein = Column(Enum(XP_ZweckbestimmungVerEntsorgung), nullable=False)
+
+    detail = relationship('FP_DetailZweckbestVerEntsorgung', back_populates='codelist_user',
+                          secondary=FP_DetailZweckbestVerEntsorgungCodelistAssoc, info={
+                                'form-type': 'inline'
+                          })
 
     textlicheErgaenzung = Column(String)
     aufschrift = Column(String)

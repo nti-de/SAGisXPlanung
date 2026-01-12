@@ -58,6 +58,7 @@
        </property>
       </widget>
      </item>
+     <item>
       <widget class="QToolButton" name="button_settings">
        <property name="toolTip">
         <string>Einstellungen</string>

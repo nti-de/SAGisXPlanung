@@ -8,6 +8,8 @@ from SAGisXPlanung import Base
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGruen, XP_ZweckbestimmungLandwirtschaft, XP_ZweckbestimmungWald
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
+from .codelists import BP_DetailZweckbestGruenFlaecheCodelistAssoc
+
 
 class BP_KomplexeZweckbestGruen(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Zweckbestimmung einer Grünfläche. """
@@ -18,6 +20,11 @@ class BP_KomplexeZweckbestGruen(RelationshipMixin, ElementOrderMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     allgemein = Column(Enum(XP_ZweckbestimmungGruen), nullable=False)
+
+    detail = relationship('BP_DetailZweckbestGruenFlaeche', back_populates='codelist_user',
+                          secondary=BP_DetailZweckbestGruenFlaecheCodelistAssoc, info={
+                                'form-type': 'inline'
+                          })
 
     textlicheErgaenzung = Column(String)
     aufschrift = Column(String)

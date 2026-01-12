@@ -91,6 +91,28 @@ class ContextMenuTool(QgsMapToolIdentify):
                                                                       feature=feat))
         return menu
 
+    def add_multi_edit_menu_entries(self, layer, menu):
+        items = []
+        plan_xid = layer.customProperty(f'xplanung/plan-xid')
+        xtype = layer.customProperty(f'xplanung/type')
+        for feat in layer.selectedFeatures():
+            xid = layer.customProperties().value(f'xplanung/feat-{feat.id()}')
+            xplan_item = XPlanungItem(xid=xid, xtype=CLASSES[xtype], plan_xid=plan_xid)
+            items.append(xplan_item)
+
+        self.multi_edit_action = QAction(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit_note.svg')),
+                                         'Gewählte Objekte bearbeiten', menu)
+        self.multi_edit_action.triggered.connect(lambda checked, arg=items:
+                                                 self.menu_action_triggered(ActionType.MultiEdit, arg))
+
+        if len(menu.actions()) > 0:
+            before_action = menu.actions()[0]
+            menu.insertAction(before_action, self.multi_edit_action)
+            menu.insertSeparator(before_action)
+        else:
+            menu.addAction(self.multi_edit_action)
+            menu.addSeparator()
+
     def createCommonMenuEntries(self, menu: QMenu, layer: QgsMapLayer, feat_id: str, map_position):
         xtype = layer.customProperties().value(f'xplanung/type')
         xplanung_id = layer.customProperties().value(f'xplanung/feat-{feat_id}')

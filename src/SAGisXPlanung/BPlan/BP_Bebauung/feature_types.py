@@ -124,6 +124,12 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
                                            'xplan_attribute': 'sondernutzung'
                                        })
 
+    detaillierteArtDerBaulNutzung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detaillierteArtDerBaulNutzung = relationship("BP_DetailArtDerBaulNutzung", back_populates="bp_baugebiet",
+                                                 foreign_keys=[detaillierteArtDerBaulNutzung_id], info={
+                                                     'form-type': 'inline'
+                                                 })
+
     nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     abweichungBauNVO = Column(Enum(XP_AbweichungBauNVOTypen))
     bauweise = Column(XPEnum(BP_Bauweise, include_default=True))

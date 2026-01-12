@@ -24,7 +24,8 @@ from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.codelists import CodeListValue
-from SAGisXPlanung.XPlan.feature_types import XP_Plan
+from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
 from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance, base_models
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
@@ -407,6 +408,7 @@ class EntityTreeModel(QAbstractItemModel):
         super().__init__(parent)
         self._root = root_node
         self._xplanung_item = xplan_item
+        self._edit_allowed = issubclass(self._xplanung_item.xtype, (XP_Plan, XP_Bereich, XP_ExterneReferenz))
 
         self.icon_relation = load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary)
         self.icon_attribute = load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary)
@@ -546,6 +548,9 @@ class EntityTreeModel(QAbstractItemModel):
         node = index.internalPointer()
         if node is None or index.isValid() is False:
             return current_flags
+        if not self._edit_allowed:
+            return current_flags & ~Qt.ItemIsEnabled
+
         xtype = self._xplanung_item.xtype
         is_readonly = hasattr(xtype, '__readonly_columns__') and node.name in xtype.__readonly_columns__
         is_section_head = node.node_type == "section"

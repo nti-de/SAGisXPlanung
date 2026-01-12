@@ -9,6 +9,7 @@ from sqlalchemy import Column, ForeignKey, Enum, ARRAY, String
 from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
+from SAGisXPlanung.FPlan.FP_Gemeinbedarf.codelists import FP_DetailZweckbestGemeinbedarfCodelistAssoc
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGemeinbedarf, XP_ZweckbestimmungSpielSportanlage, \
@@ -28,6 +29,13 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungGemeinbedarf)), info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    detaillierteZweckbestimmung = relationship('FP_DetailZweckbestGemeinbedarf', back_populates='codelist_user',
+                                               secondary=FP_DetailZweckbestGemeinbedarfCodelistAssoc,
+                                               info={
+                                                   'xplan_version': XPlanVersion.FIVE_THREE,
+                                                   'form-type': 'inline'
+                                               })
 
     rel_zweckbestimmung = relationship("FP_KomplexeZweckbestGemeinbedarf", back_populates="gemeinbedarf",
                                        cascade="all, delete", passive_deletes=True, info={

@@ -36,6 +36,13 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     artDerFestlegung = Column(Enum(SO_KlassifizNachSchienenverkehrsrecht))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachSchienenverkehrsrecht",
+                                          back_populates="so_schienenverkehr", foreign_keys=[detailArtDerFestlegung_id],
+                                          info={
+                                              'form-type': 'inline'
+                                          })
     name = Column(String)
     nummer = Column(String)
 
@@ -82,6 +89,12 @@ class SO_Bodenschutzrecht(MixedGeometry, SO_Objekt):
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     artDerFestlegung = Column(XPEnum(SO_KlassifizNachBodenschutzrecht, include_default=True))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachBodenschutzrecht", back_populates="so_bodenschutz",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
 
     istVerdachtsflaeche = Column(Boolean)
     name = Column(String)
@@ -148,6 +161,12 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     artDerFestlegung = Column(Enum(SO_KlassifizNachDenkmalschutzrecht))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachDenkmalschutzrecht", back_populates="so_denkmalschutz",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
 
     weltkulturerbe = Column(Boolean)
     name = Column(String)
@@ -473,6 +492,12 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
 
     artDerFestlegung = Column(XPEnum(SO_KlassifizNachLuftverkehrsrecht, include_default=True))
 
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachLuftverkehrsrecht", back_populates="so_luftverkehr",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
+
     name = Column(String)
     nummer = Column(String)
     laermschutzzone = Column(XPEnum(SO_LaermschutzzoneTypen, include_default=True))
@@ -535,6 +560,12 @@ class SO_SonstigesRecht(MixedGeometry, SO_Objekt):
 
     nummer = Column(String)
     artDerFestlegung = Column(XPEnum(SO_KlassifizNachSonstigemRecht, include_default=True))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachSonstigemRecht", back_populates="so_sonstiges_recht",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
 
     name = Column(String)
 

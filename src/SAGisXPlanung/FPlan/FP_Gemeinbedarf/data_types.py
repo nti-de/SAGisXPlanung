@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base
+from SAGisXPlanung.FPlan.FP_Gemeinbedarf.codelists import FP_DetailZweckbestGemeinbedarfCodelistAssoc
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGemeinbedarf, XP_ZweckbestimmungSpielSportanlage
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
@@ -18,6 +19,11 @@ class FP_KomplexeZweckbestGemeinbedarf(RelationshipMixin, ElementOrderMixin, Bas
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     allgemein = Column(Enum(XP_ZweckbestimmungGemeinbedarf), nullable=False)
+
+    detail = relationship('FP_DetailZweckbestGemeinbedarf', back_populates='codelist_user_v6',
+                          secondary=FP_DetailZweckbestGemeinbedarfCodelistAssoc, info={
+                                'form-type': 'inline'
+                          })
 
     textlicheErgaenzung = Column(String)
     aufschrift = Column(String)
