@@ -2,13 +2,15 @@ from typing import Optional, Dict, Any
 from uuid import uuid4
 
 from lxml import etree
+from osgeo import gdal
 from sqlalchemy import Column, String, Enum, Date, ForeignKey, CheckConstraint, Boolean, Table, event, \
-    PrimaryKeyConstraint
+    PrimaryKeyConstraint, inspect
 from sqlalchemy.dialects.postgresql import UUID, BYTEA
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship, deferred
 
 from SAGisXPlanung import Base, XPlanVersion
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.codelists import CodeListLegacy
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt, XP_ExterneReferenzTyp, XP_SPEMassnahmenTypen, \
     XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt, XP_RechtscharakterPlanaenderung, XP_Aenderungsarten
@@ -193,6 +195,27 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         return ['file', 'georef_file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
                 'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche',
                 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text', 'xp_rasterdarstellung_legende']
+
+
+@event.listens_for(XP_ExterneReferenz, 'after_update', propagate=True)
+def file_data_changed(mapper, connection, xp_ref: XP_ExterneReferenz):
+    # detect if visualisation needs to change
+    # only if plan is currently visible
+    layer = MapLayerRegistry().layer_by_orm_id(str(xp_ref.id))
+    if layer is None:
+        return
+
+    # and attributes have changed which influence the map visuals
+    history = [inspect(xp_ref).attrs.file.history, inspect(xp_ref).attrs.georef_file.history]
+    if not any(h.has_changes() for h in history):
+        return
+
+    # update map display
+    for filename, file_data in xp_ref.get_file_data().items():
+        if file_data is not None:
+            vsi_path = f'/vsimem/{filename}'
+            gdal.FileFromMemBuffer(vsi_path, file_data)
+            layer.setDataSource(vsi_path, layer.name(),layer.providerType())
 
 
 class XP_SpezExterneReferenz(XP_ExterneReferenz):

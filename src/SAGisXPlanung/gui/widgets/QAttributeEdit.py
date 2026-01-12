@@ -18,7 +18,7 @@ from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
 from qgis.PyQt.QtGui import QIcon
 from qgis.utils import iface
 from sqlalchemy import select
-from sqlalchemy.orm import class_mapper, RelationshipProperty
+from sqlalchemy.orm import class_mapper, RelationshipProperty, load_only
 
 from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
@@ -26,7 +26,7 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Abstra
 from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
-from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance, base_models
+from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance, base_models, find_true_class
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -372,7 +372,14 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.pushAttributeChangedCommand(original, value, a, i))
+        dlg.fileChanged.connect(lambda file_content, a=attribute_name: self.on_file_content_changed(a, file_content))
         dlg.exec_()
+
+    def on_file_content_changed(self, attribute: str, file_content: bytes):
+        with Session.begin() as session:
+            cls = find_true_class(self._xplanung_item.xtype, attribute)
+            orm_instance = session.get(cls, self._xplanung_item.xid, [load_only('id')])
+            orm_instance.set_file_data(attribute, file_content)
 
     def pushAttributeChangedCommand(self, original_value, new_value, attr, index):
         command = AttributeChangedCommand(

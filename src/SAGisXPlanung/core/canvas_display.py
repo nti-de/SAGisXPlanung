@@ -92,14 +92,7 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
                 new_layers = await asyncio.to_thread(collect_layers, plan, plan_xid, session)
 
             for layer in new_layers:
-                if isinstance(layer, QgsRasterLayer):
-                    if layer_group:
-                        QgsProject.instance().addMapLayer(layer, False)
-                        layer_group.addLayer(layer)
-                    else:
-                        QgsProject.instance().addMapLayer(layer)
-                else:
-                    MapLayerRegistry().addLayer(layer, group=layer_group)
+                MapLayerRegistry().addLayer(layer, group=layer_group)
 
     except Exception as e:
         logger.debug(f'Error while loading plan: {e}')
@@ -205,6 +198,7 @@ def collect_layers(plan, plan_xid, session):
 
         raster_layer = QgsRasterLayer(f'/vsimem/{ref.referenzURL}', ref.referenzName or ref.referenzURL, "gdal")
         raster_layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
+        raster_layer.setCustomProperty('xplanung/feat_id', str(ref.id))
         new_layers.append(raster_layer)
 
     return new_layers

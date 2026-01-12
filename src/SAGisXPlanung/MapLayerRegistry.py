@@ -2,7 +2,7 @@ import logging
 from typing import Union
 
 from qgis.PyQt import QtCore
-from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup)
+from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup, QgsRasterLayer)
 from qgis.utils import iface
 
 from SAGisXPlanung import Session
@@ -78,8 +78,8 @@ class MapLayerRegistry(Singleton):
                     else:
                         group.insertLayer(next_index, layer)
 
-            elif group and isinstance(layer, QgsAnnotationLayer):
-                group.insertLayer(0, layer)
+            elif group is not None:
+                group.addLayer(layer)
 
         if isinstance(layer, QgsVectorLayer):
             layer.committedGeometriesChanges.connect(self.onGeometriesChanged)
@@ -107,13 +107,18 @@ class MapLayerRegistry(Singleton):
                     return True
         return False
 
-    def layer_by_orm_id(self, orm_xid: str) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
+    def layer_by_orm_id(self, orm_xid: str) -> Union[None, QgsVectorLayer, QgsRasterLayer]:
         for lyr in self._layers:
-            for key in lyr.customPropertyKeys():
-                if 'xplanung/feat-' not in key:
-                    continue
-                if lyr.customProperty(key) == orm_xid:
+            if isinstance(lyr, QgsRasterLayer):
+                if lyr.customProperty("xplanung/feat_id") == orm_xid:
                     return lyr
+                continue
+            if isinstance(lyr, QgsVectorLayer):
+                for key in lyr.customPropertyKeys():
+                    if 'xplanung/feat-' not in key:
+                        continue
+                    if lyr.customProperty(key) == orm_xid:
+                        return lyr
         return None
 
     def layerByXid(self, xplan_item: XPlanungItem, geom_type: GeometryType = None) -> Union[None, QgsVectorLayer, QgsAnnotationLayer]:
