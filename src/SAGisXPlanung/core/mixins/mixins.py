@@ -341,7 +341,8 @@ class MapCanvasMixin:
         feat.setGeometry(self.geometry())
         feat.setFields(fields)
 
-        feat['gml_id'] = str(self.id)
+        if 'gml_id' in feat.fields().names():
+            feat['gml_id'] = str(self.id)
 
         legacy_fields = None
         if hasattr(self, 'layer_fields'):
