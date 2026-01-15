@@ -1,5 +1,12 @@
 ## Changelog
 
+### [2.12.1] - 15.01.2025
+
+#### Fehlerbehebungen
+
+- Fehler beim Laden von XPlan-Layern bestehnder Projekte (9403c89f)
+- Fehlende Aktualisierung von externen Referenzen bei Anpassung der Dateiquelle (999c69cd)
+
 ### [2.12.0] - 09.01.2025
 
 #### Neue Funktionen
