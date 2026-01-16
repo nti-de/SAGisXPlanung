@@ -8,14 +8,14 @@ from typing import Any, List, Optional
 
 import qasync
 import yaml
-from PyQt5.QtCore import QAbstractItemModel, QSettings
-from PyQt5.QtGui import QColor
 from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
-from qgis.PyQt.QtCore import Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, QRegExp, pyqtSignal
-from qgis.PyQt.QtWidgets import QHeaderView, QLineEdit
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import (Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, pyqtSignal, QAbstractItemModel,
+                              QSettings, QSize, QAbstractListModel)
+from qgis.PyQt.QtWidgets import (QHeaderView, QLineEdit, QWidget, QMenu, QSizePolicy, QListView, QStyledItemDelegate,
+                                 QHBoxLayout, QToolButton)
+from qgis.PyQt.QtGui import QIcon, QColor, QFontMetrics, QPen
 from qgis.utils import iface
 from sqlalchemy import select
 from sqlalchemy.orm import class_mapper, RelationshipProperty, load_only
@@ -26,14 +26,14 @@ from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Abstra
 from SAGisXPlanung.XPlan.codelists import CodeListValue
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich
-from SAGisXPlanung.core.helper import update_field_value, is_mapped, is_mapped_instance, base_models, find_true_class
+from SAGisXPlanung.core.helper import update_field_value, base_models, find_true_class
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, FeatureType
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand
-from SAGisXPlanung.gui.style import load_svg, ApplicationColor
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 from SAGisXPlanung.gui.style.styles import SeparatorDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
@@ -45,13 +45,19 @@ NodeRole = Qt.UserRole + 2
 
 style = """
 QToolButton[objectName="button_flash"], QToolButton[objectName="button_zoom"] {{
-    background: palette(window); 
+    background: transparent; 
     border: 0px;
     padding: 5px;
     border-radius: 5px;
 }}
 QToolButton:hover[objectName="button_flash"], QToolButton:hover[objectName="button_zoom"] {{
     background-color: {_button_hover_bg};
+}}
+QToolButton[objectName="back_button"] {{
+    background-color: transparent; 
+    border: 0px;
+    padding: 3px;
+    border-radius: 3px;;
 }}
 
 #title-label {{
@@ -261,6 +267,19 @@ class QAttributeEdit(CLS, FORM_CLASS):
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         header.setDefaultAlignment(Qt.AlignCenter)
 
+        # nav bar setup
+        self.nav_stack = NavigationStack()
+        self.breadcrumbs = BreadcrumbBar(self)
+        self.breadcrumbs.hide()
+        self.breadcrumbs.crumbClicked.connect(self.on_breadcrumb_clicked)
+        self.layout().insertWidget(0, self.breadcrumbs)
+        root_item = NavigationItem(
+            xplan_item=self._xplanung_item,
+            display_name=self._xplanung_item.xtype.__name__
+        )
+        self.nav_stack.push(root_item)
+        self._update_breadcrumbs()
+
         self.treeView.doubleClicked.connect(self.on_double_clicked)
 
         # -------------- STYLE -------------
@@ -290,6 +309,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
         self.label_object_name.setText(self._xplanung_item.xtype.__name__)
         self.label_object_type.setText(_object_category_name(self._xplanung_item.xtype))
+
+    def _update_breadcrumbs(self):
+        self.breadcrumbs.set_items(self.nav_stack.items())
 
     def model_index(self, attr: str):
         indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, attr, 1, Qt.MatchFixedString)
@@ -402,12 +424,20 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if issubclass(self._xplanung_item.xtype, XP_Plan) and attr == 'name':
             self.nameChanged.emit(value)
 
-    def navigate_to(self, nav_item: NavigationItem):
+    def navigate_to(self, nav_item: NavigationItem, push_history: bool = True):
+        if push_history:
+            self.nav_stack.push(nav_item)
+
         root_node = self._load_tree_node(nav_item.xplan_item)
         self.model.set_source_data(root_node, nav_item.xplan_item)
 
         self._xplanung_item = nav_item.xplan_item
         self._update_view()
+        self._update_breadcrumbs()
+
+    def on_breadcrumb_clicked(self, index: int):
+        nav_item = self.nav_stack.pop_to(index)
+        self.navigate_to(nav_item, push_history=False)
 
 
 class EntityTreeModel(QAbstractItemModel):
@@ -642,3 +672,411 @@ class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
     def setFilterFixedString(self, pattern: str):
         super().setFilterFixedString(pattern)
         self.invalidateFilter()
+
+
+class NavigationStack:
+    def __init__(self):
+        self._items: List[NavigationItem] = []
+
+    def _same_item(self, a: NavigationItem, b: NavigationItem) -> bool:
+        return (
+            a.xplan_item.xid == b.xplan_item.xid
+            and a.xplan_item.xtype == b.xplan_item.xtype
+        )
+
+    def push(self, item: NavigationItem):
+        """ Push item unless it already exists in the stack. If it exists, truncate to its first occurrence. """
+        for i, existing in enumerate(self._items):
+            if self._same_item(existing, item):
+                self._items = self._items[: i + 1]
+                return
+
+        self._items.append(item)
+
+    def pop_to(self, index: int) -> NavigationItem:
+        self._items = self._items[: index + 1]
+        return self._items[-1]
+
+    def current(self) -> Optional[NavigationItem]:
+        return self._items[-1] if self._items else None
+
+    def items(self) -> List[NavigationItem]:
+        return list(self._items)
+
+    def clear(self):
+        self._items.clear()
+
+
+class BreadcrumbModel(QAbstractListModel):
+
+    IsSeparatorRole = Qt.UserRole + 1
+    IsEllipsisRole = Qt.UserRole + 2
+    ItemIndexRole = Qt.UserRole + 3
+    IsActiveRole = Qt.UserRole + 4
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._items = []  # List of NavigationItem objects
+        self._display_mode = "full"  # "full" or "collapsed"
+        self._visible_indices = []  # Which items to show in collapsed mode
+
+    def set_items(self, items: List):
+        self.beginResetModel()
+        self._items = items
+        self._display_mode = "full"
+        self._visible_indices = list(range(len(items)))
+        self.endResetModel()
+
+    def set_display_mode(self, mode: str, visible_indices: List[int] = None):
+        """Switch between full and collapsed display."""
+        if self._display_mode == mode and visible_indices == self._visible_indices:
+            return
+
+        self.beginResetModel()
+        self._display_mode = mode
+        if visible_indices is not None:
+            self._visible_indices = visible_indices
+        self.endResetModel()
+
+    def rowCount(self, parent=QModelIndex()):
+        if parent.isValid():
+            return 0
+
+        if self._display_mode == "full":
+            return len(self._items) * 2 - 1 if self._items else 0
+        else:
+            visible_count = len(self._visible_indices)
+            if visible_count > 0:
+                return (visible_count + 1) * 2 - 1 # (visible_items + ellipsis) * 2 - 1
+            return 0
+
+    def data(self, index, role=Qt.DisplayRole):
+        if not index.isValid():
+            return None
+
+        row = index.row()
+
+        if self._display_mode == "full":
+            # even indices are items, odd indices are separators
+            is_separator = row % 2 == 1
+
+            if role == self.IsSeparatorRole:
+                return is_separator
+
+            if is_separator:
+                if role == Qt.DisplayRole:
+                    return "›"
+                return None
+
+            # It's an item
+            item_idx = row // 2
+            if item_idx >= len(self._items):
+                return None
+
+            item = self._items[item_idx]
+
+            if role == Qt.DisplayRole:
+                return item.display_name or item.xplan_item.xtype.__name__
+            elif role == self.ItemIndexRole:
+                return item_idx
+            elif role == self.IsActiveRole:
+                return item_idx == len(self._items) - 1
+
+        else:  # collapsed mode
+            is_separator = row % 2 == 1
+
+            if role == self.IsSeparatorRole:
+                return is_separator
+
+            is_ellipsis = row == 2
+            if role == self.IsEllipsisRole:
+                return is_ellipsis
+            if role == Qt.DisplayRole and is_ellipsis:
+                return "…"
+            if role == Qt.DisplayRole and is_separator:
+                return "›"
+
+            # It's a visible item
+            item_idx = self._row_to_item_index(row)
+            item = self._items[item_idx]
+
+            if role == Qt.DisplayRole:
+                return item.display_name or item.xplan_item.xtype.__name__
+            elif role == self.ItemIndexRole:
+                return item_idx
+            elif role == self.IsActiveRole:
+                return item_idx == len(self._items) - 1
+
+        return None
+
+    def _row_to_item_index(self, row: int) -> int:
+        if self._display_mode == "full":
+            return row // 2
+        else:
+            if row == 0:
+                return 0
+            actual_idx = (row - 2) // 2
+            return self._visible_indices[actual_idx]
+
+    def get_hidden_items(self):
+        """Get items that are hidden in collapsed mode (for ellipsis menu)."""
+        if self._display_mode != "collapsed":
+            return []
+
+        all_indices = set(range(len(self._items)))
+        visible = set(self._visible_indices)
+        hidden_indices = sorted(all_indices - visible)
+
+        return [(idx, self._items[idx]) for idx in hidden_indices]
+
+    def item_count(self) -> int:
+        return len(self._items)
+
+
+class BreadcrumbDelegate(QStyledItemDelegate):
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._hover_row = -1
+
+    def set_hover_row(self, row: int):
+        self._hover_row = row
+
+    def paint(self, painter, option, index):
+        painter.save()
+
+        is_separator = index.data(BreadcrumbModel.IsSeparatorRole)
+        is_active = index.data(BreadcrumbModel.IsActiveRole)
+        text = index.data(Qt.DisplayRole)
+
+        normal_color = QColor("#6b7280")
+        hover_color = QColor("#111827")
+        active_color = QColor("#111827")
+        hover_bg = QColor("#f3f4f6")
+
+        rect = option.rect
+
+        if is_separator:
+            painter.setPen(QPen(normal_color))
+            painter.drawText(rect, Qt.AlignCenter, text)
+        else:
+            # draw clickable breadcrumb
+            is_hovered = self._hover_row == index.row()
+
+            # Background for hover
+            if is_hovered and not is_active:
+                painter.fillRect(rect, hover_bg)
+
+            # Text color
+            if is_active:
+                painter.setPen(QPen(active_color))
+            elif is_hovered:
+                painter.setPen(QPen(hover_color))
+            else:
+                painter.setPen(QPen(normal_color))
+
+            text_rect = rect.adjusted(4, 0, -4, 0)
+            painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, text)
+
+        painter.restore()
+
+    def sizeHint(self, option, index):
+        text = index.data(Qt.DisplayRole)
+
+        fm = QFontMetrics(option.font)
+        width = fm.horizontalAdvance(text)
+        height = fm.height()
+
+        return QSize(width + 8, height)
+
+    def editorEvent(self, event, model, option, index):
+        # We handle clicks in the view, so just return False
+        return False
+
+
+class BreadcrumbListView(QListView):
+
+    itemClicked = pyqtSignal(int)  # emits the actual item index
+    ellipsisClicked = pyqtSignal(list)  # emits list of hidden items
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setFlow(QListView.LeftToRight)
+        self.setWrapping(False)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setSelectionMode(QListView.NoSelection)
+        self.setFocusPolicy(Qt.NoFocus)
+
+        self.setFrameShape(QListView.NoFrame)
+        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.viewport().setAutoFillBackground(False)
+
+        self._delegate = BreadcrumbDelegate(self)
+        self.setItemDelegate(self._delegate)
+
+        self.setMouseTracking(True)
+
+        self._hover_index = QModelIndex()
+
+    def mouseMoveEvent(self, event):
+        index = self.indexAt(event.pos())
+
+        if index != self._hover_index:
+            self._hover_index = index
+
+            # Update delegate's hover state
+            if index.isValid():
+                is_separator = index.data(BreadcrumbModel.IsSeparatorRole)
+                is_active = index.data(BreadcrumbModel.IsActiveRole)
+                if not is_separator and not is_active:
+                    self._delegate.set_hover_row(index.row())
+                    self.viewport().update()
+                    return
+
+            self._delegate.set_hover_row(-1)
+            self.viewport().update()
+
+        super().mouseMoveEvent(event)
+
+    def leaveEvent(self, event):
+        self._hover_index = QModelIndex()
+        self._delegate.set_hover_row(-1)
+        self.viewport().update()
+        super().leaveEvent(event)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            index = self.indexAt(event.pos())
+            if index.isValid():
+                is_separator = index.data(BreadcrumbModel.IsSeparatorRole)
+                is_ellipsis = index.data(BreadcrumbModel.IsEllipsisRole)
+                is_active = index.data(BreadcrumbModel.IsActiveRole)
+
+                if is_ellipsis:
+                    # Show menu with hidden items
+                    hidden_items = self.model().get_hidden_items()
+                    self.ellipsisClicked.emit(hidden_items)
+                elif not is_separator and not is_active:
+                    # Regular breadcrumb click
+                    item_index = index.data(BreadcrumbModel.ItemIndexRole)
+                    if item_index is not None:
+                        self.itemClicked.emit(item_index)
+
+        super().mousePressEvent(event)
+
+    def sizeHint(self):
+        # calculate minimum height based on content
+        if self.model() and self.model().rowCount() > 0:
+            index = self.model().index(0, 0)
+            item_size = self.itemDelegate().sizeHint(self.viewOptions(), index)
+            return QSize(200, item_size.height())
+        return QSize(200, 5)
+
+    def minimumSizeHint(self):
+        return self.sizeHint()
+
+
+class BreadcrumbBar(QWidget):
+
+    crumbClicked = pyqtSignal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self._layout = QHBoxLayout(self)
+        self._layout.setContentsMargins(0, 0, 0, 0)
+        self._layout.setSpacing(0)
+
+        self._ellipsis_menu = QMenu(self)
+
+        self._back_button = QToolButton(self)
+        self._back_button.setObjectName("back_button")
+        self._back_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow_back.svg'),
+                                           color=ApplicationColor.Tertiary))
+        self._back_hover_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Tertiary)
+        self._back_button.installEventFilter(self._back_hover_filter)
+        self._layout.addWidget(self._back_button)
+
+        # Create model and view
+        self._model = BreadcrumbModel(self)
+        self._list_view = BreadcrumbListView(self)
+        self._list_view.setModel(self._model)
+
+        self._list_view.setSizePolicy(self._list_view.sizePolicy().horizontalPolicy(), QSizePolicy.Maximum)
+
+        self._list_view.itemClicked.connect(self.crumbClicked.emit)
+        self._list_view.ellipsisClicked.connect(self._show_ellipsis_menu)
+        self._back_button.clicked.connect(self.on_back_button_clicked)
+
+        self._layout.addWidget(self._list_view)
+
+    @pyqtSlot()
+    def on_back_button_clicked(self):
+        self.crumbClicked.emit(self._list_view.model().item_count() - 2) # len-1 is current item, -2 is previous
+
+    def set_items(self, items: List):
+        self._model.set_items(items)
+        # only show breadcrumbs if there are 2 or more items (user has navigated)
+        if len(items) < 2:
+            self.hide()
+        else:
+            self.show()
+            self._update_display_mode()
+
+    def _calculate_full_width(self):
+        """Calculate total width needed for full display."""
+        total = 0
+        for row in range(self._model.rowCount()):
+            index = self._model.index(row, 0)
+            size = self._list_view.itemDelegate().sizeHint(
+                self._list_view.viewOptions(), index
+            )
+            total += size.width()
+        return total
+
+    def _update_display_mode(self):
+        if self._model.rowCount() == 0:
+            return
+
+        available_width = self.width()
+        needed_width = self._calculate_full_width()
+
+        if needed_width <= available_width:
+            self._model.set_display_mode("full")
+        else:
+            items_count = (self._model.rowCount() + 1) // 2
+
+            if items_count <= 2:
+                visible = list(range(items_count))
+            else:
+                visible = [0, items_count - 2, items_count - 1]
+
+                self._model.set_display_mode("collapsed", visible)
+                # try if collapse state is enough, otherwise collapse one further history item
+                collapsed_width = self._calculate_full_width()
+                if collapsed_width <= available_width:
+                    return
+                visible = [0, items_count - 1]
+
+            self._model.set_display_mode("collapsed", visible)
+
+    def _show_ellipsis_menu(self, hidden_items):
+        """Show menu with hidden breadcrumb items."""
+        self._ellipsis_menu.clear()
+
+        for idx, item in hidden_items:
+            display_name = item.display_name or item.xplan_item.xtype.__name__
+            action = self._ellipsis_menu.addAction(display_name)
+            action.triggered.connect(lambda _, i=idx: self.crumbClicked.emit(i))
+
+        ellipsis_index = self._model.index(1, 0)
+        if ellipsis_index.isValid():
+            rect = self._list_view.visualRect(ellipsis_index)
+            global_pos = self._list_view.mapToGlobal(rect.bottomLeft())
+            self._ellipsis_menu.exec_(global_pos)
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        self._update_display_mode()
