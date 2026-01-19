@@ -1,10 +1,21 @@
 ## Changelog
 
+### [2.12.2] - 19.01.2025
+
+#### Neue Funktionen
+
+- Navigation in Attributansicht (1025c5c3)
+
+#### Weiteres
+
+- Support für veraltete QGIS-Version entfernt (99964799)
+- Anpassung Plugin-Bereitstellung Ubuntu >= 23.04 (173457c4)
+
 ### [2.12.1] - 15.01.2025
 
 #### Fehlerbehebungen
 
-- Fehler beim Laden von XPlan-Layern bestehnder Projekte (9403c89f)
+- Fehler beim Laden von XPlan-Layern bestehender Projekte (9403c89f)
 - Fehlende Aktualisierung von externen Referenzen bei Anpassung der Dateiquelle (999c69cd)
 
 ### [2.12.0] - 09.01.2025
