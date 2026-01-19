@@ -25,10 +25,28 @@ steps:
   displayName: 'Install Sudo in container (thanks Microsoft! https://github.com/microsoft/azure-pipelines-agent/issues/2043)'
 
 - script: |
-    python3 -m pip install --upgrade pip
-    sudo apt-get install libgeos-dev
-    pip install numpy==1.26.4 pytest pytest-azurepipelines pytest-cov pytest-qt pytest-mock pytest-asyncio pytest-qgis nest-asyncio
-    pip install -r requirements.txt
+    set -e
+    if python3 -m pip help install | grep -q break-system-packages; then
+        PIP_BREAK="--break-system-packages"
+    else
+        PIP_BREAK=""
+    fi
+    
+    python3 -m pip install $PIP_BREAK --upgrade pip
+    sudo apt-get install -y libgeos-dev
+    
+    pip install $PIP_BREAK \
+        numpy==1.26.4 \
+        pytest \
+        pytest-azurepipelines \
+        pytest-cov \
+        pytest-qt \
+        pytest-mock \
+        pytest-asyncio \
+        pytest-qgis \
+        nest-asyncio
+    
+    pip install $PIP_BREAK -r requirements.txt
   displayName: 'Install dependencies'
 
 - script: |
