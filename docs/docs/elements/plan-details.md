@@ -202,3 +202,48 @@ ausgeführt werden.
       </td>
    </tr>
 </table>
+
+## Die Attributansicht
+
+Die Attributansicht dient zur Anzeige und Bearbeitung aller fachlichen Eigenschaften eines einzelnen Planinhalts.
+In der Attributansicht werden sowohl einfache Attribute (z. B. Text, Zahlen, Auswahlwerte) als auch
+Beziehungen zu anderen Objekten übersichtlich dargestellt.
+
+<figure markdown="span">
+    ![Attributansicht](../assets/attribute-view.png)
+</figure>
+
+### Aufbau der Attributansicht
+
+Die Attributansicht ist in mehrere Bereiche gegliedert:
+
+- **Kopfbereich**
+    - Anzeige der Objektart (z. B. `BP_BaugebietsTeilFlaeche`)
+    - Icons zum Aufleuchten des Objekts auf der QGIS-Karte, sowie zum Fokussieren des
+      Kartenausschnitts auf die Geometrie des Objekts
+
+- **Filter- und Ansichtssteuerung**
+    - **Suchen**: Textsuche über Attributnamen und Attributwerte
+    - **Alle**: Anzeige aller Felder aus dem XPlanung-Datenmodell
+    - **Beziehungen**: Anzeige ausschließlich von Relation zwischen XPlan-Objekten
+    - **Attribut**: Anzeige ausschließlich einfacher Attribute
+
+- **Attributtabelle**
+    - Spalte **XPlanung-Attribut**: Name des Attributs gemäß XPlanung-Schema
+    - Spalte **Wert**: Aktueller Attributwert bzw. Verweis auf verknüpfte Objekte
+
+### Attributtypen
+
+In der Attributansicht werden unterschiedliche Typen von Attributen dargestellt:
+
+- **Einfache Attribute**  
+  z. B. `uuid`, `text`, `rechtsstand`, `ebene`  
+  → enthalten direkt editierbare Werte (Text, Zahlen, Auswahlwerte, Codelisten)
+
+- **Beziehungen**  
+  z. B. `gehörtZuBereich`, `wirdDargestelltDurch`  
+  → verweisen auf andere XPlan-Objekte und zeigen die Anzahl der verknüpften Elemente an
+
+- **Geometrieattribute**
+    - `position`: zeigt den Geometrietyp (z. B. Polygon) und die Koordinaten
+    - nicht editierbar, Bearbeitung erfolgt über die QGIS-Kartenwerkzeuge

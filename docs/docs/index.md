@@ -1,7 +1,9 @@
 # Anwendungsdokumentation SAGis XPlanung
 
 SAGis XPlanung ist eine Erweiterung für die GIS-Software QGIS, die eine Erfassung und
-Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermöglicht
+Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermöglicht.
+
+![QGIS Screenshot](assets/screenshot_banner.png)
 
 ## Erste Schritte
 
@@ -13,7 +15,7 @@ Visualisierung von Bauleitplänen nach Richtlinien des Standards XPlanung ermög
 
     Leitfaden zur Installation und Einrichtung von SAGis XPlanung
 
-    [:octicons-arrow-right-24: Installation](#)
+    [:octicons-arrow-right-24: Installation](setup/index.md)
 
 
 -   :map:{ .lg .middle } __Ersten XPlan erfassen__
