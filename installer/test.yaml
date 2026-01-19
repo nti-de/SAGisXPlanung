@@ -8,8 +8,8 @@ pool:
 
 strategy:
   matrix:
-    qgis34:
-      containerImage: qgis/qgis:release-3_34
+    latest:
+      containerImage: qgis/qgis:latest
     ltr:
       containerImage: qgis/qgis:ltr-jammy
 
