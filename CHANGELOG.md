@@ -5,11 +5,13 @@
 #### Neue Funktionen
 
 - Navigation in Attributansicht (1025c5c3)
+- Neue QGIS-Aktion zum Öffnen der XPlan-Ansicht aus der QGIS-Attributtabelle (bcd9ed92)
 
 #### Weiteres
 
 - Support für veraltete QGIS-Version entfernt (99964799)
 - Anpassung Plugin-Bereitstellung Ubuntu >= 23.04 (173457c4)
+- Angleichung der Layout-Abstände (ef80498e)
 
 ### [2.12.1] - 15.01.2025
 
