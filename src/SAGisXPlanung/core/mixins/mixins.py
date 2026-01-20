@@ -14,6 +14,7 @@ from SAGisXPlanung.XPlan.types import GeometryType
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 from SAGisXPlanung.config import xplan_tooltip, export_version, QgsConfig
+from SAGisXPlanung.core.attribute_actions import default_actions
 from SAGisXPlanung.core.helper import find_true_class
 
 try:
@@ -381,6 +382,10 @@ class MapCanvasMixin:
         layer.setCustomProperty('xplanung/type', cls.__name__)
         layer.setCustomProperty('xplanung/plan-xid', str(plan_xid))
         layer.setCustomProperty('xplanung/layer-priority', cls.__LAYER_PRIORITY__)
+
+        action_manager = layer.actions()
+        for action in default_actions():
+            action_manager.addAction(action)
 
         if hasattr(cls, 'renderer'):
             if signature(cls.renderer).parameters.get("geom_type"):
