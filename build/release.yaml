@@ -29,7 +29,26 @@ steps:
     rootFolderOrFile: 'src/SAGisXPlanung'
     includeRootFolder: true
     archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_dev_$(Build.SourceBranchName).zip'
+    replaceExistingArchive: true
+
+- script: |
+    python3 build/build.py
+  displayName: 'Build release plugin version'
+  workingDirectory: $(Build.SourcesDirectory)
+
+- task: ArchiveFiles@2
+  displayName: 'Package release plugin'
+  inputs:
+    rootFolderOrFile: 'dist/SAGisXPlanung_pro'
+    includeRootFolder: true
+    archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
     replaceExistingArchive: true
 
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish build artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'qgis-plugins'
+

@@ -30,7 +30,7 @@ from SAGisXPlanung.utils import createXPlanungIndicators
 try:
     # __init.py__ may not be reloaded when upgrading through QGIS plugin manager
     # therefore only import when possible
-    from SAGisXPlanung import ALLOW_UPGRADE_FROM_QGIS, BASE_DIR
+    from SAGisXPlanung import ALLOW_UPGRADE_FROM_QGIS, BASE_DIR, RELEASE
 except ImportError:
     pass
 
@@ -49,7 +49,7 @@ class XPlanung(QObject):
         self.data_action = None
         self.snapshot_action = None
         self.processing_menu = None
-        self.menu_name = 'SAGis XPlanung'
+        self.menu_name = 'SAGis XPlanung' if RELEASE else 'SAGis XPlanung (dev)'
         self.provider = None
 
         # Check if plugin was started the first time in current QGIS session
@@ -106,8 +106,10 @@ class XPlanung(QObject):
 
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
-
-        xp_icon = os.path.abspath(os.path.join(os.path.dirname(__file__), 'gui/resources/sagis_icon.png'))
+        if RELEASE:
+            xp_icon = os.path.join(BASE_DIR, 'gui/resources/sagis_icon.png')
+        else:
+            xp_icon = os.path.join(BASE_DIR, 'gui/resources/sagis_dev_icon.png')
         settings_icon = ':/images/themes/default/mActionOptions.svg'
         self.main_action = QAction(QIcon(xp_icon), 'SAGis XPlanung', self.iface.mainWindow())
         self.main_action.setToolTip('Plugin zum Erfassen von XPlanung konformen Bauleitplänen')

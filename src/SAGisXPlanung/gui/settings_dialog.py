@@ -7,7 +7,7 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtGui import QShowEvent, QCloseEvent
 from qgis.PyQt.QtWidgets import QDialog
 
-from SAGisXPlanung import VERSION, XPlanVersion, BASE_DIR
+from SAGisXPlanung import VERSION, XPlanVersion, BASE_DIR, RELEASE
 from SAGisXPlanung.config.layer_symbology import load_symbol_defaults
 # don't remove following import: all classes need to be imported at plugin startup for ORM to work correctly
 from SAGisXPlanung.gui.widgets import QAttributeConfigView
@@ -22,7 +22,7 @@ class Settings(QDialog, FORM_CLASS):
         super(Settings, self).__init__(parent)
         self.setupUi(self)
 
-        self.versionLabel.setText(VERSION)
+        self.versionLabel.setText(VERSION if RELEASE else f'{VERSION} (dev)')
 
         # initialize UI on all settings pages
         for i in range(0, self.tabs.count()):

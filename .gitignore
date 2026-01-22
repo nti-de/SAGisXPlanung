@@ -9,7 +9,6 @@ __pycache__/
 # Distribution / packaging
 .Python
 **/dependencies/
-build/
 develop-eggs/
 dist/
 downloads/
@@ -141,5 +140,4 @@ cython_debug/
 # pycharm
 .idea/
 
-installer/*/
 /docs/site/
