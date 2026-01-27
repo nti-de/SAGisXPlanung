@@ -1,1 +1,0 @@
-from ._context_menu_tool_actions import MoveAnnotationItemAction

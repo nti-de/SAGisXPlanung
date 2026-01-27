@@ -26,6 +26,7 @@ from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_Rechtscharakter, FP_PlanArt
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan
+from SAGisXPlanung.FPlan.FP_Bebauung.codelists import FP_DetailArtDerBaulNutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_WaldFlaeche
 from SAGisXPlanung.GML.GMLWriter import writeTextNode, GMLWriter
@@ -36,6 +37,7 @@ from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.enums import LP_Planun
     LP_FlaechenTypBVSpeziell, LP_FlaechenTypBV
 from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.feature_types import LP_BiotopverbundBiotopvernetzung
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, XP_PTO
+from SAGisXPlanung.XPlan.codelists import CodeList
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_SpezExterneReferenz, XP_ExterneReferenz, \
     XP_Hoehenangabe, XP_GesetzlicheGrundlage
 from SAGisXPlanung.XPlan.enums import XP_WaldbetretungTyp, XP_ArtHoehenbezugspunkt, XP_ImmissionsschutzTypen, \

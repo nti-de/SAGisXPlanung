@@ -17,7 +17,6 @@ from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateIt
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
-from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
 from SAGisXPlanung.utils import CLASSES, full_version_required_warning
 
 logger = logging.getLogger(__name__)
