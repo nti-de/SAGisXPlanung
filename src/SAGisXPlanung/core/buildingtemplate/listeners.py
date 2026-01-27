@@ -32,20 +32,21 @@ def register_update_listeners():
 
 def refresh_template(cell_type, target: XPlanungItem, column_name: str, new_value):
     with Session.begin() as session:
+        load_opt = load_only(getattr(target.xtype, 'id'))
         if target.xtype is BP_Dachgestaltung:
-            dachgestaltung = session.query(BP_Dachgestaltung).options(load_only('id')).get(target.xid)
+            dachgestaltung = session.query(BP_Dachgestaltung).options(load_opt).get(target.xid)
             bp_baugebiet = dachgestaltung.baugebiet
         elif target.xtype is XP_Hoehenangabe:
             try:
-                hoehenangabe = session.query(XP_Hoehenangabe).options(load_only('id')).get(target.xid)
+                hoehenangabe = session.query(XP_Hoehenangabe).options(load_opt).get(target.xid)
                 bp_baugebiet = session.query(BP_BaugebietsTeilFlaeche).options(
-                    load_only('id')
+                    load_only(BP_BaugebietsTeilFlaeche.id)
                 ).get(hoehenangabe.xp_objekt_id)
             except:
                 # might fail when hohenangabe is used in a different relation than with BP_BaugebietsTeilFlaeche
                 return
         else:
-            bp_baugebiet = session.query(BP_BaugebietsTeilFlaeche).options(load_only('id')).get(target.xid)
+            bp_baugebiet = session.query(BP_BaugebietsTeilFlaeche).options(load_opt).get(target.xid)
 
         if not bp_baugebiet:
             return

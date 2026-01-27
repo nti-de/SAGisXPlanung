@@ -10,7 +10,7 @@ class Toaster(QFrame):
         super(Toaster, self).__init__(*args, **kwargs)
         QHBoxLayout(self)
 
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Maximum)
+        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
 
         self.setStyleSheet('''
             Toaster {
@@ -45,7 +45,7 @@ class Toaster(QFrame):
         self.opacityAni.setDuration(100)
         self.opacityAni.finished.connect(self.checkClosed)
 
-        self.corner = Qt.TopLeftCorner
+        self.corner = Qt.Corner.TopLeftCorner
         self.margin = 10
 
     def checkClosed(self):
@@ -73,17 +73,17 @@ class Toaster(QFrame):
         self.opacityAni.start()
 
     def eventFilter(self, source, event):
-        if source == self.parent() and event.type() == QEvent.Resize:
+        if source == self.parent() and event.type() == QEvent.Type.Resize:
             self.opacityAni.stop()
             parentRect = self.parent().rect()
             geo = self.geometry()
-            if self.corner == Qt.TopLeftCorner:
+            if self.corner == Qt.Corner.TopLeftCorner:
                 geo.moveTopLeft(
                     parentRect.topLeft() + QPoint(self.margin, self.margin))
-            elif self.corner == Qt.TopRightCorner:
+            elif self.corner == Qt.Corner.TopRightCorner:
                 geo.moveTopRight(
                     parentRect.topRight() + QPoint(-self.margin, self.margin))
-            elif self.corner == Qt.BottomRightCorner:
+            elif self.corner == Qt.Corner.BottomRightCorner:
                 geo.moveBottomRight(
                     parentRect.bottomRight() + QPoint(-self.margin, -self.margin))
             else:
@@ -117,8 +117,8 @@ class Toaster(QFrame):
 
     @staticmethod
     def showMessage(parent, message=None, widget=None,
-                    icon=QStyle.SP_MessageBoxInformation, color=None,
-                    corner=Qt.TopLeftCorner, margin=10, closable=True,
+                    icon=QStyle.StandardPixmap.SP_MessageBoxInformation, color=None,
+                    corner=Qt.Corner.TopLeftCorner, margin=10, closable=True,
                     timeout=5000, desktop=False, parentWindow=True, background_color=None) -> 'Toaster':
 
         if parent and parentWindow:
@@ -126,7 +126,7 @@ class Toaster(QFrame):
 
         if not parent or desktop:
             self = Toaster(None)
-            self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.BypassWindowManagerHint)
+            self.setWindowFlags(self.windowFlags() | Qt.WindowType.FramelessWindowHint | Qt.WindowType.BypassWindowManagerHint)
 
             # This is a dirty hack!
             # parentless objects are garbage collected, so the widget will be
@@ -165,7 +165,7 @@ class Toaster(QFrame):
             labelIcon = QLabel()
             self.layout().addWidget(labelIcon)
             icon = self.style().standardIcon(icon)
-            size = self.style().pixelMetric(QStyle.PM_SmallIconSize)
+            size = self.style().pixelMetric(QStyle.PixelMetric.PM_SmallIconSize)
             labelIcon.setPixmap(icon.pixmap(size))
 
         if message is not None:
@@ -178,13 +178,13 @@ class Toaster(QFrame):
         if closable:
             self.closeButton = QToolButton()
             self.layout().addWidget(self.closeButton)
-            closeIcon = self.style().standardIcon(QStyle.SP_TitleBarCloseButton)
+            closeIcon = self.style().standardIcon(QStyle.StandardPixmap.SP_TitleBarCloseButton)
             self.closeButton.setIcon(closeIcon)
             self.closeButton.setAutoRaise(True)
             self.closeButton.clicked.connect(self.close)
 
         if background_color is not None:
-            self.setAttribute(Qt.WA_StyledBackground, True)
+            self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
             self.setStyleSheet(self.styleSheet() + f'Toaster {{ background-color: {background_color}; }}')
 
         if color is not None:
@@ -204,12 +204,12 @@ class Toaster(QFrame):
         geo = self.geometry()
         # now the widget should have the correct size hints, let's move it to the
         # right place
-        if corner == Qt.TopLeftCorner:
+        if corner == Qt.Corner.TopLeftCorner:
             geo.moveTopLeft(
                 parentRect.topLeft() + QPoint(margin, margin))
-        elif corner == Qt.TopRightCorner:
+        elif corner == Qt.Corner.TopRightCorner:
             geo.moveTopRight(parentRect.topRight() + QPoint(-margin, margin))
-        elif corner == Qt.BottomRightCorner:
+        elif corner == Qt.Corner.BottomRightCorner:
             geo.moveBottomRight(parentRect.bottomRight() + QPoint(-margin, -margin))
         else:
             geo.moveBottomLeft(parentRect.bottomLeft() + QPoint(margin, -margin))

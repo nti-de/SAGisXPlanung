@@ -29,7 +29,7 @@ class FP_Gewaesser(PolygonGeometry, FP_Objekt):
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#71f8ff'))
@@ -38,8 +38,8 @@ class FP_Gewaesser(PolygonGeometry, FP_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -72,19 +72,19 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         colored_strip = QgsSimpleLineSymbolLayer(QColor('#71f8ff'))
         colored_strip.setWidth(3)
         colored_strip.setOffset(1.5)
-        colored_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        colored_strip.setPenJoinStyle(Qt.MiterJoin)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
         symbol.appendSymbolLayer(colored_strip)
 
         border = QgsSimpleLineSymbolLayer(QColor('black'))
         border.setWidth(0.5)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         symbol.appendSymbolLayer(border)
 
         return symbol
@@ -92,7 +92,7 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

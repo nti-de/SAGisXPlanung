@@ -37,7 +37,7 @@ def geometry_from_spatial_element(element: Union[WKBElement, WKTElement]) -> Qgs
 def geom_type_as_layer_url(geom_type: GeometryType) -> str:
     """ Converts a GeometryType to a string that can be used in a layer url.
         This is required because the displayString returns 'Line' which is not accepted by QgsVectorLayer provider"""
-    if geom_type == QgsWkbTypes.LineGeometry:
+    if geom_type == QgsWkbTypes.GeometryType.LineGeometry:
         return 'linestring'
     else:
         return QgsWkbTypes.geometryDisplayString(geom_type)

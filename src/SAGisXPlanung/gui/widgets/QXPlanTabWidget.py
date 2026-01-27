@@ -1,6 +1,6 @@
 import itertools
 
-from PyQt5.QtWidgets import QStyle
+from qgis.PyQt.QtWidgets import QStyle, QSizePolicy, QTabBar
 from qgis.PyQt.QtCore import pyqtSlot
 from qgis.PyQt import QtWidgets
 
@@ -20,7 +20,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
 
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(lambda index: self.closeTab(index))
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         if self.parent_type is not None and issubclass(self.parent_type, XP_Objekt):
             return
@@ -78,8 +78,8 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
         self.setCurrentIndex(self.currentIndex() + 1)
 
         if not closable:
-            close_side = self.style().styleHint(QStyle.SH_TabBar_CloseButtonPosition)
-            self.tabBar().tabButton(self.currentIndex(), close_side).resize(0, 0)
+            close_side = self.style().styleHint(QStyle.StyleHint.SH_TabBar_CloseButtonPosition)
+            self.tabBar().tabButton(self.currentIndex(), QTabBar.ButtonPosition(close_side)).resize(0, 0)
 
     def onAddRelationRequested(self, cls, cls_type, uselist, parent_attribute):
         tab_exists = any([self.widget(index).parent_attribute == parent_attribute for index in range(self.count())])
@@ -113,7 +113,7 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
             msg.setText(e.message)
             msg.setWindowTitle(f"Konformitätsbedingung {e.code} für das Objekt {e.object_type} verletzt")
             msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
-            ret = msg.exec_()
+            ret = msg.exec()
         except InvalidFormException:
             pass
 

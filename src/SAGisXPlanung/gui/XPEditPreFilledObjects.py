@@ -17,7 +17,7 @@ from SAGisXPlanung.utils import PRE_FILLED_CLASSES, save_to_db_async, confirmObj
 FORM_CLASS, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/prefilled_object_edit.ui'))
 logger = logging.getLogger(__name__)
 
-XID_ROLE = Qt.UserRole + 1
+XID_ROLE = Qt.ItemDataRole.UserRole + 1
 
 
 class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
@@ -26,14 +26,14 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
     def __init__(self, parent=None):
         super(XPEditPreFilledObjectsDialog, self).__init__(parent)
         self.setupUi(self)
-        self.setAttribute(Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.tab_widget = None
 
         self.model = QStandardItemModel()
         self.proxy = QSortFilterProxyModel()
         self.proxy.setSourceModel(self.model)
-        self.proxy.setSortCaseSensitivity(Qt.CaseInsensitive)
+        self.proxy.setSortCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.proxy.sort(0)
         self.listView.setModel(self.proxy)
         self.listView.setEnabled(False)
@@ -47,9 +47,9 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
         for cls in PRE_FILLED_CLASSES:
             self.cbClass.addItem(cls.__name__, cls)
 
-        self.listView.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.listView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.listView.doubleClicked.connect(self.onDoubleClicked)
-        self.listView.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.listView.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.listView.customContextMenuRequested.connect(self.onContextMenuRequested)
 
         self.newObject.setStyleSheet('''
@@ -88,7 +88,7 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
         delete_action.triggered.connect(lambda s, xid=xplan_id: self.onDeleteObject(xid))
         menu.addAction(delete_action)
 
-        menu.exec_(self.listView.viewport().mapToGlobal(pos))
+        menu.exec(self.listView.viewport().mapToGlobal(pos))
 
     @pyqtSlot(int)
     def onClassIndexChanged(self, index: int):
@@ -160,7 +160,7 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
         # update data in view
         indices = self.model.match(self.model.index(0, 0), XID_ROLE, xid)
         if indices:
-            self.model.setData(indices[0], str(content), Qt.DisplayRole)
+            self.model.setData(indices[0], str(content), Qt.ItemDataRole.DisplayRole)
 
     @pyqtSlot(QModelIndex)
     def onDoubleClicked(self, index: QModelIndex):

@@ -91,9 +91,9 @@ class RelatedObjectItem:
 class RelatedObjectModel(QAbstractListModel):
     """Model for displaying related objects in the list view"""
 
-    CodeRole = Qt.UserRole + 1
-    TitleRole = Qt.UserRole + 2
-    DescriptionRole = Qt.UserRole + 3
+    CodeRole = Qt.ItemDataRole.UserRole + 1
+    TitleRole = Qt.ItemDataRole.UserRole + 2
+    DescriptionRole = Qt.ItemDataRole.UserRole + 3
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -102,7 +102,7 @@ class RelatedObjectModel(QAbstractListModel):
     def rowCount(self, parent=QModelIndex()):
         return len(self._items)
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid() or index.row() >= len(self._items):
             return None
 
@@ -150,31 +150,31 @@ class RelatedObjectDelegate(QStyledItemDelegate):
         text_rect = rect.adjusted(12, 16, -12, -16)
 
         # Draw code (bold, black)
-        painter.setPen(Qt.black)
+        painter.setPen(Qt.GlobalColor.black)
         code_font = painter.font()
         code_font.setBold(True)
         code_font.setPointSize(10)
         painter.setFont(code_font)
-        painter.drawText(text_rect, Qt.AlignLeft | Qt.AlignTop, code)
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, code)
 
         # Calculate vertical offset for title
         code_height = painter.fontMetrics().height()
         title_rect = text_rect.adjusted(0, code_height + 2, 0, 0)
 
         # Draw title (brown/orange color)
-        painter.setPen(Qt.darkRed)
+        painter.setPen(Qt.GlobalColor.darkRed)
         title_font = painter.font()
         title_font.setBold(False)
         title_font.setPointSize(9)
         painter.setFont(title_font)
-        painter.drawText(title_rect, Qt.AlignLeft | Qt.AlignTop, title)
+        painter.drawText(title_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, title)
 
         # Calculate vertical offset for description
         title_height = painter.fontMetrics().height()
         desc_rect = title_rect.adjusted(0, title_height + 2, 0, 0)
 
         # Draw description (gray, wrapped)
-        painter.setPen(Qt.gray)
+        painter.setPen(Qt.GlobalColor.gray)
         desc_font = painter.font()
         desc_font.setPointSize(9)
         painter.setFont(desc_font)
@@ -182,9 +182,9 @@ class RelatedObjectDelegate(QStyledItemDelegate):
         # Word wrap description
         fm = painter.fontMetrics()
         desc_rect_height = rect.bottom() - desc_rect.top() - 8
-        elided_text = fm.elidedText(description, Qt.ElideRight,
+        elided_text = fm.elidedText(description, Qt.TextElideMode.ElideRight,
                                     desc_rect.width() * 2)  # Allow 2 lines approximately
-        painter.drawText(desc_rect, Qt.AlignLeft | Qt.AlignTop | Qt.TextWordWrap,
+        painter.drawText(desc_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
                          elided_text)
 
         painter.restore()
@@ -235,7 +235,7 @@ class SelectRelatedWidget(QWidget):
         self.search_edit = QLineEdit(self)
         self.search_edit.setObjectName("search_edit")
         self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'),
-                                   QLineEdit.LeadingPosition)
+                                   QLineEdit.ActionPosition.LeadingPosition)
         self.search_edit.setPlaceholderText('Suchen...')
         self.search_edit.textChanged.connect(self.on_search_filter_changed)
         header_layout.addWidget(self.search_edit)
@@ -248,15 +248,15 @@ class SelectRelatedWidget(QWidget):
         # List view with model
         self.list_view = QListView(self)
         self.list_view.setUniformItemSizes(True)
-        self.list_view.setSelectionMode(QListView.MultiSelection)
-        self.list_view.setEditTriggers(QListView.NoEditTriggers)
+        self.list_view.setSelectionMode(QListView.SelectionMode.MultiSelection)
+        self.list_view.setEditTriggers(QListView.EditTrigger.NoEditTriggers)
         self.list_view.setWordWrap(True)
 
         # Setup model
         self.model = RelatedObjectModel(self)
         self.proxy_model = QSortFilterProxyModel(self)
         self.proxy_model.setSourceModel(self.model)
-        self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.proxy_model.setFilterRole(RelatedObjectModel.CodeRole)
 
         self.list_view.setModel(self.proxy_model)
@@ -329,7 +329,7 @@ class SelectRelatedWidget(QWidget):
 
             item = self.model._items[source_index.row()]
             if item.xplan_item.xid in self._selected_ids:
-                sel_model.select(proxy_index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                sel_model.select(proxy_index, QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)
 
         sel_model.blockSignals(False)
 

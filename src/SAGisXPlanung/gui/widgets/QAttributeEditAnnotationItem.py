@@ -41,7 +41,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
     def onSliderValueChanged(self, value: int):
         scale = (value - 1) / (99 - 1)
 
-        indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, self.ATTRIBUTE_SIZE, 1, Qt.MatchFixedString)
+        indices = self.model.match(self.model.index(0, 0), Qt.ItemDataRole.DisplayRole, self.ATTRIBUTE_SIZE, 1, Qt.MatchFlag.MatchFixedString)
         if not indices:
             return
         self.model.setData(indices[0].siblingAtColumn(1), f'{scale:.2f}')
@@ -51,7 +51,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
     def onDialValueChanged(self, value: int):
         self.angleEdit.setText(f'{value}°')
 
-        indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, self.ATTRIBUTE_ANGLE, 1, Qt.MatchFixedString)
+        indices = self.model.match(self.model.index(0, 0), Qt.ItemDataRole.DisplayRole, self.ATTRIBUTE_ANGLE, 1, Qt.MatchFlag.MatchFixedString)
         if not indices:
             return
         self.model.setData(indices[0].siblingAtColumn(1), value)

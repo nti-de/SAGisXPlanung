@@ -69,7 +69,7 @@ class BaseInputElement(ABC):
 
         self.background_widget.setLayout(vbox)
         self.background_widget.setObjectName("back")
-        self.background_widget.setAttribute(Qt.WA_StyledBackground, True)
+        self.background_widget.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.background_widget.layout().setContentsMargins(5, 5, 5, 5)
         self.background_widget.setStyleSheet(
             'QWidget#back {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')

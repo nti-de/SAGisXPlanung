@@ -3,7 +3,7 @@ import os
 
 import qasync
 from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard
-from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal
+from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout,
                                  QApplication)
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
@@ -135,7 +135,7 @@ class CommonConfigPage(SettingsPage):
         QgsConfig.set_geometry_validation_config(validation_config)
 
     def edit_xplan24_item(self, index):
-        account = index.data(Qt.DisplayRole)
+        account = index.data(Qt.ItemDataRole.DisplayRole)
         self.form_page.set_account(index, account)
         self.ui.xplan24_page_stack.setCurrentIndex(1)
 
@@ -185,7 +185,7 @@ class AccountListView(QListView):
         delegate.editClicked.connect(self.editClicked.emit)
         delegate.deleteClicked.connect(self.remove_account)
 
-        self.setSelectionMode(QListView.SingleSelection)
+        self.setSelectionMode(QListView.SelectionMode.SingleSelection)
 
         self.proxy_style = HighlightRowProxyStyle('Fusion')
         self.proxy_style.setParent(self)
@@ -204,10 +204,10 @@ class AccountListView(QListView):
         QgsConfig.set_xplan24_accounts(self.model()._accounts)
 
     def copy_api_key(self, index):
-        account = index.data(Qt.DisplayRole)
-        QApplication.clipboard().setText(account.api_key, QClipboard.Clipboard)
+        account = index.data(Qt.ItemDataRole.DisplayRole)
+        QApplication.clipboard().setText(account.api_key, QClipboard.Mode.Clipboard)
 
-        Toaster.showMessage(self, message='API Schlüssel kopiert!', corner=Qt.BottomRightCorner,
+        Toaster.showMessage(self, message='API Schlüssel kopiert!', corner=Qt.Corner.BottomRightCorner,
                             margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
                             timeout=3000)
 
@@ -225,8 +225,8 @@ class AccountListModel(QAbstractListModel):
     def rowCount(self, parent=QModelIndex()):
         return len(self._accounts)
 
-    def data(self, index, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             return self._accounts[index.row()]
         return None
 
@@ -267,7 +267,7 @@ class AccountDelegate(QStyledItemDelegate):
         self._hovered_index = None
 
     def paint(self, painter, option, index):
-        account = index.data(Qt.DisplayRole)
+        account = index.data(Qt.ItemDataRole.DisplayRole)
         if not account:
             return
 
@@ -301,7 +301,7 @@ class AccountDelegate(QStyledItemDelegate):
 
         redacted = account.api_key[:6] + "..."
         api_text = f"API-Key: {redacted}"
-        api_text_width = subtitle_metrics.width(api_text)
+        api_text_width = subtitle_metrics.horizontalAdvance(api_text)
         subtitle_top = title_rect.bottom() + spacing
         subtitle_rect = QRect(option.rect.left() + padding, subtitle_top,
                               api_text_width, subtitle_height)
@@ -310,14 +310,14 @@ class AccountDelegate(QStyledItemDelegate):
 
         # --- Draw Title ---
         painter.setFont(title_font)
-        painter.setPen(Qt.black)
-        painter.drawText(title_rect, Qt.AlignLeft | Qt.AlignVCenter, account.name)
+        painter.setPen(Qt.GlobalColor.black)
+        painter.drawText(title_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, account.name)
 
         # --- Draw Subtitle (API Key) ---
         painter.setFont(subtitle_font)
         subtitle_color = ApplicationColor.Grey400.value
         painter.setPen(QPen(QColor(subtitle_color)))
-        painter.drawText(subtitle_rect, Qt.AlignLeft | Qt.AlignVCenter, api_text)
+        painter.drawText(subtitle_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, api_text)
 
         # --- Draw Icon ---
         self.get_hover_icon("copy").paint(painter, icon_rects["copy"])
@@ -348,7 +348,7 @@ class AccountDelegate(QStyledItemDelegate):
         icon_rects = self.get_icon_rects(option, index)
         pos = event.pos()
 
-        if event.type() == event.MouseMove:
+        if event.type() == QEvent.Type.MouseMove:
             hovered_icon = None
             for name, rect in icon_rects.items():
                 if rect.contains(pos):
@@ -368,7 +368,7 @@ class AccountDelegate(QStyledItemDelegate):
             self.parent().viewport().update(option.rect)
             return True
 
-        if event.type() == event.MouseButtonRelease and event.button() == Qt.LeftButton:
+        if event.type() == event.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
             if icon_rects["copy"].contains(pos):
                 self.copyClicked.emit(index)
                 return True
@@ -390,8 +390,8 @@ class AccountDelegate(QStyledItemDelegate):
         spacing = 6
         icon_gap = 10
 
-        redacted = index.data(Qt.DisplayRole).api_key[:6] + "..."
-        api_text_width = text_metrics.width(f"API-Key: {redacted}")
+        redacted = index.data(Qt.ItemDataRole.DisplayRole).api_key[:6] + "..."
+        api_text_width = text_metrics.horizontalAdvance(f"API-Key: {redacted}")
 
         subtitle_top = option.rect.top() + padding + text_metrics.height() + spacing
         subtitle_baseline = subtitle_top + text_metrics.ascent()

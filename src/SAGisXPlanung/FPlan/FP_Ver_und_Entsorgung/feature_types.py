@@ -45,7 +45,7 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#f7ff5a'))
@@ -56,9 +56,9 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Versorgung', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Ver_und_Entsorgung', geometry_type=geom_type,
                                  scale_factor=5)

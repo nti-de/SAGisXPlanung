@@ -4,13 +4,13 @@ from qgis.PyQt.QtWidgets import QStyle, QStyleOptionFrame, QLabel
 
 
 class ElideLabel(QLabel):
-    _elideMode = Qt.ElideMiddle
+    _elideMode = Qt.TextElideMode.ElideMiddle
 
     def elideMode(self):
         return self._elideMode
 
     def setElideMode(self, mode):
-        if self._elideMode != mode and mode != Qt.ElideNone:
+        if self._elideMode != mode and mode != Qt.TextElideMode.ElideNone:
             self._elideMode = mode
             self.updateGeometry()
 
@@ -19,7 +19,7 @@ class ElideLabel(QLabel):
 
     def sizeHint(self):
         hint = self.fontMetrics().boundingRect(self.text()).size()
-        l, t, r, b = self.getContentsMargins()
+        l, t, r, b = self.layout().getContentsMargins()
         margin = self.margin() * 2
         return QSize(
             min(100, hint.width()) + l + r + margin,
@@ -30,8 +30,7 @@ class ElideLabel(QLabel):
         qp = QPainter(self)
         opt = QStyleOptionFrame()
         self.initStyleOption(opt)
-        self.style().drawControl(QStyle.CE_ShapedFrame, opt, qp, self)
-        l, t, r, b = self.getContentsMargins()
+        self.style().drawControl(QStyle.ControlElement.CE_ShapedFrame, opt, qp, self)
         margin = self.margin()
         try:
             # since Qt >= 5.11

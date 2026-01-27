@@ -44,11 +44,11 @@ SAGis XPlanung kann über das QGIS-Plugin Repository heruntergeladen werden.
 Für eine erfolgreiche Ausführung des Programms müssen zudem folgende Python-Komponenten installiert werden:
 - lxml
 - packaging
-- SQLAlchemy==1.4.49 (:warning: Anwendung nicht kompatibel mit SQLAlchemy 2.0)
-- GeoAlchemy2==0.12.5
+- SQLAlchemy==2.0.46
+- GeoAlchemy2>=0.12.5
 - shapely>=2.0.2
 - qasync==0.22.0
-- asyncpg==0.29.0
+- asyncpg==0.31.0
 
 <details><summary><b>Anleitung anzeigen</b></summary>
 

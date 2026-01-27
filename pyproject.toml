@@ -1,8 +1,5 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
+requires = ["setuptools>=42"]
 build-backend = "setuptools.build_meta"
 
 [tool.pytest.ini_options]
@@ -14,4 +11,3 @@ pythonpath = [
   "src"
 ]
 asyncio_mode = "auto"
-qt_api= "pyqt5"

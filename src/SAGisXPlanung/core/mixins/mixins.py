@@ -91,18 +91,18 @@ class FeatureType:
 
 class GeometryObject:
     """ Abstrakte Oberklasse für XPlanung-Geometrietypen """
-    __geometry_type__ = QgsWkbTypes.UnknownGeometry
+    __geometry_type__ = QgsWkbTypes.GeometryType.UnknownGeometry
     __geometry_column_name__ = 'position'
 
 
 class MixedGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen mit variablem Raumbezug (Geometrieobjekte im XPlan-Schema) """
-    __geometry_type__ = QgsWkbTypes.UnknownGeometry
+    __geometry_type__ = QgsWkbTypes.GeometryType.UnknownGeometry
 
 
 class PointGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen als Flächengeometrien"""
-    __geometry_type__ = QgsWkbTypes.PointGeometry
+    __geometry_type__ = QgsWkbTypes.GeometryType.PointGeometry
 
     @classmethod
     def hidden_inputs(cls):
@@ -115,12 +115,12 @@ class PointGeometry(GeometryObject):
 
 class PolygonGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen als Flächengeometrien"""
-    __geometry_type__ = QgsWkbTypes.PolygonGeometry
+    __geometry_type__ = QgsWkbTypes.GeometryType.PolygonGeometry
 
 
 class LineGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen als Liniengeometrien"""
-    __geometry_type__ = QgsWkbTypes.LineGeometry
+    __geometry_type__ = QgsWkbTypes.GeometryType.LineGeometry
 
     @classmethod
     def hidden_inputs(cls):

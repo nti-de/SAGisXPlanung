@@ -31,7 +31,7 @@ class FP_Strassenverkehr(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
@@ -42,9 +42,9 @@ class FP_Strassenverkehr(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             point_symbol = QgsSymbol.defaultSymbol(geom_type)
             point_symbol.setColor(QColor('#fbdd19'))
             return QgsSingleSymbolRenderer(point_symbol)

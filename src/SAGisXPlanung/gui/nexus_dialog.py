@@ -36,8 +36,8 @@ FORM_CLASS_NEXUS_SETTINGS, _ = uic.loadUiType(os.path.join(os.path.dirname(__fil
 logger = logging.getLogger(__name__)
 
 
-XID_ROLE = Qt.UserRole + 1
-NAME_ROLE = Qt.UserRole + 2
+XID_ROLE = Qt.ItemDataRole.UserRole + 1
+NAME_ROLE = Qt.ItemDataRole.UserRole + 2
 
 
 def object_as_dict(obj, exclude_patterns=None):
@@ -116,11 +116,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         super(NexusDialog, self).__init__(parent)
         self.setupUi(self)
 
-        self.setWindowFlags(self.windowFlags() | Qt.WindowMinimizeButtonHint)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMinimizeButtonHint)
         self.setAcceptDrops(True)
 
         self.nexus_search.setPlaceholderText('Suchen...')
-        self.nexus_search.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.nexus_search.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.nexus_search.setMaximumWidth(360)
         self.nexus_search.editingFinished.connect(self.on_search_entered)
 
@@ -142,14 +142,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                                           color=ApplicationColor.Tertiary))
         self.button_xplan24.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
-        self.button_reload.setCursor(Qt.PointingHandCursor)
-        self.button_xplan_export.setCursor(Qt.PointingHandCursor)
-        self.button_edit.setCursor(Qt.PointingHandCursor)
-        self.button_map.setCursor(Qt.PointingHandCursor)
-        self.button_delete.setCursor(Qt.PointingHandCursor)
-        self.button_settings.setCursor(Qt.PointingHandCursor)
-        self.button_before.setCursor(Qt.PointingHandCursor)
-        self.button_next.setCursor(Qt.PointingHandCursor)
+        self.button_reload.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_xplan_export.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_edit.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_map.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_delete.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_settings.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_before.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_next.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.button_before.setDisabled(True)
         self.button_next.setDisabled(True)
@@ -187,15 +187,15 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.model = None
         self.setup_model()
         self.nexus_view.setModel(self.model)
-        self.nexus_view.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.nexus_view.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.nexus_view.setSortingEnabled(True)
-        self.nexus_view.sortByColumn(self.table_settings.sort_column_index(), Qt.AscendingOrder)
+        self.nexus_view.sortByColumn(self.table_settings.sort_column_index(), Qt.SortOrder.AscendingOrder)
 
         self.nexus_view.horizontalHeader().setStretchLastSection(True)
         self.nexus_view.horizontalHeader().setMaximumSectionSize(360)
         self.nexus_view.horizontalHeader().setDefaultSectionSize(180)
         self.nexus_view.horizontalHeader().sortIndicatorChanged.connect(self.on_sort_changed)
-        self.nexus_view.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        self.nexus_view.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
 
         self.table_proxy_style = RemoveFrameFocusProxyStyle('Fusion')
         self.table_proxy_style.setParent(self)
@@ -241,7 +241,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.model.set_source_data(data)
 
         self.enable_pagination_buttons()
-        self.select_all_check.setCheckState(Qt.Unchecked)
+        self.select_all_check.setCheckState(Qt.CheckState.Unchecked)
         self.enable_plan_actions(0)
         max_per_page = self.table_settings.max_entries_per_page
         self.label_result_count.setText(self.PAGE_COUNT_LABEL_PATTERN.format(
@@ -291,11 +291,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
     def on_selection_changed(self, selected: QItemSelection, deselected: QItemSelection):
         selected_rows = self.nexus_view.selectionModel().selectedRows()
         if len(selected_rows) == self.model.rowCount(QModelIndex()):
-            self.select_all_check.setCheckState(Qt.Checked)
+            self.select_all_check.setCheckState(Qt.CheckState.Checked)
         elif len(selected_rows) > 0:
-            self.select_all_check.setCheckState(Qt.PartiallyChecked)
+            self.select_all_check.setCheckState(Qt.CheckState.PartiallyChecked)
         else:
-            self.select_all_check.setCheckState(Qt.Unchecked)
+            self.select_all_check.setCheckState(Qt.CheckState.Unchecked)
         self.enable_plan_actions(len(selected_rows))
 
     @pyqtSlot(int, Qt.SortOrder)
@@ -310,9 +310,9 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
     @pyqtSlot(int)
     def on_select_all_check_state_changed(self, state: int):
-        if state == Qt.PartiallyChecked:
+        if state == Qt.CheckState.PartiallyChecked:
             return
-        if state == Qt.Unchecked:
+        if state == Qt.CheckState.Unchecked:
             self.nexus_view.clearSelection()
         else:
             self.nexus_view.selectAll()
@@ -348,7 +348,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
             try:
                 await export_action(self, plan_xid)
 
-                Toaster.showMessage(self, message='Planwerk erfolgreich exportiert!', corner=Qt.BottomRightCorner,
+                Toaster.showMessage(self, message='Planwerk erfolgreich exportiert!', corner=Qt.Corner.BottomRightCorner,
                                     margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
                                     timeout=3000)
             except ActionCanceledException:
@@ -356,7 +356,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
             except Exception as e:
                 logger.error(e)
                 iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht exportiert werden!",
-                                               str(e), level=Qgis.Critical)
+                                               str(e), level=Qgis.MessageLevel.Critical)
 
     @qasync.asyncSlot()
     async def on_delete_clicked(self):
@@ -385,11 +385,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
             msg.setWindowTitle("Löschvorgang bestätigen")
             names_text = "\n".join(selected_plan_names)
             msg.setText(f"Ausgewählte Pläne unwiderruflich löschen?\n\n{names_text}")
-            msg.setIcon(QMessageBox.Question)
-            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            msg.setIcon(QMessageBox.Icon.Question)
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-            reply = msg.exec_()
-            if reply == QMessageBox.No:
+            reply = msg.exec()
+            if reply == QMessageBox.StandardButton.No:
                 return
 
             loop = asyncio.get_event_loop()
@@ -442,10 +442,10 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.paginate()
 
     def next_check_state(self):
-        if self.select_all_check.checkState() == Qt.Unchecked:
-            self.select_all_check.setCheckState(Qt.Checked)
+        if self.select_all_check.checkState() == Qt.CheckState.Unchecked:
+            self.select_all_check.setCheckState(Qt.CheckState.Checked)
         else:
-            self.select_all_check.setCheckState(Qt.Unchecked)
+            self.select_all_check.setCheckState(Qt.CheckState.Unchecked)
 
     def enable_plan_actions(self, selection_count: int):
         if selection_count == 0:
@@ -484,7 +484,7 @@ class NexusTableModel(QAbstractTableModel):
 
     def set_column_header(self, header_keys: List[str]):
         self._horizontal_header_keys = header_keys
-        self.headerDataChanged.emit(Qt.Horizontal, 0, len(self._horizontal_header_keys))
+        self.headerDataChanged.emit(Qt.Orientation.Horizontal, 0, len(self._horizontal_header_keys))
 
     def set_source_data(self, source_data: List[dict]):
         self.beginResetModel()
@@ -498,7 +498,7 @@ class NexusTableModel(QAbstractTableModel):
         return str(value)
 
     def data(self, index, role):
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             column_name = self._horizontal_header_keys[index.column()]
             value = self._data[index.row()].get(column_name, "")
             if value is None:
@@ -514,15 +514,15 @@ class NexusTableModel(QAbstractTableModel):
         if role == NAME_ROLE:
             return self._data[index.row()].get('name', None)
 
-    def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def setData(self, index: QModelIndex, value, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             self._data[index.row()][index.column()] = value
             self.dataChanged.emit(index, index)
 
     def headerData(self, col, orientation, role):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return self._horizontal_header_keys[col]
-        if role == Qt.DisplayRole and orientation == Qt.Vertical:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Vertical:
             return col + 1
 
     def rowCount(self, index):
@@ -576,7 +576,7 @@ class TableSettings:
 
     def set_sort(self, col: int, sort_order: Qt.SortOrder):
         self.sort_column = self.header_labels()[col]
-        if sort_order == Qt.AscendingOrder:
+        if sort_order == Qt.SortOrder.AscendingOrder:
             self.sort_order = 'asc'
         else:
             self.sort_order = 'desc'
@@ -601,12 +601,12 @@ class NexusSettingsDialog(QDialog, FORM_CLASS_NEXUS_SETTINGS):
         self.model = QStandardItemModel()
         self.columns_view.setModel(self.model)
         self.columns_view.setMouseTracking(True)
-        self.columns_view.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.columns_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.columns_view.setDragEnabled(True)
         self.columns_view.setAcceptDrops(True)
         self.columns_view.setDragDropOverwriteMode(False)
-        self.columns_view.setDragDropMode(QAbstractItemView.InternalMove)
-        self.columns_view.setDefaultDropAction(Qt.MoveAction)
+        self.columns_view.setDragDropMode(QAbstractItemView.DragDropMode.InternalMove)
+        self.columns_view.setDefaultDropAction(Qt.DropAction.MoveAction)
         self.columns_view.setStyleSheet("QListView::item { padding: 5px; }")
         self.columns_view.setItemDelegate(HighlightRowDelegate())
         self.list_proxy_style = HighlightRowProxyStyle('Fusion')
@@ -616,8 +616,8 @@ class NexusSettingsDialog(QDialog, FORM_CLASS_NEXUS_SETTINGS):
         for column in self.table_settings.columns:
             item = QStandardItem(column.name)
             item.setCheckable(True)
-            item.setData(Qt.Checked if column.visible else Qt.Unchecked, Qt.CheckStateRole)
-            item.setFlags(item.flags() & ~Qt.ItemIsDropEnabled)
+            item.setData(Qt.CheckState.Checked if column.visible else Qt.CheckState.Unchecked, Qt.ItemDataRole.CheckStateRole)
+            item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsDropEnabled)
 
             self.model.appendRow(item)
 
@@ -627,9 +627,9 @@ class NexusSettingsDialog(QDialog, FORM_CLASS_NEXUS_SETTINGS):
             item = self.model.item(index)
 
             col_config = ColumnConfig(
-                name=item.data(Qt.DisplayRole),
+                name=item.data(Qt.ItemDataRole.DisplayRole),
                 column_index=index,
-                visible=item.data(Qt.CheckStateRole)
+                visible=item.data(Qt.ItemDataRole.CheckStateRole)
             )
             cols.append(col_config)
 

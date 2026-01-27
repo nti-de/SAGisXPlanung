@@ -31,21 +31,21 @@ def generic_objects_renderer(geom_type: GeometryType):
         raise Exception('parameter geom_type should not be None')
 
     symbol = QgsSymbol.defaultSymbol(geom_type)
-    if geom_type == QgsWkbTypes.PointGeometry:
+    if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
         point = symbol.symbolLayer(0)
         point.setColor(QColor('#cbcbcb'))
         point.setSize(4)
-        point.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
-    elif geom_type == QgsWkbTypes.LineGeometry:
+        point.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+    elif geom_type == QgsWkbTypes.GeometryType.LineGeometry:
         line = symbol.symbolLayer(0)
         line.setColor(QColor('#cbcbcb'))
         line.setWidth(0.75)
-        line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
     else:
         fill = symbol.symbolLayer(0)
         fill.setFillColor(QColor('#cbcbcb'))
-        fill.setBrushStyle(Qt.BDiagPattern)
-        fill.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        fill.setBrushStyle(Qt.BrushStyle.BDiagPattern)
+        fill.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
     return QgsSingleSymbolRenderer(symbol)
 
 

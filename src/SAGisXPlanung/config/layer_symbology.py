@@ -97,7 +97,7 @@ def generate_default_style_items():
                 )
                 items.append(style_item)
             else:
-                for geom_type in [QgsWkbTypes.PolygonGeometry, QgsWkbTypes.LineGeometry, QgsWkbTypes.PointGeometry]:
+                for geom_type in [QgsWkbTypes.GeometryType.PolygonGeometry, QgsWkbTypes.GeometryType.LineGeometry, QgsWkbTypes.GeometryType.PointGeometry]:
                     items.append(StyleItem(
                         base_type,
                         xplan_class,

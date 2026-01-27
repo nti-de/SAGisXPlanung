@@ -1,6 +1,11 @@
 from typing import TypeVar, Type
 
-from qgis.PyQt.QtWidgets import QUndoStack, QUndoCommand
+from SAGisXPlanung import PYQT5
+
+if PYQT5:
+    from qgis.PyQt.QtWidgets import QUndoStack, QUndoCommand
+else:
+    from qgis.PyQt.QtGui import QUndoStack, QUndoCommand
 
 
 T = TypeVar('T', bound=QUndoCommand)

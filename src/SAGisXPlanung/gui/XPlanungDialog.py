@@ -6,7 +6,7 @@ from asyncio import CancelledError
 from typing import List
 
 import qasync
-from PyQt5.QtWidgets import QMessageBox
+from qgis.PyQt.QtWidgets import QMessageBox
 
 from qgis.core import Qgis
 from qgis.PyQt import QtWidgets, sip
@@ -37,8 +37,6 @@ logger = logging.getLogger(__name__)
 uifile = os.path.join(BASE_DIR, 'ui/XPlanung_dialog_base.ui')
 FORM_CLASS = compile_ui_file(uifile)
 
-logger.debug(uifile)
-logger.debug(FORM_CLASS)
 
 style = """
 QToolButton {{
@@ -61,8 +59,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     def __init__(self, parent=None):
         super(XPlanungDialog, self).__init__(parent)
         self.setupUi(self)
-        logger.debug('setup ui called')
-        self.setAllowedAreas(self.allowedAreas() | Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.setAllowedAreas(self.allowedAreas() | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.iface = iface
         self.export_task = None
         self.import_task = None
@@ -76,7 +73,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.bInfo.clicked.connect(self.openDetails)
         self.button_cancel_import.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/cancel.svg'),
                                                    color=ApplicationColor.Tertiary))
-        self.button_cancel_import.setCursor(Qt.PointingHandCursor)
+        self.button_cancel_import.setCursor(Qt.CursorShape.PointingHandCursor)
         self.hover_filter = SVGButtonEventFilter(ApplicationColor.Tertiary, ApplicationColor.Primary)
         self.button_cancel_import.installEventFilter(self.hover_filter)
         self.button_cancel_import.clicked.connect(self.on_cancel_import)
@@ -87,7 +84,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.identifyTool.featureSaved.connect(self.onFeatureSaved)
         self.bIdentify.setIcon(QIcon(':/images/themes/default/mActionIdentify.svg'))
         self.bIdentify.clicked.connect(self.onIdentifyClicked)
-        self.bIdentify_shortcut = QtWidgets.QShortcut(QKeySequence(Qt.ALT | Qt.Key_Q), self)
+        self.bIdentify_shortcut = QtWidgets.QShortcut(QKeySequence(Qt.Modifier.ALT | Qt.Key.Key_Q), self)
         self.bIdentify_shortcut.activated.connect(lambda: self.bIdentify.click())
         self.iface.mapCanvas().mapToolSet.connect(self.onMapToolChanged)
 
@@ -192,7 +189,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             _show_dialog(XPCreatePlanDialog(iface, CLASSES['LP_Plan']))
         else:
             self.iface.messageBar().pushMessage("XPlanung Fehler", "Keine Planart ausgewählt",
-                                                level=Qgis.Warning)
+                                                level=Qgis.MessageLevel.Warning)
 
     @qasync.asyncSlot()
     async def export(self):
@@ -201,7 +198,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         Nutzt die aktive PostgreSQL-Verbindung die über das XPlanung-Einstellungsmenü konfiguriert wurde.
         """
         self.bExport.setEnabled(False)
-        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        QApplication.setOverrideCursor(QCursor(Qt.CursorShape.WaitCursor))
         self.bExport.repaint()
 
         try:
@@ -213,13 +210,13 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             url = QUrl.fromLocalFile(file_name)
             path = QDir.toNativeSeparators(file_name)
             iface.messageBar().pushMessage("XPlanung", f"Planwerk erfolgreich exportiert! <a href=\"{url}\">{path}</a>",
-                                           level=Qgis.Success)
+                                           level=Qgis.MessageLevel.Success)
         except ActionCanceledException:
             pass
         except Exception as e:
             logger.exception(e)
             iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht umgewandelt werden!",
-                                           str(e), level=Qgis.Critical)
+                                           str(e), level=Qgis.MessageLevel.Critical)
 
         finally:
             self.bExport.setEnabled(True)
@@ -233,7 +230,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         filepath = self.fwImportPath.filePath()
         if not filepath:
             self.iface.messageBar().pushMessage("XPlanung Fehler", "Kein Pfad zur XPlanGML-Datei angegeben",
-                                                level=Qgis.Critical)
+                                                level=Qgis.MessageLevel.Critical)
             return
 
         self.bImport.setEnabled(False)
@@ -252,14 +249,14 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
                     self,
                     "XPlanGML-Import unterbrochen",
                     f"{warning_text}\n\nImport trotzdem fortsetzen?",
-                    QMessageBox.Yes | QMessageBox.No,
-                    QMessageBox.No
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No
                 )
-                if result == QMessageBox.No:
+                if result == QMessageBox.StandardButton.No:
                     return
 
             # start import
-            self.setCursor(Qt.BusyCursor)
+            self.setCursor(Qt.CursorShape.BusyCursor)
 
             coro = asyncio.to_thread(import_plan, input_data, self.import_progress)
             self.import_task = asyncio.create_task(coro)
@@ -272,17 +269,17 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
                 warn_info_text = '\n\n '.join(w for w in import_result.warnings)
                 iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} importiert! "
                                                            f"({len(import_result.warnings)} Warnungen)",
-                                               warn_info_text, level=Qgis.Warning)
+                                               warn_info_text, level=Qgis.MessageLevel.Warning)
             else:
                 iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich importiert!",
-                                               level=Qgis.Success)
+                                               level=Qgis.MessageLevel.Success)
 
         except CancelledError:
             self.cancellation_token.set()
         except Exception as e:
             logger.exception(e)
             iface.messageBar().pushMessage("XPlanung Fehler", "XPlanGML-Dokument konnte nicht importiert werden!",
-                                           str(e), level=Qgis.Critical)
+                                           str(e), level=Qgis.MessageLevel.Critical)
 
         finally:
             self.bImport.setEnabled(True)
@@ -322,14 +319,14 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         # find object
         proxy_model = self.details_dialog.objectTree.proxy
         index_list = proxy_model.match(proxy_model.index(0, 0), XID_ROLE, xplan_item.xid, 1,
-                                       Qt.MatchWildcard | Qt.MatchRecursive)
+                                       Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
         if not index_list:
             return
 
         selection_model = self.details_dialog.objectTree.selectionModel()
-        selection_model.select(index_list[0], QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
+        selection_model.select(index_list[0], QItemSelectionModel.SelectionFlag.ClearAndSelect | QItemSelectionModel.SelectionFlag.Rows)
 
-        self.details_dialog.objectTree.scrollTo(index_list[0], QAbstractItemView.PositionAtCenter)
+        self.details_dialog.objectTree.scrollTo(index_list[0], QAbstractItemView.ScrollHint.PositionAtCenter)
 
     @qasync.asyncSlot(XPlanungItem)
     async def onFeatureSaved(self, xplan_item: XPlanungItem):
@@ -342,7 +339,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         # find parent, to add object
         model = self.details_dialog.objectTree.model
-        index_list = model.match(model.index(0, 0), XID_ROLE, parent_id, -1, Qt.MatchWildcard | Qt.MatchRecursive)
+        index_list = model.match(model.index(0, 0), XID_ROLE, parent_id, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
 
         if not index_list:
             return

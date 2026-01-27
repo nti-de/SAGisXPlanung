@@ -51,20 +51,20 @@ class LP_SchutzBestimmterTeileVonNaturUndLandschaft(MixedGeometry, LP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         border = QgsSimpleLineSymbolLayer(QColor('black'))
         border.setWidth(0.5)
         border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         symbol.appendSymbolLayer(border)
 
         outline_strip = QgsSimpleLineSymbolLayer(QColor('#0df919'))
         outline_strip.setWidth(8)
         outline_strip.setOffset(4.25)
-        outline_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        outline_strip.setPenJoinStyle(Qt.MiterJoin)
+        outline_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        outline_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
         symbol.appendSymbolLayer(outline_strip)
         symbol.setOpacity(0.75)
         return symbol
@@ -72,7 +72,7 @@ class LP_SchutzBestimmterTeileVonNaturUndLandschaft(MixedGeometry, LP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

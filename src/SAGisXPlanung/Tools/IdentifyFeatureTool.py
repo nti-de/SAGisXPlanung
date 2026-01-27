@@ -25,7 +25,7 @@ class IdentifyFeatureTool(QgsMapToolIdentify):
         self.keep_selection = keep_selection
         super(IdentifyFeatureTool, self).__init__(self.canvas)
 
-        cursor = QgsApplication.getThemeCursor(QgsApplication.CrossHair)
+        cursor = QgsApplication.getThemeCursor(QgsApplication.Cursor.CrossHair)
         self.setCursor(cursor)
 
     def activate(self):
@@ -41,17 +41,17 @@ class IdentifyFeatureTool(QgsMapToolIdentify):
         # super(IdentifyFeatureTool, self).setLayer(vl)
 
     def canvasReleaseEvent(self, event):
-        if event.button() == Qt.RightButton or not self.layer:
+        if event.button() == Qt.MouseButton.RightButton or not self.layer:
             self.canvas.unsetMapTool(self)
             return
 
         # event.snapPoint(QgsMapMouseEvent.SnapProjectConfig)
-        found_features = self.identify(event.x(), event.y(), [self.layer], QgsMapToolIdentify.LayerSelection)
+        found_features = self.identify(event.x(), event.y(), [self.layer], QgsMapToolIdentify.IdentifyMode.LayerSelection)
 
         if not self.keep_selection:
             layers = self.iface.mapCanvas().layers()
             for l in layers:
-                if l.type() == QgsMapLayer.VectorLayer:
+                if l.type() == QgsMapLayer.LayerType.VectorLayer:
                     l.removeSelection()
 
         if len(found_features) > 0:

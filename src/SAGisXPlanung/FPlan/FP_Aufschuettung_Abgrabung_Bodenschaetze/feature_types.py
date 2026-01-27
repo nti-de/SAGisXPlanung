@@ -27,7 +27,7 @@ class FP_Abgrabung(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
@@ -35,13 +35,13 @@ class FP_Abgrabung(MixedGeometry, FP_Objekt):
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.5)
         border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Triangle
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Triangle
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Triangle
 
         triangle_symbol = QgsSimpleMarkerSymbolLayer(
             shape=shape,
@@ -49,12 +49,12 @@ class FP_Abgrabung(MixedGeometry, FP_Objekt):
             strokeColor=QColor('#000000'),
             size=20
         )
-        triangle_symbol.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        triangle_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=30)
         marker_line.setAverageAngleLength(0)
         marker_line.setOffset(10)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(triangle_symbol)
@@ -68,7 +68,7 @@ class FP_Abgrabung(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -89,7 +89,7 @@ class FP_Aufschuettung(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
@@ -97,13 +97,13 @@ class FP_Aufschuettung(MixedGeometry, FP_Objekt):
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.5)
         border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Triangle
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Triangle
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Triangle
 
         triangle_symbol = QgsSimpleMarkerSymbolLayer(
             shape=shape,
@@ -111,14 +111,14 @@ class FP_Aufschuettung(MixedGeometry, FP_Objekt):
             strokeColor=QColor('#000000'),
             size=20
         )
-        triangle_symbol.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        triangle_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         triangle_symbol.setAngle(180)
-        triangle_symbol.setVerticalAnchorPoint(QgsMarkerSymbolLayer.Bottom)
+        triangle_symbol.setVerticalAnchorPoint(QgsMarkerSymbolLayer.VerticalAnchorPoint.Bottom)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=30)
         marker_line.setAverageAngleLength(0)
         marker_line.setOffset(20)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(triangle_symbol)
@@ -132,7 +132,7 @@ class FP_Aufschuettung(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

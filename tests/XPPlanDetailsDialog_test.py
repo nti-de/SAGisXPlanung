@@ -112,7 +112,7 @@ class TestXPPlanDetailsDialog_constructExplorer:
         dialog.construct_explorer(plan)
 
         model = dialog.objectTree.model
-        index_list = model.match(model.index(0, 0), Qt.DisplayRole, 'BP_Plan', -1, QtCore.Qt.MatchFixedString)
+        index_list = model.match(model.index(0, 0), Qt.ItemDataRole.DisplayRole, 'BP_Plan', -1, Qt.MatchFlag.MatchFixedString)
         assert len(index_list) == 1
         item = model.itemAtIndex(index_list[0])
         assert item._data.xtype == BP_Plan

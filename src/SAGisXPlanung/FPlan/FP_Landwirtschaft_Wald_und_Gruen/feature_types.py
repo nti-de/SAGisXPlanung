@@ -47,7 +47,7 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#7ec400'))
@@ -56,8 +56,8 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -65,9 +65,9 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Gruen', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Landwirtschaft_Wald_und_Gruenflaechen', geometry_type=geom_type,
                                  scale_factor=5)
@@ -100,7 +100,7 @@ class FP_Landwirtschaft(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#fff394'))
@@ -109,8 +109,8 @@ class FP_Landwirtschaft(MixedGeometry, FP_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -118,7 +118,7 @@ class FP_Landwirtschaft(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -152,7 +152,7 @@ class FP_WaldFlaeche(MixedGeometry, FlaechenschlussObjekt, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#00cb4d'))
@@ -161,8 +161,8 @@ class FP_WaldFlaeche(MixedGeometry, FlaechenschlussObjekt, FP_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -170,7 +170,7 @@ class FP_WaldFlaeche(MixedGeometry, FlaechenschlussObjekt, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

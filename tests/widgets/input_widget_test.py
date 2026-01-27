@@ -1,7 +1,7 @@
 from datetime import date
 import enum
 
-from PyQt5.QtWidgets import QLineEdit
+from qgis.PyQt.QtWidgets import QLineEdit
 from sqlalchemy import ARRAY, Column, Enum
 
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_NebenanlagenFlaeche

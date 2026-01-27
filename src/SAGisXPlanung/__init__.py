@@ -10,13 +10,24 @@ from enum import Enum
 from io import StringIO
 from pathlib import Path
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, QT_VERSION_STR
 from qgis.core import Qgis, QgsApplication
 from qgis.PyQt.uic import compiler
 
 import SAGisXPlanung
+from SAGisXPlanung.log_handler import setup_logger
 
 logger = logging.getLogger(__name__)
+
+
+PYQT5 = PYQT6 = False
+if "PyQt5" in sys.modules:
+    PYQT5 = True
+elif "PyQt6" in sys.modules:
+    PYQT6 = True
+
+def qt_version_tuple():
+    return tuple(map(int, QT_VERSION_STR.split('.')))
 
 
 # ================ LOG UNCAUGHT EXCEPTIONS ====================
@@ -54,7 +65,10 @@ def setup_asyncio():
 # https://lists.osgeo.org/pipermail/qgis-developer/2018-January/051342.html
 def compile_ui_file(ui_file):
     code_string = StringIO()
-    winfo = compiler.UICompiler().compileUi(ui_file, code_string, False, '_rc', '.')
+    if PYQT5:
+        winfo = compiler.UICompiler().compileUi(ui_file, code_string, False, '_rc', '.')
+    else:
+        winfo = compiler.UICompiler().compileUi(ui_file, code_string)
 
     ui_globals = {}
     exec(code_string.getvalue(), ui_globals)
@@ -79,11 +93,11 @@ DEPENDENCIES = [
     'requests',
     'packaging',
     'lxml',
-    'SQLAlchemy==1.4.49',
+    'SQLAlchemy==2.0.46',
     'GeoAlchemy2==0.12.5',
     'shapely>=2.0.2',
     'qasync==0.22.0',
-    'asyncpg==0.29.0'
+    'asyncpg==0.31.0'
 ]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -162,20 +176,14 @@ def qgis_info():
 
 
 def classFactory(iface):
-    """Load XPlanung class from file XPlanung.
-
-    :param iface: A QGIS interface instance.
-    :type iface: QgsInterface
-    """
-    formatter = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logfilename = os.path.join(BASE_DIR, 'XPlanung.log')
-    logging.basicConfig(filename=logfilename, level=logging.DEBUG, format=formatter, datefmt='%m.%d.%Y %H:%M:%S',
-                        force=True)
+    setup_logger(BASE_DIR, "SAGisXPlanung" if not RELEASE else "SAGisXPlanung_pro")
 
     # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
     logging.getLogger('qasync').setLevel(logging.ERROR)
     logging.getLogger('PyQt5.uic.uiparser').setLevel(logging.ERROR)
     logging.getLogger('PyQt5.uic.properties').setLevel(logging.ERROR)
+    logging.getLogger('PyQt6.uic.uiparser').setLevel(logging.ERROR)
+    logging.getLogger('PyQt6.uic.properties').setLevel(logging.ERROR)
 
     logger.info(system_info())
     logger.info(qgis_info())

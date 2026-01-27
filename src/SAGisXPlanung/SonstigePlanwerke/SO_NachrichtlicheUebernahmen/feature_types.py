@@ -48,7 +48,7 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#b69ad1'))
@@ -57,8 +57,8 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -66,7 +66,7 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -102,19 +102,19 @@ class SO_Bodenschutzrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.5)
         border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Cross
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Cross
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Cross
 
         cross_symbol = QgsSimpleMarkerSymbolLayer(
             shape=shape,
@@ -122,15 +122,15 @@ class SO_Bodenschutzrecht(MixedGeometry, SO_Objekt):
             strokeColor=QColor('#000000'),
             size=5
         )
-        cross_symbol.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
-        cross_symbol.setVerticalAnchorPoint(QgsMarkerSymbolLayer.Bottom)
+        cross_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+        cross_symbol.setVerticalAnchorPoint(QgsMarkerSymbolLayer.VerticalAnchorPoint.Bottom)
         cross_symbol.setStrokeWidth(0.5)
         cross_symbol.setAngle(45)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=10)
         marker_line.setAverageAngleLength(0)
         marker_line.setOffset(2)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(cross_symbol)
@@ -143,7 +143,7 @@ class SO_Bodenschutzrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -174,19 +174,19 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Square
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Square
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Square
         symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#ef0000'), size=2)
-        symbol_layer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=3)
         marker_line.setOffset(0.8)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(symbol_layer)
@@ -198,9 +198,9 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Denkmalschutz', QgsSymbol.defaultSymbol(geom_type),
                                  'SO_SonstigeGebiete', geometry_type=geom_type,
                                  scale_factor=5)
@@ -233,7 +233,7 @@ class SO_Strassenverkehrsrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
@@ -244,7 +244,7 @@ class SO_Strassenverkehrsrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -319,7 +319,7 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
@@ -330,7 +330,7 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -365,7 +365,7 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#c1dfea'))
@@ -376,7 +376,7 @@ class SO_Gewaesser(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -411,7 +411,7 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
@@ -420,8 +420,8 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         blue_strip = QgsSimpleLineSymbolLayer(QColor('#45a1d0'))
         blue_strip.setWidth(5)
         blue_strip.setOffset(2.5)
-        blue_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        blue_strip.setPenJoinStyle(Qt.MiterJoin)
+        blue_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        blue_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
         symbol.appendSymbolLayer(blue_strip)
 
         return symbol
@@ -429,7 +429,7 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser')
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -460,7 +460,7 @@ class SO_Wasserrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def line_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         blue_outline = QgsSimpleLineSymbolLayer(QColor('#377ded'))
@@ -471,7 +471,7 @@ class SO_Wasserrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.LineGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.LineGeometry:
             return QgsSingleSymbolRenderer(cls.line_symbol())
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
@@ -519,7 +519,7 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
@@ -528,8 +528,8 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
         colored_strip = QgsSimpleLineSymbolLayer(QColor('#c052c2'))
         colored_strip.setWidth(5)
         colored_strip.setOffset(2.5)
-        colored_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        colored_strip.setPenJoinStyle(Qt.MiterJoin)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
         symbol.appendSymbolLayer(colored_strip)
 
         return symbol
@@ -537,7 +537,7 @@ class SO_Luftverkehrsrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'SO_SonstigeGebiete')
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

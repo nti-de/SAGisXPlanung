@@ -66,7 +66,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.plan_xid = None
         self.plan_type = None
         self.setupUi(self)
-        self.setAllowedAreas(self.allowedAreas() | Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.setAllowedAreas(self.allowedAreas() | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.setObjectName('xplanung-details')
 
         self.deleteIcon = QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
@@ -78,7 +78,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bEdit.clicked.connect(self.show_attribute_page)
         # self.bEdit.setDisabled(True)
         self.bPrev.clicked.connect(self.prevPage)
-        self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.Save)
+        self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.StandardButton.Save)
         self.bSave.setVisible(False)
 
         self.bEditMain.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit.svg')))
@@ -107,10 +107,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.parish.parishEditRequested.connect(self.parishEdit.show)
 
         # self.objectTree.selectionModel().currentChanged.connect(lambda: self.bEdit.setDisabled(False))
-        self.objectTree.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.objectTree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.objectTree.customContextMenuRequested.connect(self.showObjectTreeContextMenu)
         self.objectTree.doubleClicked.connect(self.show_attribute_page)
-        self.objectTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.objectTree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.stackedWidget.currentChanged.connect(self.updateButtons)
 
         self.validation_spinner = WaitingSpinner(self.validation_result_view, disableParentWhenSpinning=True, radius=5, lines=20,
@@ -124,8 +124,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.undo_stack.indexChanged.connect(self.onUndoStackChanged)
         self.bUndo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/undo.svg'), color='#1F2937'))
         self.bRedo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/redo.svg'), color='#1F2937'))
-        self.bUndo.setCursor(Qt.PointingHandCursor)
-        self.bRedo.setCursor(Qt.PointingHandCursor)
+        self.bUndo.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.bRedo.setCursor(Qt.CursorShape.PointingHandCursor)
         self.bUndo.setDisabled(True)
         self.bRedo.setDisabled(True)
         button_styling = '''
@@ -148,7 +148,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def changeEvent(self, event: QEvent):
         super(XPPlanDetailsDialog, self).changeEvent(event)
         # widget dock status is changing
-        if event.type() == QEvent.ParentChange:
+        if event.type() == QEvent.Type.ParentChange:
             self.updateButtons()
 
     async def initialize_data(self, xid: str, keep_page=False):
@@ -212,7 +212,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     @pyqtSlot(bool)
     def onEditMainClicked(self, clicked: bool):
         with Session.begin() as session:
-            plan: XP_Plan = session.get(self.plan_type, self.plan_xid, [selectinload('*')])
+            plan: XP_Plan = session.get(self.plan_type, self.plan_xid, options=[selectinload('*')])
 
             edit_widget = plan.edit_widget()
             self.insertWidgetIntoNewPage(edit_widget)
@@ -228,7 +228,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 xp_gemeinde = session.query(XP_Gemeinde).get(parish_id)
                 parish_list.append(xp_gemeinde)
 
-            plan = session.query(XP_Plan).options(lazyload('*'), load_only('id')).get(self.plan_xid)
+            plan = session.query(XP_Plan).options(lazyload('*'), load_only(XP_Plan.id)).get(self.plan_xid)
             setattr(plan, 'gemeinde', parish_list)
 
     def construct_explorer(self, plan):
@@ -257,7 +257,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         if len(selected_indices) > 1:
             self.create_multi_selection_menu(menu, selected_indices)
-            menu.exec_(self.objectTree.mapToGlobal(point))
+            menu.exec(self.objectTree.mapToGlobal(point))
             return
 
         item: ClassNode = selected_indices[0].model().itemAtIndex(selected_indices[0])
@@ -317,7 +317,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.addSeparator()
             menu.addMenu(data_class_menu)
 
-        menu.exec_(self.objectTree.viewport().mapToGlobal(point))
+        menu.exec(self.objectTree.viewport().mapToGlobal(point))
 
     def create_multi_selection_menu(self, menu: QMenu, selected_indices: List[QModelIndex]):
         # edit
@@ -414,7 +414,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         selected_ids = tab_widget.get_selected_ids()
                         attach_objects = []
                         for selected_id in selected_ids:
-                            o = await session.get(tab_widget.create_type, selected_id, [selectinload('*')])
+                            o = await session.get(tab_widget.create_type, selected_id, options=[selectinload('*')])
                             attach_objects.append(o)
 
                         if not attach_objects:
@@ -494,7 +494,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         # find parent, to add object
         model = self.objectTree.model
-        index_list = model.match(model.index(0, 0), XID_ROLE, parent_id, -1, Qt.MatchWildcard | Qt.MatchRecursive)
+        index_list = model.match(model.index(0, 0), XID_ROLE, parent_id, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
 
         if not index_list:
             return
@@ -506,7 +506,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         # find node to delete
         model = self.objectTree.model
         index_list = model.match(model.index(0, 0), XID_ROLE, node.xplanItem().xid, -1,
-                                 Qt.MatchWildcard | Qt.MatchRecursive)
+                                 Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
 
         if not index_list:
             return
@@ -572,7 +572,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     t += f'<li>{item.__class__.__name__}: {item.id}</li>'
                 t += '</ul>'
                 msg.setText(t)
-            ret = msg.exec_()
+            ret = msg.exec()
             if ret == QtWidgets.QMessageBox.Cancel:
                 return False, []
 
@@ -594,19 +594,19 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             for item in xplan_items:
                 m = self.objectTree.model
                 # find item
-                index_list = m.match(m.index(0, 0), XID_ROLE, item.xid, -1, Qt.MatchWildcard | Qt.MatchRecursive)
+                index_list = m.match(m.index(0, 0), XID_ROLE, item.xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
                 if index_list:
                     index_list[0].internalPointer().flag_new = True
                     m.dataChanged.emit(index_list[0], index_list[0])
                     continue
 
                 # else find parent and add new item
-                index_list = m.match(m.index(0, 0), XID_ROLE, item.parent_xid, -1, Qt.MatchWildcard | Qt.MatchRecursive)
+                index_list = m.match(m.index(0, 0), XID_ROLE, item.parent_xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
                 if index_list:
                     await self.addExplorerItem(index_list[0], item, 0)
 
         self.bFixAreas.setEnabled(True)
-        iface.messageBar().pushMessage("XPlanung", "Bilden des Flaechenschluss abgeschlossen", level=Qgis.Info)
+        iface.messageBar().pushMessage("XPlanung", "Bilden des Flaechenschluss abgeschlossen", level=Qgis.MessageLevel.Info)
 
     @qasync.asyncSlot()
     async def startValidation(self):

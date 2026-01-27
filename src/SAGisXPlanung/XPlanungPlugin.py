@@ -76,8 +76,8 @@ class XPlanung(QObject):
 
         self.dockWidget = XPlanungDialog(parent=iface.mainWindow())
         self.dockWidget.setMaximumWidth(1000)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dockWidget.details_dialog)
-        self.iface.addTabifiedDockWidget(Qt.RightDockWidgetArea, self.dockWidget, ['xplanung-details'], raiseTab=True)
+        self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidget.details_dialog)
+        self.iface.addTabifiedDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dockWidget, ['xplanung-details'], raiseTab=True)
         self.dockWidget.hide()
         self.dockWidget.details_dialog.hide()
 
@@ -184,7 +184,7 @@ class XPlanung(QObject):
 
     @pyqtSlot()
     def showSettings(self):
-        self.settings.exec_()
+        self.settings.exec()
 
         self.dockWidget.details_dialog.hide()
         if not self.is_valid_db():
@@ -228,14 +228,14 @@ class XPlanung(QObject):
         settings.setFlag(Qgis.MapSettingsFlag.Antialiasing, True)
         settings.setFlag(Qgis.MapSettingsFlag.ForceVectorOutput, True)
 
-        printer = QPrinter(QPrinter.HighResolution)
+        printer = QPrinter(QPrinter.PrinterMode.HighResolution)
         printer.setOutputFileName(filename[0])
-        printer.setOutputFormat(QPrinter.PdfFormat)
+        printer.setOutputFormat(QPrinter.OutputFormat.PdfFormat)
 
         printer.setPageOrientation(QPageLayout.Orientation.Portrait)
         outputSize = settings.outputSize()
-        printer.setPaperSize(QSizeF(outputSize * 25.4 / settings.outputDpi()), QPrinter.Millimeter)
-        printer.setPageMargins(0, 0, 0, 0, QPrinter.Millimeter)
+        printer.setPaperSize(QSizeF(outputSize * 25.4 / settings.outputDpi()), QPrinter.Unit.Millimeter)
+        printer.setPageMargins(0, 0, 0, 0, QPrinter.Unit.Millimeter)
         printer.setResolution(settings.outputDpi())
 
         dest_painter = QPainter(printer)
@@ -269,7 +269,7 @@ class XPlanung(QObject):
         path = QDir.toNativeSeparators(filename[0])
         self.iface.messageBar().pushMessage("Als PDF Speichern",
                                             f"Kartenausschnitt erfolgreich unter <a href=\"{url}\">{path}</a> gespeichert",
-                                            level=Qgis.Success)
+                                            level=Qgis.MessageLevel.Success)
 
     def on_project_loaded(self):
         logger.debug('project loaded')
@@ -308,11 +308,11 @@ class XPlanung(QObject):
 
         msg_box = QMessageBox()
         msg_box.setWindowTitle('Inkompatiblität mit der Datenbank')
-        msg_box.setIcon(QMessageBox.Warning)
+        msg_box.setIcon(QMessageBox.Icon.Warning)
         msg_box.setText(meta.error)
-        settings_button = msg_box.addButton('Einstellungen', QMessageBox.YesRole)
-        msg_box.addButton(QMessageBox.Cancel)
-        msg_box.setEscapeButton(QMessageBox.Cancel)
+        settings_button = msg_box.addButton('Einstellungen', QMessageBox.ButtonRole.YesRole)
+        msg_box.addButton(QMessageBox.StandardButton.Cancel)
+        msg_box.setEscapeButton(QMessageBox.StandardButton.Cancel)
         msg_box.exec()
         if msg_box.clickedButton() == settings_button:
             db_page = self.settings.navigate_to_page(DatabaseConfigPage)

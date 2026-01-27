@@ -130,7 +130,8 @@ def plan_factory():
             bereich.planinhalt.append(point_object)
 
             bp_objekt_line = BP_BauGrenze()
-            bp_objekt_line.position = from_shape(MultiLineString([((0, 0), (1, 1)), ((-1, 0), (1, 0))]))
+            bp_objekt_line.position = WKTElement('LINESTRING (30.5 10.2, 31.0 11.8, 32.25 12.0)', srid=4326)
+
             bp_objekt_line.bautiefe = 5.3
             bp_objekt_line.aufschrift = 'baugrenze'
             bereich.planinhalt.append(bp_objekt_line)
@@ -306,12 +307,33 @@ class TestGMLWriter_writeFeature:
 
         xplan_schema.assertValid(root)
 
+    def test_write_feature_with_codelist(self, gml_writer, fplan_schema):
+        codelist = CodeList()
+        codelist.name = "FP_DetailArtDerBaulNutzung"
+        codelist.uri = "https://"
+        codelist_value = FP_DetailArtDerBaulNutzung()
+        codelist_value.codelist = codelist
+        codelist_value.id = uuid.uuid4()
+        codelist_value.value = 'Solarpark'
+        codelist_value.definition = 'Photovoltaikanlage'
+
+        fp_bau = FP_BebauungsFlaeche()
+        fp_bau.rechtscharakter = FP_Rechtscharakter.Darstellung
+        fp_bau.flaechenschluss = True
+        fp_bau.position = WKTElement('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)))', srid=4326)
+        fp_bau.detaillierteArtDerBaulNutzung = codelist_value
+        fp_bau.detaillierteArtDerBaulNutzung_id = codelist_value.id
+
+        gml_writer.write_feature(fp_bau)
+        assert gml_writer.root[-1:] is not None
+        fplan_schema.assertValid(gml_writer.root[-1:][0])
+
     def test_writeXPObject_empty_array_enum_value_issue23(self, gml_writer, fplan_schema):
         obj = FP_WaldFlaeche()
 
         obj.betreten = []
         obj.rechtscharakter = FP_Rechtscharakter.Darstellung
-        obj.position = from_shape(MultiPolygon([Polygon([(0, 0), (1, 1), (1, 0)])]), srid=4326)
+        obj.position = WKTElement('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)))', srid=4326)
         obj.flaechenschluss = True
 
         gml_writer.write_feature(obj)
@@ -323,7 +345,7 @@ class TestGMLWriter_writeFeature:
 
         obj.betreten = [XP_WaldbetretungTyp.Reiten, XP_WaldbetretungTyp.Fahren]
         obj.rechtscharakter = FP_Rechtscharakter.Darstellung
-        obj.position = from_shape(MultiPolygon([Polygon([(0, 0), (1, 1), (1, 0)])]), srid=4326)
+        obj.position = WKTElement('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)))', srid=4326)
         obj.flaechenschluss = True
 
         gml_writer.write_feature(obj)
@@ -334,7 +356,7 @@ class TestGMLWriter_writeFeature:
         obj = BP_GruenFlaeche()
 
         obj.rechtscharakter = BP_Rechtscharakter.Festsetzung
-        obj.position = from_shape(MultiPolygon([Polygon([(0, 0), (1, 1), (1, 0)])]), srid=4326)
+        obj.position = WKTElement('MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)))', srid=4326)
 
         gml_writer.write_feature(obj)
         assert gml_writer.root[-1:] is not None

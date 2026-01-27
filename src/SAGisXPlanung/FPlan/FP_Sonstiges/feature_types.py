@@ -1,6 +1,6 @@
 import logging
 
-from PyQt5.QtGui import QColor
+from qgis.PyQt.QtGui import QColor
 from qgis._core import QgsFillSymbol, QgsLinePatternFillSymbolLayer, QgsUnitTypes, QgsSimpleLineSymbolLayer
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
@@ -52,7 +52,7 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Kennzeichnung', QgsSymbol.defaultSymbol(geom_type),
                                  'Sonstiges', geometry_type=geom_type,
                                  scale_factor=5)
@@ -76,7 +76,7 @@ class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         line_pattern = QgsLinePatternFillSymbolLayer()
-        line_pattern.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        line_pattern.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         line_pattern.setLineAngle(45)
         line_pattern.setDistance(30)
         line_pattern.setLineWidth(1)
@@ -87,7 +87,7 @@ class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
 
         line = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -95,7 +95,7 @@ class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

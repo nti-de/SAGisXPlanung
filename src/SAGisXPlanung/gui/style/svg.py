@@ -6,7 +6,7 @@ def load_svg(svg, color=None):
     img = QPixmap(svg)
     if color:
         qp = QPainter(img)
-        qp.setCompositionMode(QPainter.CompositionMode_SourceIn)
+        qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
         qp.fillRect(img.rect(), QColor(color))
         qp.end()
     return QIcon(img)
@@ -21,9 +21,9 @@ class SVGButtonEventFilter(QObject):
         self.hover_color = hover_color
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.HoverEnter:
+        if event.type() == QEvent.Type.HoverEnter:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color=self.hover_color))
-        elif event.type() == QEvent.HoverLeave:
+        elif event.type() == QEvent.Type.HoverLeave:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color=self.color))
         return False
 

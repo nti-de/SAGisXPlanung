@@ -24,7 +24,7 @@ def update_field_values(xplan_items: List[XPlanungItem], update_map: dict[str, A
     feature_ids = []
     xids = [item.xid for item in xplan_items]
     cp = layer.customProperties()
-    for feat in layer.getFeatures(QgsFeatureRequest().setFlags(QgsFeatureRequest.NoGeometry).setNoAttributes()):
+    for feat in layer.getFeatures(QgsFeatureRequest().setFlags(QgsFeatureRequest.Flag.NoGeometry).setNoAttributes()):
         id_prop = cp.value(f'xplanung/feat-{feat.id()}')
         if id_prop in xids:
             feature_ids.append(feat.id())

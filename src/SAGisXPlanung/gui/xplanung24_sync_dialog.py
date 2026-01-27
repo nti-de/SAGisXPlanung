@@ -82,8 +82,8 @@ QProgressBar::chunk {{
 
 class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
-    PLAN_ID_ROLE = Qt.UserRole + 1
-    PLAN_DATA_ROLE = Qt.UserRole + 2
+    PLAN_ID_ROLE = Qt.ItemDataRole.UserRole + 1
+    PLAN_DATA_ROLE = Qt.ItemDataRole.UserRole + 2
 
     def __init__(self, parent=iface.mainWindow(), selected_plans=None):
         super().__init__(parent)
@@ -106,8 +106,8 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         model = QStringListModel(plan_names)
         self.selected_plan_list.setModel(model)
         self.selected_plan_list.setMouseTracking(True)
-        self.selected_plan_list.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.selected_plan_list.setSelectionMode(QListView.NoSelection)
+        self.selected_plan_list.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.selected_plan_list.setSelectionMode(QListView.SelectionMode.NoSelection)
         self.selected_plan_list.setStyleSheet("QListView::item { padding: 5px; }")
         self.selected_plan_list.setItemDelegate(HighlightRowDelegate())
         self.list_proxy_style = HighlightRowProxyStyle('Fusion')
@@ -126,15 +126,15 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.account_plan_table.setModel(account_model)
         self.account_plan_table.setMouseTracking(True)
         self.account_plan_table.setSortingEnabled(True)
-        self.account_plan_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.account_plan_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.account_plan_table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.account_plan_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.account_plan_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.account_plan_table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
         # self.account_plan_table.setStyleSheet("QTableView::item { padding: 5px; }")
         self.account_plan_table.setItemDelegateForColumn(2, DateTimeDisplayDelegate(self))
         self.account_plan_table.horizontalHeader().setStretchLastSection(False)
-        self.account_plan_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.account_plan_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.account_plan_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.account_plan_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
         self.account_plan_table.verticalHeader().setVisible(False)
         account_proxy_style = RemoveFrameFocusProxyStyle('Fusion')
         account_proxy_style.setParent(self)
@@ -191,10 +191,10 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.tab_download.setStyleSheet(qss)
 
     def next_check_state(self):
-        if self.select_all_checkbox.checkState() == Qt.Unchecked:
-            self.select_all_checkbox.setCheckState(Qt.Checked)
+        if self.select_all_checkbox.checkState() == Qt.CheckState.Unchecked:
+            self.select_all_checkbox.setCheckState(Qt.CheckState.Checked)
         else:
-            self.select_all_checkbox.setCheckState(Qt.Unchecked)
+            self.select_all_checkbox.setCheckState(Qt.CheckState.Unchecked)
 
     def update_upload_button_state(self):
         has_selected_plans = bool(self.selected_plans)
@@ -208,7 +208,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
         for i in range(model.rowCount()):
             checkbox_item = model.item(i, 0)
-            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+            if checkbox_item and checkbox_item.checkState() == Qt.CheckState.Checked:
                 checked_count += 1
 
         if checked_count > 0:
@@ -226,10 +226,10 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         model = self.account_plan_table.model()
 
         # Select/deselect the entire row based on checkbox state
-        if item.checkState() == Qt.Checked:
-            selection_model.select(model.index(row, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+        if item.checkState() == Qt.CheckState.Checked:
+            selection_model.select(model.index(row, 0), QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)
         else:
-            selection_model.select(model.index(row, 0), QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+            selection_model.select(model.index(row, 0), QItemSelectionModel.SelectionFlag.Deselect | QItemSelectionModel.SelectionFlag.Rows)
 
         self.update_download_button_state()
         self.update_select_all_checkbox_state()
@@ -243,22 +243,22 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         checked_count = 0
         for i in range(model.rowCount()):
             checkbox_item = model.item(i, 0)
-            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+            if checkbox_item and checkbox_item.checkState() == Qt.CheckState.Checked:
                 checked_count += 1
 
         # Block signals to avoid recursion
         self.select_all_checkbox.blockSignals(True)
         if checked_count == 0:
-            self.select_all_checkbox.setCheckState(Qt.Unchecked)
+            self.select_all_checkbox.setCheckState(Qt.CheckState.Unchecked)
         elif checked_count == model.rowCount():
-            self.select_all_checkbox.setCheckState(Qt.Checked)
+            self.select_all_checkbox.setCheckState(Qt.CheckState.Checked)
         else:
-            self.select_all_checkbox.setCheckState(Qt.PartiallyChecked)
+            self.select_all_checkbox.setCheckState(Qt.CheckState.PartiallyChecked)
         self.select_all_checkbox.blockSignals(False)
 
     def on_select_all_changed(self, state):
         model = self.account_plan_table.model()
-        check_state = Qt.Checked if state == Qt.Checked else Qt.Unchecked
+        check_state = Qt.CheckState.Checked if state == Qt.CheckState.Checked else Qt.CheckState.Unchecked
         selection_model = self.account_plan_table.selectionModel()
 
         model.itemChanged.disconnect(self.on_plan_check_changed)
@@ -266,10 +266,10 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
             checkbox_item = model.item(i, 0)
             if checkbox_item:
                 checkbox_item.setCheckState(check_state)
-                if check_state == Qt.Checked:
-                    selection_model.select(model.index(i, 0), QItemSelectionModel.Select | QItemSelectionModel.Rows)
+                if check_state == Qt.CheckState.Checked:
+                    selection_model.select(model.index(i, 0), QItemSelectionModel.SelectionFlag.Select | QItemSelectionModel.SelectionFlag.Rows)
                 else:
-                    selection_model.select(model.index(i, 0), QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+                    selection_model.select(model.index(i, 0), QItemSelectionModel.SelectionFlag.Deselect | QItemSelectionModel.SelectionFlag.Rows)
 
         model.itemChanged.connect(self.on_plan_check_changed)
 
@@ -311,14 +311,14 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                 for plan in remote_plans:
                     name_item = QStandardItem(plan.get('name', ''))
                     name_item.setCheckable(True)
-                    name_item.setCheckState(Qt.Unchecked)
+                    name_item.setCheckState(Qt.CheckState.Unchecked)
                     name_item.setData(plan['id'], self.PLAN_ID_ROLE)
                     name_item.setData(plan, self.PLAN_DATA_ROLE)
                     plan_id_item = QStandardItem(plan.get('planId', ''))
                     plan_id_item.setEditable(False)
                     created_at = QDateTime.fromMSecsSinceEpoch(int(plan.get('createdAt', 0)))
                     date_item = QStandardItem()
-                    date_item.setData(created_at, Qt.DisplayRole)
+                    date_item.setData(created_at, Qt.ItemDataRole.DisplayRole)
                     date_item.setEditable(False)
                     model.appendRow([name_item, plan_id_item, date_item])
 
@@ -331,7 +331,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         finally:
             self.account_empty_state.set_active(True)
             self.account_plan_table.setEnabled(True)
-            self.select_all_checkbox.setCheckState(Qt.Unchecked)
+            self.select_all_checkbox.setCheckState(Qt.CheckState.Unchecked)
             self.update_download_button_state()
 
     def fetch_remote_plans(self, api_key):
@@ -380,7 +380,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
         for i in range(model.rowCount()):
             checkbox_item = model.item(i, 0)
-            if checkbox_item and checkbox_item.checkState() == Qt.Checked:
+            if checkbox_item and checkbox_item.checkState() == Qt.CheckState.Checked:
                 plan_data = checkbox_item.data(self.PLAN_DATA_ROLE)
                 checked_plans.append(plan_data)
 
@@ -415,15 +415,15 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
 
                         if db_result:
                             msg = QMessageBox()
-                            msg.setIcon(QMessageBox.Warning)
+                            msg.setIcon(QMessageBox.Icon.Warning)
                             msg.setText(f"Plan existiert bereits in der Datenbank.")
                             msg.setWindowTitle("XPlanGML Import unterbrochen")
-                            msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-                            button_yes = msg.button(QMessageBox.Yes)
+                            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+                            button_yes = msg.button(QMessageBox.StandardButton.Yes)
                             button_yes.setText("Überschreiben")
-                            msg.setDefaultButton(QMessageBox.Cancel)
-                            ret = msg.exec_()
-                            if ret == QMessageBox.Cancel:
+                            msg.setDefaultButton(QMessageBox.StandardButton.Cancel)
+                            ret = msg.exec()
+                            if ret == QMessageBox.StandardButton.Cancel:
                                 self.download_status_label.setText('')
                                 return
                             overwrite = True
@@ -437,7 +437,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                             QMetaObject.invokeMethod(
                                 self.download_progress,
                                 "setValue",
-                                Qt.QueuedConnection,
+                                Qt.ConnectionType.QueuedConnection,
                                 Q_ARG(int, percentage)
                             )
 

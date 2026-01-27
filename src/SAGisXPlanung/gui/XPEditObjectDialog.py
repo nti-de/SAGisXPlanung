@@ -24,7 +24,7 @@ class XPEditObjectDialog(QDialog):
 
         self.xplan_item = xplan_item
         self.layout = QVBoxLayout(self)
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
 

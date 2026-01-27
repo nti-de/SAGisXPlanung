@@ -3,13 +3,12 @@ import re
 from enum import Enum
 from typing import List
 
-from PyQt5.QtCore import QRectF
-from PyQt5.QtGui import QPaintEvent, QPainter
-from PyQt5.QtSvg import QSvgRenderer
-from qgis.PyQt.QtCore import QAbstractTableModel, QModelIndex, Qt
-from qgis.PyQt.QtGui import QIcon, QColor
+from qgis.PyQt.QtSvg import QSvgRenderer
+from qgis.PyQt.QtCore import QAbstractTableModel, QModelIndex, Qt, QPointF, QRectF
+from qgis.PyQt.QtGui import QIcon, QColor, QPaintEvent, QPainter
 from qgis.PyQt.QtWidgets import QTreeView, QAbstractItemView, QMenu, QAction
 from qgis.PyQt import sip
+
 from qgis.gui import QgsGeometryRubberBand
 from qgis.core import (QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon,
                        QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
@@ -51,24 +50,24 @@ class ValidationResultModel(QAbstractTableModel):
     def columnCount(self, parent=QModelIndex()):
         return 2
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             result = self.results[index.row()]
             if index.column() == 0:
                 return result.xtype.__name__
             elif index.column() == 1:
                 return result.error_msg if result.error_msg else ""
-        if role == Qt.ToolTipRole:
+        if role == Qt.ItemDataRole.ToolTipRole:
             result = self.results[index.row()]
             return _error_detail_message(result)
 
         return None
 
-    def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Horizontal:
             return self.headers[section]
         return None
 
@@ -108,14 +107,14 @@ class ValidationTreeView(QTreeView):
         self.proxy_style.setParent(self)
         self.setStyle(self.proxy_style)
         self.setMouseTracking(True)
-        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
         self.icon_paths = {
             ValidationState.ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
             ValidationState.SUCCESS: os.path.join(BASE_DIR, 'gui/resources/valid.svg'),
         }
 
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_context_menu)
 
         self.destroyed.connect(self.__del__)
@@ -152,7 +151,7 @@ class ValidationTreeView(QTreeView):
                                'Geometriefehler auf Karte hervorheben')
         flash_action.triggered.connect(lambda: self.highlight_geometry_error(index))
         menu.addAction(flash_action)
-        menu.exec_(self.viewport().mapToGlobal(position))
+        menu.exec(self.viewport().mapToGlobal(position))
 
     def highlight_geometry_error(self, index: QModelIndex):
         """ Copy the error message of the selected row to the clipboard """
@@ -214,15 +213,15 @@ class ValidationTreeView(QTreeView):
         if not icon_path:
             return
 
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setRenderHint(QPainter.SmoothPixmapTransform)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
         painter.setPen(QColor(ApplicationColor.Grey600))
 
         renderer = QSvgRenderer(icon_path)
         view_rect = self.viewport().rect()
         icon_size = 24
         icon_rect = QRectF(0, 0, icon_size, icon_size)
-        icon_rect.moveCenter(view_rect.center())
+        icon_rect.moveCenter(QPointF(view_rect.center()))
         icon_rect.translate(0, -10)
 
         renderer.render(painter, icon_rect)
@@ -231,4 +230,4 @@ class ValidationTreeView(QTreeView):
         text_rect = painter.fontMetrics().boundingRect(text)
         text_rect.moveCenter(view_rect.center())
         text_rect.translate(0, int(icon_size / 2))
-        painter.drawText(text_rect, Qt.AlignCenter, text)
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, text)

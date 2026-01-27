@@ -59,7 +59,7 @@ class TestXPlanungDialog:
 
 
     def test_onIdentifyClicked(self, dialog, qtbot):
-        qtbot.mouseClick(dialog.bIdentify, Qt.LeftButton)
+        qtbot.mouseClick(dialog.bIdentify, Qt.MouseButton.LeftButton)
 
         assert dialog.identifyTool is not None
         assert iface.mapCanvas().mapTool() == dialog.identifyTool
@@ -79,7 +79,7 @@ class TestXPlanungDialog:
         model = dialog.details_dialog.objectTree.model
         await dialog.onFeatureSaved(bpbereich_item)
 
-        index_list = model.match(model.index(0, 0), XID_ROLE, bpbereich_item.xid, -1, Qt.MatchWildcard | Qt.MatchRecursive)
+        index_list = model.match(model.index(0, 0), XID_ROLE, bpbereich_item.xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
         assert index_list
         assert index_list[0].parent().isValid()
         assert index_list[0].internalPointer().flag_new
@@ -99,5 +99,5 @@ class TestXPlanungDialog:
 
         index_list = dialog.details_dialog.objectTree.selectionModel().selectedIndexes()
         assert index_list
-        assert index_list[0].data(Qt.DisplayRole) == 'BP_Plan'
+        assert index_list[0].data(Qt.ItemDataRole.DisplayRole) == 'BP_Plan'
 

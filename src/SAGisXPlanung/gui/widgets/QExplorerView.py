@@ -8,7 +8,7 @@ from qgis.PyQt.QtWidgets import (QTreeView)
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle, FlagNewRole
 
-XID_ROLE = Qt.UserRole + 2
+XID_ROLE = Qt.ItemDataRole.UserRole + 2
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ class QExplorerView(QTreeView):
             proxy1 = FlatProxyModel()
             proxy1.setSourceModel(self.model)
             self.proxy.setSourceModel(proxy1)
-            self.proxy.sort(0, Qt.AscendingOrder)
+            self.proxy.sort(0, Qt.SortOrder.AscendingOrder)
             self.sorting = SortOptions.SortAlphabet
         elif SortOptions(opts) == SortOptions.SortCategory:
             proxy1 = CategoryProxyModel()
@@ -136,11 +136,11 @@ class ExplorerTreeModel(QAbstractItemModel):
         self.endRemoveRows()
         return True
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
         node = index.internalPointer()
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return node.data(index.column())
         if role == FlagNewRole:
             return node.flag_new
@@ -148,7 +148,7 @@ class ExplorerTreeModel(QAbstractItemModel):
             return node.xplanItem().xid
         return None
 
-    def setData(self, index: QModelIndex, value, role=Qt.EditRole):
+    def setData(self, index: QModelIndex, value, role=Qt.ItemDataRole.EditRole):
         if role == FlagNewRole:
             node = index.internalPointer()
             if not node:
@@ -156,8 +156,8 @@ class ExplorerTreeModel(QAbstractItemModel):
             node.flag_new = value
             self.dataChanged.emit(index, index)
 
-    def headerData(self, col, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(self, col, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self._horizontal_header[col]
 
     def indexForTreeItem(self, node):
@@ -344,9 +344,9 @@ class CategoryProxyModel(QAbstractProxyModel):
         index = self.mapToSource(index)
         return self.sourceModel().itemAtIndex(index)
 
-    def data(self, index: QModelIndex, role=Qt.DisplayRole):
+    def data(self, index: QModelIndex, role=Qt.ItemDataRole.DisplayRole):
         if not index.parent().isValid() and index.row() < len(self.categories):
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 return self.categories[index.row()]
 
         return self.sourceModel().data(self.mapToSource(index), role)

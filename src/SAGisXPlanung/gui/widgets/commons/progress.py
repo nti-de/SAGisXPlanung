@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QProgressBar
-from PyQt5.QtCore import Qt
+from qgis.PyQt.QtWidgets import QProgressBar
+from qgis.PyQt.QtCore import Qt
 
 from SAGisXPlanung.gui.style import ApplicationColor
 
@@ -18,7 +18,7 @@ class ProgressBar(QProgressBar):
         self.setMaximum(100)
         self.setMinimum(0)
         self.setValue(0)
-        self.setOrientation(Qt.Horizontal)
+        self.setOrientation(Qt.Orientation.Horizontal)
 
         self.apply_style()
 

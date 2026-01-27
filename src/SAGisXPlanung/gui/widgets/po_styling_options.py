@@ -21,7 +21,7 @@ class QCommonStylingOptions(QWidget):
         self._layout.addWidget(QLabel('Drehwinkel'), 1, 0)
 
         vbox = QVBoxLayout()
-        self.sizeSlider = QSlider(Qt.Horizontal, self)
+        self.sizeSlider = QSlider(Qt.Orientation.Horizontal, self)
         self.sizeSlider.setRange(1, 99)
         self.sizeSlider.setSliderPosition(50)
         self.sizeSlider.setSingleStep(1)
@@ -29,9 +29,9 @@ class QCommonStylingOptions(QWidget):
 
         hbox = QHBoxLayout()
         hbox.addWidget(QLabel('Klein'))
-        hbox.addItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        hbox.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         hbox.addWidget(QLabel('Mittel'))
-        hbox.addItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        hbox.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         hbox.addWidget(QLabel('Groß'))
         vbox.addLayout(hbox)
         self._layout.addLayout(vbox, 0, 1)

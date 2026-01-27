@@ -91,7 +91,7 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#8fe898'))
@@ -130,7 +130,7 @@ class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#befe9d'))
@@ -171,7 +171,7 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#17a8a5'))

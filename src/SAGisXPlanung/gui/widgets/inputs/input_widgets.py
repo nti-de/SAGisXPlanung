@@ -107,7 +107,7 @@ class QBooleanInput(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
         self.option_yes.toggled.connect(self.onRadioButtonToggle)
         self.option_no.toggled.connect(self.onRadioButtonToggle)
         self.clear_button = QPushButton('Auswahl entfernen')
-        self.clear_button.setCursor(Qt.PointingHandCursor)
+        self.clear_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.clear_button.clicked.connect(self.clearSelection)
         self.clear_button.hide()
         self.clear_button.setStyleSheet('''
@@ -122,7 +122,7 @@ class QBooleanInput(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
 
         self.layout.addWidget(self.option_yes)
         self.layout.addWidget(self.option_no)
-        self.layout.addItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.layout.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         self.layout.addWidget(self.clear_button)
         self.group = QButtonGroup()
         self.group.addButton(self.option_yes)
@@ -299,7 +299,7 @@ class QMultiInputWidget(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
         button = QToolButton()
         button.setIcon(load_svg(icon_path))
         button.installEventFilter(self)
-        button.setCursor(Qt.PointingHandCursor)
+        button.setCursor(Qt.CursorShape.PointingHandCursor)
         button.setToolTip(tooltip)
         button.clicked.connect(callback)
         button.setStyleSheet("QToolButton { background: palette(window); border: 0px; }")
@@ -320,9 +320,9 @@ class QMultiInputWidget(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
         return el
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.HoverEnter:
+        if event.type() == QEvent.Type.HoverEnter:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
-        elif event.type() == QEvent.HoverLeave:
+        elif event.type() == QEvent.Type.HoverLeave:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
         return False
 
@@ -435,7 +435,7 @@ class QComboBoxNoScroll(BaseInputElement, QComboBox, metaclass=XPlanungInputMeta
         self.scrollWidget = scroll_widget
         self.include_default = include_default
         self.enum_type = enum_type
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         if self.include_default:
             self.addItem('')
@@ -471,7 +471,7 @@ class QDateEditNoScroll(BaseInputElement, QgsDateEdit, metaclass=XPlanungInputMe
     def __init__(self, scroll_widget=None, *args, **kwargs):
         super(QDateEditNoScroll, self).__init__(*args, **kwargs)
         self.scrollWidget = scroll_widget
-        self.setFocusPolicy(Qt.StrongFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         self.setAllowNull(True)
         self.setNullRepresentation('')

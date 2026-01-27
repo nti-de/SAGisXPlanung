@@ -38,7 +38,7 @@ class QFeatureIdentify(BaseInputElement, QtWidgets.QWidget, metaclass=XPlanungIn
 
         self.reconfigure_layout = QtWidgets.QHBoxLayout(self)
         self.geometry_text = ElideLabel()
-        self.geometry_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.geometry_text.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.geometry_text.setStyleSheet('color: #4b5563')
         self.edit_enabled = QCheckBox('Geometrie anpassen')
         self.reconfigure_layout.addWidget(self.geometry_text)
@@ -50,16 +50,16 @@ class QFeatureIdentify(BaseInputElement, QtWidgets.QWidget, metaclass=XPlanungIn
 
         self.geometry_layout = QtWidgets.QVBoxLayout(self)
         self.mMapLayerComboBox = QgsMapLayerComboBox(self)
-        self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.PolygonLayer)
+        self.mMapLayerComboBox.setFilters(QgsMapLayerProxyModel.Filter.PolygonLayer)
         self.geometry_layout.addWidget(self.mMapLayerComboBox)
 
         self.layer = self.mMapLayerComboBox.currentLayer()
         self.featureGeometry: Union[QgsGeometry, None] = None
 
-        self.horizontalLayout.addItem(QtWidgets.QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
+        self.horizontalLayout.addItem(QtWidgets.QSpacerItem(40, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
 
         self.label = QtWidgets.QLabel("Feature:")
-        self.label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        self.label.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
         self.horizontalLayout.addWidget(self.label)
         self.cbFeature = QgsFeaturePickerWidget(self)
         self.set_fetch_limit()
@@ -74,7 +74,7 @@ class QFeatureIdentify(BaseInputElement, QtWidgets.QWidget, metaclass=XPlanungIn
         self.bIdentify.setText("")
         self.bIdentify.setToolTip("Geltungsbereich auf Karte wählen")
         self.bIdentify.setIcon(QIcon(':/images/themes/default/mActionIdentifyByPolygon.svg'))
-        self.bIdentify.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
+        self.bIdentify.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         self.bIdentify.clicked.connect(self.identifyFeature)
         self.horizontalLayout.addWidget(self.bIdentify)
 
@@ -99,7 +99,7 @@ class QFeatureIdentify(BaseInputElement, QtWidgets.QWidget, metaclass=XPlanungIn
 
             Korrekte Lösung wäre die Nutzung von SizePolicy's der zugrundeliegenden ComboBox, diese ist aber als
             privates Attribut `mComboBox` der Klasse `QgsFeaturePickerWidget` versteckt."""
-        if event.type() == QEvent.Resize:
+        if event.type() == QEvent.Type.Resize:
             self.cbFeature.setMaximumWidth(int(self.mMapLayerComboBox.width() / 2))
             return True
         return False

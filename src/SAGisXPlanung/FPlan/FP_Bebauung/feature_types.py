@@ -61,7 +61,7 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
 
     @classmethod
     def symbol(cls):
-        return QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        return QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
 
     @classmethod
     @fallback_renderer
@@ -99,8 +99,8 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
             line = QgsSimpleLineSymbolLayer.create({})
             line.setColor(QColor(0, 0, 0))
             line.setWidth(0.3)
-            line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-            line.setPenStyle(Qt.SolidLine)
+            line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+            line.setPenStyle(Qt.PenStyle.SolidLine)
             rule.symbol().appendSymbolLayer(line)
 
         root_rule.removeChildAt(0)

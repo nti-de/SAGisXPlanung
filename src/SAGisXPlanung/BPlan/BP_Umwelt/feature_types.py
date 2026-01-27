@@ -41,27 +41,27 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.5)
         border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.ArrowHeadFilled
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.ArrowHeadFilled
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.ArrowHeadFilled
         arrowhead_symbol = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#000000'), size=6)
         arrowhead_symbol.setAngle(270)
-        arrowhead_symbol.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        arrowhead_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=10)
         marker_line.setAverageAngleLength(0)
         marker_line.setOffset(3.5)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.setAngle(270)
@@ -75,7 +75,7 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

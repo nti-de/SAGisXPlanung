@@ -15,8 +15,8 @@ def stroke_circle(rect: QRectF, context: QgsRenderContext):
     painter: QPainter = context.painter()
     painter.save()
 
-    inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
-    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderMapUnits)
+    inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderUnit.RenderMapUnits)
+    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderUnit.RenderMapUnits)
     radius = (rect.height() / 2) - inset
     path = QPainterPath()
     path.addEllipse(rect.center(), radius, radius)
@@ -31,7 +31,7 @@ def stroke_triangle(rect: QRectF, context: QgsRenderContext):
     painter: QPainter = context.painter()
     painter.save()
 
-    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderMapUnits)
+    pen_width = context.convertToPainterUnits(0.25, QgsUnitTypes.RenderUnit.RenderMapUnits)
 
     path = QPainterPath()
     path.moveTo(rect.left() + (rect.width() / 2), rect.top())
@@ -85,7 +85,7 @@ class TableCell(abc.ABC):
         self.attributes = attributes
 
         self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMillimeters)
 
     @abc.abstractmethod
     def paint(self, rect: QRectF, context: QgsRenderContext):
@@ -171,11 +171,11 @@ class ArtDerBaulNutzungCell(TableCell):
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
         text_format = QgsTextFormat()
-        text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+        text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMillimeters)
         text_format.setSize(rect.height() * self.FONT_SCALE)
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter,
                                    [self.text, self.MaxZahlWohnungen] if self.MaxZahlWohnungen else [self.text],
-                                   context, text_format, True, QgsTextRenderer.AlignVCenter,
+                                   context, text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -188,7 +188,7 @@ class ZahlVollgeschosseCell(TableCell):
         super().__init__(attributes)
 
         self.text_format = QgsTextFormat()
-        self.text_format.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+        self.text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMillimeters)
 
         self.text = ""
         self.zwingend = False
@@ -207,8 +207,8 @@ class ZahlVollgeschosseCell(TableCell):
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -236,8 +236,8 @@ class BaumasseCell(TableCell):
             return
 
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, self.text, context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -272,8 +272,8 @@ class GrundGeschossflaecheCell(TableCell):
             return
 
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, self.text, context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, self.text, context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -294,8 +294,8 @@ class GrundflaechenzahlCell(TableCell):
 
     def paint(self, rect: QRectF, context: QgsRenderContext):
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -322,8 +322,8 @@ class GeschossflaechenzahlCell(TableCell):
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
         if not self.range:
-            QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
-                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+            QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text], context,
+                                       self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                        Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                        Qgis.TextLayoutMode.Rectangle)
 
@@ -331,15 +331,15 @@ class GeschossflaechenzahlCell(TableCell):
         else:
             rect_left = QRectF(rect.left(), rect.top(), rect.height(), rect.height())
             stroke_circle(rect_left, context)
-            QgsTextRenderer().drawText(rect_left, 0, QgsTextRenderer.AlignCenter, [self.text[0]], context,
-                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+            QgsTextRenderer().drawText(rect_left, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text[0]], context,
+                                       self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                        Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                        Qgis.TextLayoutMode.Rectangle)
 
             rect_right = QRectF(rect.right()-rect.height(), rect.top(), rect.height(), rect.height())
             stroke_circle(rect_right, context)
-            QgsTextRenderer().drawText(rect_right, 0, QgsTextRenderer.AlignCenter, [self.text[1]], context,
-                                       self.text_format, True, QgsTextRenderer.AlignVCenter,
+            QgsTextRenderer().drawText(rect_right, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text[1]], context,
+                                       self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                        Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                        Qgis.TextLayoutMode.Rectangle)
 
@@ -372,13 +372,13 @@ class BebauungsArtCell(TableCell):
 
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
-        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
+        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderUnit.RenderMapUnits)
         width_offset = rect.width() / 6
         triangle_rect = rect.marginsRemoved(QMarginsF(inset + width_offset, inset, inset + width_offset, inset))
         stroke_triangle(triangle_rect, context)
 
-        QgsTextRenderer().drawText(triangle_rect, 0, QgsTextRenderer.AlignCenter, ['', self.text], context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(triangle_rect, 0, QgsTextRenderer.HAlignment.AlignCenter, ['', self.text], context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -407,8 +407,8 @@ class BauweiseCell(TableCell):
 
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, [self.text], context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, [self.text], context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -452,8 +452,8 @@ class DachformCell(TableCell):
 
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, filter(None, self.text), context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, filter(None, self.text), context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -486,8 +486,8 @@ class DachneigungCell(TableCell):
 
         self.text_format.setSize(rect.height() * self.FONT_SCALE)
 
-        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.AlignCenter, filter(None, self.text), context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+        QgsTextRenderer().drawText(rect, 0, QgsTextRenderer.HAlignment.AlignCenter, filter(None, self.text), context,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)
 
@@ -543,9 +543,9 @@ class BauHoeheCell(TableCell):
 
         self.text_format.setSize(rect.height() * (self.FONT_SCALE / len(self.text)))
 
-        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderMapUnits)
+        inset = context.convertToPainterUnits(0.5, QgsUnitTypes.RenderUnit.RenderMapUnits)
         rect = rect.marginsRemoved(QMarginsF(inset, inset, inset, inset))
         QgsTextRenderer().drawText(rect, 0, Qgis.TextHorizontalAlignment.Left, self.text, context,
-                                   self.text_format, True, QgsTextRenderer.AlignVCenter,
+                                   self.text_format, True, QgsTextRenderer.VAlignment.AlignVCenter,
                                    Qgis.TextRendererFlags(Qgis.TextRendererFlag.WrapLines),
                                    Qgis.TextLayoutMode.Rectangle)

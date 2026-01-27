@@ -88,7 +88,7 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#f7ff5a'))
@@ -99,7 +99,7 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return icon_renderer('Versorgung', cls.polygon_symbol(),
                                  'BP_Ver_und_Entsorgung', geometry_type=geom_type)
         elif geom_type is not None:

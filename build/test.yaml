@@ -12,10 +12,12 @@ strategy:
       containerImage: qgis/qgis:latest
     ltr:
       containerImage: qgis/qgis:ltr-jammy
+    qt6-main:
+      containerImage: ghcr.io/qgis/pyqgis4-checker:main-ubuntu
 
 container:
   image: $[ variables['containerImage'] ]
-  options: "--name ci-container -v /usr/bin/docker:/tmp/docker:ro"
+  options: "--user 0:0 --name ci-container -v /usr/bin/docker:/tmp/docker:ro"
 
 steps:
 
@@ -26,6 +28,8 @@ steps:
 
 - script: |
     set -e
+    sudo apt install -y build-essential
+    
     if python3 -m pip help install | grep -q break-system-packages; then
         PIP_BREAK="--break-system-packages"
     else
@@ -33,10 +37,10 @@ steps:
     fi
     
     python3 -m pip install $PIP_BREAK --upgrade pip
-    sudo apt-get install -y libgeos-dev
+    python3 -m pip install $PIP_BREAK --upgrade setuptools
+    sudo apt-get install -y libgeos-dev python3-mock
     
     pip install $PIP_BREAK \
-        numpy==1.26.4 \
         pytest \
         pytest-azurepipelines \
         pytest-cov \

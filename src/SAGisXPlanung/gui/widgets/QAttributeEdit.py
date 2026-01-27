@@ -14,13 +14,13 @@ from qgis.PyQt import uic
 from qgis.PyQt.QtCore import (Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, pyqtSignal, QAbstractItemModel,
                               QSettings, QSize, QAbstractListModel)
 from qgis.PyQt.QtWidgets import (QHeaderView, QLineEdit, QWidget, QMenu, QSizePolicy, QListView, QStyledItemDelegate,
-                                 QHBoxLayout, QToolButton)
+                                 QHBoxLayout, QToolButton, QStyleOptionViewItem)
 from qgis.PyQt.QtGui import QIcon, QColor, QFontMetrics, QPen
 from qgis.utils import iface
 from sqlalchemy import select
 from sqlalchemy.orm import class_mapper, RelationshipProperty, load_only
 
-from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync
+from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync, qt_version_tuple, PYQT5
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.codelists import CodeListValue
@@ -40,8 +40,8 @@ from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDrop
 FORM_CLASS, CLS = uic.loadUiType(os.path.join(BASE_DIR, 'ui/attribute_edit.ui'))
 logger = logging.getLogger(__name__)
 
-ObjectRole = Qt.UserRole + 1
-NodeRole = Qt.UserRole + 2
+ObjectRole = Qt.ItemDataRole.UserRole + 1
+NodeRole = Qt.ItemDataRole.UserRole + 2
 
 style = """
 QToolButton[objectName="button_flash"], QToolButton[objectName="button_zoom"] {{
@@ -240,7 +240,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.button_flash.clicked.connect(self.on_button_flash_clicked)
 
         # search setup
-        self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.search_edit.textChanged.connect(self.onFilterTextChanged)
 
         # filter setup
@@ -265,7 +265,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         header.setStretchLastSection(False)
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        header.setDefaultAlignment(Qt.AlignCenter)
+        header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # nav bar setup
         self.nav_stack = NavigationStack()
@@ -314,7 +314,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.breadcrumbs.set_items(self.nav_stack.items())
 
     def model_index(self, attr: str):
-        indices = self.model.match(self.model.index(0, 0), Qt.DisplayRole, attr, 1, Qt.MatchFixedString)
+        indices = self.model.match(self.model.index(0, 0), Qt.ItemDataRole.DisplayRole, attr, 1, Qt.MatchFlag.MatchFixedString)
         if not indices:
             return QModelIndex()
         return indices[0].siblingAtColumn(1)
@@ -367,7 +367,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         if index.column() == 0:
             return
 
-        if not index.flags() & Qt.ItemIsSelectable or not index.flags() & Qt.ItemIsEnabled:
+        if not index.flags() & Qt.ItemFlag.ItemIsSelectable or not index.flags() & Qt.ItemFlag.ItemIsEnabled:
             return
 
         index = self.proxyModel.mapToSource(index)
@@ -395,12 +395,13 @@ class QAttributeEdit(CLS, FORM_CLASS):
         dlg.attributeChanged.connect(lambda original, value, a=attribute_name, i=index:
                                      self.pushAttributeChangedCommand(original, value, a, i))
         dlg.fileChanged.connect(lambda file_content, a=attribute_name: self.on_file_content_changed(a, file_content))
-        dlg.exec_()
+        dlg.exec()
 
     def on_file_content_changed(self, attribute: str, file_content: bytes):
         with Session.begin() as session:
             cls = find_true_class(self._xplanung_item.xtype, attribute)
-            orm_instance = session.get(cls, self._xplanung_item.xid, [load_only('id')])
+            load_opts = [load_only(getattr(cls, 'id'))]
+            orm_instance = session.get(cls, self._xplanung_item.xid, options=load_opts)
             orm_instance.set_file_data(attribute, file_content)
 
     def pushAttributeChangedCommand(self, original_value, new_value, attr, index):
@@ -499,13 +500,13 @@ class EntityTreeModel(QAbstractItemModel):
             if node.node_type == "relation" and index.column() == 1:
                 return QColor(100, 150, 255)
 
-        elif role == Qt.ToolTipRole:
+        elif role == Qt.ItemDataRole.ToolTipRole:
             # show tooltips for first column, which are the xplanung attributes
             if index.column() != 0:
                 return
             return xplan_tooltip(self._xplanung_item.xtype, node.name)
 
-        elif role == Qt.DecorationRole:
+        elif role == Qt.ItemDataRole.DecorationRole:
             if index.column() == 0:
                 if node.node_type == "relation":
                     return self.icon_relation
@@ -519,8 +520,8 @@ class EntityTreeModel(QAbstractItemModel):
 
         return None
 
-    def setData(self, index: QModelIndex, value, role=Qt.DisplayRole):
-        if role == Qt.DisplayRole:
+    def setData(self, index: QModelIndex, value, role=Qt.ItemDataRole.DisplayRole):
+        if role == Qt.ItemDataRole.DisplayRole:
             node = index.internalPointer()
             if index.column() == 0:
                 node.name = value
@@ -593,9 +594,9 @@ class EntityTreeModel(QAbstractItemModel):
         is_section_head = node.node_type == "section"
         is_link = node.node_type == "relation"
         if is_readonly:
-            return current_flags & ~Qt.ItemIsEnabled
+            return current_flags & ~Qt.ItemFlag.ItemIsEnabled
         if index.column() == 0 or is_section_head or is_link:
-            return current_flags & ~Qt.ItemIsSelectable
+            return current_flags & ~Qt.ItemFlag.ItemIsSelectable
         return current_flags
 
     @staticmethod
@@ -608,7 +609,7 @@ class EntityTreeModel(QAbstractItemModel):
 class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.setRecursiveFilteringEnabled(True)
         # TODO: QT6 new property autoAcceptChildRows: self.setAutoAcceptChildRows(True)
 
@@ -619,7 +620,12 @@ class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex) -> bool:
-        if not self.filterRegExp().pattern() and self._node_type_filter is None:
+        if qt_version_tuple() < (5, 12, 0):
+            filter_regex = self.filterRegExp()
+        else:
+            filter_regex = self.filterRegularExpression()
+
+        if not filter_regex.pattern() and self._node_type_filter is None:
             return True
 
         source_model = self.sourceModel()
@@ -631,16 +637,15 @@ class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
 
         # Check text filter match
         text_matches = True
-        if self.filterRegExp().pattern():
-            attribute_name = source_model.data(index_col0, Qt.DisplayRole)
-            value = source_model.data(index_col1, Qt.DisplayRole)
+        if filter_regex.pattern():
+            attribute_name = source_model.data(index_col0, Qt.ItemDataRole.DisplayRole)
+            value = source_model.data(index_col1, Qt.ItemDataRole.DisplayRole)
 
             attribute_text = str(attribute_name) if attribute_name else ""
             value_text = str(value) if value else ""
 
-            filter_pattern = self.filterRegExp()
-            matches_attribute = filter_pattern.indexIn(attribute_text) >= 0
-            matches_value = filter_pattern.indexIn(value_text) >= 0
+            matches_attribute = filter_regex.indexIn(attribute_text) >= 0
+            matches_value = filter_regex.indexIn(value_text) >= 0
 
             text_matches = matches_attribute or matches_value
 
@@ -709,10 +714,10 @@ class NavigationStack:
 
 class BreadcrumbModel(QAbstractListModel):
 
-    IsSeparatorRole = Qt.UserRole + 1
-    IsEllipsisRole = Qt.UserRole + 2
-    ItemIndexRole = Qt.UserRole + 3
-    IsActiveRole = Qt.UserRole + 4
+    IsSeparatorRole = Qt.ItemDataRole.UserRole + 1
+    IsEllipsisRole = Qt.ItemDataRole.UserRole + 2
+    ItemIndexRole = Qt.ItemDataRole.UserRole + 3
+    IsActiveRole = Qt.ItemDataRole.UserRole + 4
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -750,7 +755,7 @@ class BreadcrumbModel(QAbstractListModel):
                 return (visible_count + 1) * 2 - 1 # (visible_items + ellipsis) * 2 - 1
             return 0
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
 
@@ -764,7 +769,7 @@ class BreadcrumbModel(QAbstractListModel):
                 return is_separator
 
             if is_separator:
-                if role == Qt.DisplayRole:
+                if role == Qt.ItemDataRole.DisplayRole:
                     return "›"
                 return None
 
@@ -775,7 +780,7 @@ class BreadcrumbModel(QAbstractListModel):
 
             item = self._items[item_idx]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 return item.display_name or item.xplan_item.xtype.__name__
             elif role == self.ItemIndexRole:
                 return item_idx
@@ -791,16 +796,16 @@ class BreadcrumbModel(QAbstractListModel):
             is_ellipsis = row == 2
             if role == self.IsEllipsisRole:
                 return is_ellipsis
-            if role == Qt.DisplayRole and is_ellipsis:
+            if role == Qt.ItemDataRole.DisplayRole and is_ellipsis:
                 return "…"
-            if role == Qt.DisplayRole and is_separator:
+            if role == Qt.ItemDataRole.DisplayRole and is_separator:
                 return "›"
 
             # It's a visible item
             item_idx = self._row_to_item_index(row)
             item = self._items[item_idx]
 
-            if role == Qt.DisplayRole:
+            if role == Qt.ItemDataRole.DisplayRole:
                 return item.display_name or item.xplan_item.xtype.__name__
             elif role == self.ItemIndexRole:
                 return item_idx
@@ -847,7 +852,7 @@ class BreadcrumbDelegate(QStyledItemDelegate):
 
         is_separator = index.data(BreadcrumbModel.IsSeparatorRole)
         is_active = index.data(BreadcrumbModel.IsActiveRole)
-        text = index.data(Qt.DisplayRole)
+        text = index.data(Qt.ItemDataRole.DisplayRole)
 
         normal_color = QColor("#6b7280")
         hover_color = QColor("#111827")
@@ -858,7 +863,7 @@ class BreadcrumbDelegate(QStyledItemDelegate):
 
         if is_separator:
             painter.setPen(QPen(normal_color))
-            painter.drawText(rect, Qt.AlignCenter, text)
+            painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
         else:
             # draw clickable breadcrumb
             is_hovered = self._hover_row == index.row()
@@ -876,12 +881,12 @@ class BreadcrumbDelegate(QStyledItemDelegate):
                 painter.setPen(QPen(normal_color))
 
             text_rect = rect.adjusted(4, 0, -4, 0)
-            painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, text)
+            painter.drawText(text_rect, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, text)
 
         painter.restore()
 
     def sizeHint(self, option, index):
-        text = index.data(Qt.DisplayRole)
+        text = index.data(Qt.ItemDataRole.DisplayRole)
 
         fm = QFontMetrics(option.font)
         width = fm.horizontalAdvance(text)
@@ -902,15 +907,15 @@ class BreadcrumbListView(QListView):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self.setFlow(QListView.LeftToRight)
+        self.setFlow(QListView.Flow.LeftToRight)
         self.setWrapping(False)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSelectionMode(QListView.NoSelection)
-        self.setFocusPolicy(Qt.NoFocus)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setSelectionMode(QListView.SelectionMode.NoSelection)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.setFrameShape(QListView.NoFrame)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setFrameShape(QListView.Shape.NoFrame)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.viewport().setAutoFillBackground(False)
 
         self._delegate = BreadcrumbDelegate(self)
@@ -919,6 +924,15 @@ class BreadcrumbListView(QListView):
         self.setMouseTracking(True)
 
         self._hover_index = QModelIndex()
+
+    def view_options(self):
+        if PYQT5:
+            option = self.viewOptions()
+        else:
+            option = QStyleOptionViewItem()
+            self.initViewItemOption(option)
+
+        return option
 
     def mouseMoveEvent(self, event):
         index = self.indexAt(event.pos())
@@ -947,7 +961,7 @@ class BreadcrumbListView(QListView):
         super().leaveEvent(event)
 
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             index = self.indexAt(event.pos())
             if index.isValid():
                 is_separator = index.data(BreadcrumbModel.IsSeparatorRole)
@@ -970,7 +984,7 @@ class BreadcrumbListView(QListView):
         # calculate minimum height based on content
         if self.model() and self.model().rowCount() > 0:
             index = self.model().index(0, 0)
-            item_size = self.itemDelegate().sizeHint(self.viewOptions(), index)
+            item_size = self.itemDelegate().sizeHint(self.view_options(), index)
             return QSize(200, item_size.height())
         return QSize(200, 5)
 
@@ -1004,7 +1018,7 @@ class BreadcrumbBar(QWidget):
         self._list_view = BreadcrumbListView(self)
         self._list_view.setModel(self._model)
 
-        self._list_view.setSizePolicy(self._list_view.sizePolicy().horizontalPolicy(), QSizePolicy.Maximum)
+        self._list_view.setSizePolicy(self._list_view.sizePolicy().horizontalPolicy(), QSizePolicy.Policy.Maximum)
 
         self._list_view.itemClicked.connect(self.crumbClicked.emit)
         self._list_view.ellipsisClicked.connect(self._show_ellipsis_menu)
@@ -1031,7 +1045,7 @@ class BreadcrumbBar(QWidget):
         for row in range(self._model.rowCount()):
             index = self._model.index(row, 0)
             size = self._list_view.itemDelegate().sizeHint(
-                self._list_view.viewOptions(), index
+                self._list_view.view_options(), index
             )
             total += size.width()
         return total
@@ -1075,7 +1089,7 @@ class BreadcrumbBar(QWidget):
         if ellipsis_index.isValid():
             rect = self._list_view.visualRect(ellipsis_index)
             global_pos = self._list_view.mapToGlobal(rect.bottomLeft())
-            self._ellipsis_menu.exec_(global_pos)
+            self._ellipsis_menu.exec(global_pos)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

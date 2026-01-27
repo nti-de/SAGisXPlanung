@@ -41,7 +41,7 @@ class BP_GewaesserFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#c1dfea'))

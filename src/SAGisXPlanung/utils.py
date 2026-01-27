@@ -360,7 +360,7 @@ def confirmObjectDeletion(obj) -> bool:
         False, wenn Vorgang abgebrochen wurde
     """
     msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
+    msg.setIcon(QMessageBox.Icon.Warning)
 
     has_dependencies = False
     for rel in obj.__class__.relationships():
@@ -376,10 +376,10 @@ def confirmObjectDeletion(obj) -> bool:
                     f"<ul><li>ID: {obj.id} </li>"
                     f"<li> Objektklasse: <code>{obj.__class__.__name__}</code> </li></ul>")
     msg.setWindowTitle("Löschvorgang bestätigen")
-    msg.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
-    msg.setDefaultButton(QMessageBox.Cancel)
-    ret = msg.exec_()
-    if ret == QMessageBox.Cancel:
+    msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.Cancel)
+    msg.setDefaultButton(QMessageBox.StandardButton.Cancel)
+    ret = msg.exec()
+    if ret == QMessageBox.StandardButton.Cancel:
         return False
 
     return True

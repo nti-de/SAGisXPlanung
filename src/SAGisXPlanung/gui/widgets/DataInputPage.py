@@ -4,7 +4,7 @@ from collections import namedtuple
 from typing import List
 
 import yaml
-from PyQt5.QtWidgets import QVBoxLayout
+from qgis.PyQt.QtWidgets import QVBoxLayout
 from qgis.PyQt import QtCore, QtWidgets, QtGui
 from qgis.PyQt.QtCore import Qt, QSettings
 from qgis.PyQt.QtWidgets import QFrame, QSpacerItem, QSizePolicy, QGridLayout, QGroupBox
@@ -43,10 +43,10 @@ class DataInputPage(QtWidgets.QScrollArea):
         s = QSettings()
         self.ATTRIBUTE_CONFIG = yaml.safe_load(s.value(f"plugins/xplanung/attribute_config", '')) or {}
 
-        self.setFrameShape(QFrame.NoFrame)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.horizontalScrollBar().setEnabled(False)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
+        self.setSizePolicy(QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum)
 
         self.content_widget = QtWidgets.QWidget()
         self.setWidget(self.content_widget)
@@ -59,7 +59,7 @@ class DataInputPage(QtWidgets.QScrollArea):
         self.createLayout()
 
         spacer = QtWidgets.QWidget()
-        spacer.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Expanding)
+        spacer.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Expanding)
         self.vBox.addWidget(spacer)
 
     def sizeHint(self):
@@ -92,20 +92,20 @@ class DataInputPage(QtWidgets.QScrollArea):
         h_layout.setContentsMargins(0, 10, 0, 10)
         l1 = QtWidgets.QLabel('Objekt gehört zu:')
         l2 = QtWidgets.QPushButton(self.parent_class.__name__, objectName='lParentClass')
-        l1.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
-        l2.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
+        l1.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
+        l2.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
         h_layout.addWidget(l1)
         h_layout.addWidget(l2)
         if self.parent_attribute:
             label_display_name = self.parent_class.xplan_attribute_name(self.parent_attribute)
 
             l3 = QtWidgets.QLabel(f'(Attribut: {label_display_name})', objectName='lParentAttribute')
-            l2.setCursor(Qt.PointingHandCursor)
+            l2.setCursor(Qt.CursorShape.PointingHandCursor)
             l2.clicked.connect(lambda checked: self.parentLinkClicked.emit())
             h_layout.addWidget(l3)
         else:
             l2.setDisabled(True)
-            h_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Minimum))
+            h_layout.addItem(QSpacerItem(20, 10, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         self.vBox.addWidget(widget)
 
     def createLayout(self):
@@ -128,15 +128,15 @@ class DataInputPage(QtWidgets.QScrollArea):
                     continue
 
                 label, control = self.create_input(key, prop)
-                control.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                control.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
                 # wrap label in spacer items, to keep it aligned with first row of control widget
                 # when the control widget has expanding rows
                 if isinstance(control, QMultiInputWidget):
                     spacer_container = QVBoxLayout()
-                    spacer_container.addItem(QSpacerItem(20, 5, QSizePolicy.Minimum, QSizePolicy.Minimum))
+                    spacer_container.addItem(QSpacerItem(20, 5, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Minimum))
                     spacer_container.addWidget(label)
-                    spacer_container.addItem(QSpacerItem(20, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
+                    spacer_container.addItem(QSpacerItem(20, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
 
                     grid.addLayout(spacer_container, i - col_skip, 0)
                 else:

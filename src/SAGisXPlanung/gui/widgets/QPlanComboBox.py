@@ -23,7 +23,7 @@ class QPlanComboBox(QComboBoxNoScroll):
         super(QPlanComboBox, self).__init__(*args, **kwargs)
 
         self.setMinimumContentsLength(20)
-        self.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
 
         self.refresh()
 
@@ -60,8 +60,8 @@ class QPlanComboBox(QComboBoxNoScroll):
         self.initStyleOption(opt)
 
         p = QStylePainter(self)
-        p.drawComplexControl(QStyle.CC_ComboBox, opt)
+        p.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
 
-        text_rect = self.style().subControlRect(QStyle.CC_ComboBox, opt, QStyle.SC_ComboBoxEditField)
-        opt.currentText = p.fontMetrics().elidedText(opt.currentText, Qt.ElideRight, text_rect.width())
-        p.drawControl(QStyle.CE_ComboBoxLabel, opt)
+        text_rect = self.style().subControlRect(QStyle.ComplexControl.CC_ComboBox, opt, QStyle.SubControl.SC_ComboBoxEditField)
+        opt.currentText = p.fontMetrics().elidedText(opt.currentText, Qt.TextElideMode.ElideRight, text_rect.width())
+        p.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)

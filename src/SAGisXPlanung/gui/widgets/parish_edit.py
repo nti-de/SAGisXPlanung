@@ -37,7 +37,7 @@ class QParishLabel(QWidget):
         }
         ''')
         self.icon_button.clicked.connect(self.onLocationEdit)
-        self.icon_button.setCursor(Qt.PointingHandCursor)
+        self.icon_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.icon_button.setVisible(False)
         self.installEventFilter(self)
 
@@ -54,9 +54,9 @@ class QParishLabel(QWidget):
         if not self.active:
             return False
 
-        if event.type() == QEvent.Enter:
+        if event.type() == QEvent.Type.Enter:
             self.icon_button.show()
-        elif event.type() == QEvent.Leave:
+        elif event.type() == QEvent.Type.Leave:
             self.icon_button.hide()
         return False
 
@@ -80,16 +80,16 @@ class QParishEdit(QWidget):
         self.cb.checkedItemsChanged.connect(self.onControlEdited)
 
         self.group = QFrame()
-        self.group.setFrameStyle(QFrame.StyledPanel)
+        self.group.setFrameStyle(QFrame.Shape.StyledPanel)
         self.group.setLayout(QVBoxLayout())
         self.group.layout().addWidget(QLabel('Gemeinde auswählen:'))
         self.group.layout().addWidget(self.cb)
 
         self.close_button = QToolButton()
-        self.close_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Minimum)
+        self.close_button.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
         self.close_button.setIcon(self.loadSvg(os.path.join(BASE_DIR, 'gui/resources/expand_less.svg')))
         self.close_button.installEventFilter(self)
-        self.close_button.setCursor(Qt.PointingHandCursor)
+        self.close_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.close_button.setToolTip('Sektion schließen')
         self.close_button.setIconSize(QSize(24, 24))
         self.close_button.setStyleSheet('''
@@ -103,7 +103,7 @@ class QParishEdit(QWidget):
 
         self.setLayout(QHBoxLayout())
         self.layout().addWidget(self.group)
-        self.layout().addWidget(self.close_button, Qt.AlignCenter)
+        self.layout().addWidget(self.close_button, Qt.AlignmentFlag.AlignCenter)
         self.layout().setContentsMargins(0, 0, 0, 0)
 
     def setup(self, parish_objects: List[XP_Gemeinde]):
@@ -114,7 +114,7 @@ class QParishEdit(QWidget):
             xp_gemeinde = session.query(XP_Gemeinde).all()
             for g in xp_gemeinde:
                 match = bool(any(g == p for p in parish_objects))
-                self.cb.addItemWithCheckState(str(g), Qt.Checked if match else Qt.Unchecked, str(g.id))
+                self.cb.addItemWithCheckState(str(g), Qt.CheckState.Checked if match else Qt.CheckState.Unchecked, str(g.id))
 
     @pyqtSlot(bool)
     def onExpandLessClicked(self, clicked):
@@ -133,9 +133,9 @@ class QParishEdit(QWidget):
         self.parishChanged.emit(parish)
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.HoverEnter:
+        if event.type() == QEvent.Type.HoverEnter:
             obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
-        elif event.type() == QEvent.HoverLeave:
+        elif event.type() == QEvent.Type.HoverLeave:
             obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
         return False
 
@@ -143,7 +143,7 @@ class QParishEdit(QWidget):
         img = QPixmap(svg)
         if color:
             qp = QPainter(img)
-            qp.setCompositionMode(QPainter.CompositionMode_SourceIn)
+            qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
             qp.fillRect(img.rect(), QColor(color))
             qp.end()
         return QIcon(img)

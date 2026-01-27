@@ -48,7 +48,7 @@ class TestQFeatureIdentify:
         QgsProject.instance().addMapLayer(layer)
 
         qtbot.addWidget(widget)
-        qtbot.mouseClick(widget.bIdentify, Qt.LeftButton)
+        qtbot.mouseClick(widget.bIdentify, Qt.MouseButton.LeftButton)
 
         assert iface.mapCanvas().mapTool().__class__ == IdentifyFeatureTool
         assert iface.mapCanvas().mapTool() == widget.mapTool

@@ -105,20 +105,20 @@ class SymbolEditButton(QWidget):
 
         self.setLayout(QVBoxLayout())
         self.setMouseTracking(True)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setObjectName('back')
-        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.layout().setContentsMargins(5, 5, 5, 5)
 
         self._button = QToolButton()
         self._button.setIcon(self.icon)
-        self._button.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self._button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        self._button.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self._button.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
         self._button.setMinimumHeight(20)
         self.setMinimumHeight(20)
-        self.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Preferred)
 
-        self.layout().addWidget(self._button, 0, Qt.AlignCenter)
+        self.layout().addWidget(self._button, 0, Qt.AlignmentFlag.AlignCenter)
 
         self.setStyleSheet('''
         #back:hover {
@@ -129,7 +129,7 @@ class SymbolEditButton(QWidget):
         ''')
 
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             svg_dialog = QSymbolSelectionDialog(self)
             svg_dialog.svg_selected.connect(self.svg_selected.emit)
             svg_dialog.svg_selection_saved.connect(self.onSvgSelectionSaved)
@@ -171,7 +171,7 @@ class QSymbolSelectionDialog(QDialog):
 
         self.nav_layout = QHBoxLayout()
         self.nav_layout.setSpacing(10)
-        self.buttons = QDialogButtonBox(QDialogButtonBox.Save | QDialogButtonBox.Cancel)
+        self.buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
         self.buttons.accepted.connect(self.accept)
         self.buttons.rejected.connect(self.reject)
         self.error_label = QLabel('')
@@ -200,10 +200,10 @@ class QSymbolSelectionDialog(QDialog):
         symbol_node = PPO_CONFIG.get(file_name, "")
         if not symbol_node:
             self.error_label.setText('Dieses Symbol gehört nicht zum Symbolkatalog von SAGis XPlanung!')
-            self.buttons.button(QDialogButtonBox.Save).setEnabled(False)
+            self.buttons.button(QDialogButtonBox.StandardButton.Save).setEnabled(False)
             return
 
-        self.buttons.button(QDialogButtonBox.Save).setEnabled(True)
+        self.buttons.button(QDialogButtonBox.StandardButton.Save).setEnabled(True)
         self.error_label.clear()
         self.svg_selected.emit(path)
 

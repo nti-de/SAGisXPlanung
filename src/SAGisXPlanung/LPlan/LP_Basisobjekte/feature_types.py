@@ -89,13 +89,13 @@ class LP_Plan(XP_Plan):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.8)
-        line.setPenStyle(Qt.SolidLine)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
 
         symbol.appendSymbolLayer(line)
         return QgsSingleSymbolRenderer(symbol)
@@ -121,7 +121,7 @@ class LP_Bereich(XP_Bereich):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         simple_line = QgsSimpleLineSymbolLayer.create({})
         symbol.appendSymbolLayer(simple_line)

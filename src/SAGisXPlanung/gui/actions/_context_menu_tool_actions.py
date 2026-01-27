@@ -56,7 +56,11 @@ class MoveAnnotationItemAction(QAction):
         iface.mapCanvas().viewport().removeEventFilter(self.event_filter)
 
         with Session.begin() as session:
-            xp_po = session.get(self.xplan_item.xtype, self.xplan_item.xid, [load_only('id', 'position')])
+            load_opts = [
+                load_only(getattr(self.xplan_item.xtype, 'id')),
+                load_only(getattr(self.xplan_item.xtype, 'position'))
+            ]
+            xp_po = session.get(self.xplan_item.xtype, self.xplan_item.xid, options=load_opts)
 
             xp_po.setGeometry(QgsGeometry.fromPointXY(self.event_filter.last_pos))
 
@@ -74,17 +78,17 @@ class AnnotationMoveEventFilter(QObject):
 
     def eventFilter(self, obj, event):
         # on mouse move let canvas item follow mouse position
-        if event.type() == QEvent.MouseMove:
+        if event.type() == QEvent.Type.MouseMove:
             point = self.canvas.getCoordinateTransform().toMapCoordinates(event.pos())
             self.action.setCenter(point)
             self.last_pos = point
         # on left click dont propagate the event and finish moving the canvas item
-        if event.type() == QEvent.MouseButtonRelease:
-            if event.button() == Qt.MiddleButton:
+        if event.type() == QEvent.Type.MouseButtonRelease:
+            if event.button() == Qt.MouseButton.MiddleButton:
                 return False
-            if event.button() == Qt.LeftButton:
+            if event.button() == Qt.MouseButton.LeftButton:
                 self.action.endMove()
-            if event.button() == Qt.RightButton:
+            if event.button() == Qt.MouseButton.RightButton:
                 self.action.setCenter(self.initial_pos)
                 self.initial_pos = None
                 self.action.endMove()

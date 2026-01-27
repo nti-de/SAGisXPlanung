@@ -98,7 +98,7 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#febae1'))
@@ -187,7 +187,7 @@ class BP_SpielSportanlagenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obj
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         border = QgsSimpleLineSymbolLayer()

@@ -38,10 +38,10 @@ def check(required_packages):
     message += "\n".join(missing_packages)
     message += "\n\nSollen die fehlenden Komponenten installliert werden?"
 
-    dialog = QMessageBox(QMessageBox.Question, 'Fehlende Abhängigkeiten', message, QMessageBox.Yes | QMessageBox.No)
+    dialog = QMessageBox(QMessageBox.Icon.Question, 'Fehlende Abhängigkeiten', message, QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
     reply = dialog.exec()
 
-    if reply == QMessageBox.No:
+    if reply == QMessageBox.StandardButton.No:
         return False
 
     error = False
@@ -49,7 +49,7 @@ def check(required_packages):
     for package in missing_packages:
         try:
             import subprocess
-            ret = subprocess.call(['python3', '-m', 'pip', 'install', package])
+            ret = subprocess.call(['python3', '-m', 'pip', 'install', package, '--force-reinstall'])
             if ret == 0:
                 log.append(f'{package} ... installiert')
             else:
@@ -61,9 +61,9 @@ def check(required_packages):
     if error:
         iface.messageBar().pushMessage("XPlanung",
                                        f'Fehler beim Installieren der Python-Pakete', '\n'.join(log),
-                                       level=Qgis.Critical)
+                                       level=Qgis.MessageLevel.Critical)
     else:
         iface.messageBar().pushMessage("XPlanung",
                                        f'Python-Pakete erfolgreich installiert', '\n'.join(log),
-                                       level=Qgis.Success)
+                                       level=Qgis.MessageLevel.Success)
         return True

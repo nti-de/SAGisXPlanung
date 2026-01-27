@@ -86,7 +86,7 @@ class DatabaseConfigPage(SettingsPage):
     def setup_ui(self, ui):
         self.ui = ui
 
-        self.ui.tab_database_actions.tabBar().setCursor(Qt.PointingHandCursor)
+        self.ui.tab_database_actions.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
         self.ui.tab_database_actions.setCurrentIndex(0)
         self.db_create_options = [w for w in self.ui.db_create_group.children() if isinstance(w, QLineEdit)]
         self.ui.db_create.setEnabled(False)
@@ -103,7 +103,7 @@ class DatabaseConfigPage(SettingsPage):
                                                    color=ApplicationColor.Grey600))
         self.ui.button_upgrade.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/upgrade.svg'),
                                                 color=ApplicationColor.Tertiary))
-        self.ui.button_upgrade.setCursor(Qt.PointingHandCursor)
+        self.ui.button_upgrade.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.ui.database_version_frame.hide()
         self.ui.button_upgrade.clicked.connect(self.on_revision_update_clicked)
@@ -273,7 +273,7 @@ class DatabaseConfigPage(SettingsPage):
                 loop = asyncio.get_running_loop()
                 await loop.run_in_executor(None, self.upgrade_database_revision)
 
-                Toaster.showMessage(self, message='Datenbank erfolgreich aktualisiert!', corner=Qt.BottomRightCorner,
+                Toaster.showMessage(self, message='Datenbank erfolgreich aktualisiert!', corner=Qt.Corner.BottomRightCorner,
                                     margin=20, icon=None, closable=False, color='#ffffff', background_color='#404040',
                                     timeout=3000)
                 self.ui.database_version_frame.hide()

@@ -1,5 +1,5 @@
 import pytest
-from PyQt5.QtCore import QModelIndex
+from qgis.PyQt.QtCore import QModelIndex, QItemSelectionModel
 from mock import Mock, patch, MagicMock
 
 from SAGisXPlanung.XPlan.feature_types import XP_TextAbschnitt
@@ -116,8 +116,7 @@ class TestSelectRelatedWidget:
         # Select first item
         index = widget.proxy_model.index(0, 0)
         widget.list_view.selectionModel().select(
-            index,
-            widget.list_view.selectionModel().Select
+            index, QItemSelectionModel.SelectionFlag.Select
         )
 
         assert len(widget._selected_ids) == 1
@@ -127,12 +126,12 @@ class TestSelectRelatedWidget:
         # Select first item
         index = widget.proxy_model.index(0, 0)
         sel_model = widget.list_view.selectionModel()
-        sel_model.select(index, sel_model.Select)
+        sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
 
         assert len(widget._selected_ids) == 1
 
         # Deselect
-        sel_model.select(index, sel_model.Deselect)
+        sel_model.select(index, QItemSelectionModel.SelectionFlag.Deselect)
         assert len(widget._selected_ids) == 0
 
     def test_multi_selection(self, widget):
@@ -141,7 +140,7 @@ class TestSelectRelatedWidget:
         # Select multiple items
         for i in range(3):
             index = widget.proxy_model.index(i, 0)
-            sel_model.select(index, sel_model.Select)
+            sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
 
         assert len(widget._selected_ids) == 3
 
@@ -151,7 +150,7 @@ class TestSelectRelatedWidget:
         # Select items
         sel_model = widget.list_view.selectionModel()
         index = widget.proxy_model.index(0, 0)
-        sel_model.select(index, sel_model.Select)
+        sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
 
         assert widget.selected_count.text() == "1"
 
@@ -167,7 +166,7 @@ class TestSelectRelatedWidget:
         sel_model = widget.list_view.selectionModel()
         for i in range(2):
             index = widget.proxy_model.index(i, 0)
-            sel_model.select(index, sel_model.Select)
+            sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
 
         selected_ids = widget.get_selected_ids()
         assert len(selected_ids) == 2
@@ -178,7 +177,7 @@ class TestSelectRelatedWidget:
         # Select first item
         sel_model = widget.list_view.selectionModel()
         index = widget.proxy_model.index(0, 0)
-        sel_model.select(index, sel_model.Select)
+        sel_model.select(index, QItemSelectionModel.SelectionFlag.Select)
 
         assert len(widget._selected_ids) == 1
 

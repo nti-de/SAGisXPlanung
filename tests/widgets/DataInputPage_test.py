@@ -1,7 +1,7 @@
 import pytest
-from PyQt5.QtCore import QObject
-from PyQt5.QtWidgets import QGridLayout, QLabel
+from qgis.PyQt.QtWidgets import QLabel, QTabBar
 from qgis.PyQt import QtWidgets, QtCore
+from qgis.PyQt.QtCore import Qt
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 
@@ -127,7 +127,7 @@ class TestQXPlanTabWidget_closeTab:
         assert isinstance(group_box, QtWidgets.QGroupBox)
         add_button = [button for button in group_box.findChildren(QtWidgets.QPushButton)
                       if button.text() == 'Hinzufügen'][0]
-        qtbot.mouseClick(add_button, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(add_button, Qt.MouseButton.LeftButton)
         assert tab_widget.count() == 2
 
         # test populate content from multiple tabs
@@ -142,12 +142,12 @@ class TestQXPlanTabWidget_closeTab:
         assert isinstance(group_box, QtWidgets.QGroupBox)
         add_button = [button for button in group_box.findChildren(QtWidgets.QPushButton)
                       if button.text() == 'Hinzufügen'][0]
-        qtbot.mouseClick(add_button, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(add_button, Qt.MouseButton.LeftButton)
 
         # test closing tab
-        close_button = tab_widget.tabBar().tabButton(1, QtWidgets.QTabBar.RightSide)
+        close_button = tab_widget.tabBar().tabButton(1, QTabBar.ButtonPosition.RightSide)
         assert close_button
-        qtbot.mouseClick(close_button, QtCore.Qt.LeftButton)
+        qtbot.mouseClick(close_button, Qt.MouseButton.LeftButton)
 
         assert tab_widget.count() == 1
 
@@ -160,20 +160,20 @@ class TestQXPlanTabWidget_closeTab:
     #     assert isinstance(group_box, QtWidgets.QGroupBox)
     #     add_button = [button for button in group_box.findChildren(QtWidgets.QPushButton)
     #                   if button.text() == 'Hinzufügen'][0]
-    #     qtbot.mouseClick(add_button, QtCore.Qt.LeftButton)
+    #     qtbot.mouseClick(add_button, Qt.MouseButton.LeftButton)
     #
     #     # add dependent subrelation
     #     group_box = tab_widget.widget(1).vBox.itemAt(1).widget()
     #     assert isinstance(group_box, QtWidgets.QGroupBox)
     #     add_button = [button for button in group_box.findChildren(QtWidgets.QPushButton)
     #                   if button.text() == 'Hinzufügen'][0]
-    #     qtbot.mouseClick(add_button, QtCore.Qt.LeftButton)
+    #     qtbot.mouseClick(add_button, Qt.MouseButton.LeftButton)
     #
     #     # test closing tab
-    #     close_button = tab_widget.tabBar().tabButton(1, QtWidgets.QTabBar.RightSide)
+    #     close_button = tab_widget.tabBar().tabButton(1, QTabBar.ButtonPosition.RightSide)
     #     assert close_button
     #
-    #     qtbot.mouseClick(close_button, QtCore.Qt.LeftButton)
+    #     qtbot.mouseClick(close_button, Qt.MouseButton.LeftButton)
     #     yes_button = tab_widget.close_warning.button(QtWidgets.QMessageBox.Yes)
-    #     qtbot.mouseClick(yes_button, QtCore.Qt.LeftButton)
+    #     qtbot.mouseClick(yes_button, Qt.MouseButton.LeftButton)
 

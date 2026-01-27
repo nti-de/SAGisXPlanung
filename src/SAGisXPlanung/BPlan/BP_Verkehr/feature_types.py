@@ -76,7 +76,7 @@ class BP_StrassenVerkehrsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Obje
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#fbdd19'))
@@ -108,7 +108,7 @@ class BP_StrassenbegrenzungsLinie(LineGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         colored_strip = QgsSimpleLineSymbolLayer(QColor('#57e158'))
@@ -204,7 +204,7 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
@@ -215,9 +215,9 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
         line_pattern_symbol.deleteSymbolLayer(0)
         line_pattern_layer = QgsSimpleLineSymbolLayer(QColor('#fbdd19'))
         line_pattern_layer.setWidth(2)
-        line_pattern_layer.setWidthUnit(QgsUnitTypes.RenderMapUnits)
+        line_pattern_layer.setWidthUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         line_pattern_symbol.appendSymbolLayer(line_pattern_layer)
-        line_pattern.setDistanceUnit(QgsUnitTypes.RenderMapUnits)
+        line_pattern.setDistanceUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         line_pattern.setSubSymbol(line_pattern_symbol)
         symbol.appendSymbolLayer(line_pattern)
 
@@ -226,7 +226,7 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Verkehr')
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -251,23 +251,23 @@ class BP_BereichOhneEinAusfahrtLinie(LineGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor('black'))
         line.setWidth(0.1)
-        line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.SemiCircle
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.SemiCircle
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.SemiCircle
         half_dots_symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=1)
-        half_dots_symbol_layer.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        half_dots_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=3)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(half_dots_symbol_layer)
@@ -301,15 +301,15 @@ class BP_EinfahrtPunkt(PointGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PointGeometry)
         symbol.deleteSymbolLayer(0)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Triangle
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Triangle
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Triangle
         triangle_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=5)
-        triangle_layer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        triangle_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         angle_prop = QgsProperty.fromField("nordwinkel")
         triangle_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyAngle, angle_prop)

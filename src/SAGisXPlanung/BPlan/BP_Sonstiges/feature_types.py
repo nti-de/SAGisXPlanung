@@ -32,12 +32,12 @@ class BP_FlaecheOhneFestsetzung(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer.create({})
         fill.setFillColor(QColor(0, 0, 0))
-        fill.setBrushStyle(Qt.BDiagPattern)
+        fill.setBrushStyle(Qt.BrushStyle.BDiagPattern)
 
         symbol.appendSymbolLayer(fill)
         symbol.setOpacity(0.2)
@@ -76,19 +76,19 @@ class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         white_marker = QgsSimpleLineSymbolLayer(QColor('#ffffff'))
         white_marker.setWidth(1)
         white_marker.setOffset(0.5)
-        white_marker.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        white_marker.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         white_marker.setUseCustomDashPattern(True)
         white_marker.setCustomDashVector([3, 1.5])
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.2)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         symbol.appendSymbolLayer(white_marker)
         symbol.appendSymbolLayer(border)
@@ -123,23 +123,23 @@ class BP_NutzungsartenGrenze(LineGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor('black'))
         line.setWidth(0.1)
-        line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Circle
         else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Circle
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Circle
         dots_symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=1)
-        dots_symbol_layer.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        dots_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=3)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMetersInMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(dots_symbol_layer)
@@ -182,7 +182,7 @@ class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         return symbol
 

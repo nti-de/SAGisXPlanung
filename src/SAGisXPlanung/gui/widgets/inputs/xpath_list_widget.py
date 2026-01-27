@@ -3,15 +3,15 @@ import os
 import sys
 from typing import List, Optional
 
-from PyQt5.QtWidgets import (
+from qgis.PyQt.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QListWidget, QListWidgetItem,
     QDialog, QFormLayout, QComboBox, QGroupBox, QFrame, QScrollArea,
     QTextEdit, QMessageBox, QSpacerItem, QSizePolicy, QGridLayout, QListView, QStyledItemDelegate, QStyle,
     QStyleOptionViewItem
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QTimer, QRect, QAbstractListModel, QModelIndex, QVariant
-from PyQt5.QtGui import QFont, QPalette, QColor, QPainter, QPen, QBrush, QIcon, QMouseEvent, QFontDatabase, QFontMetrics
+from qgis.PyQt.QtCore import Qt, pyqtSignal, QTimer, QRect, QAbstractListModel, QModelIndex, QVariant
+from qgis.PyQt.QtGui import QFont, QPalette, QColor, QPainter, QPen, QBrush, QIcon, QMouseEvent, QFontDatabase, QFontMetrics
 import json
 import uuid
 
@@ -78,9 +78,9 @@ class XPathListWidget(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
             reply = QMessageBox.question(
                 self, "Ausdruck löschen",
                 f"Diesen XPath-Ausdruck löschen?\n\n{expression.xpath}",
-                QMessageBox.Yes | QMessageBox.No
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
-            if reply == QMessageBox.Yes:
+            if reply == QMessageBox.StandardButton.Yes:
                 self.model.removeRow(index)
 
     def value(self):
@@ -101,7 +101,7 @@ class XPathListView(QListView):
         self._empty_message = "Kein XPath-Ausdruck konfiguriert.\nKlicken Sie auf \"XPath hinzufügen\" um zu starten."
 
         self.setMouseTracking(True)
-        self.setSelectionMode(QListView.SingleSelection)
+        self.setSelectionMode(QListView.SelectionMode.SingleSelection)
         self.setStyleSheet("QListView::item { padding: 5px;}")
 
         self.delegate = XPathItemDelegate(self)
@@ -116,7 +116,7 @@ class XPathListView(QListView):
     def _paint_empty_message(self, event):
         """Paint the empty state message."""
         painter = QPainter(self.viewport())
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         # Set up font and color
         font = QFont()
@@ -136,7 +136,7 @@ class XPathListView(QListView):
         # Draw the message
         painter.drawText(
             text_rect,
-            Qt.AlignCenter | Qt.TextWordWrap,
+            Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
             self._empty_message
         )
 
@@ -151,25 +151,25 @@ class XPathModel(QAbstractListModel):
         super().__init__(parent)
         self._expressions = []
 
-        self.font = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+        self.font = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
 
     def rowCount(self, parent=QModelIndex()):
         return len(self._expressions)
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid() or index.row() >= len(self._expressions):
-            return QVariant()
+            return NULL
 
         expression = self._expressions[index.row()]
 
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return expression.xpath
-        elif role == Qt.UserRole:
+        elif role == Qt.ItemDataRole.UserRole:
             return expression
-        elif role == Qt.FontRole:
+        elif role == Qt.ItemDataRole.FontRole:
             return self.font
 
-        return QVariant()
+        return NULL
 
     def insertRow(self, row, parent=QModelIndex()):
         return self.insertRows(row, 1, parent)
@@ -250,7 +250,7 @@ class XPathItemDelegate(HighlightRowDelegate):
                                           color=ApplicationColor.Tertiary))
 
     def paint(self, painter, option, index):
-        expression = index.data(Qt.UserRole)
+        expression = index.data(Qt.ItemDataRole.UserRole)
         if not expression:
             return
 
@@ -261,10 +261,10 @@ class XPathItemDelegate(HighlightRowDelegate):
             option.rect.width() - icon_area_width - 15,
             option.rect.height()
         )
-        painter.setFont(index.data(Qt.FontRole))
+        painter.setFont(index.data(Qt.ItemDataRole.FontRole))
         metrics = QFontMetrics(painter.font())
-        elided_text = metrics.elidedText(expression.xpath, Qt.ElideRight, text_rect.width())
-        painter.drawText(text_rect, Qt.AlignVCenter | Qt.AlignLeft, elided_text)
+        elided_text = metrics.elidedText(expression.xpath, Qt.TextElideMode.ElideRight, text_rect.width())
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft, elided_text)
 
         # Button area
         button_y = option.rect.top() + (option.rect.height() - 30) // 2
@@ -290,11 +290,11 @@ class XPathItemDelegate(HighlightRowDelegate):
 
     def _draw_button(self, painter, rect, icon: QIcon, hovered=False):
         painter.save()
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         if hovered:
             painter.setBrush(QBrush(QColor(ApplicationColor.Grey200)))
-            painter.setPen(Qt.NoPen)
+            painter.setPen(Qt.PenStyle.NoPen)
             painter.drawRoundedRect(rect, 3, 3)
 
         icon_size = 16
@@ -304,7 +304,7 @@ class XPathItemDelegate(HighlightRowDelegate):
             icon_size,
             icon_size
         )
-        icon.paint(painter, icon_rect, Qt.AlignCenter)
+        icon.paint(painter, icon_rect, Qt.AlignmentFlag.AlignCenter)
         painter.restore()
 
 
@@ -314,7 +314,7 @@ class XPathItemDelegate(HighlightRowDelegate):
     def editorEvent(self, event, model, option, index):
         row = index.row()
 
-        if event.type() == QMouseEvent.MouseMove:
+        if event.type() == QMouseEvent.Type.MouseMove:
             pos = event.pos()
             hovered = None
 
@@ -328,15 +328,15 @@ class XPathItemDelegate(HighlightRowDelegate):
                 option.widget.viewport().update()
 
             if hovered:
-                option.widget.setCursor(Qt.PointingHandCursor)
+                option.widget.setCursor(Qt.CursorShape.PointingHandCursor)
             else:
-                option.widget.setCursor(Qt.ArrowCursor)
+                option.widget.setCursor(Qt.CursorShape.ArrowCursor)
 
             return False
 
-        elif event.type() == QMouseEvent.MouseButtonRelease and event.button() == Qt.LeftButton:
+        elif event.type() == QMouseEvent.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
             pos = event.pos()
-            option.widget.setCursor(Qt.ArrowCursor)
+            option.widget.setCursor(Qt.CursorShape.ArrowCursor)
             for key, rect in self.button_rects.get(row, {}).items():
                 if rect.contains(pos):
                     if key == 'copy':

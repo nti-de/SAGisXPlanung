@@ -27,29 +27,29 @@ class MultiSelectComboBox(QComboBox):
         self.empty_text = empty_text
         self.display_text = self.empty_text
 
-    def add_item(self, text, data=None, check_state=Qt.Unchecked):
+    def add_item(self, text, data=None, check_state=Qt.CheckState.Unchecked):
         item = QStandardItem(text)
-        item.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
-        item.setData(data, Qt.UserRole)
+        item.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
+        item.setData(data, Qt.ItemDataRole.UserRole)
         self.model().appendRow(item)
 
         item.setCheckState(check_state)
 
     def on_item_pressed(self, index):
         item = self.model().itemFromIndex(index)
-        if item.checkState() == Qt.Checked:
-            item.setCheckState(Qt.Unchecked)
+        if item.checkState() == Qt.CheckState.Checked:
+            item.setCheckState(Qt.CheckState.Unchecked)
         else:
-            item.setCheckState(Qt.Checked)
+            item.setCheckState(Qt.CheckState.Checked)
 
     def on_item_changed(self, item: QStandardItem):
         self.update_display_text()
 
-    def checked_items(self, role=Qt.DisplayRole):
+    def checked_items(self, role=Qt.ItemDataRole.DisplayRole):
         checked_items = []
         for i in range(self.model().rowCount()):
             item = self.model().item(i)
-            if item.checkState() == Qt.Checked:
+            if item.checkState() == Qt.CheckState.Checked:
                 checked_items.append(item.data(role))
         return checked_items
 
@@ -62,11 +62,11 @@ class MultiSelectComboBox(QComboBox):
         self.initStyleOption(opt)
 
         p = QStylePainter(self)
-        p.drawComplexControl(QStyle.CC_ComboBox, opt)
+        p.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
 
-        text_rect = self.style().subControlRect(QStyle.CC_ComboBox, opt, QStyle.SC_ComboBoxEditField)
-        opt.currentText = p.fontMetrics().elidedText(self.display_text, Qt.ElideRight, text_rect.width())
-        p.drawControl(QStyle.CE_ComboBoxLabel, opt)
+        text_rect = self.style().subControlRect(QStyle.ComplexControl.CC_ComboBox, opt, QStyle.SubControl.SC_ComboBoxEditField)
+        opt.currentText = p.fontMetrics().elidedText(self.display_text, Qt.TextElideMode.ElideRight, text_rect.width())
+        p.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 
     def sizeHint(self):
         hint = super().sizeHint()
@@ -80,20 +80,20 @@ class SearchableComboBox(QComboBox):
     def __init__(self, parent=None):
         super(SearchableComboBox, self).__init__(parent)
 
-        self.setFocusPolicy(Qt.ClickFocus)
+        self.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
         self.setEditable(True)
 
         # prevent insertions into combobox
-        self.setInsertPolicy(QComboBox.NoInsert)
+        self.setInsertPolicy(QComboBox.InsertPolicy.NoInsert)
 
         # filter model for matching items
         self.filter_model = QSortFilterProxyModel(self)
-        self.filter_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.filter_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
         self.filter_model.setSourceModel(self.model())
 
         # completer that uses filter model
         self.completer = QCompleter(self.filter_model, self)
-        self.completer.setCompletionMode(QCompleter.UnfilteredPopupCompletion)
+        self.completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
         self.setCompleter(self.completer)
 
         icon_path = Path(BASE_DIR, 'gui', 'resources', 'arrow_drop_down.svg').as_posix()
@@ -151,7 +151,7 @@ class SearchableComboBox(QComboBox):
         self.view().setStyle(self._proxy_style)
 
         self.completer_view = QListView(self)
-        self.completer_view.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.completer_view.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.completer_view.setMouseTracking(True)
         self.completer_view.setStyleSheet(view_sheet_style)
         self.completer_view.setStyle(self._proxy_style)

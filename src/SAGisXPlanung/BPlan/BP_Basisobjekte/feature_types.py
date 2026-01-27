@@ -151,20 +151,20 @@ class BP_Plan(XP_Plan):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
-        symbol.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         dashed_border = QgsSimpleLineSymbolLayer.create({})
         dashed_border.setColor(QColor(0, 0, 0))
         dashed_border.setWidth(2)
         dashed_border.setOffset(-1)
-        dashed_border.setPenStyle(Qt.DashLine)
-        dashed_border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        dashed_border.setPenStyle(Qt.PenStyle.DashLine)
+        dashed_border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         symbol.appendSymbolLayer(dashed_border)
         symbol.appendSymbolLayer(border)
@@ -241,7 +241,7 @@ class BP_Bereich(XP_Bereich):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         simple_line = QgsSimpleLineSymbolLayer.create({})
         symbol.appendSymbolLayer(simple_line)

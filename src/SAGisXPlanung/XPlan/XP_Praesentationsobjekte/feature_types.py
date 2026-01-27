@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Optional, List, Any
 from uuid import uuid4
 
-from PyQt5.QtCore import QVariant
+from qgis.PyQt.QtCore import QVariant
 from geoalchemy2 import Geometry, WKTElement, WKBElement
 from qgis._core import QgsField, QgsNullSymbolRenderer, QgsPalLayerSettings, QgsVectorLayerSimpleLabeling, QgsProperty, \
     QgsPropertyCollection, Qgis, QgsFeatureRequest, QgsFeature, QgsFields
@@ -60,7 +60,7 @@ def create_attribute_change_listener(cls: type, attr_name: str, target_xid: str,
             session = object_session(target)
             xp_po = session.get(XP_AbstraktesPraesentationsobjekt, orm_xid)
 
-            fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.NoGeometry)
+            fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.Flag.NoGeometry)
             for feat in layer.getFeatures(fr):
                 id_prop = layer.customProperties().value(f'xplanung/feat-{feat.id()}')
                 if id_prop == str(orm_xid):
@@ -132,7 +132,7 @@ class XP_AbstraktesPraesentationsobjekt(FeatureType, RelationshipMixin, ElementO
         if not layer:
             return
 
-        fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.NoGeometry)
+        fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.Flag.NoGeometry)
         for feature in layer.getFeatures(fr):
             id_prop = layer.customProperties().value(f'xplanung/feat-{feature.id()}')
             if id_prop == str(self.id):
@@ -245,7 +245,7 @@ def po_base_changed(mapper, connection, xp_po: XP_AbstraktesPraesentationsobjekt
         return
 
     # update map display
-    fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.NoGeometry)
+    fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.Flag.NoGeometry)
     for feat in layer.getFeatures(fr):
         id_prop = layer.customProperties().value(f'xplanung/feat-{feat.id()}')
         if id_prop == str(xp_po.id):
@@ -473,33 +473,33 @@ class XP_PPO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
         label_settings.placementSettings().setOverlapHandling(Qgis.LabelOverlapHandling.AllowOverlapIfRequired)
 
         text_format = QgsTextFormat()
-        text_format.setSizeUnit(QgsUnitTypes.RenderMapUnits)
+        text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         exp = f"if(\"form\" = 'SVG', \"skalierung\" * \"symbol_size\", \"skalierung\" * \"text_size\")"
         size_prop = QgsProperty.fromExpression(exp)
         angle_prop = QgsProperty.fromField("drehwinkel")
         prop_collection = QgsPropertyCollection()
-        prop_collection.setProperty(QgsPalLayerSettings.Size, size_prop)
-        prop_collection.setProperty(QgsPalLayerSettings.LabelRotation, angle_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.Size, size_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.LabelRotation, angle_prop)
 
         background = QgsTextBackgroundSettings()
-        background.setStrokeWidthUnit(QgsUnitTypes.RenderMapUnits)
-        background.setSizeType(QgsTextBackgroundSettings.SizeFixed)
-        background.setSizeUnit(QgsUnitTypes.RenderMapUnits)
+        background.setStrokeWidthUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        background.setSizeType(QgsTextBackgroundSettings.SizeType.SizeFixed)
+        background.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         background_enable_prop = QgsProperty.fromExpression("\"form\" != 'Text'")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeDraw, background_enable_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeDraw, background_enable_prop)
         background_form_prop = QgsProperty.fromField("form")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeKind, background_form_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeKind, background_form_prop)
         fill_form_prop = QgsProperty.fromField("symbol_fill")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeFillColor, fill_form_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeFillColor, fill_form_prop)
         stroke_form_prop = QgsProperty.fromField("symbol_stroke")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeStrokeColor, stroke_form_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeStrokeColor, stroke_form_prop)
         strokewidth_form_prop = QgsProperty.fromExpression("\"symbol_stroke_width\" * \"skalierung\"")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeStrokeWidth, strokewidth_form_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeStrokeWidth, strokewidth_form_prop)
         svg_symbol_prop = QgsProperty.fromField("symbol_path")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeSVGFile, svg_symbol_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeSVGFile, svg_symbol_prop)
         shape_size_prop = QgsProperty.fromExpression("\"symbol_size\" * \"skalierung\"")
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeSizeX, shape_size_prop)
-        prop_collection.setProperty(QgsPalLayerSettings.ShapeSizeY, shape_size_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeSizeX, shape_size_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.ShapeSizeY, shape_size_prop)
 
         # create the labeling configuration and apply it to the layer
         text_format.setBackground(background)
@@ -590,12 +590,12 @@ class XP_PTO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
         label_settings.placementSettings().setOverlapHandling(Qgis.LabelOverlapHandling.AllowOverlapIfRequired)
 
         text_format = QgsTextFormat()
-        text_format.setSizeUnit(QgsUnitTypes.RenderMapUnits)
+        text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         size_prop = QgsProperty.fromExpression('"skalierung" * "text_size"')
         angle_prop = QgsProperty.fromField("drehwinkel")
         prop_collection = QgsPropertyCollection()
-        prop_collection.setProperty(QgsPalLayerSettings.Size, size_prop)
-        prop_collection.setProperty(QgsPalLayerSettings.LabelRotation, angle_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.Size, size_prop)
+        prop_collection.setProperty(QgsPalLayerSettings.Property.LabelRotation, angle_prop)
 
         # create the labeling configuration and apply it to the layer
         label_settings.setDataDefinedProperties(prop_collection)

@@ -55,7 +55,7 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#febae1'))
@@ -64,8 +64,8 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
 
         return symbol
@@ -73,9 +73,9 @@ class FP_Gemeinbedarf(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Gemeinbedarf', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Gemeinbedarf_Spiel_und_Sportanlagen', geometry_type=geom_type,
                                  symbol_size=30)
@@ -110,25 +110,25 @@ class FP_SpielSportanlage(MixedGeometry, FP_Objekt):
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
 
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
         line.setWidth(0.5)
-        line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        line.setPenStyle(Qt.SolidLine)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line.setPenStyle(Qt.PenStyle.SolidLine)
 
         dotted_line_inner = QgsMarkerLineSymbolLayer()
         dotted_line_inner.setColor(QColor(0, 0, 0))
         dotted_line_inner.setWidth(0.8)
         dotted_line_inner.setOffset(2)
-        dotted_line_inner.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        dotted_line_inner.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         dotted_line_outer = dotted_line_inner.clone()
         dotted_line_outer.setOffset(1)
-        dotted_line_outer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        dotted_line_outer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         symbol.appendSymbolLayer(fill)
         symbol.appendSymbolLayer(line)
@@ -140,9 +140,9 @@ class FP_SpielSportanlage(MixedGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        if geom_type == QgsWkbTypes.PolygonGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('SpielSportanlage', QgsSymbol.defaultSymbol(geom_type),
                                  'BP_Gemeinbedarf_Spiel_und_Sportanlagen', geometry_type=geom_type,
                                  scale_factor=5)

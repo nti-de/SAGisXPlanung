@@ -32,7 +32,6 @@ class ActionType(Enum):
 
 
 class ContextMenuTool(QgsMapToolIdentify):
-    editBuildingTemplateRequested = pyqtSignal(QBuildingTemplateEdit)
     accessAttributesRequested = pyqtSignal(XPlanungItem)
     highlightObjectTreeRequested = pyqtSignal(XPlanungItem)
     multiEditRequested = pyqtSignal(list)  # List[XPlanungItem]
@@ -113,7 +112,7 @@ class ContextMenuTool(QgsMapToolIdentify):
             menu.addAction(self.multi_edit_action)
             menu.addSeparator()
 
-    def createCommonMenuEntries(self, menu: QMenu, layer: QgsMapLayer, feat_id: str, map_position):
+    def createCommonMenuEntries(self, menu: QMenu, layer: QgsMapLayer, feat_id: int, map_position):
         xtype = layer.customProperties().value(f'xplanung/type')
         xplanung_id = layer.customProperties().value(f'xplanung/feat-{feat_id}')
         plan_xid = layer.customProperties().value(f'xplanung/plan-xid')
@@ -155,13 +154,11 @@ class ContextMenuTool(QgsMapToolIdentify):
             full_version_required_warning()
 
     def canvasReleaseEvent(self, event: QgsMapMouseEvent):
-        results = self.identify(event.x(), event.y(), QgsMapToolIdentify.TopDownAll, [],
-                                QgsMapToolIdentify.VectorLayer, QgsIdentifyContext())
-        global_pos = self.canvas.mapToGlobal(QPoint(event.x() + 5, event.y() + 5))
-        canvas_pos = self.canvas.mapToScene(event.pos())
-
-        topmost_item = self.canvas.scene().itemAt(canvas_pos, QTransform())
-        canvas_item = topmost_item if isinstance(topmost_item, BuildingTemplateItem) else None
+        x = event.position().toPoint().x()
+        y = event.position().toPoint().y()
+        results = self.identify(x, y, QgsMapToolIdentify.IdentifyMode.TopDownAll, [],
+                                QgsMapToolIdentify.Type.VectorLayer, QgsIdentifyContext())
+        global_pos = self.canvas.mapToGlobal(QPoint(x + 5, y + 5))
 
         map_point = event.mapPoint()
         search_rect = QgsRectangle(map_point.x(), map_point.y(), map_point.x(), map_point.y())
@@ -179,11 +176,11 @@ class ContextMenuTool(QgsMapToolIdentify):
     # https://www.qgis.org/api/classQgsIconUtils.html#a58d939a4422eb18db911ccd2aeebaa44
     def iconForWkbType(self, wkb_type):
         geometry_type = QgsWkbTypes.geometryType(wkb_type)
-        if geometry_type == QgsWkbTypes.PolygonGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QIcon(':/images/themes/default/mIconPolygonLayer.svg')
-        if geometry_type == QgsWkbTypes.LineGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.LineGeometry:
             return QIcon(':/images/themes/default/mIconLineLayer.svg')
-        if geometry_type == QgsWkbTypes.PointGeometry:
+        if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
             return QIcon(':/images/themes/default/mIconPointLayer.svg')
 
     def delete_highlight(self):

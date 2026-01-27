@@ -4,6 +4,7 @@ import os
 
 import qasync
 from qgis.PyQt import QtGui, QtCore, QtWidgets, uic
+from qgis.PyQt.QtCore import Qt
 from qgis.core import Qgis
 
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -24,7 +25,7 @@ class XPCreatePlanDialog(QtWidgets.QDialog, FORM_CLASS):
         self.parent_type = parent_type
 
         self.setWindowTitle(f"Neues {self.class_type.__name__}-Objekt anlegen")
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose)
 
         self.buttons_hbox = QtWidgets.QHBoxLayout()
         self.b_create = QtWidgets.QPushButton(f"{self.class_type.__name__} erstellen")
@@ -45,7 +46,7 @@ class XPCreatePlanDialog(QtWidgets.QDialog, FORM_CLASS):
     @qasync.asyncSlot()
     async def createObject(self):
         try:
-            QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+            QtWidgets.QApplication.setOverrideCursor(QtGui.QCursor(Qt.CursorShape.WaitCursor))
 
             self.content = self.tabs.populateContent()
             if not self.content:
@@ -53,13 +54,13 @@ class XPCreatePlanDialog(QtWidgets.QDialog, FORM_CLASS):
 
             await save_to_db_async(self.content)
 
-            self.iface.messageBar().pushMessage("XPlanung", "Datensatz wurde gespeichert", level=Qgis.Success)
+            self.iface.messageBar().pushMessage("XPlanung", "Datensatz wurde gespeichert", level=Qgis.MessageLevel.Success)
             self.contentSaved.emit()
             self.accept()
 
         except Exception as e:
             logger.exception(f"error {e}")
             self.iface.messageBar().pushMessage("XPlanung Fehler", "Datensatz konnte nicht gespeichert werden!",
-                                                str(e), level=Qgis.Critical)
+                                                str(e), level=Qgis.MessageLevel.Critical)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()

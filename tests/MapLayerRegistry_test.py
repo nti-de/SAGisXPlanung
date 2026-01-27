@@ -1,17 +1,12 @@
 import uuid
 
 import pytest
-from PyQt5.QtWidgets import QGraphicsItem
 from geoalchemy2 import WKTElement
 from mock.mock import MagicMock
-from qgis._core import QgsLayerTreeNode, QgsLayerTreeGroup
-from qgis._gui import QgsMapCanvasItem
 
-from qgis.core import QgsVectorLayer, QgsAnnotationLayer, QgsProject, QgsGeometry, QgsWkbTypes, QgsSingleSymbolRenderer
-from qgis.utils import iface
+from qgis.core import QgsVectorLayer, QgsProject, QgsGeometry, QgsWkbTypes, QgsSingleSymbolRenderer
 
-from SAGisXPlanung import Session
-from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
+from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry

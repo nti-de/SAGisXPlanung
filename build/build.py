@@ -2,11 +2,59 @@ import ast
 import re
 import shutil
 from pathlib import Path
+from contextlib import contextmanager
 
+# ------------------------------------------------------------
+# Optional rich progress support
+# ------------------------------------------------------------
+try:
+    from rich.progress import Progress, SpinnerColumn, BarColumn, TextColumn, TimeElapsedColumn, Console
+
+    @contextmanager
+    def progress_context():
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("{task.completed}/{task.total}"),
+            TimeElapsedColumn(),
+        ) as progress:
+            yield progress
+
+    def progress_iter(progress, iterable, description):
+        task = progress.add_task(description, total=len(iterable))
+        for item in iterable:
+            yield item
+            progress.advance(task)
+
+    @contextmanager
+    def rich_task(description: str):
+        _console = Console()
+        with _console.status(f"[bold]{description}[/bold]..."):
+            yield
+
+except ImportError:
+    @contextmanager
+    def progress_context():
+        yield None
+
+    def progress_iter(progress, iterable, description):
+        yield from iterable
+
+    @contextmanager
+    def rich_task(description: str):
+        print(f"{description}...")
+        yield
+
+
+# ------------------------------------------------------------
+# Build configuration
+# ------------------------------------------------------------
 SRC_NAME = "SAGisXPlanung"
 SRC = Path("src") / SRC_NAME
 TARGET_NAME = SRC_NAME + "_pro"
 DST = Path("dist") / TARGET_NAME
+
 
 class PluginRewriter(ast.NodeTransformer):
     ACTION_STRING_VARS = {
@@ -67,11 +115,7 @@ class PluginRewriter(ast.NodeTransformer):
             arg = node.args[0]
             if isinstance(arg, ast.Name) and arg.id == SRC_NAME:
                 arg.id = TARGET_NAME
-
-            elif (
-                isinstance(arg, ast.Attribute)
-                and self._is_myplugin_attr(arg)
-            ):
+            elif isinstance(arg, ast.Attribute) and self._is_myplugin_attr(arg):
                 self._rewrite_attr(arg)
 
         return self.generic_visit(node)
@@ -82,29 +126,33 @@ class PluginRewriter(ast.NodeTransformer):
         return isinstance(node, ast.Name) and node.id == SRC_NAME
 
     def _rewrite_attr(self, node):
-        # Walk down to the root Name node
         while isinstance(node.value, ast.Attribute):
             node = node.value
         if isinstance(node.value, ast.Name) and node.value.id == SRC_NAME:
             node.value.id = TARGET_NAME
 
 
+# ------------------------------------------------------------
+# Build process
+# ------------------------------------------------------------
 if DST.exists():
     shutil.rmtree(DST)
 
-shutil.copytree(SRC, DST)
+with rich_task("Copying source tree"):
+    shutil.copytree(SRC, DST)
 
-for py in DST.rglob("*.py"):
-    tree = ast.parse(py.read_text(encoding="utf-8"))
-    tree = PluginRewriter().visit(tree)
-    ast.fix_missing_locations(tree)
-    py.write_text(ast.unparse(tree), encoding="utf-8")
-
+with progress_context() as progress:
+    py_files = list(DST.rglob("*.py"))
+    for py in progress_iter(progress, py_files, "Rewriting Python files"):
+        tree = ast.parse(py.read_text(encoding="utf-8"))
+        tree = PluginRewriter().visit(tree)
+        ast.fix_missing_locations(tree)
+        py.write_text(ast.unparse(tree), encoding="utf-8")
 
 metadata = DST / "metadata.txt"
 text = metadata.read_text(encoding="utf-8")
-text = re.sub(r'(?m)^\s*name\s*=.*$',f'name=SAGis XPlanung', text)
-text = re.sub(r'(?m)^\s*icon\s*=.*$',f'icon=gui/resources/sagis_dev_icon.png', text)
+text = re.sub(r'(?m)^\s*name\s*=.*$', 'name=SAGis XPlanung', text)
+text = re.sub(r'(?m)^\s*icon\s*=.*$', 'icon=gui/resources/sagis_icon.png', text)
 metadata.write_text(text, encoding="utf-8")
 
 
@@ -112,9 +160,11 @@ def rewrite_ui_text(path, src, target):
     text = path.read_text(encoding="utf-8")
     if src not in text:
         return False
-
     path.write_text(text.replace(src, target), encoding="utf-8")
     return True
 
-for ui in DST.rglob("*.ui"):
-    rewrite_ui_text(ui, SRC_NAME, TARGET_NAME)
+
+with progress_context() as progress:
+    ui_files = list(DST.rglob("*.ui"))
+    for ui in progress_iter(progress, ui_files, "Rewriting UI files"):
+        rewrite_ui_text(ui, SRC_NAME, TARGET_NAME)

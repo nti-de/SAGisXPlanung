@@ -30,7 +30,7 @@ class AttributeConfigPage(SettingsPage):
         self.ui.attribute_view = QAttributeConfigView()
         self.ui.tab_attributes.layout().addWidget(self.ui.attribute_view)
         self.ui.filter_edit.setPlaceholderText('Suchen...')
-        self.ui.filter_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.LeadingPosition)
+        self.ui.filter_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.ui.filter_edit.textChanged.connect(self.ui.attribute_view.onFilterTextChanged)
 
     def setup_data(self):
@@ -60,13 +60,13 @@ class QAttributeConfigView(QTreeView):
         self.setMouseTracking(True)
 
         self.viewport().installEventFilter(QToolTipper(self))
-        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.customContextMenuRequested.connect(self.onContextMenuRequested)
 
         # header setup
         self.header().setStretchLastSection(False)
-        self.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.header().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.header().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
 
         # model setup
         self.setupModelData()
@@ -144,7 +144,7 @@ class QAttributeConfigView(QTreeView):
         deselect_all_action.triggered.connect(functools.partial(self.onSelectCategoryTriggered, index, False))
         menu.addAction(deselect_all_action)
 
-        menu.exec_(self.viewport().mapToGlobal(pos))
+        menu.exec(self.viewport().mapToGlobal(pos))
 
     @pyqtSlot(QModelIndex, bool, bool)
     def onSelectCategoryTriggered(self, index: QModelIndex, select: bool, checked: bool):
@@ -152,7 +152,7 @@ class QAttributeConfigView(QTreeView):
 
         for i in range(node.childCount()):
             match = self._model.index(i, 0, index)
-            self._model.setData(match.siblingAtColumn(2), select, Qt.CheckStateRole)
+            self._model.setData(match.siblingAtColumn(2), select, Qt.ItemDataRole.CheckStateRole)
 
 
 class AttributeConfigModel(QAbstractItemModel):
@@ -192,38 +192,38 @@ class AttributeConfigModel(QAbstractItemModel):
         self.endRemoveRows()
         return True
 
-    def data(self, index, role=Qt.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
         node = index.internalPointer()
-        if role == Qt.DisplayRole:
+        if role == Qt.ItemDataRole.DisplayRole:
             return node.data(index.column())
-        if role == Qt.ToolTipRole:
+        if role == Qt.ItemDataRole.ToolTipRole:
             return '<qt>{}</qt>'.format(html.escape(node.data(index.column())))
-        if role == Qt.CheckStateRole and index.column() == 2 and index.parent().isValid():
+        if role == Qt.ItemDataRole.CheckStateRole and index.column() == 2 and index.parent().isValid():
             return node.checked()
         return None
 
     def flags(self, index: QModelIndex):
         current_flags = super(AttributeConfigModel, self).flags(index)
-        flags = current_flags & ~Qt.ItemIsSelectable
+        flags = current_flags & ~Qt.ItemFlag.ItemIsSelectable
 
         if not index.parent().isValid():
-            return flags & ~Qt.ItemIsEnabled
+            return flags & ~Qt.ItemFlag.ItemIsEnabled
 
         node = index.internalPointer()
         if node.required:
-            return flags & ~Qt.ItemIsEnabled
+            return flags & ~Qt.ItemFlag.ItemIsEnabled
         if index.column() == 2:
-            return flags | Qt.ItemIsUserCheckable
+            return flags | Qt.ItemFlag.ItemIsUserCheckable
 
         return flags
 
-    def setData(self, index, value, role=Qt.EditRole):
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
         if index.column() == 2:
-            if role == Qt.EditRole:
+            if role == Qt.ItemDataRole.EditRole:
                 return False
-            if role == Qt.CheckStateRole:
+            if role == Qt.ItemDataRole.CheckStateRole:
                 item = self.itemAtIndex(index)
                 if item.required:
                     return True
@@ -233,8 +233,8 @@ class AttributeConfigModel(QAbstractItemModel):
 
         return super(AttributeConfigModel, self).setData(index, value, role)
 
-    def headerData(self, col, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
+    def headerData(self, col, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return self._horizontal_header[col]
 
     def itemAtIndex(self, index: QModelIndex):
@@ -276,7 +276,7 @@ class SortProxyModel(QSortFilterProxyModel):
         super().__init__(parent)
 
         self.setRecursiveFilteringEnabled(True)
-        self.setFilterCaseSensitivity(Qt.CaseInsensitive)
+        self.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
 
     def filterAcceptsRow(self, source_row: int, parent: QModelIndex):
         index = self.sourceModel().index(source_row, 0, parent)
@@ -313,8 +313,8 @@ class AttributeTreeNode:
 
     def checked(self):
         if self.required:
-            return Qt.Checked
-        return Qt.Checked if self.is_checked else Qt.Unchecked
+            return Qt.CheckState.Checked
+        return Qt.CheckState.Checked if self.is_checked else Qt.CheckState.Unchecked
 
     def childCount(self):
         return len(self._children)
@@ -350,7 +350,7 @@ class AttributeTreeNode:
 class QToolTipper(QObject):
 
     def eventFilter(self, obj: QObject, event: QEvent):
-        if event.type() == QEvent.ToolTip:
+        if event.type() == QEvent.Type.ToolTip:
             view: QAbstractItemView = obj.parent()
             if not view:
                 return False
@@ -363,7 +363,7 @@ class QToolTipper(QObject):
             item_text_width = fm.width(item_text)
             rect = view.visualRect(index)
             if len(item_text) != 0 and item_text_width > rect.width():
-                tooltip = view.model().data(index, Qt.ToolTipRole)
+                tooltip = view.model().data(index, Qt.ItemDataRole.ToolTipRole)
                 QToolTip.showText(event.globalPos(), tooltip, view, rect)
             else:
                 QToolTip.hideText()

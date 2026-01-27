@@ -2,18 +2,18 @@ import inspect
 import logging
 from typing import List, Iterable
 
-from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject, Qt
-from qgis.PyQt.QtWidgets import QUndoCommand
-from sqlalchemy import update, delete, select, inspect as s_inspect
-from sqlalchemy.orm import make_transient, selectinload, load_only, RelationshipProperty
-from sqlalchemy.orm.attributes import flag_modified
+from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject
+from sqlalchemy.orm import make_transient, load_only, RelationshipProperty
 
-from SAGisXPlanung import Session, Base
-from SAGisXPlanung.XPlanungItem import XPlanungItem
-from SAGisXPlanung.config import export_version
+from SAGisXPlanung import Session, Base, PYQT5
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
 from SAGisXPlanung.core.helper import find_true_class
-from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
+from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode
+
+if PYQT5:
+    from qgis.PyQt.QtWidgets import QUndoCommand
+else:
+    from qgis.PyQt.QtGui import QUndoCommand
 
 
 logger = logging.getLogger(__name__)
@@ -46,14 +46,13 @@ class AttributeChangedCommand(QUndoCommand):
             session.expire_on_commit = False
 
             cls = find_true_class(self.xplan_item.xtype, self.attribute)
+            load_opts = [load_only(getattr(self.xplan_item.xtype, 'id'))]
             if isinstance(mapper_property := getattr(cls, self.attribute).property, RelationshipProperty):
                 # if the changed property is a relationship, then write the corresponding id instead of ORM object
                 # (only if it does not contain a secondary relation with assoc table)
                 update_value = None
                 if mapper_property.secondary is not None:
-                    o = session.get(self.xplan_item.xtype, self.xplan_item.xid, [
-                        load_only('id')
-                    ])
+                    o = session.get(self.xplan_item.xtype, self.xplan_item.xid, options=load_opts)
 
                     merged = []
                     for selected_item in value:
@@ -72,7 +71,7 @@ class AttributeChangedCommand(QUndoCommand):
 
             # this is pretty slow since it emits a SELECT and has to populate the ORM instance
             # but is required to emit mapper-level events after_update/before_update which are used to update visualization
-            orm_instance = session.get(cls, self.xplan_item.xid, [load_only('id')])
+            orm_instance = session.get(cls, self.xplan_item.xid, options=load_opts)
             setattr(orm_instance, attr, update_value)
 
             # if hasattr(cls, 'FORCE_ORM_UPDATE') and cls.FORCE_ORM_UPDATE:

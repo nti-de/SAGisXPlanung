@@ -1,7 +1,7 @@
 import logging
 import os
 
-from PyQt5.QtWidgets import QComboBox
+from qgis.PyQt.QtWidgets import QComboBox
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QWidget, QHBoxLayout, QToolButton, QMenu, QDialog
 from qgis.PyQt.QtCore import pyqtSlot, Qt, QSize, QEvent
@@ -46,12 +46,12 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
             self.cb.view().customContextMenuRequested.disconnect()
         else:
             self.cb = QComboBoxNoScroll(self.parent_widget)
-        self.cb.setFocusPolicy(Qt.StrongFocus)
+        self.cb.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
         # weird fix for combobox growing larger than parent layout
         # https://www.qtcentre.org/threads/11092-QCombobox-contents-not-adjusting-itself-properly
         self.cb.setMinimumContentsLength(20)
-        self.cb.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        self.cb.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
 
         self.container.layout().addWidget(self.cb)
         self.layout.addWidget(self.container)
@@ -63,7 +63,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
             self.b_plus = QToolButton()
             self.b_plus.setIcon(load_svg(self.plus_icon_path))
             self.b_plus.installEventFilter(self)
-            self.b_plus.setCursor(Qt.PointingHandCursor)
+            self.b_plus.setCursor(Qt.CursorShape.PointingHandCursor)
             self.b_plus.setToolTip('Neues Objekt hinzufügen')
             self.b_plus.clicked.connect(self.addRelation)
             self.b_plus.setStyleSheet('''
@@ -74,7 +74,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
                 ''')
             self.layout.addWidget(self.b_plus)
 
-        self.cb.view().setContextMenuPolicy(Qt.CustomContextMenu)
+        self.cb.view().setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.cb.view().customContextMenuRequested.connect(self.onContextMenuRequested)
 
         self.setLayout(self.layout)
@@ -84,7 +84,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         if not index.isValid():
             return
 
-        data = self.cb.model().data(index, Qt.UserRole)
+        data = self.cb.model().data(index, Qt.ItemDataRole.UserRole)
         if not data:
             return
 
@@ -98,7 +98,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         delete_action.triggered.connect(lambda s, item_data=data: self.onDeleteObject(item_data))
         menu.addAction(delete_action)
 
-        menu.exec_(self.cb.view().viewport().mapToGlobal(point))
+        menu.exec(self.cb.view().viewport().mapToGlobal(point))
 
     def onEditObject(self, item_xid):
         from SAGisXPlanung.gui.XPEditObjectDialog import XPEditObjectDialog
@@ -106,8 +106,8 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         xplan_item = XPlanungItem(xtype=self.cls, xid=item_xid)
 
         d = XPEditObjectDialog(xplan_item)
-        result = d.exec_()
-        if result == QDialog.Accepted:
+        result = d.exec()
+        if result == QDialog.DialogCode.Accepted:
             self.refreshComboBox()
 
     def onDeleteObject(self, item_xid):
@@ -121,9 +121,9 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         self.refreshComboBox()
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.HoverEnter:
+        if event.type() == QEvent.Type.HoverEnter:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
-        elif event.type() == QEvent.HoverLeave:
+        elif event.type() == QEvent.Type.HoverLeave:
             obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
         return False
 
@@ -132,7 +132,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
         from SAGisXPlanung.gui.XPCreatePlanDialog import XPCreatePlanDialog
         d = XPCreatePlanDialog(iface=iface, cls_type=self.cls, parent_type=self.parent_type.cls_type)
         d.contentSaved.connect(self.refreshComboBox)
-        d.exec_()
+        d.exec()
 
     def refreshComboBox(self):
         self.cb.clear()
@@ -159,7 +159,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
             self.container.setStyleSheet('')
             self.container.layout().setContentsMargins(0, 0, 0, 0)
             return
-        self.container.setAttribute(Qt.WA_StyledBackground, True)
+        self.container.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.container.layout().setContentsMargins(5, 5, 5, 5)
         self.container.setStyleSheet(
             '#container {background-color: #ffb0b0; border: 1px solid red; border-radius: 3px;}')

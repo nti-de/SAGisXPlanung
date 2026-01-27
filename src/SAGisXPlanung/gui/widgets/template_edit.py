@@ -144,17 +144,17 @@ class LabeledButton(QWidget):
 
         self.setLayout(QVBoxLayout())
         self.setMouseTracking(True)
-        self.setCursor(Qt.PointingHandCursor)
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setObjectName('back')
-        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self.layout().setContentsMargins(5, 5, 5, 5)
 
         self._button = QToolButton()
         self._button.setIcon(icon)
-        self._button.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self._button.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
 
-        self.layout().addWidget(self._button, 0, Qt.AlignCenter)
-        self.layout().addWidget(QLabel(label_text), 0, Qt.AlignCenter)
+        self.layout().addWidget(self._button, 0, Qt.AlignmentFlag.AlignCenter)
+        self.layout().addWidget(QLabel(label_text), 0, Qt.AlignmentFlag.AlignCenter)
 
         self.setStyleSheet('''
         #back:hover {
@@ -176,7 +176,7 @@ class LabeledButton(QWidget):
         self.buttonToggled.emit(checked, self.row_count)
 
     def mouseReleaseEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton and not self.property('checked'):
+        if event.button() == Qt.MouseButton.LeftButton and not self.property('checked'):
             self.toggleButton(True)
         super(LabeledButton, self).mousePressEvent(event)
 

@@ -390,8 +390,8 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
             try:
                 po.toCanvas(layer_group, plan_xid)
             except TypeError as e:
-                logger.debug(e)
-                logger.debug(traceback.format_exc())
+                logger.error(e)
+                logger.error(traceback.format_exc())
                 pass
 
         super(XP_Objekt, self).toCanvas(layer_group, plan_xid)
@@ -430,7 +430,7 @@ def receive_after_delete(mapper, connection, target: XP_Objekt):
     if not layer:
         return
 
-    fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.NoGeometry)
+    fr = QgsFeatureRequest().setNoAttributes().setFlags(QgsFeatureRequest.Flag.NoGeometry)
     for feature in layer.getFeatures(fr):
         id_prop = layer.customProperties().value(f'xplanung/feat-{feature.id()}')
         if id_prop == str(target.id):

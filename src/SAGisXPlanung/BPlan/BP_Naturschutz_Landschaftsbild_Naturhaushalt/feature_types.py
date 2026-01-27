@@ -27,7 +27,7 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': 'bp_pflanzung',
     }
-    __rule_based_renderers__ = [QgsWkbTypes.PointGeometry]
+    __rule_based_renderers__ = [QgsWkbTypes.GeometryType.PointGeometry]
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
@@ -60,32 +60,32 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
 
     @classmethod
     def point_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PointGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PointGeometry)
         return symbol
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         symbol.setClipFeaturesToExtent(False)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.3)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         green_fill = QgsSimpleFillSymbolLayer(QColor('#16ce3c'))
 
-        shape = QgsSimpleMarkerSymbolLayerBase.Circle
+        shape = QgsSimpleMarkerSymbolLayerBase.Shape.Circle
         circle_symbol = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#000000'), size=1.5)
-        circle_symbol.setFillColor(QColor(Qt.transparent))
+        circle_symbol.setFillColor(QColor(Qt.GlobalColor.transparent))
         circle_symbol.setStrokeWidth(0.3)
-        circle_symbol.setStrokeWidthUnit(QgsUnitTypes.RenderMapUnits)
-        circle_symbol.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        circle_symbol.setStrokeWidthUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        circle_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         marker_line = QgsMarkerLineSymbolLayer(interval=3)
         marker_line.setOffset(1.5)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         marker_symbol = QgsMarkerSymbol()
         marker_symbol.deleteSymbolLayer(0)
         marker_symbol.appendSymbolLayer(circle_symbol)
@@ -99,12 +99,12 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
-        if geom_type == QgsWkbTypes.PointGeometry:
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             renderer = RuleBasedSymbolRenderer(cls.__icon_map__, cls.point_symbol(),
                                                'BP_Naturschutz_Landschaftsbild_Naturhaushalt',
-                                               geometry_type=QgsWkbTypes.PointGeometry)
+                                               geometry_type=QgsWkbTypes.GeometryType.PointGeometry)
             return renderer
-        elif geom_type == QgsWkbTypes.PolygonGeometry:
+        elif geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
@@ -139,20 +139,20 @@ class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt,
 
     @classmethod
     def symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         symbol.setClipFeaturesToExtent(False)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.5)
-        border.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        border.setPenJoinStyle(Qt.MiterJoin)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         green_strip = QgsSimpleLineSymbolLayer(QColor(22, 206, 60))
         green_strip.setWidth(3)
         green_strip.setOffset(1.75)
-        green_strip.setOutputUnit(QgsUnitTypes.RenderMapUnits)
-        green_strip.setPenJoinStyle(Qt.MiterJoin)
+        green_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        green_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         symbol.appendSymbolLayer(border)
         symbol.appendSymbolLayer(green_strip)

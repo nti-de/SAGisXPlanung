@@ -150,7 +150,7 @@ class BuildingTemplateItem:
 
     def paint(self, painter, context):
         self.context = context
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         brush = QBrush(self._color)
         painter.setBrush(brush)
@@ -168,7 +168,7 @@ class BuildingTemplateItem:
         pen.setWidthF(
             self.context.convertToPainterUnits(
                 self._pen_width_map_units, # * self._scale,
-                QgsUnitTypes.RenderMapUnits
+                QgsUnitTypes.RenderUnit.RenderMapUnits
             )
         )
         painter.strokePath(self._path, pen)
@@ -178,10 +178,10 @@ class BuildingTemplateItem:
         painter.restore()
 
     def paint_cell_content(self, painter: QPainter):
-        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
-        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderMapUnits)
-        cell_height = self.context.convertToPainterUnits(self.cell_height, QgsUnitTypes.RenderMapUnits)
-        cell_width = self.context.convertToPainterUnits(self.cell_width, QgsUnitTypes.RenderMapUnits)
+        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderUnit.RenderMapUnits)
+        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderUnit.RenderMapUnits)
+        cell_height = self.context.convertToPainterUnits(self.cell_height, QgsUnitTypes.RenderUnit.RenderMapUnits)
+        cell_width = self.context.convertToPainterUnits(self.cell_width, QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         for i in range(self.rows):
             for j in range(self.columns):
@@ -228,8 +228,8 @@ class BuildingTemplateItem:
     def updatePath(self):
         self._path = QPainterPath(self._center)
 
-        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderMapUnits)
-        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderMapUnits)
+        height = self.context.convertToPainterUnits(self.height, QgsUnitTypes.RenderUnit.RenderMapUnits)
+        width = self.context.convertToPainterUnits(self.width, QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         top_left = QPointF(-width/2, -height/2)
 

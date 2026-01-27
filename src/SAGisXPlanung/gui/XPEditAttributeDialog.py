@@ -29,7 +29,7 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         self.field_type = field_type
         self.original_value = original_value
 
-        self.discard_button = self.buttonBox.button(QtWidgets.QDialogButtonBox.Discard)
+        self.discard_button = self.buttonBox.button(QtWidgets.QDialogButtonBox.StandardButton.Discard)
         self.discard_button.clicked.connect(lambda s: self.setOriginalValue())
 
         context = WidgetContext(
@@ -64,7 +64,7 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
             if value != self.original_value:
                 self.attributeChanged.emit(self.original_value, value)
         except DetachedInstanceError as e:
-            logger.debug(e)
+            logger.error(e)
 
         if isinstance(self.control, QFileInput):
             self.fileChanged.emit(self.control.file())

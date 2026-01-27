@@ -144,7 +144,7 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
     @classmethod
     def symbol(cls):
-        return QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        return QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
 
     @classmethod
     @fallback_renderer
@@ -335,7 +335,7 @@ class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, 
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
         symbol.setOpacity(0.4)
 
@@ -365,7 +365,7 @@ class BP_BauGrenze(LineGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         colored_strip = QgsSimpleLineSymbolLayer.create({})
@@ -376,7 +376,7 @@ class BP_BauGrenze(LineGeometry, BP_Objekt):
         border = QgsSimpleLineSymbolLayer.create({})
         border.setColor(QColor(0, 0, 0))
         border.setWidth(0.3)
-        border.setPenStyle(Qt.DashDotLine)
+        border.setPenStyle(Qt.PenStyle.DashDotLine)
 
         symbol.appendSymbolLayer(colored_strip)
         symbol.appendSymbolLayer(border)
@@ -408,7 +408,7 @@ class BP_BauLinie(LineGeometry, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.LineGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
         colored_strip = QgsSimpleLineSymbolLayer.create({})
@@ -419,7 +419,7 @@ class BP_BauLinie(LineGeometry, BP_Objekt):
         border = QgsSimpleLineSymbolLayer.create({})
         border.setColor(QColor(0, 0, 0))
         border.setWidth(0.3)
-        border.setPenStyle(Qt.DashDotDotLine)
+        border.setPenStyle(Qt.PenStyle.DashDotDotLine)
 
         symbol.appendSymbolLayer(colored_strip)
         symbol.appendSymbolLayer(border)
@@ -496,7 +496,7 @@ class BP_BesondererNutzungszweckFlaeche(PolygonGeometry, FlaechenschlussObjekt, 
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         line = QgsSimpleLineSymbolLayer.create({})
@@ -581,13 +581,13 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
     @classmethod
     def symbol(cls):
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.PolygonGeometry)
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
         red_outline = QgsSimpleLineSymbolLayer(QColor('red'))
         red_outline.setWidth(0.3)
-        red_outline.setPenStyle(Qt.DashLine)
-        red_outline.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        red_outline.setPenStyle(Qt.PenStyle.DashLine)
+        red_outline.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         symbol.appendSymbolLayer(red_outline)
         return symbol
