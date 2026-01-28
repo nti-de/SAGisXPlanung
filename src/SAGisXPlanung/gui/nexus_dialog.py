@@ -572,6 +572,8 @@ class TableSettings:
         return [col.name for col in self.columns if col.visible]
 
     def sort_column_index(self):
+        if not self.sort_column in self.header_labels():
+            return -1
         return self.header_labels().index(self.sort_column)
 
     def set_sort(self, col: int, sort_order: Qt.SortOrder):
