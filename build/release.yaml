@@ -1,54 +1,123 @@
-pool:
-  vmImage: ubuntu-latest
-
 trigger:
  tags:
    include:
      - v2.*
 
-steps:
+jobs:
+- job: build_shared
+  displayName: Build common assets
+  pool:
+    vmImage: ubuntu-latest
 
-- script: |
-    python3 -m pip install --upgrade pip
-    python3 -m pip install mkdocs-material==9.6.9
-  displayName: 'Install mkdocs'
+  steps:
+  - script: |
+      python3 -m pip install --upgrade pip
+      python3 -m pip install mkdocs-material==9.6.9
+    displayName: 'Install mkdocs'
 
-- script: |
-    python3 -m mkdocs build
-  displayName: 'Build Documentation with mkdocs'
-  workingDirectory: docs
+  - script: |
+      python3 -m mkdocs build
+    displayName: 'Build Documentation with mkdocs'
+    workingDirectory: docs
 
-- task: CopyFiles@2
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/docs/site'
-    Contents: '**'
-    TargetFolder: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
+  - task: CopyFiles@2
+    displayName: 'Copy docs into plugin'
+    inputs:
+      SourceFolder: '$(Build.SourcesDirectory)/docs/site'
+      Contents: '**'
+      TargetFolder: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
 
-- task: ArchiveFiles@2
-  inputs:
-    rootFolderOrFile: 'src/SAGisXPlanung'
-    includeRootFolder: true
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_dev_$(Build.SourceBranchName).zip'
-    replaceExistingArchive: true
+  - task: ArchiveFiles@2
+    inputs:
+      rootFolderOrFile: 'src/SAGisXPlanung'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_dev_$(Build.SourceBranchName).zip'
+      replaceExistingArchive: true
 
-- script: |
-    python3 build/build.py
-  displayName: 'Build release plugin version'
-  workingDirectory: $(Build.SourcesDirectory)
+  - script: |
+      python3 build/build.py
+    displayName: 'Build release'
+    workingDirectory: $(Build.SourcesDirectory)
 
-- task: ArchiveFiles@2
-  displayName: 'Package release plugin'
-  inputs:
-    rootFolderOrFile: 'dist/SAGisXPlanung_pro'
-    includeRootFolder: true
-    archiveType: 'zip'
-    archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
-    replaceExistingArchive: true
+  - task: ArchiveFiles@2
+    displayName: 'Package release'
+    inputs:
+      rootFolderOrFile: 'dist/SAGisXPlanung_pro'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
+      replaceExistingArchive: true
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish build artifacts'
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'qgis-plugins'
+  - task: PublishPipelineArtifact@1
+    displayName: 'Publish plugin docs'
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
+      artifact: 'plugin-docs'
 
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish build artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'qgis-plugins'
+
+- job: build_variants
+  displayName: Build packaged plugin
+  dependsOn: build_shared
+  pool:
+    vmImage: ubuntu-latest
+
+  strategy:
+    matrix:
+      win_cp312:
+        PY_VER: "312"
+        PY_ABI: "cp312"
+        PLATFORM: "win_amd64"
+        ARTIFACT_SUFFIX: "win_cp312"
+
+      win_cp313:
+        PY_VER: "313"
+        PY_ABI: "cp313"
+        PLATFORM: "win_amd64"
+        ARTIFACT_SUFFIX: "win_cp313"
+
+  steps:
+  - task: DownloadPipelineArtifact@2
+    displayName: 'Download plugin docs'
+    inputs:
+      artifact: 'plugin-docs'
+      path: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
+
+  - script: |
+      DEP_DIR="src/SAGisXPlanung/dependencies/$(PY_ABI)"
+      mkdir -p "$DEP_DIR"
+  
+      pip install \
+        -r requirements.txt \
+        --target "$DEP_DIR" \
+        --platform $(PLATFORM) \
+        --python-version $(PY_VER) \
+        --implementation cp \
+        --abi $(PY_ABI) \
+        --only-binary=:all:
+    displayName: 'Package Install ($(PY_ABI))'
+
+  - script: |
+      python3 build/build.py
+    displayName: 'Build release'
+    workingDirectory: $(Build.SourcesDirectory)
+
+  - task: ArchiveFiles@2
+    displayName: 'Package release'
+    inputs:
+      rootFolderOrFile: 'dist/SAGisXPlanung_pro'
+      includeRootFolder: true
+      archiveType: 'zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName)_$(PLATFORM)-$(PY_ABI).zip'
+      replaceExistingArchive: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish build artifacts'
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'qgis-plugins'

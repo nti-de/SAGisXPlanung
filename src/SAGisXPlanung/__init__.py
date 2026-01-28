@@ -94,7 +94,7 @@ DEPENDENCIES = [
     'packaging',
     'lxml',
     'SQLAlchemy==2.0.46',
-    'GeoAlchemy2==0.12.5',
+    'GeoAlchemy2>=0.12.5',
     'shapely>=2.0.2',
     'qasync==0.22.0',
     'asyncpg==0.31.0'
@@ -188,10 +188,10 @@ def classFactory(iface):
     logger.info(system_info())
     logger.info(qgis_info())
 
-    dependency_dir39 = Path(BASE_DIR) / Path('dependencies/py39')
-    dependency_dir312 = Path(BASE_DIR) / Path('dependencies/py312')
-    sys.path.insert(0, str(dependency_dir39))
-    sys.path.insert(0, str(dependency_dir312))
+    py_tag = f"cp{sys.version_info.major}{sys.version_info.minor}"
+    deps = Path(BASE_DIR) / "dependencies" / f"{py_tag}"
+    if deps.exists():
+        sys.path.insert(0, str(deps))
 
     from SAGisXPlanung.config.dependencies import check
     re = check(DEPENDENCIES)

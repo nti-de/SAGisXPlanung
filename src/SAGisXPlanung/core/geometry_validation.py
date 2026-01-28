@@ -46,7 +46,7 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
     result = []
 
     with Session.begin() as session:
-        stmt = f"""
+        stmt = text(f"""
             WITH all_objekt_positions AS (
                 SELECT id, flaechenschluss, position FROM bp_objekt
                 UNION ALL
@@ -85,7 +85,7 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                     OR st_within(a.position, b.position)
                 )
                 AND NOT ST_IsEmpty(polygon_geom);
-        """
+        """)
 
         res = session.execute(stmt).all()
         for row in res:
@@ -273,7 +273,7 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
     # validate that the union of all plan contents is equal to the geltungsbereich => find gaps
     result = []
     with Session.begin() as session:
-        stmt = f"""
+        stmt = text(f"""
             SELECT 
                 ST_AsText((ST_dump(st_difference(xp_plan."raeumlicherGeltungsbereich", plan_contents.united))).geom) as wkt, xp_plan.id
             FROM
@@ -296,7 +296,7 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 ) as plan_contents
             INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
             WHERE xp_plan.id = '{plan_id}';
-        """
+        """)
         res = session.execute(stmt)
         for row in res:
             validation_result = ValidationResult(

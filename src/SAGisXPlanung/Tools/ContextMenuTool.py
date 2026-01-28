@@ -12,7 +12,7 @@ from qgis.PyQt.QtWidgets import QMenu, QAction
 from qgis.PyQt.QtCore import pyqtSignal, QPoint
 from qgis.PyQt.QtGui import QIcon, QColor, QTransform
 
-from SAGisXPlanung import BASE_DIR
+from SAGisXPlanung import BASE_DIR, PYQT5
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateItem
 from SAGisXPlanung.XPlan.feature_types import XP_Objekt
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
@@ -153,8 +153,12 @@ class ContextMenuTool(QgsMapToolIdentify):
             full_version_required_warning()
 
     def canvasReleaseEvent(self, event: QgsMapMouseEvent):
-        x = event.position().toPoint().x()
-        y = event.position().toPoint().y()
+        if PYQT5:
+            x = event.x()
+            y = event.y()
+        else:
+            x = event.position().toPoint().x()
+            y = event.position().toPoint().y()
         results = self.identify(x, y, QgsMapToolIdentify.IdentifyMode.TopDownAll, [],
                                 QgsMapToolIdentify.Type.VectorLayer, QgsIdentifyContext())
         global_pos = self.canvas.mapToGlobal(QPoint(x + 5, y + 5))
