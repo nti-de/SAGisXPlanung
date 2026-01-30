@@ -72,7 +72,7 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
                                      info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     erstellungsMassstab = Column(Integer, doc='Erstellungsmaßstab')
-    bezugshoehe = Column(Float, doc='Standard Bezugshöhe')
+    bezugshoehe = Column(Length, doc='Standard Bezugshöhe')
     hoehenbezug = Column(String(), doc='Höhenbezug', info={'xplan_version': XPlanVersion.SIX})
     technischerPlanersteller = Column(String, doc='Technischer Planersteller')
     raeumlicherGeltungsbereich = Column(Geometry(),
