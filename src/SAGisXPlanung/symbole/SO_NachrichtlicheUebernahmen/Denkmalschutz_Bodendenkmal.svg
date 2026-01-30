@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"  viewBox="0 0 20 20">
+  <g>
+    <circle style="fill:white;stroke:black;stroke-width:0.5" cx="10" cy="10" r="8">
+    </circle>
+    <text x="10px" y="12.5px" text-anchor="middle" style="font-family:'ArialMT', 'Arial', sans-serif;font-size:7px;">BD</text>
+  </g>
+</svg>

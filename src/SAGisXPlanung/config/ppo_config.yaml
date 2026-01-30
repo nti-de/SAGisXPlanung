@@ -594,18 +594,6 @@ bauweise_einzelhaeuser_doppelhaeuser:
 # endregion
 
 # region BP_Gemeinbedarf_Spiel_und_Sportanlagen
-Allgemeinbildende_Schule.svg:
-  type:
-    svg:
-      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
-  name: Allgemeinbildende Schule
-  attribute:
-    - xpath:
-        - zweckbestimmung
-        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
-        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
-      type: XP_ZweckbestimmungGemeinbedarf
-      value: 12000
 Alteneinrichtung.svg:
   type:
     svg:
@@ -1228,15 +1216,90 @@ Wasser.svg:
 # endregion
 
 # region BP_Verkehr
-Fussgaengerbereich.svg:
-  category: BP_Verkehr
-  name: Fußgängerbereich
 Parkierungsflaeche.svg:
-  category: BP_Verkehr
+  type:
+    svg:
+      category: BP_Verkehr
   name: Fläche zum Parken von Fahrzeugen
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: BP_ZweckbestimmungStrassenverkehr
+      value:
+        - 1000
+        - 3300
+Fussgaengerbereich.svg:
+  type:
+    svg:
+      category: BP_Verkehr
+  name: Fußgängerbereich
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: BP_ZweckbestimmungStrassenverkehr
+      value: 1100
+    - xpath:
+        - zweckbestimmung
+      type: FP_ZweckbestimmungStrassenverkehr
+      value: 14002
+    - xpath:
+        - zweckbestimmung
+      type: SO_ZweckbestimmungStrassenverkehr
+      value: 14002
 VerkehrsberuhigterBereich.svg:
-  category: BP_Verkehr
+  type:
+    svg:
+      category: BP_Verkehr
   name: Verkehrsberuhigte Zone
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: BP_ZweckbestimmungStrassenverkehr
+      value: 1200
+    - xpath:
+        - zweckbestimmung
+      type: FP_ZweckbestimmungStrassenverkehr
+      value: 14000
+    - xpath:
+        - zweckbestimmung
+      type: SO_ZweckbestimmungStrassenverkehr
+      value: 14000
+Radweg.svg:
+  type:
+    svg:
+      category: BP_Verkehr
+  name: Radweg
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: BP_ZweckbestimmungStrassenverkehr
+      value: 1400
+    - xpath:
+        - zweckbestimmung
+      type: FP_ZweckbestimmungStrassenverkehr
+      value: 14004
+    - xpath:
+        - zweckbestimmung
+      type: SO_ZweckbestimmungStrassenverkehr
+      value: 14004
+Fuss_Radweg.svg:
+  type:
+    svg:
+      category: BP_Verkehr
+  name: Fuß- und Radweg
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: BP_ZweckbestimmungStrassenverkehr
+      value: 1300
+    - xpath:
+        - zweckbestimmung
+      type: FP_ZweckbestimmungStrassenverkehr
+      value: 14003
+    - xpath:
+        - zweckbestimmung
+      type: SO_ZweckbestimmungStrassenverkehr
+      value: 14003
 # endregion
 
 # region BP_Wasser
@@ -1257,13 +1320,39 @@ Ueberschwaemmungsgebiet.svg:
   name: Überschwemmungsgefährdetes Gebiet
 # endregion
 
-# region SO_SonstigeGebiete
-Denkmalschutz_Einzelanlagen.svg:
-  category: SO_SonstigeGebiete
-  name: Denkmalschutz Einzelanlage
+# region SO_NachrichtlicheUebernahmen
+# region SO_Denkmalschutzrecht
 Denkmalschutz_Ensemble.svg:
-  category: SO_SonstigeGebiete
+  type:
+    svg:
+      category: SO_NachrichtlicheUebernahmen
   name: Denkmalschutz Ensemble
+  attribute:
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachDenkmalschutzrecht
+      value: 1000
+Denkmalschutz_Einzelanlagen.svg:
+  type:
+    svg:
+      category: SO_NachrichtlicheUebernahmen
+  name: Denkmalschutz Einzelanlage
+  attribute:
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachDenkmalschutzrecht
+      value: 1100
+Denkmalschutz_Bodendenkmal.svg:
+  type:
+    svg:
+      category: SO_NachrichtlicheUebernahmen
+  name: Denkmalschutz Bodendenkmal
+  attribute:
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachDenkmalschutzrecht
+      value: 1600
+# endregion
 # endregion
 
 # region Sonstiges
