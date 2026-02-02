@@ -57,8 +57,9 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.data_types import FP_K
     FP_KomplexeZweckbestLandwirtschaft, FP_KomplexeZweckbestWald
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_Gruen, FP_Landwirtschaft, FP_WaldFlaeche
 from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung
+from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutz
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
-    FP_PrivilegiertesVorhaben
+    FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
@@ -209,6 +210,8 @@ CLASSES = {
     'FP_KomplexeZweckbestVerEntsorgung': FP_KomplexeZweckbestVerEntsorgung,
     'FP_PrivilegiertesVorhaben': FP_PrivilegiertesVorhaben,
     'FP_TextAbschnitt': FP_TextAbschnitt,
+    'FP_Nutzungsbeschraenkung': FP_Nutzungsbeschraenkung,
+    'FP_NutzungsbeschraenkungsFlaeche': FP_NutzungsbeschraenkungsFlaeche,
 
     'SO_Objekt': SO_Objekt,
     'SO_Strassenverkehrsrecht': SO_Strassenverkehrsrecht,
@@ -285,6 +288,8 @@ CLASSES = {
     'SO_DetailKlassifizNachSchienenverkehrsrecht': SO_DetailKlassifizNachSchienenverkehrsrecht,
     'SO_DetailKlassifizNachLuftverkehrsrecht': SO_DetailKlassifizNachLuftverkehrsrecht,
     'SO_DetailKlassifizNachSonstigemRecht': SO_DetailKlassifizNachSonstigemRecht,
+
+    'XP_DetailTechnVorkehrungImmissionsschutz': XP_DetailTechnVorkehrungImmissionsschutz,
 
     'XP_GenerAttribut': XP_GenerAttribut,
     'XP_DatumAttribut': XP_DatumAttribut,

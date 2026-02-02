@@ -8,7 +8,7 @@ Create Date: 2026-02-02 11:26:53.233493
 import os
 import sys
 
-from alembic import op
+from alembic import op, context
 import sqlalchemy as sa
 
 from alembic_postgresql_enum import ColumnType
@@ -71,6 +71,36 @@ sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
         sa.ForeignKeyConstraint(['id'], ['xp_gener_attribut.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
+
+    schutztyp_enum = postgresql.ENUM('Schutzflaeche', 'BesondereAnlagenVorkehrungen',
+                                     name='xp_immissionsschutztypen', create_type=False)
+    vorkehrung_enum = postgresql.ENUM('Laermschutzvorkehrung', 'FassadenMitSchallschutzmassnahmen',
+                                      'Laermschutzwand', 'Laermschutzwall', 'SonstigeVorkehrung',
+                                      name='xp_technvorkehrungenimmissionsschutz', create_type=False)
+
+    if not context.is_offline_mode():
+        schutztyp_enum.create(op.get_bind(), checkfirst=True)
+        vorkehrung_enum.create(op.get_bind(), checkfirst=True)
+
+    op.create_table('fp_nutzungsbeschraenkung',
+sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('nutzung', sa.String(), nullable=True),
+        sa.Column('typ', schutztyp_enum, nullable=True),
+        sa.Column('technVorkehrung', vorkehrung_enum, nullable=True),
+        sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('assoc_detail_vorkehrung_immissionschutz',
+sa.Column('codelist_user_id', sa.UUID(), nullable=True),
+        sa.Column('codelist_id', sa.UUID(), nullable=True),
+        sa.ForeignKeyConstraint(['codelist_id'], ['codelist_values.id'], ),
+        sa.ForeignKeyConstraint(['codelist_user_id'], ['fp_nutzungsbeschraenkung.id'], ondelete='CASCADE')
+    )
+    op.create_table('fp_nutzungsbeschraenkung_flaeche',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
+        sa.PrimaryKeyConstraint('id')
+    )
     # ### end Alembic commands ###
 
 
@@ -82,4 +112,9 @@ def downgrade():
     op.drop_table('xp_double_attribut')
     op.drop_table('xp_datum_attribut')
     op.drop_table('xp_gener_attribut')
+
+    op.drop_table('assoc_detail_vorkehrung_immissionschutz')
+    op.drop_table('fp_nutzungsbeschraenkung')
+    op.drop_table('fp_nutzungsbeschraenkung_flaeche')
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('fp_nutzungsbeschraenkung', 'fp_nutzungsbeschraenkung_flaeche');")
     # ### end Alembic commands ###

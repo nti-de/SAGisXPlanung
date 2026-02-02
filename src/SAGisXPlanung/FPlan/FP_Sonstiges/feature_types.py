@@ -5,13 +5,17 @@ from qgis._core import QgsFillSymbol, QgsLinePatternFillSymbolLayer, QgsUnitType
 from sqlalchemy import Column, ForeignKey, ARRAY, Enum, Boolean, String
 
 from qgis.core import QgsWkbTypes, QgsSymbol, QgsSingleSymbolRenderer
+from sqlalchemy.orm import relationship
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
+from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutzCodelistAssoc
 from SAGisXPlanung.FPlan.FP_Sonstiges.enums import FP_ZweckbestimmungPrivilegiertesVorhaben
-from SAGisXPlanung.XPlan.core import LayerPriorityType
+from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer, icon_renderer
-from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung, XP_ImmissionsschutzTypen, \
+    XP_TechnVorkehrungenImmissionsschutz
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, UeberlagerungsObjekt, PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)
@@ -57,6 +61,54 @@ class FP_Kennzeichnung(MixedGeometry, FP_Objekt):
                                  'Sonstiges', geometry_type=geom_type,
                                  scale_factor=5)
         return generic_objects_renderer(geom_type)
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class FP_NutzungsbeschraenkungsFlaeche(PolygonGeometry, UeberlagerungsObjekt, FP_Objekt):
+    """ Umgrenzungen der Flächen für besondere Anlagen und Vorkehrungen zum Schutz vor schädlichen Umwelteinwirkungen
+        im Sinne des Bundes-Immissionsschutzgesetzes (§ 5, Abs. 2, Nr. 6 BauGB) """
+
+    __tablename__ = 'fp_nutzungsbeschraenkung_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+@xp_version(versions=[XPlanVersion.SIX])
+class FP_Nutzungsbeschraenkung(MixedGeometry, FP_Objekt):
+    """ Umgrenzungen von Flächen für Nutzungsbeschränkungen oder für Vorkehrungen zum Schutz gegen schädliche
+        Umwelteinwirkungen im Sinne des Bundes-Immissionsschutzgesetzes (§ 5, Abs. 2, Nr. 6 BauGB) """
+
+    __tablename__ = 'fp_nutzungsbeschraenkung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    nutzung = Column(String)
+    typ = Column(XPEnum(XP_ImmissionsschutzTypen, include_default=True))
+    technVorkehrung = Column(XPEnum(XP_TechnVorkehrungenImmissionsschutz, include_default=True))
+
+    detaillierteTechnVorkehrung = relationship(
+        'XP_DetailTechnVorkehrungImmissionsschutz',
+        back_populates='codelist_user',
+        secondary=XP_DetailTechnVorkehrungImmissionsschutzCodelistAssoc,
+        info={
+            'form-type': 'inline'
+        }
+    )
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
 
 class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
