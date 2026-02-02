@@ -39,7 +39,7 @@ from SAGisXPlanung.LPlan.LP_PlaninhalteLandschaftsplanung.feature_types import L
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, XP_PTO
 from SAGisXPlanung.XPlan.codelists import CodeList
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_SpezExterneReferenz, XP_ExterneReferenz, \
-    XP_Hoehenangabe, XP_GesetzlicheGrundlage
+    XP_Hoehenangabe, XP_GesetzlicheGrundlage, XP_DoubleAttribut
 from SAGisXPlanung.XPlan.enums import XP_WaldbetretungTyp, XP_ArtHoehenbezugspunkt, XP_ImmissionsschutzTypen, \
     XP_ExterneReferenzTyp, XP_ExterneReferenzArt, XP_Bundeslaender, XP_Rechtscharakter
 
@@ -73,6 +73,10 @@ def plan_factory():
             baugb.name = 'Baugesetzbuch'
             baugb.datum = datetime.date(2024, 1, 1)
             plan.versionBauGB = baugb
+            gen_attr = XP_DoubleAttribut()
+            gen_attr.name = 'test'
+            gen_attr.wert = 123.456
+            plan.hatGenerAttribut.append(gen_attr)
 
             ref = XP_SpezExterneReferenz()
             ref.beschreibung = 'test'

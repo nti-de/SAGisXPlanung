@@ -4,12 +4,12 @@ from sqlalchemy.orm import load_only
 
 from .template_cells import TableCell
 from .template_item import BuildingTemplateCellDataType, BuildingTemplateItem, TableCellFactory
-from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 
 from SAGisXPlanung.utils import CLASSES  # dont remove: requires loading all model classed before registering listeners
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
 from SAGisXPlanung import Session
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung
+from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlan.data_types import XP_Hoehenangabe
 from SAGisXPlanung.XPlanungItem import XPlanungItem

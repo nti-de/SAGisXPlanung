@@ -88,7 +88,7 @@ except Exception as e:
 
 VERSION = '2.12.2'
 RELEASE = False
-COMPATIBLE_DB_REVISIONS = ['315e0f69004f']
+COMPATIBLE_DB_REVISIONS = ['2b1452b49cc5']
 DEPENDENCIES = [
     'requests',
     'packaging',

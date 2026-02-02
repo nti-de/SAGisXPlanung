@@ -104,7 +104,8 @@ from SAGisXPlanung.XPlan.codelists import CodeListValue, XP_MimeTypes
 from SAGisXPlanung.XPlan.data_types import (XP_SpezExterneReferenz, XP_ExterneReferenz, XP_VerfahrensMerkmal,
                                             XP_Gemeinde,
                                             XP_Plangeber, XP_GesetzlicheGrundlage, XP_SPEMassnahmenDaten,
-                                            XP_Hoehenangabe, XP_VerbundenerPlan)
+                                            XP_Hoehenangabe, XP_VerbundenerPlan, XP_GenerAttribut, XP_DatumAttribut,
+                                            XP_DoubleAttribut, XP_StringAttribut, XP_IntegerAttribut, XP_URLAttribut)
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.simple_depth import XP_SimpleGeometry
 
@@ -284,6 +285,13 @@ CLASSES = {
     'SO_DetailKlassifizNachSchienenverkehrsrecht': SO_DetailKlassifizNachSchienenverkehrsrecht,
     'SO_DetailKlassifizNachLuftverkehrsrecht': SO_DetailKlassifizNachLuftverkehrsrecht,
     'SO_DetailKlassifizNachSonstigemRecht': SO_DetailKlassifizNachSonstigemRecht,
+
+    'XP_GenerAttribut': XP_GenerAttribut,
+    'XP_DatumAttribut': XP_DatumAttribut,
+    'XP_DoubleAttribut': XP_DoubleAttribut,
+    'XP_StringAttribut': XP_StringAttribut,
+    'XP_IntegerAttribut': XP_IntegerAttribut,
+    'XP_URLAttribut': XP_URLAttribut,
 }
 
 

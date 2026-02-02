@@ -4,10 +4,10 @@ from uuid import uuid4
 from lxml import etree
 from osgeo import gdal
 from sqlalchemy import Column, String, Enum, Date, ForeignKey, CheckConstraint, Boolean, Table, event, \
-    PrimaryKeyConstraint, inspect
+    PrimaryKeyConstraint, inspect, Float, Integer
 from sqlalchemy.dialects.postgresql import UUID, BYTEA
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import relationship, deferred
+from sqlalchemy.orm import relationship, deferred, declared_attr
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
@@ -445,3 +445,85 @@ class XP_VerbundenerPlan(RelationshipMixin, ElementOrderMixin, Base):
     def hidden_inputs(cls):
         return ['aendert_verbundenerPlan', 'wurdeGeaendertVon_verbundenerPlan',
                 'aendertPlan_verbundenerPlan', 'wurdeGeaendertVonPlan_verbundenerPlan']
+
+
+class XP_GenerAttribut(RelationshipMixin, ElementOrderMixin, Base):
+    """ Abstrakte Basisklasse für Generische Attribute. """
+
+    __tablename__ = "xp_gener_attribut"
+    __avoidRelation__ = ['plan', 'xp_objekt']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    name = Column(String, nullable=False)
+
+    type = Column(String())
+
+    plan_id = Column(UUID(as_uuid=True), ForeignKey("xp_plan.id", ondelete="CASCADE"))
+    plan = relationship("XP_Plan", back_populates="hatGenerAttribut")
+
+    xp_objekt_id = Column(UUID(as_uuid=True), ForeignKey("xp_objekt.id", ondelete="CASCADE"))
+    xp_objekt = relationship("XP_Objekt", back_populates="hatGenerAttribut")
+
+    __mapper_args__ = {
+        "polymorphic_on": type,
+        "polymorphic_identity": "xp_gener_attribut",
+    }
+
+    @classmethod
+    def avoid_export(cls):
+        return ['plan', 'xp_objekt']
+
+
+class XP_DatumAttribut(XP_GenerAttribut):
+    """ Generische Attribute vom Datentyp "Datum" """
+    __tablename__ = 'xp_datum_attribut'
+    __mapper_args__ = {
+        "polymorphic_identity": "xp_datum_attribut",
+    }
+
+    id = Column(UUID(as_uuid=True), ForeignKey("xp_gener_attribut.id"), primary_key=True)
+    wert = Column(Date, nullable=False)
+
+
+class XP_DoubleAttribut(XP_GenerAttribut):
+    """ Generisches Attribut vom Datentyp "Double". """
+    __tablename__ = 'xp_double_attribut'
+    __mapper_args__ = {
+        "polymorphic_identity": "xp_double_attribut",
+    }
+
+    id = Column(UUID(as_uuid=True), ForeignKey("xp_gener_attribut.id"), primary_key=True)
+    wert = Column(Float, nullable=False)
+
+
+class XP_IntegerAttribut(XP_GenerAttribut):
+    """ Generische Attribute vom Datentyp "Integer". """
+    __tablename__ = 'xp_integer_attribut'
+    __mapper_args__ = {
+        "polymorphic_identity": "xp_integer_attribut",
+    }
+
+    id = Column(UUID(as_uuid=True), ForeignKey("xp_gener_attribut.id"), primary_key=True)
+    wert = Column(Integer, nullable=False)
+
+
+class XP_StringAttribut(XP_GenerAttribut):
+    """ Generisches Attribut vom Datentyp "CharacterString" """
+    __tablename__ = 'xp_string_attribut'
+    __mapper_args__ = {
+        "polymorphic_identity": "xp_string_attribut",
+    }
+
+    id = Column(UUID(as_uuid=True), ForeignKey("xp_gener_attribut.id"), primary_key=True)
+    wert = Column(String, nullable=False)
+
+
+class XP_URLAttribut(XP_GenerAttribut):
+    """ Generisches Attribut vom Datentyp "Double". """
+    __tablename__ = 'xp_url_attribut'
+    __mapper_args__ = {
+        "polymorphic_identity": "xp_url_attribut",
+    }
+
+    id = Column(UUID(as_uuid=True), ForeignKey("xp_gener_attribut.id"), primary_key=True)
+    wert = Column(RefURL, nullable=False)

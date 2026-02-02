@@ -82,6 +82,8 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
 
     verfahrensMerkmale = relationship("XP_VerfahrensMerkmal", back_populates="plan", cascade="all, delete",
                                       passive_deletes=True)
+    hatGenerAttribut = relationship("XP_GenerAttribut", back_populates="plan", cascade="all, delete",
+                                    passive_deletes=True)
     externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
                                    passive_deletes=True)
 
@@ -323,6 +325,8 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
     gliederung2 = Column(String)
     ebene = Column(Integer)
 
+    hatGenerAttribut = relationship("XP_GenerAttribut", back_populates="xp_objekt", cascade="all, delete",
+                                    passive_deletes=True)
     hoehenangabe = relationship("XP_Hoehenangabe", back_populates="xp_objekt", cascade="all, delete",
                                 passive_deletes=True)
 

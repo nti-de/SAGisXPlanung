@@ -12,7 +12,7 @@ from SAGisXPlanung.GML.GMLReader import GMLReader
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_ZweckbestimmungStrassenverkehr
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_PPO, XP_PTO, XP_Nutzungsschablone
-from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_VerbundenerPlan
+from SAGisXPlanung.XPlan.data_types import XP_Gemeinde, XP_Plangeber, XP_VerbundenerPlan, XP_IntegerAttribut
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzTyp, XP_ExterneReferenzArt, XP_ZweckbestimmungGruen
 
 
@@ -126,6 +126,11 @@ class TestGMLReader_readPlan:
 
         wegerecht = next(p for p in plan.bereich[1].planinhalt if isinstance(p, BP_Wegerecht))
         assert wegerecht.flaechenschluss is False
+
+        assert plan.hatGenerAttribut
+        assert isinstance(plan.hatGenerAttribut[0], XP_IntegerAttribut)
+        assert plan.hatGenerAttribut[0].wert == '123'
+
 
     @pytest.mark.parametrize('gml_reader', ['BPlan001_6-0.gml'], indirect=True)
     def test_read_plan_v6(self, gml_reader):

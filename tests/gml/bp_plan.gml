@@ -46,6 +46,12 @@
           <xplan:signiert>true</xplan:signiert>
         </xplan:XP_VerfahrensMerkmal>
       </xplan:verfahrensMerkmale>
+      <xplan:hatGenerAttribut>
+        <xplan:XP_IntegerAttribut>
+          <xplan:name>GenAttr</xplan:name>
+          <xplan:wert>123</xplan:wert>
+        </xplan:XP_IntegerAttribut>
+      </xplan:hatGenerAttribut>
       <xplan:externeReferenz>
         <xplan:XP_SpezExterneReferenz>
           <xplan:art>Dokument</xplan:art>
