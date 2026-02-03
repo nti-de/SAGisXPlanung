@@ -316,8 +316,11 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             link_type = mapper_property.info.get('link-type')
             if link_type == 'abstract':
                 class_pool = rel_class.__subclasses__()
+                # create new sub menu for collection of subclasses from abstract base
+                item_option_menu = data_class_menu.addMenu(f'{action_name} ({rel_class.__name__})')
             else:
                 class_pool = [rel_class, *rel_class.__subclasses__()]
+                item_option_menu = data_class_menu
 
             for entity_class in class_pool:
                 if hasattr(entity_class, 'xp_versions') and export_version() not in entity_class.xp_versions:
@@ -335,7 +338,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         if ex and child_item.xplanItem().xtype == rel_class:
                             data_class_action.setToolTip('Objekt existiert bereits!')
                             data_class_action.setEnabled(False)
-                data_class_menu.addAction(data_class_action)
+                item_option_menu.addAction(data_class_action)
 
         if not data_class_menu.isEmpty():
             menu.addSeparator()
