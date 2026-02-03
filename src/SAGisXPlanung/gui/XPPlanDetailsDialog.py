@@ -417,6 +417,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     async def onSaveClicked(self, parent_item: ClassNode, attribute, checked: bool):
 
         self.init_spinner.start()
+        keep_page = False  # flag when error occurred, will make the dialog stay on this page
 
         try:
             async with SessionAsync.begin() as session:
@@ -435,7 +436,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         data_obj = tab_widget.data_input_widget.populateContent()
                         # we can append immediately; SelectRelatedWidget is guaranteed to be used with m:n relation
                         getattr(parent_obj, attribute).append(data_obj)
-                        self.prevPage()
                         return
                     else:
                         selected_ids = tab_widget.get_selected_ids()
@@ -449,12 +449,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                         else:
                             setattr(parent_obj, attribute, attach_objects)
 
-                        self.prevPage()
                         return
                 else:
                     data_obj = tab_widget.populateContent()
 
                 if not data_obj:
+                    keep_page = True
                     return
 
                 data_obj.id = uuid.uuid4()
@@ -473,14 +473,16 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 self.objectTree.model.addChild(node, parent_item)
                 self.iterateRelation(data_obj, node)
 
-            self.prevPage()
-
         except Exception as e:
+            keep_page = True
             logger.exception(e)
         finally:
-            if self.bSave.receivers(self.bSave.clicked) > 0:
-                self.bSave.clicked.disconnect()
             self.init_spinner.stop()
+            if not keep_page:
+                if self.bSave.receivers(self.bSave.clicked) > 0:
+                    self.bSave.clicked.disconnect()
+                self.prevPage()
+
 
     def iterateRelation(self, obj, root_node):
         try:
