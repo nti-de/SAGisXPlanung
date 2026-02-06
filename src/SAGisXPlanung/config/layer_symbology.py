@@ -48,10 +48,14 @@ def load_symbol_defaults():
             return
 
         class_name, geometry_type = match.group(1), int(match.group(2))
+        class_type = CLASSES.get(class_name)
+        if not class_type:
+            return
 
         qgs_geom_type = GeometryType(int(geometry_type))
         renderer = _load_renderer_from_file(qml_file, qgs_geom_type)
-        QgsConfig.set_class_renderer(CLASSES[class_name], geometry_type, renderer)
+        if not QgsConfig.class_renderer(class_type, geometry_type):
+            QgsConfig.set_class_renderer(class_type, geometry_type, renderer)
 
     # set display priority -> order of layers in layertree
     display_priority = 1
@@ -70,7 +74,7 @@ def find_file_based_renderer(xplan_class, geometry_type):
 
     geometry_type_num = GEOMETRY_ORDER[geometry_type]
     # File naming pattern: {xplan_class.__name__}-{geometry_type_num}_{any-text}.qml
-    pattern = rf"{xplan_class.__name__}-{geometry_type_num}_.*\.qml"
+    pattern = rf"{xplan_class.__name__}-{geometry_type_num}(?:_.*)?\.qml"
 
     # Check if the file exists in the override folder first, then the default folder
     for folder_path in [override_folder_path, default_folder_path]:
