@@ -371,7 +371,9 @@ class BP_BauGrenze(LineGeometry, BP_Objekt):
         colored_strip = QgsSimpleLineSymbolLayer.create({})
         colored_strip.setColor(QColor('#1e8ebe'))
         colored_strip.setWidth(0.8)
-        colored_strip.setOffset(0.3)
+        colored_strip.setOffset(-0.4)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
 
         border = QgsSimpleLineSymbolLayer.create({})
         border.setColor(QColor(0, 0, 0))

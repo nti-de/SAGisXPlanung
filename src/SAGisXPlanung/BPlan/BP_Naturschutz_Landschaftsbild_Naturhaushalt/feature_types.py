@@ -64,39 +64,6 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         return symbol
 
     @classmethod
-    def polygon_symbol(cls) -> QgsSymbol:
-        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
-        symbol.deleteSymbolLayer(0)
-        symbol.setClipFeaturesToExtent(False)
-
-        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
-        border.setWidth(0.3)
-        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
-
-        green_fill = QgsSimpleFillSymbolLayer(QColor('#16ce3c'))
-
-        shape = QgsSimpleMarkerSymbolLayerBase.Shape.Circle
-        circle_symbol = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#000000'), size=1.5)
-        circle_symbol.setFillColor(QColor(Qt.GlobalColor.transparent))
-        circle_symbol.setStrokeWidth(0.3)
-        circle_symbol.setStrokeWidthUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        circle_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-
-        marker_line = QgsMarkerLineSymbolLayer(interval=3)
-        marker_line.setOffset(1.5)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        marker_symbol = QgsMarkerSymbol()
-        marker_symbol.deleteSymbolLayer(0)
-        marker_symbol.appendSymbolLayer(circle_symbol)
-        marker_line.setSubSymbol(marker_symbol)
-
-        symbol.appendSymbolLayer(border)
-        symbol.appendSymbolLayer(green_fill)
-        symbol.appendSymbolLayer(marker_line)
-        return symbol
-
-    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType):
         if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
@@ -104,8 +71,6 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
                                                'BP_Naturschutz_Landschaftsbild_Naturhaushalt',
                                                geometry_type=QgsWkbTypes.GeometryType.PointGeometry)
             return renderer
-        elif geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
-            return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 

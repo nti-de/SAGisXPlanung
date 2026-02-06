@@ -4,7 +4,10 @@
      viewBox="0 0 20 20">
     <rect x="0" y="0" width="20" height="20" fill="black"/>
     <g>
+        <text x="10px" y="13px" text-anchor="middle" font-size="9" style="font-family:'ArialMT', 'Arial', sans-serif;fill:white;">F+R</text>
+        <!--    This would be better syntax, but not allowed in SVG Tiny
         <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-size="9" style="font-family:'ArialMT', 'Arial', sans-serif;fill:white;">F+R</text>
+        -->
     </g>
 
 </svg>
