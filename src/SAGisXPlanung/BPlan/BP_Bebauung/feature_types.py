@@ -374,6 +374,7 @@ class BP_BauGrenze(LineGeometry, BP_Objekt):
         colored_strip.setOffset(-0.4)
         colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        colored_strip.setPenCapStyle(Qt.PenCapStyle.FlatCap)
 
         border = QgsSimpleLineSymbolLayer.create({})
         border.setColor(QColor(0, 0, 0))
@@ -416,12 +417,15 @@ class BP_BauLinie(LineGeometry, BP_Objekt):
         colored_strip = QgsSimpleLineSymbolLayer.create({})
         colored_strip.setColor(QColor('#e95c4a'))
         colored_strip.setWidth(0.8)
-        colored_strip.setOffset(0.3)
+        colored_strip.setOffset(-0.4)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        colored_strip.setPenCapStyle(Qt.PenCapStyle.FlatCap)
 
         border = QgsSimpleLineSymbolLayer.create({})
         border.setColor(QColor(0, 0, 0))
         border.setWidth(0.3)
-        border.setPenStyle(Qt.PenStyle.DashDotDotLine)
+        border.setPenStyle(Qt.PenStyle.DashDotLine)
 
         symbol.appendSymbolLayer(colored_strip)
         symbol.appendSymbolLayer(border)
