@@ -202,6 +202,7 @@ class SelectRelatedWidget(QWidget):
         self.orm_attribute = orm_attribute
 
         main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
 
         # Description
         description_label = QLabel(

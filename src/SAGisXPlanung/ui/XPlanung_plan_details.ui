@@ -96,7 +96,7 @@
              <item>
               <layout class="QVBoxLayout" name="verticalLayout_3">
                <item>
-                <widget class="QLabel" name="lTitle">
+                <widget class="ElideLabel" name="lTitle">
                  <property name="font">
                   <font>
                    <pointsize>10</pointsize>
@@ -107,9 +107,6 @@
                  </property>
                  <property name="text">
                   <string>&lt;template-name&gt;</string>
-                 </property>
-                 <property name="wordWrap">
-                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -653,6 +650,11 @@ QToolButton:checked {
    <class>ValidationTreeView</class>
    <extends>QTreeView</extends>
    <header>SAGisXPlanung/gui/widgets/geometry_validation_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ElideLabel</class>
+   <extends>QLabel</extends>
+   <header>SAGisXPlanung/gui/widgets.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

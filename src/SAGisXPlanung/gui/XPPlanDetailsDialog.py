@@ -80,6 +80,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bPrev.clicked.connect(self.prevPage)
         self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.StandardButton.Save)
         self.bSave.setVisible(False)
+        self.lTitle.setElideMode(Qt.TextElideMode.ElideRight)
 
         self.bEditMain.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit.svg')))
         self.bEditMain.clicked.connect(self.onEditMainClicked)
