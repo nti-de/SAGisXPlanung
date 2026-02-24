@@ -1,45 +1,40 @@
 import asyncio
 import functools
-import inspect
 import logging
 import os
 import uuid
 from typing import List, Tuple, Union
 
 import qasync
-import yaml
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction
-from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex, QSettings
+from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex
 from qgis.gui import QgsDockWidget
 from qgis.core import (Qgis)
 from qgis.utils import iface
-from sqlalchemy import select, exists
-from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper, RelationshipProperty
-from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import select, exists, inspect as sa_inspect
+from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper, RelationshipProperty, MANYTOMANY
 from sqlalchemy.orm.exc import UnmappedClassError
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
-from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan
 from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Plan
-from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_Nutzungsschablone, \
-    XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
-from SAGisXPlanung.core.helper import base_models, find_true_class
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
+from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.core.mixins.mixins import GeometryObject
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
-from SAGisXPlanung.gui.commands import ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand
+from SAGisXPlanung.gui.commands import (ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand,
+                                        StackChangeType, CommandType)
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
-from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit, TreeNode
+from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -122,7 +117,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.undo_stack = XPUndoStack()
         self.undo_stack.undoTextChanged.connect(lambda u: self.bUndo.setToolTip(f'Rückgängig: {u}' if u else ''))
         self.undo_stack.redoTextChanged.connect(lambda r: self.bRedo.setToolTip(f'Vorwärts: {r}' if r else ''))
-        self.undo_stack.indexChanged.connect(self.onUndoStackChanged)
+        self.undo_stack.stack_changed.connect(self.on_undo_stack_changed)
         self.bUndo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/undo.svg'), color='#1F2937'))
         self.bRedo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/redo.svg'), color='#1F2937'))
         self.bUndo.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -205,10 +200,37 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         widget.deleteLater()
         self.stackedWidget.setCurrentIndex(0)
 
-    @qasync.asyncSlot(int)
-    async def onUndoStackChanged(self, idx: int):
+    @qasync.asyncSlot(int, StackChangeType)
+    async def on_undo_stack_changed(self, idx: int, change_type: StackChangeType):
         self.bUndo.setDisabled(idx == 0)
         self.bRedo.setDisabled(self.undo_stack.count() == 0 or idx == self.undo_stack.count())
+
+        if change_type == StackChangeType.REDO:
+            command = self.undo_stack.command(idx - 1)
+        else:
+            command = self.undo_stack.command(idx)
+
+        if hasattr(command, 'command_type') and command.command_type == CommandType.OBJECT_DELETED:
+            if change_type == StackChangeType.REDO:
+                for delete_item in command.delete_items:
+                    xplan_item = delete_item.xplan_item
+                    model = self.objectTree.model
+                    index_list = model.match(model.index(0, 0), XID_ROLE, xplan_item.xid, -1,
+                                             Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
+                    if not index_list:
+                        return
+                    index = index_list[0]
+                    if not xplan_item.parent_xid:
+                        parent = index.parent()
+                        if parent.isValid():
+                            xplan_item.parent_xid = parent.internalPointer().xplanItem().xid
+                            delete_item.explorer_row = index.row()
+                    model.removeRows(index.row(), 1, index.parent())
+
+            else:
+                for delete_item in command.delete_items:
+                    self.onDeleteReverted(delete_item.xplan_item, delete_item.explorer_row)
+
 
     @pyqtSlot(bool)
     def onEditMainClicked(self, clicked: bool):
@@ -239,7 +261,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.iterateRelation(plan, node)
         self.objectTree.model.addChild(node)
 
-    async def addExplorerItem(self, parent_node: ClassNode, xplan_item: XPlanungItem, row=None):
+    def addExplorerItem(self, parent_node: ClassNode, xplan_item: XPlanungItem, row=None):
         node = ClassNode(xplan_item, new=True)
         self.objectTree.model.addChild(node, parent_node, row)
 
@@ -346,7 +368,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             iface.mapCanvas().flashGeometries([plan_content.geometry()], plan_content.srs())
 
     def onCreateDataClass(self, parent_item: ClassNode, data_class, attribute):
-        if issubclass(data_class, XP_TextAbschnitt):
+        rel = sa_inspect(parent_item._data.xtype).relationships[attribute]
+        if rel.direction == MANYTOMANY:
             widget = SelectRelatedWidget(data_class, parent_item._data, attribute)
         else:
             widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
@@ -477,7 +500,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         item = self.objectTree.selectedItems()[0]
 
         xplanung_item = XPlanungItem(xid=item._data.xid, xtype=item._data.xtype, plan_xid=self.plan_xid)
-        attribute_edit_widget = QAttributeEdit.create(xplanung_item, self)
+        attribute_edit_widget = QAttributeEdit.create(xplanung_item, self, self.undo_stack)
         attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
 
         for undo_command in self.undo_stack.iterate(_type=AttributeChangedCommand):
@@ -488,9 +511,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         self.insertWidgetIntoNewPage(attribute_edit_widget)
 
-    @qasync.asyncSlot(ClassNode)
-    async def onDeleteReverted(self, node: ClassNode):
-        xplan_item = node.xplanItem()
+    @pyqtSlot(XPlanungItem, int)
+    def onDeleteReverted(self, xplan_item: XPlanungItem, row: int):
         parent_id = xplan_item.parent_xid or xplan_item.bereich_xid or xplan_item.plan_xid
 
         # find parent, to add object
@@ -500,23 +522,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         if not index_list:
             return
 
-        await self.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item, row=node.row())
-
-    @qasync.asyncSlot(ClassNode)
-    async def onDeleteApplied(self, node: ClassNode):
-        # find node to delete
-        model = self.objectTree.model
-        index_list = model.match(model.index(0, 0), XID_ROLE, node.xplanItem().xid, -1,
-                                 Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
-
-        if not index_list:
-            return
-        model.removeRows(index_list[0].row(), 1, index_list[0].parent())
+        self.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item, row=row)
 
     def onDeleteClick(self, item: ClassNode):
-        command = ObjectsDeletedCommand([item], self)
-        command.signal_proxy.deleteReverted.connect(self.onDeleteReverted)
-        command.signal_proxy.deleteApplied.connect(self.onDeleteApplied)
+        command = ObjectsDeletedCommand([(item.xplanItem(), item.row(), None)], self)
         self.undo_stack.push(command)
 
     def delete_indices(self, indices: List[QModelIndex]):
@@ -604,7 +613,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 # else find parent and add new item
                 index_list = m.match(m.index(0, 0), XID_ROLE, item.parent_xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
                 if index_list:
-                    await self.addExplorerItem(index_list[0], item, 0)
+                    self.addExplorerItem(index_list[0], item, 0)
 
         self.bFixAreas.setEnabled(True)
         iface.messageBar().pushMessage("XPlanung", "Bilden des Flaechenschluss abgeschlossen", level=Qgis.MessageLevel.Info)

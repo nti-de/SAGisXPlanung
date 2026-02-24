@@ -1,2 +1,2 @@
-from ._undo_commands import AttributeChangedCommand, ObjectsDeletedCommand
-from ._stack import XPUndoStack
+from ._undo_commands import AttributeChangedCommand, ObjectsDeletedCommand, CommandType
+from ._stack import XPUndoStack, StackChangeType

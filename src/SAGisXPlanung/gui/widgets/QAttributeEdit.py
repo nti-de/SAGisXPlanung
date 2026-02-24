@@ -1,4 +1,6 @@
 import datetime
+import functools
+import html
 import inspect
 import logging
 import os
@@ -12,13 +14,13 @@ from geoalchemy2 import WKBElement, WKTElement
 
 from qgis.PyQt import uic
 from qgis.PyQt.QtCore import (Qt, QSortFilterProxyModel, pyqtSlot, QModelIndex, pyqtSignal, QAbstractItemModel,
-                              QSettings, QSize, QAbstractListModel)
+                              QSettings, QSize, QAbstractListModel, QRect, QEvent)
 from qgis.PyQt.QtWidgets import (QHeaderView, QLineEdit, QWidget, QMenu, QSizePolicy, QListView, QStyledItemDelegate,
-                                 QHBoxLayout, QToolButton, QStyleOptionViewItem)
-from qgis.PyQt.QtGui import QIcon, QColor, QFontMetrics, QPen
+                                 QHBoxLayout, QToolButton, QStyleOptionViewItem, QStyle, QAction)
+from qgis.PyQt.QtGui import QIcon, QColor, QFontMetrics, QPen, QPainter, QPalette, QBrush
 from qgis.utils import iface
-from sqlalchemy import select
-from sqlalchemy.orm import class_mapper, RelationshipProperty, load_only
+from sqlalchemy import select, inspect as sa_inspect
+from sqlalchemy.orm import class_mapper, RelationshipProperty, load_only, MANYTOMANY, MANYTOONE
 
 from SAGisXPlanung import BASE_DIR, Session, Base, SessionAsync, qt_version_tuple, PYQT5
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element
@@ -32,9 +34,10 @@ from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
-from SAGisXPlanung.gui.commands import AttributeChangedCommand
+from SAGisXPlanung.gui.commands import AttributeChangedCommand, ObjectsDeletedCommand, CommandType, StackChangeType
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
-from SAGisXPlanung.gui.style.styles import SeparatorDelegate, HighlightRowProxyStyle
+from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle
+from SAGisXPlanung.gui.widgets.commons.tooltip import ToolTip
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
 FORM_CLASS, CLS = uic.loadUiType(os.path.join(BASE_DIR, 'ui/attribute_edit.ui'))
@@ -110,6 +113,7 @@ class TreeNode:
     children: List['TreeNode'] = None
     node_type: str = "attribute"  # "attribute", "relation", "section"
     icon_type: str = None  # "attribute", "link", "expand"
+    relation_preview: str = None
 
     def __post_init__(self):
         if self.children is None:
@@ -128,12 +132,7 @@ class TreeNode:
 
     @staticmethod
     def create_section(name: str, objects: List[Any]) -> 'TreeNode':
-        count = len(objects)
-        section = TreeNode(
-            name=name,
-            value=f"{count} Objekte" if count != 1 else "1 Objekt",
-            node_type="section"
-        )
+        section = TreeNode(name=name, node_type="section")
 
         for i, obj in enumerate(objects):
             ref_node = TreeNode(
@@ -141,9 +140,38 @@ class TreeNode:
                 value=XPlanungItem(xid=str(obj.id), xtype=obj.__class__),
                 node_type="relation"
             )
+            ref_node.create_preview(obj)
             section.add_child(ref_node)
 
         return section
+
+    def create_preview(self, rel_obj):
+        attributes = []
+        for key, val in vars(rel_obj).items():
+            if '_' in key or key in ('id', 'type'):
+                continue
+            if not val:
+                continue
+            if isinstance(val, (list, dict, set, tuple)) and len(val) == 0:
+                continue
+            if isinstance(val, str) and val.strip() == "":
+                continue
+
+            attributes.append((key, val))
+            if len(attributes) == 3:
+                break
+
+        if not attributes:
+            return
+
+        rows = []
+        for key, val in attributes:
+            rows.append(
+                f"<tr><th>{html.escape(str(key))}</th>"
+                f"<td>{html.escape(str(val))}</td></tr>"
+            )
+
+        self.relation_preview = f'<b>{rel_obj.__class__.__name__}</b><br><table class="relation-preview" border="none" cellspacing="0" cellpadding="3">' + "".join(rows) + "</table>"
 
 
 @dataclass
@@ -166,12 +194,12 @@ class QAttributeEdit(CLS, FORM_CLASS):
     ATTRIBUTE_ANGLE = 'drehwinkel'
 
     @staticmethod
-    def create(xplanung_item: XPlanungItem, parent):
+    def create(xplanung_item: XPlanungItem, parent, undo_stack):
         if issubclass(xplanung_item.xtype, XP_AbstraktesPraesentationsobjekt):
             from SAGisXPlanung.gui.widgets.QAttributeEditAnnotationItem import QAttributeEditAnnotationItem
-            return QAttributeEditAnnotationItem(xplanung_item, parent)
+            return QAttributeEditAnnotationItem(xplanung_item, parent, undo_stack)
         else:
-            return QAttributeEdit(xplanung_item, parent)
+            return QAttributeEdit(xplanung_item, parent, undo_stack)
 
     @staticmethod
     def _load_tree_node(xplan_item: XPlanungItem) -> TreeNode:
@@ -215,11 +243,13 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
             return root_node
 
-    def __init__(self, xplanung_item: XPlanungItem, parent):
+    def __init__(self, xplanung_item: XPlanungItem, parent, undo_stack):
         super(QAttributeEdit, self).__init__(parent)
         self.setupUi(self)
         self.parent = parent
         self._xplanung_item = xplanung_item
+        self.undo_stack = undo_stack
+        self.undo_stack.stack_changed.connect(self.on_undo_stack_changed)
 
         # info header setup
         self.label_object_name.setObjectName("title-label")
@@ -348,19 +378,85 @@ class QAttributeEdit(CLS, FORM_CLASS):
     def onFilterTextChanged(self, text: str):
         self.proxyModel.setFilterFixedString(text)
 
-    @pyqtSlot(QModelIndex)
-    def on_relation_clicked(self, index: QModelIndex):
+    @pyqtSlot(QModelIndex, QEvent)
+    def on_relation_clicked(self, index: QModelIndex, event: QEvent):
         attribute_name = index.siblingAtColumn(0).data()
         related_xplan_item = index.data(role=ObjectRole)
         display_name = related_xplan_item.xtype.__name__
 
-        nav_item = NavigationItem(
-            xplan_item=related_xplan_item,
-            relation_name=attribute_name,
-            display_name=display_name
-        )
+        if event.button() == Qt.MouseButton.LeftButton:
+            nav_item = NavigationItem(
+                xplan_item=related_xplan_item,
+                relation_name=attribute_name,
+                display_name=display_name
+            )
 
-        self.navigate_to(nav_item)
+            self.navigate_to(nav_item)
+        else:
+            # for relationship sections, get the attribute name from the parent row
+            if index.parent().isValid():
+                attribute_name = index.parent().siblingAtColumn(0).data()
+                attribute_name = self._xplanung_item.xtype.attribute_by_version(attribute_name, export_version())
+
+            rel = sa_inspect(self._xplanung_item.xtype).relationships[attribute_name]
+
+            menu = QMenu(self)
+            if rel.direction is MANYTOONE:
+                return
+
+            delete_action = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg')), 'Objekt löschen')
+            delete_action.triggered.connect(functools.partial(
+                self.on_delete_action_triggered,
+                related_xplan_item,
+                index
+            ))
+            menu.addAction(delete_action)
+            if rel.direction is MANYTOMANY:
+                unlink_action = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/link-off.svg')), 'Beziehung auflösen')
+                # menu.addAction(unlink_action) TODO: make unlink functional
+            menu.exec(self.treeView.viewport().mapToGlobal(event.pos()))
+
+    def on_delete_action_triggered(self, item_to_delete: XPlanungItem, index: QModelIndex, state):
+        source_index = self.proxyModel.mapToSource(index)
+
+        command = ObjectsDeletedCommand([(item_to_delete, None, source_index)], self)
+        self.undo_stack.push(command)
+
+    @qasync.asyncSlot(int, StackChangeType)
+    async def on_undo_stack_changed(self, idx: int, change_type: StackChangeType):
+        if change_type == StackChangeType.REDO:
+            command = self.undo_stack.command(idx - 1)
+        else:
+            command = self.undo_stack.command(idx)
+
+        if hasattr(command, 'command_type') and command.command_type == CommandType.OBJECT_DELETED:
+            if change_type == StackChangeType.REDO:
+                for delete_item in command.delete_items:
+                    self.model.remove_node(delete_item.attribute_view_index)
+            else:
+                for delete_item in command.delete_items:
+                    attr_name = delete_item.attribute_name
+                    # find parent, to add object
+                    parent_index_list = self.model.match(
+                        self.model.index(0, 0),
+                        Qt.ItemDataRole.DisplayRole,
+                        attr_name,
+                        -1,
+                        Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive
+                    )
+
+                    if not parent_index_list:
+                        return
+
+                    parent_node = parent_index_list[0].internalPointer()
+
+                    if parent_node.node_type == 'section':
+                        insert_row = parent_node.child_count()
+                        self.model.beginInsertRows(parent_index_list[0], insert_row, insert_row)
+                        parent_node.add_child(TreeNode('', delete_item.xplan_item, node_type="relation"))
+                        self.model.endInsertRows()
+                    else:
+                        parent_node.value = delete_item.xplan_item
 
     @pyqtSlot(QModelIndex)
     def on_double_clicked(self, index: QModelIndex):
@@ -480,8 +576,16 @@ class EntityTreeModel(QAbstractItemModel):
 
         if role == Qt.ItemDataRole.DisplayRole:
             if index.column() == 0:
+                parent = index.parent()
+                if parent.isValid():
+                    parent_node = parent.internalPointer()
+                    if parent_node.node_type == "section":
+                        return f"Objekt {index.row() + 1}"
                 return node.name
             elif index.column() == 1:
+                if node.node_type == "section":
+                    count = node.child_count()
+                    return f"{count} Objekte" if count != 1 else "1 Objekt"
                 value = node.value
                 if node.node_type == 'relation' and isinstance(value, XPlanungItem):
                     return value.xtype.__name__
@@ -604,6 +708,26 @@ class EntityTreeModel(QAbstractItemModel):
         if isinstance(value, datetime.date):
             return value.strftime("%d.%m.%Y")
         return str(value)
+
+    def remove_node(self, index: QModelIndex):
+        parent_index = self.parent(index)
+        row = index.row()
+
+        if not parent_index.isValid():
+            # if it's a single row (uselist=False), set the value to empty
+            node = index.internalPointer()
+            node.value = None
+            return
+
+        self.beginRemoveRows(parent_index, row, row)
+        parent_node = parent_index.internalPointer() if parent_index.isValid() else self._root
+        parent_node.children.pop(row)
+        self.endRemoveRows()
+
+        parent_node = parent_index.internalPointer()
+        if parent_node.node_type == "section":
+            badge_index = self.createIndex(parent_index.row(), 1, parent_node)
+            self.dataChanged.emit(badge_index, badge_index)
 
 
 class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
@@ -1094,3 +1218,150 @@ class BreadcrumbBar(QWidget):
     def resizeEvent(self, event):
         super().resizeEvent(event)
         self._update_display_mode()
+
+
+class SeparatorDelegate(QStyledItemDelegate):
+    """Custom delegate that draws separators between rows"""
+
+    link_clicked = pyqtSignal(QModelIndex, QEvent)  # index, event
+
+    def __init__(self, link_icon: QIcon, parent=None):
+        super().__init__(parent)
+        self.separator_color = QColor(200, 200, 200)  # Light gray
+        self.separator_thickness = 1
+
+        self.link_icon = link_icon
+
+        # Badge styling
+        self.badge_bg_color = QColor(220, 220, 220)  # Light gray background
+        self.badge_text_color = QColor(80, 80, 80)   # Dark gray text
+        self.badge_padding = 6
+        self.badge_height = 20
+        self.badge_radius = 10
+
+    def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
+        if not index.isValid():
+            return super().paint(painter, option, index)
+
+        option.palette.setBrush(QPalette.ColorRole.HighlightedText, QBrush(Qt.GlobalColor.black))
+        option.palette.setBrush(QPalette.ColorRole.Highlight, QColor('#CBD5E1'))
+
+        is_last_column = index.column() == index.model().columnCount(index.parent()) - 1
+        node = index.data(Qt.ItemDataRole.UserRole + 2)
+        index_text = index.data(Qt.ItemDataRole.DisplayRole)
+
+        if is_last_column and node.node_type == "section":
+            # Custom rendering for section badges
+            painter.save()
+
+            # Draw the selection/hover background if needed
+            if option.state & QStyle.StateFlag.State_Selected:
+                painter.fillRect(option.rect, option.palette.highlight())
+
+            # Calculate badge dimensions
+            font_metrics = painter.fontMetrics()
+            text_width = font_metrics.horizontalAdvance(index_text)
+            badge_width = text_width + 2 * self.badge_padding
+
+            # Center the badge vertically in the cell
+            badge_rect = option.rect.adjusted(
+                self.badge_padding,
+                (option.rect.height() - self.badge_height) // 2,
+                -option.rect.width() + badge_width + self.badge_padding,
+                -(option.rect.height() - self.badge_height) // 2
+            )
+
+            # Draw badge background (rounded rectangle)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+            painter.setBrush(self.badge_bg_color)
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.drawRoundedRect(badge_rect, self.badge_radius, self.badge_radius)
+
+            # Draw badge text
+            painter.setPen(self.badge_text_color)
+            painter.drawText(badge_rect, Qt.AlignmentFlag.AlignCenter, index_text)
+
+            painter.restore()
+
+        elif is_last_column and node and node.node_type == "relation" and node.value:
+            # Custom rendering for relation links with chevron
+            painter.save()
+            option.palette.setBrush(QPalette.ColorRole.HighlightedText, QColor(100, 150, 255))
+            if option.state & QStyle.StateFlag.State_MouseOver:
+                font = option.font
+                font.setUnderline(True)
+                painter.setFont(font)
+            super().paint(painter, option, index)
+
+            if self.link_icon:
+                icon_size = 12
+                # Position icon at the right side of the text
+                font_metrics = painter.fontMetrics()
+                text_width = font_metrics.horizontalAdvance(index_text)
+
+                icon_x = option.rect.left() + text_width + 8
+                icon_y = option.rect.top() + (option.rect.height() - icon_size) // 2
+
+                icon_rect = option.rect.adjusted(
+                    icon_x - option.rect.left(),
+                    icon_y - option.rect.top(),
+                    -(option.rect.width() - icon_size - (icon_x - option.rect.left())),
+                    -(option.rect.bottom() - icon_y - icon_size)
+                )
+
+                self.link_icon.paint(painter, icon_rect)
+
+            painter.restore()
+        else:
+            # Standard rendering for other items
+            super().paint(painter, option, index)
+
+        # Only draw the separator in the last column to avoid multiple overlapping lines
+        if is_last_column:
+            painter.save()
+            pen = QPen(self.separator_color, self.separator_thickness)
+            painter.setPen(pen)
+
+            # Get the view to calculate full row width
+            view = self.parent()
+            y = option.rect.bottom()
+            viewport_rect = view.viewport().rect()
+            painter.drawLine(0, y, viewport_rect.right(), y)
+
+            painter.restore()
+
+    def editorEvent(self, event, model, option, index):
+        node = index.data(Qt.ItemDataRole.UserRole + 2)
+        is_relation = node and node.node_type == "relation" and index.column() == 1
+
+        if is_relation and node.value:
+            if event.type() == QEvent.Type.MouseButtonRelease:
+                self.link_clicked.emit(index, event)
+                return True
+
+        return False
+
+    def helpEvent(self, event, view, option, index):
+        if event is None or view is None:
+            return False
+
+        node = index.data(Qt.ItemDataRole.UserRole + 2)
+        is_last_column = index.column() == index.model().columnCount(index.parent()) - 1
+
+        if not is_last_column or not node or node.node_type != "relation" or not node.value:
+            return super().helpEvent(event, view, option, index)
+
+        text = index.data(Qt.ItemDataRole.DisplayRole)
+        fm = option.fontMetrics
+        text_width = fm.horizontalAdvance(text)
+        text_rect = QRect(option.rect.left(),  option.rect.top(), text_width + 10, option.rect.height())
+
+        if not text_rect.contains(event.pos()):
+            return False
+
+        # TODO: rework tooltip: which attributes to show, formatting, etc.
+        # tooltip = ToolTip(node.relation_preview, view.window())
+        # tooltip.adjust_pos(view, index)
+        # tooltip.show()
+        return True
+

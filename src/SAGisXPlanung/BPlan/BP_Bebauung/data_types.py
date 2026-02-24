@@ -58,7 +58,7 @@ class BP_Dachgestaltung(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['baugebiet', 'besondere_nutzung', 'gemeinbedarf', 'grundstueck_ueberbaubar']
+        return ['baugebiet', 'besondere_nutzung', 'gemeinbedarf', 'grundstueck_ueberbaubar', 'bp_wohngebaeude_flaeche']
 
     def validate(self):
         if self.DNmin and (not self.DNmax and not self.DN and not self.DNZwingend):

@@ -1,14 +1,16 @@
-import inspect
 import logging
-from typing import List, Iterable
+from dataclasses import dataclass
+from enum import Enum, auto
+from typing import Union
 
 from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject
-from sqlalchemy.orm import make_transient, load_only, RelationshipProperty
+from sqlalchemy.orm import make_transient, load_only, RelationshipProperty, ONETOMANY
+from sqlalchemy import inspect as sa_inspect
 
 from SAGisXPlanung import Session, Base, PYQT5
+from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
 from SAGisXPlanung.core.helper import find_true_class
-from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode
 
 if PYQT5:
     from qgis.PyQt.QtWidgets import QUndoCommand
@@ -19,11 +21,14 @@ else:
 logger = logging.getLogger(__name__)
 
 
+class CommandType(Enum):
+    ATTRIBUTE_CHANGED = auto()
+    OBJECT_DELETED = auto()
+    RELATION_UNLINKED = auto()
+
+
 class SignalProxy(QObject):
     changeApplied = pyqtSignal(QModelIndex, str, object)  # index, attr, value
-
-    deleteReverted = pyqtSignal(ClassNode)
-    deleteApplied = pyqtSignal(ClassNode)
 
 
 class AttributeChangedCommand(QUndoCommand):
@@ -95,47 +100,94 @@ class AttributeChangedCommand(QUndoCommand):
 
 
 class ObjectsDeletedCommand(QUndoCommand):
-    def __init__(self, nodes_to_delete: List[ClassNode], parent):
-        self.count = len(nodes_to_delete)
+    command_type = CommandType.OBJECT_DELETED
+
+    @dataclass
+    class DeleteItem:
+        xplan_item: XPlanungItem
+        explorer_row: int = None
+        attribute_view_index: QModelIndex = None
+        attribute_name: str = None
+
+    def __init__(self,
+                 delete_items: list[tuple[XPlanungItem, Union[int, None], Union[QModelIndex, None]]],
+                 parent=None):
+        self.count = len(delete_items)
         super().__init__(f'Löschen {self.count} Objekt{"e" if self.count > 1 else ""}')
 
         self.parent = parent
+        self.delete_items = []
+        for item, explorer_row, attribute_view_index in delete_items:
+            if attribute_view_index is None:
+                self.delete_items.append(self.DeleteItem(item, explorer_row))
+                continue
 
-        self.main_items = nodes_to_delete
-        self.tracked_deletes = []
+            parent_index = attribute_view_index.parent()
+            if parent_index.isValid():
+                attribute_name = parent_index.internalPointer().name
+            else:
+                attribute_name = attribute_view_index.internalPointer().name
+            self.delete_items.append(self.DeleteItem(
+                item,
+                explorer_row,
+                attribute_view_index,
+                attribute_name=attribute_name
+            ))
 
-        self.signal_proxy = SignalProxy()
-
-    def undo(self):
-        with Session.begin() as session:
-            for item, obj in self.tracked_deletes:
-                make_transient(obj)
-                session.add(obj)
-
-            main_item, _ = self.tracked_deletes[-1]
-            self.signal_proxy.deleteReverted.emit(main_item)
+        self._snapshots: list[tuple[type, dict]] = []
 
     def redo(self):
-        self.tracked_deletes = []
-
-        def _collect_deletes(item, session):
-            # Collect object instances that will be deleted
-            # The actual deletion happens via cascaded backrefs on the top-level item to be deleted.
-            for i in range(item.childCount()):
-                child = item.child(i)
-                _collect_deletes(child, session)
-
-            # Fetch and record the object for deletion
-            xp_item = item.xplanItem()
-            delete_obj = session.get(xp_item.xtype, xp_item.xid)
-            self.tracked_deletes.append((item, delete_obj))
+        self._snapshots = []
 
         with Session.begin() as session:
             session.expire_on_commit = False
 
-            for main_item in self.main_items:
-                _collect_deletes(main_item, session)
-                # Delete the top-level object (selected item) after all children are collected
-                _, obj = self.tracked_deletes[-1]
-                session.delete(obj)
-                self.signal_proxy.deleteApplied.emit(main_item)
+            for delete_item in self.delete_items:
+                xplan_item = delete_item.xplan_item
+                root_obj = session.get(xplan_item.xtype, xplan_item.xid)
+                if root_obj is None:
+                    continue
+
+                # collect full tree state before delete
+                self._snapshots.extend(collect_tree(root_obj))
+
+                session.delete(root_obj)  # cascade handles children in DB
+
+    def undo(self):
+        if not self._snapshots:
+            return
+
+        with Session.begin() as session:
+            for orm_class, state in self._snapshots:
+                obj = orm_class()
+                for key, value in state.items():
+                    setattr(obj, key, value)
+                make_transient(obj)
+                session.add(obj)
+
+
+def snapshot_object(obj) -> dict:
+    """Capture all column values of an ORM object as a plain dict."""
+    insp = sa_inspect(obj.__class__)
+    return {col.key: getattr(obj, col.key) for col in insp.mapper.column_attrs}
+
+
+def collect_tree(obj) -> list[tuple[type, dict]]:
+    """
+    DFS collection of an object and all cascade-deleted children.
+    Returns list of (ORM class, state dict) in parent-first order.
+    """
+    result = []
+
+    def _recurse(o):
+        result.append((o.__class__, snapshot_object(o)))
+
+        for rel in sa_inspect(o.__class__).relationships.values():
+            if rel.direction == ONETOMANY:
+                rel_value = getattr(o, rel.key, [])
+                children = [rel_value] if rel_value is not None and not isinstance(rel_value, list) else (rel_value or [])
+                for child in children:
+                    _recurse(child)
+
+    _recurse(obj)
+    return result

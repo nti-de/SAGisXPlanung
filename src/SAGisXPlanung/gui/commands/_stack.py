@@ -1,4 +1,7 @@
+from enum import Enum, auto
 from typing import TypeVar, Type
+
+from qgis.PyQt.QtCore import pyqtSignal
 
 from SAGisXPlanung import PYQT5
 
@@ -11,8 +14,27 @@ else:
 T = TypeVar('T', bound=QUndoCommand)
 
 
+class StackChangeType(Enum):
+    REDO = auto()
+    UNDO = auto()
+
+
 class XPUndoStack(QUndoStack):
     """ Custom UndoStack with functionality to iterate over the stack contents"""
+    stack_changed = pyqtSignal(int, StackChangeType)
+
+    def __init__(self):
+        super().__init__()
+        self._last_index = self.index()
+        self.indexChanged.connect(self._track_change)
+
+    def _track_change(self, new_index):
+        if new_index < self._last_index:
+            self.stack_changed.emit(new_index, StackChangeType.UNDO)
+        elif new_index > self._last_index:
+            self.stack_changed.emit(new_index, StackChangeType.REDO)
+
+        self._last_index = new_index
 
     def iterate(self, _type: Type[T] = None) -> T:
         """ if _type parameter is specified, only filters on the given UndoCommand type"""

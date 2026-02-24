@@ -344,4 +344,4 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         if not index_list:
             return
 
-        await self.details_dialog.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item)
+        self.details_dialog.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item)

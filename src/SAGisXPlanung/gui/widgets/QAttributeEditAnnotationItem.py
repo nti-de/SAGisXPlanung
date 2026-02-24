@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 
 class QAttributeEditAnnotationItem(QAttributeEdit):
 
-    def __init__(self, xplanung_item: XPlanungItem, parent=None):
-        super(QAttributeEditAnnotationItem, self).__init__(xplanung_item, parent)
+    def __init__(self, xplanung_item: XPlanungItem, parent, undo_stack):
+        super(QAttributeEditAnnotationItem, self).__init__(xplanung_item, parent, undo_stack)
 
         self._layer = MapLayerRegistry().layerByXid(self._xplanung_item)
         self.annotation_type = self._xplanung_item.xtype.__name__
