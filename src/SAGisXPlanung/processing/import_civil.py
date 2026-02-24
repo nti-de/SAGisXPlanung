@@ -119,7 +119,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
             for row in plan_ids:
                 feedback.pushInfo(f"Plan mit id {row.id} wird importiert...")
                 plan = self.processPlan(row.id, conn, feedback)
-
+                print(plan)
                 save_to_db(plan)
 
         return {}
@@ -135,7 +135,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
         plan.gemeinde.append(gemeinde)
 
         plan.name = res.name
-        plan.planArt = BP_PlanArt[res.art]
+        plan.planArt = [BP_PlanArt[res.art]]
 
         # RemoveRepeatedPoints does not remove duplicated points from geometry column directly, most likely a bug???
         # dump to wkt and create new geometry as workaround
