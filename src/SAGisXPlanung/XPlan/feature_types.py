@@ -494,6 +494,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     xp_objekte = relationship("XP_Objekt",
         secondary=xp_textabschnitt_assoc,
         back_populates="refTextInhalt_v6",
+        passive_deletes=True,
         info={'xplan_version': XPlanVersion.SIX}
     )
 
@@ -501,11 +502,13 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     xp_plaene = relationship("XP_Plan",
         secondary=xp_textabschnitt_assoc,
         back_populates="texte",
+        passive_deletes=True,
         info={'xplan_version': XPlanVersion.FIVE_THREE}
     )
     xp_plaene_v6 = relationship("XP_Plan",
         secondary=xp_textabschnitt_assoc,
         back_populates="texte_v6",
+        passive_deletes=True,
         info={'xplan_version': XPlanVersion.SIX}
     )
 
