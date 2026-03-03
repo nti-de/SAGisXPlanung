@@ -7,7 +7,7 @@ from SAGisXPlanung.XPlan.types import XPEnum, RefURL, LargeString, XPlanungMeasu
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QStringInput, QTextListInput, \
     QCheckableComboBoxInput, QComboBoxNoScroll, QMeasureTypeInput, QTextInput, QFileInput, QDateEditNoScroll, \
-    QBooleanInput, QIntegerInput, QFloatInput, QDateListInput
+    QBooleanInput, QIntegerInput, QFloatInput, QDateListInput, QIntegerListInput
 from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, WidgetContext
 
 from SAGisXPlanung.gui.widgets.inputs.QFeatureIdentify import QFeatureIdentify
@@ -36,6 +36,8 @@ def create_widget(field_type, parent=None, context: Optional[WidgetContext] = No
             )
         if isinstance(field_type.item_type, String):
             return QTextListInput(parent=parent, context=context)
+        if isinstance(field_type.item_type, Integer):
+            return QIntegerListInput(parent=parent, context=context)
         if isinstance(field_type.item_type, Date):
             return QDateListInput(parent=parent, context=context)
         if isinstance(field_type.item_type, XPathField):

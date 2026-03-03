@@ -59,16 +59,28 @@ class QFloatInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanung
     def __init__(self, *args, **kwargs):
         super(QFloatInput, self).__init__(*args, **kwargs)
 
+    def _normalized_text(self):
+        text = self.text().strip()
+        return text.replace(',', '.') if text else text
+
     def value(self):
-        return float(self.text()) if self.text() else None
+        text = self._normalized_text()
+        if not text:
+            return None
+        return float(text)
 
     def setDefault(self, default):
         self.setText('' if default is None else str(default))
 
     def validate_widget(self, required):
+        text = self._normalized_text()
+        if required and not text:
+            return False
+        if not text:
+            return True
+
         try:
-            if not self.value() and required:
-                return False
+            float(text)
             return True
         except ValueError:
             self.error_message = 'Feld erwartet eine Zahl'
@@ -87,9 +99,14 @@ class QIntegerInput(LineEditMixin, BaseInputElement, QLineEdit, metaclass=XPlanu
         self.setText('' if default is None else str(default))
 
     def validate_widget(self, required):
+        text = self.text().strip()
+        if required and not text:
+            return False
+        if not text:
+            return True
+
         try:
-            if required and self.value() is None:
-                return False
+            int(text)
             return True
         except ValueError:
             self.error_message = 'Feld erwartet einen ganzzahligen Wert'
@@ -343,11 +360,12 @@ class QMultiInputWidget(BaseInputElement, QWidget, metaclass=XPlanungInputMeta):
         values = []
         for layout in self.inputs:
             widget = layout.itemAt(0).widget()
-            if not (v := widget.value()):
+            v = widget.value()
+            if v is None:
                 continue
             values.append(v)
 
-        return values
+        return values or None
 
     def validate_widget(self, required):
         return True
@@ -391,6 +409,47 @@ class QTextListInput(QMultiInputWidget):
         for text in default[1:]:
             el = self.add_input()
             el.setText(text)
+
+
+class QIntegerListInput(QMultiInputWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__('integer', *args, **kwargs)
+
+    def create_input_field(self, placeholder_text):
+        line_edit = QIntegerInput()
+        line_edit.setPlaceholderText(placeholder_text)
+        return line_edit
+
+    def setDefault(self, default):
+        if not default:
+            return
+
+        if isinstance(default, str):
+            default = [int(x.strip()) for x in default.split(',') if x.strip()]
+
+        self.first_input.setText(str(default[0]))
+
+        for number in default[1:]:
+            el = self.add_input()
+            el.setText(str(number))
+
+    def validate_widget(self, required):
+        has_value = False
+
+        for layout in self.inputs:
+            widget = layout.itemAt(0).widget()
+            if not widget.validate_widget(False):
+                self.error_message = widget.error_message
+                return False
+
+            if widget.value() is not None:
+                has_value = True
+
+        if required and not has_value:
+            self.error_message = 'Mindestens ein ganzzahliger Wert erforderlich'
+            return False
+
+        return True
 
 
 class QCheckableComboBoxInput(BaseInputElement, QgsCheckableComboBox, metaclass=XPlanungInputMeta):
