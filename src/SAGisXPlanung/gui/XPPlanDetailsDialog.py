@@ -188,13 +188,14 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bPrev.setEnabled(self.stackedWidget.currentIndex() > 0)
         self.bEdit.setEnabled(self.stackedWidget.currentIndex() == 0)
 
-        self.bSave.setVisible(self.stackedWidget.currentIndex() == 2)
-        self.bUndo.setVisible(self.stackedWidget.currentIndex() != 2)
-        self.bRedo.setVisible(self.stackedWidget.currentIndex() != 2)
+        current_widget = self.stackedWidget.currentWidget()
+        is_new_object_widget = isinstance(current_widget, (SelectRelatedWidget, QXPlanTabWidget))
+        self.bSave.setVisible(is_new_object_widget == True)
+        self.bUndo.setVisible(not is_new_object_widget)
+        self.bRedo.setVisible(not is_new_object_widget)
 
     @pyqtSlot()
     def prevPage(self):
-        # self.attributeTree.clear()
         widget = self.stackedWidget.currentWidget()
         self.stackedWidget.removeWidget(widget)
         widget.deleteLater()
@@ -377,8 +378,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         if self.bSave.receivers(self.bSave.clicked) > 0:
             self.bSave.clicked.disconnect()
         self.bSave.clicked.connect(functools.partial(self.onSaveClicked, parent_item, attribute))
-        self.stackedWidget.insertWidget(2, widget)
-        self.stackedWidget.setCurrentIndex(2)
+        self.insertWidgetIntoNewPage(widget)
 
     @pyqtSlot(QtWidgets.QWidget)
     def insertWidgetIntoNewPage(self, widget):
