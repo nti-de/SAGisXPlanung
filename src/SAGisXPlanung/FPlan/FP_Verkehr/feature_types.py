@@ -9,7 +9,7 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.FPlan.FP_Verkehr.enums import FP_ZweckbestimmungStrassenverkehr
 from SAGisXPlanung.XPlan.core import xp_version
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
@@ -47,7 +47,9 @@ class FP_Strassenverkehr(MixedGeometry, FP_Objekt):
         if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             point_symbol = QgsSymbol.defaultSymbol(geom_type)
             point_symbol.setColor(QColor('#fbdd19'))
-            return QgsSingleSymbolRenderer(point_symbol)
+            return icon_renderer('Straßenverkehr', point_symbol,
+                                 'BP_Verkehr', geometry_type=geom_type,
+                                 scale_factor=4)
         elif geom_type is not None:
             line_symbol = QgsSymbol.defaultSymbol(geom_type)
             line_symbol.setColor(QColor('#fbdd19'))

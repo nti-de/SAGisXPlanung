@@ -8,7 +8,7 @@ from sqlalchemy import Column, ForeignKey, Enum
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
 from SAGisXPlanung.XPlan.core import xp_version, LayerPriorityType
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungGewaesser, XP_ZweckbestimmungWasserwirtschaft
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
@@ -94,5 +94,9 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
+            return icon_renderer('Wasserwirtschaft', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Wasser', geometry_type=geom_type,
+                                 scale_factor=4)
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

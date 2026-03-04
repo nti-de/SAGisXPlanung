@@ -389,6 +389,20 @@ Sondergebiet_EKZ.svg:
       type: XP_Sondernutzungen
       value:
         - 16001
+Sondergebiet_Militaer.svg:
+  type:
+    svg:
+      category: BP_Bebauung
+  category: BP_Bebauung
+  name: Sondergebiet Militär
+  attribute:
+    - xpath:
+        - sondernutzung
+        - BP_KomplexeSondernutzung/allgemein
+        - sonderNutzung
+        - FP_KomplexeSondernutzung/allgemein
+      type: XP_Sondernutzungen
+      value: 2000
 
 bauliche_nutzung_dachform:
   type:
@@ -685,12 +699,6 @@ Hallenbad.svg:
 Hochschule.svg:
   category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
   name: Hochschule
-Jugendfreizeitheim.svg:
-  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
-  name: Jugendfreizeitheim
-Jugendheim.svg:
-  category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
-  name: Jugendheim
 Justizvollzug.svg:
   category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
   name: Justizvollzug
@@ -698,7 +706,7 @@ Einrichtung_Kinder.svg:
   type:
     svg:
       category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
-  name: Einrichtung Kinder
+  name: Soziale Einrichtung Kinder
   attribute:
     - xpath:
         - zweckbestimmung
@@ -706,6 +714,18 @@ Einrichtung_Kinder.svg:
         - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
       type: XP_ZweckbestimmungGemeinbedarf
       value: 16000
+Einrichtung_Jugendliche.svg:
+  type:
+    svg:
+      category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
+  name: Soziale Einrichtung Jugendliche
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
+      type: XP_ZweckbestimmungGemeinbedarf
+      value: 16001
 Kirche.svg:
   type:
     svg:
@@ -734,18 +754,20 @@ Kirchliche_Einrichtung.svg:
         - 14000
         - 14001
         - 14002
-Krankenhaus.svg:
+Gesundheit.svg:
   type:
     svg:
       category: BP_Gemeinbedarf_Spiel_und_Sportanlagen
-  name: Krankenhaus
+  name: Gesundheitliche Einrichtung
   attribute:
     - xpath:
         - zweckbestimmung
         - zweckbestimmung/BP_KomplexeZweckbestGemeinbedarf/allgemein
         - zweckbestimmung/FP_KomplexeZweckbestGemeinbedarf/allgemein
       type: XP_ZweckbestimmungGemeinbedarf
-      value: 18000
+      value:
+        - 1800
+        - 18000
 Oeffentliche_Verwaltung.svg:
   type:
     svg:
@@ -852,18 +874,6 @@ Erholungswald_Kreis_SW.svg:
         - zweckbestimmung/FP_KomplexeZweckbestWald/allgemein
       type: XP_ZweckbestimmungWald
       value: 1400
-Badeplatz.svg:
-  type:
-    svg:
-      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
-  name: Badeplatz
-  attribute:
-    - xpath:
-        - zweckbestimmung
-        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
-        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
-      type: XP_ZweckbestimmungGruen
-      value: 1500
 Dauerkleingärten.svg:
   type:
     svg:
@@ -960,6 +970,18 @@ Anlage_Tennis.svg:
         - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
       type: XP_ZweckbestimmungGruen
       value: 14006
+Freibad.svg:
+  type:
+    svg:
+      category: BP_Landwirtschaft_Wald_und_Gruenflaechen
+  name: Freibad/Badeplatz
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGruen/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestGruen/allgemein
+      type: XP_ZweckbestimmungGruen
+      value: 2000
 # endregion
 
 # region BP_Naturschutz_Landschaftsbild_Naturhaushalt
@@ -1306,18 +1328,57 @@ Fuss_Radweg.svg:
 Hafen.svg:
   category: BP_Wasser
   name: Hafen
-Hochwasserrueckhaltebecken.svg:
-  category: BP_Wasser
-  name: Hochwasser-Rückhaltebecken
 Schutzgebiet_fuer_Grund-_und_Quellwassergewinnung.svg:
   category: BP_Wasser
   name: Schutzgebiet Grund- oder Quellwasser
 Schutzgebiet_fuer_Oberflaechenwasser.svg:
   category: BP_Wasser
   name: Schutzgebiet Oberflächenwasser
-Ueberschwaemmungsgebiet.svg:
-  category: BP_Wasser
-  name: Überschwemmungsgefährdetes Gebiet
+# endregion
+
+# region Wasserwirtschaft
+Ueberschwemmungsgebiet.svg:
+  type:
+    svg:
+      category: BP_Wasser
+  name: Überschwemmungsgebiet
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: XP_ZweckbestimmungWasserwirtschaft
+      value: 1100
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachWasserrecht
+      value: 2000
+Regenrueckhaltebecken.svg:
+  type:
+    svg:
+      category: BP_Wasser
+  name: Regenrückhaltebecken
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: XP_ZweckbestimmungWasserwirtschaft
+      value: 1500
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachWasserrecht
+      value: 1500
+Hochwasserrueckhaltebecken.svg:
+  type:
+    svg:
+      category: BP_Wasser
+  name: Hochwasserrückhaltebecken
+  attribute:
+    - xpath:
+        - zweckbestimmung
+      type: XP_ZweckbestimmungWasserwirtschaft
+      value: 1000
+    - xpath:
+        - artDerFestlegung
+      type: SO_KlassifizNachWasserrecht
+      value: 1000
 # endregion
 
 # region SO_NachrichtlicheUebernahmen

@@ -11,7 +11,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzg
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.enums import SO_SchutzzonenNaturschutzrecht
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.enums import XP_KlassifizSchutzgebietNaturschutzrecht
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
@@ -57,6 +57,10 @@ class SO_SchutzgebietNaturschutzrecht(MixedGeometry, SO_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
+            return icon_renderer('Naturschutz', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Naturschutz_Landschaftsbild_Naturhaushalt', geometry_type=geom_type,
+                                 scale_factor=4)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
