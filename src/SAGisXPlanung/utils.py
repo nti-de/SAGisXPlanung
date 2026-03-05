@@ -42,7 +42,7 @@ from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZwec
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
     BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt
-from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche
+from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche, BP_WasserwirtschaftsFlaeche
 from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import FP_Abgrabung, FP_Aufschuettung
 from SAGisXPlanung.FPlan.FP_Basisobjekte.codelists import FP_SonstPlanArt, FP_Status
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt, FP_TextAbschnitt
@@ -184,6 +184,7 @@ CLASSES = {
     'BP_TextAbschnitt': BP_TextAbschnitt,
     'BP_NebenanlagenAusschlussFlaeche': BP_NebenanlagenAusschlussFlaeche,
     'BP_WohngebaeudeFlaeche': BP_WohngebaeudeFlaeche,
+    'BP_WasserwirtschaftsFlaeche': BP_WasserwirtschaftsFlaeche,
 
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,
