@@ -82,13 +82,6 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     zugunstenVon = Column(String)
 
-    def layer_fields(self):
-        return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
-            'skalierung': self.skalierung if self.skalierung else '',
-            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
-        }
-
     @classmethod
     def symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)

@@ -119,6 +119,10 @@ sa.Column('codelist_user_id', sa.UUID(), nullable=True),
                     sa.ForeignKeyConstraint(['codelist_id'], ['codelist_values.id'], ),
                     sa.ForeignKeyConstraint(['codelist_user_id'], ['bp_wasserwirtschaft.id'], ondelete='CASCADE')
                     )
+
+    op.execute("DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_gruen")
+    op.execute("DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_zweckbestimmung_gruen")
+    op.execute("""ALTER TABLE fp_gruen ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[] using NULLIF(ARRAY[zweckbestimmung::xp_zweckbestimmunggruen], '{}')""")
     # ### end Alembic commands ###
 
 
@@ -137,4 +141,6 @@ def downgrade():
     op.drop_table('fp_nutzungsbeschraenkung_flaeche')
     op.drop_table('bp_wasserwirtschaft')
     op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('fp_nutzungsbeschraenkung', 'fp_nutzungsbeschraenkung_flaeche', 'bp_wasserwirtschaft');")
+
+    op.execute('ALTER TABLE fp_gruen ALTER "zweckbestimmung" type xp_zweckbestimmunggruen using "zweckbestimmung"[1]')
     # ### end Alembic commands ###

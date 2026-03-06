@@ -27,7 +27,7 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
 
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungGruen), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungGruen)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("FP_KomplexeZweckbestGruen", back_populates="gruenflaeche",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -37,13 +37,6 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
 
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     zugunstenVon = Column(String)
-
-    def layer_fields(self):
-        return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
-            'skalierung': self.skalierung if self.skalierung else '',
-            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
-        }
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
@@ -74,10 +67,6 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
-
-    @classmethod
-    def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(48, 48))
 
 
 class FP_Landwirtschaft(MixedGeometry, FP_Objekt):

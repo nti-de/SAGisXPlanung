@@ -1,4 +1,4 @@
-from sqlalchemy import String, Enum
+from sqlalchemy import String, Enum, ARRAY
 
 from SAGisXPlanung import Base
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
@@ -21,7 +21,7 @@ def test_find_true_class():
 
 def test_get_field_type():
     field_type = get_field_type(FP_Gruen, 'zweckbestimmung')
-    assert isinstance(field_type, Enum)
+    assert isinstance(field_type, ARRAY) and hasattr(field_type.item_type, 'enums')
 
     field_type = get_field_type(FP_Gruen, 'text')
     assert isinstance(field_type, String)
