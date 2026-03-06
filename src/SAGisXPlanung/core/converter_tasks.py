@@ -126,6 +126,8 @@ def run_import_prechecks(input_data: GMLInputData) -> List[PrecheckWarning]:
         parser = etree.XMLParser(remove_blank_text=True)
         tree = etree.fromstring(input_data.gml_content, parser=parser)
         xplan_ns = tree.nsmap.get('xplan')
+        if xplan_ns is None and 'xplangml' in tree.nsmap[None]:
+            xplan_ns = tree.nsmap[None]
         version = XPlanVersion.from_namespace(xplan_ns)
 
         if version != export_version():

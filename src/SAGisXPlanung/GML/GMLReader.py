@@ -33,6 +33,8 @@ class GMLReader:
         self.root = etree.fromstring(gml, parser=parser)
 
         self.nsmap = self.root.nsmap
+        if None in self.nsmap and 'xplangml' in self.nsmap[None]:
+            self.nsmap['xplan'] = self.nsmap[None]
         # remove the None entry (top level namespace) if it exists - xpath does not allow it in the namespace map
         self.nsmap.pop(None, None)
         self.import_version = XPlanVersion.from_namespace(self.nsmap['xplan'])
