@@ -1,9 +1,9 @@
 from qgis.PyQt.QtCore import Qt, QSize
 from qgis.PyQt.QtGui import QColor
-from qgis._core import QgsMarkerSymbolLayer
 from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes, Qgis,
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
-                       QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase)
+                       QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsGeometryGeneratorSymbolLayer,
+                       QgsMarkerSymbolLayer)
 
 from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float
 from sqlalchemy.dialects.postgresql import UUID
@@ -403,12 +403,6 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
 
     artDerFestlegung = Column(XPEnum(SO_KlassifizWasserwirtschaft, include_default=True))
 
-    __icon_map__ = [
-        ('Hochwasserrückhaltebecken', '"artDerFestlegung" LIKE \'HochwasserRueckhaltebecken\'', 'Hochwasserrueckhaltebecken.svg'),
-        ('Überschwemmungsgebiet', '"artDerFestlegung" LIKE \'Ueberschwemmgebiet\'', 'Ueberschwemmungsgebiet.svg'),
-        ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
-    ]
-
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
@@ -417,11 +411,16 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
         symbol.appendSymbolLayer(fill)
 
-        blue_strip = QgsSimpleLineSymbolLayer(QColor('#45a1d0'))
-        blue_strip.setWidth(5)
-        blue_strip.setOffset(2.5)
+        blue_strip = QgsGeometryGeneratorSymbolLayer.create({})
+        blue_strip.setSymbolType(Qgis.SymbolType.Fill)
+        blue_strip.setColor(QColor('#45a1d0'))
+        blue_strip.setStrokeColor(QColor('#45a1d0'))
         blue_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        blue_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        blue_strip.setGeometryExpression("difference($geometry, buffer(wave($geometry, 20, 1.5), -4))")
+        sub_symbol = blue_strip.subSymbol()
+        fill_layer = sub_symbol.symbolLayer(0)
+        fill_layer.setStrokeColor(QColor('#45a1d0'))
+        fill_layer.setStrokeWidth(0)
         symbol.appendSymbolLayer(blue_strip)
 
         return symbol
@@ -430,14 +429,12 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
-            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Wasser')
-        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
+            return icon_renderer('Wasserwirtschaft', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Wasser', geometry_type=geom_type, scale_factor=4)
+        else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
-        raise Exception('parameter geometryType should not be None')
-
-    @classmethod
-    def previewIcon(cls):
-        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
 
 
 class SO_Wasserrecht(MixedGeometry, SO_Objekt):

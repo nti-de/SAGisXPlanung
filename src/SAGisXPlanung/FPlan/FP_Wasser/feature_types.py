@@ -1,5 +1,5 @@
 from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsUnitTypes)
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsGeometryGeneratorSymbolLayer, Qgis)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
@@ -75,17 +75,20 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
-        colored_strip = QgsSimpleLineSymbolLayer(QColor('#71f8ff'))
-        colored_strip.setWidth(3)
-        colored_strip.setOffset(1.5)
-        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
-        symbol.appendSymbolLayer(colored_strip)
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        symbol.appendSymbolLayer(fill)
 
-        border = QgsSimpleLineSymbolLayer(QColor('black'))
-        border.setWidth(0.5)
-        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        symbol.appendSymbolLayer(border)
+        blue_strip = QgsGeometryGeneratorSymbolLayer.create({})
+        blue_strip.setSymbolType(Qgis.SymbolType.Fill)
+        blue_strip.setColor(QColor('#45a1d0'))
+        blue_strip.setStrokeColor(QColor('#45a1d0'))
+        blue_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        blue_strip.setGeometryExpression("difference($geometry, buffer(wave($geometry, 20, 1.5), -4))")
+        sub_symbol = blue_strip.subSymbol()
+        fill_layer = sub_symbol.symbolLayer(0)
+        fill_layer.setStrokeColor(QColor('#45a1d0'))
+        fill_layer.setStrokeWidth(0)
+        symbol.appendSymbolLayer(blue_strip)
 
         return symbol
 
@@ -96,7 +99,6 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Wasserwirtschaft', QgsSymbol.defaultSymbol(geom_type),
-                                 'BP_Wasser', geometry_type=geom_type,
-                                 scale_factor=4)
+                                 'BP_Wasser', geometry_type=geom_type, scale_factor=4)
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

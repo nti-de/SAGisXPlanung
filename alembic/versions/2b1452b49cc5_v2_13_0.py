@@ -77,10 +77,15 @@ sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
     vorkehrung_enum = postgresql.ENUM('Laermschutzvorkehrung', 'FassadenMitSchallschutzmassnahmen',
                                       'Laermschutzwand', 'Laermschutzwall', 'SonstigeVorkehrung',
                                       name='xp_technvorkehrungenimmissionsschutz', create_type=False)
+    wasserwirtschaft_enum = postgresql.ENUM('HochwasserRueckhaltebecken', 'Ueberschwemmgebiet',
+                                            'Versickerungsflaeche', 'Entwaesserungsgraben', 'Deich',
+                                            'RegenRueckhaltebecken', 'Sonstiges',
+                                            name='xp_zweckbestimmungwasserwirtschaft', create_type=False)
 
     if not context.is_offline_mode():
         schutztyp_enum.create(op.get_bind(), checkfirst=True)
         vorkehrung_enum.create(op.get_bind(), checkfirst=True)
+        wasserwirtschaft_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table('fp_nutzungsbeschraenkung',
 sa.Column('id', sa.UUID(), nullable=False),
@@ -101,6 +106,19 @@ sa.Column('codelist_user_id', sa.UUID(), nullable=True),
         sa.ForeignKeyConstraint(['id'], ['fp_objekt.id'], ondelete='CASCADE'),
         sa.PrimaryKeyConstraint('id')
     )
+
+    op.create_table('bp_wasserwirtschaft',
+                    sa.Column('id', sa.UUID(), nullable=False),
+                    sa.Column('zweckbestimmung', wasserwirtschaft_enum, nullable=True),
+                    sa.ForeignKeyConstraint(['id'], ['bp_objekt.id'], ondelete='CASCADE'),
+                    sa.PrimaryKeyConstraint('id')
+                    )
+    op.create_table('assoc_detail_zweckwasserwirtschaft',
+                    sa.Column('codelist_user_id', sa.UUID(), nullable=True),
+                    sa.Column('codelist_id', sa.UUID(), nullable=True),
+                    sa.ForeignKeyConstraint(['codelist_id'], ['codelist_values.id'], ),
+                    sa.ForeignKeyConstraint(['codelist_user_id'], ['bp_wasserwirtschaft.id'], ondelete='CASCADE')
+                    )
     # ### end Alembic commands ###
 
 
@@ -114,7 +132,9 @@ def downgrade():
     op.drop_table('xp_gener_attribut')
 
     op.drop_table('assoc_detail_vorkehrung_immissionschutz')
+    op.drop_table('assoc_detail_zweckwasserwirtschaft')
     op.drop_table('fp_nutzungsbeschraenkung')
     op.drop_table('fp_nutzungsbeschraenkung_flaeche')
-    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('fp_nutzungsbeschraenkung', 'fp_nutzungsbeschraenkung_flaeche');")
+    op.drop_table('bp_wasserwirtschaft')
+    op.execute("DELETE FROM xp_objekt CASCADE WHERE type in ('fp_nutzungsbeschraenkung', 'fp_nutzungsbeschraenkung_flaeche', 'bp_wasserwirtschaft');")
     # ### end Alembic commands ###
