@@ -1,5 +1,5 @@
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSymbolLayerUtils, QgsSimpleFillSymbolLayer, QgsUnitTypes,
-                       QgsGeometryGeneratorSymbolLayer, Qgis)
+                       QgsGeometryGeneratorSymbolLayer, Qgis, QgsSingleSymbolRenderer)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
