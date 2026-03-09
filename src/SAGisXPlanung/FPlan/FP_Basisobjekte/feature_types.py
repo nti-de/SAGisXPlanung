@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey, Enum, String, Date, ARRAY, event, Boo
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import relationship
-from geoalchemy2 import WKBElement, Geometry, WKTElement
+from geoalchemy2 import Geometry, WKTElement
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.enums import FP_PlanArt, FP_Verfahren, FP_Rechtsstand, FP_Rechtscharakter
@@ -16,10 +16,8 @@ from SAGisXPlanung.XPlan.conversions import FP_Rechtscharakter_EnumType
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_GesetzlicheGrundlageAssoc
-from SAGisXPlanung.XPlan.enums import XP_Rechtscharakter
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.XPlan.types import GeometryType
-from SAGisXPlanung.config import export_version
 
 
 class FP_Plan(XP_Plan):
@@ -123,6 +121,14 @@ class FP_Plan(XP_Plan):
 
         symbol.appendSymbolLayer(line)
         return QgsSingleSymbolRenderer(symbol)
+
+    def _flaechenschluss_config(self) -> XP_Plan.FlaechenschlussConfig:
+        from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_FlaecheOhneDarstellung
+
+        return XP_Plan.FlaechenschlussConfig(
+            class_type=FP_FlaecheOhneDarstellung,
+            rechtscharakter_enum=FP_Rechtscharakter,
+        )
 
 
 @event.listens_for(FP_Plan, 'before_insert')

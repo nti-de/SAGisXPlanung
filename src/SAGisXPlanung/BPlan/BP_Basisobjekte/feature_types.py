@@ -1,14 +1,13 @@
 import logging
-import uuid
 
 from geoalchemy2 import Geometry, WKTElement
 from sqlalchemy import Column, Enum, String, Date, ARRAY, Boolean, ForeignKey, event, CheckConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import relationship, declared_attr
+from sqlalchemy.orm import relationship
 
 from qgis.core import (QgsSimpleLineSymbolLayer, QgsSingleSymbolRenderer, QgsSymbol, QgsWkbTypes, QgsGeometry,
-                       QgsCoordinateReferenceSystem, QgsProject, QgsUnitTypes)
+                       QgsCoordinateReferenceSystem, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt
 
@@ -22,7 +21,6 @@ from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Verfahren, BP_Rechtsstand, BP_PlanArt, BP_Rechtscharakter
 from SAGisXPlanung.XPlan.types import XPEnum, GeometryType
-from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
 
@@ -170,37 +168,13 @@ class BP_Plan(XP_Plan):
         symbol.appendSymbolLayer(border)
         return QgsSingleSymbolRenderer(symbol)
 
-    def enforceFlaechenschluss(self):
+    def _flaechenschluss_config(self) -> XP_Plan.FlaechenschlussConfig:
         from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung
 
-        geltungsbereich_geom = self.geometry()
-        results = []
-
-        for bereich in self.bereich:  # type: BP_Bereich
-            # 1. build union of all flaechenschluss objects (without BP_FlaecheOhneFestsetzung)
-            flaechenschluss_geoms = [p.geometry() for p in bereich.planinhalt
-                                     if p.flaechenschluss and not isinstance(p, BP_FlaecheOhneFestsetzung)]
-            combined = QgsGeometry.unaryUnion(flaechenschluss_geoms)
-
-            # fill difference of 1. and Geltungsbereich with BP_FlaecheOhneFestsetzung
-            diff = geltungsbereich_geom.difference(combined)
-
-            areas_without_usage = [p for p in bereich.planinhalt if p.type == 'bp_flaeche_ohne_festsetzung']
-            if areas_without_usage:
-                fl = areas_without_usage[0]
-                fl.setGeometry(diff, srid=QgsProject.instance().crs().postgisSrid())
-            else:
-                fl = BP_FlaecheOhneFestsetzung()
-                fl.id = uuid.uuid4()
-                fl.flaechenschluss = True
-                fl.rechtscharakter = BP_Rechtscharakter.Unbekannt
-                fl.setGeometry(diff, srid=QgsProject.instance().crs().postgisSrid())
-                bereich.planinhalt.append(fl)
-
-            results.append(XPlanungItem(xtype=fl.__class__, xid=str(fl.id), parent_xid=str(bereich.id)))
-
-        return results
-
+        return XP_Plan.FlaechenschlussConfig(
+            class_type=BP_FlaecheOhneFestsetzung,
+            rechtscharakter_enum=BP_Rechtscharakter,
+        )
 
 @event.listens_for(BP_Plan, 'before_insert')
 @event.listens_for(BP_Plan, 'before_update')

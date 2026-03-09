@@ -15,7 +15,7 @@ from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung, XP_ImmissionsschutzTypen, \
     XP_TechnVorkehrungenImmissionsschutz
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry, UeberlagerungsObjekt, PolygonGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, UeberlagerungsObjekt, PolygonGeometry, FlaechenschlussObjekt
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 logger = logging.getLogger(__name__)
@@ -152,3 +152,19 @@ class FP_PrivilegiertesVorhaben(MixedGeometry, FP_Objekt):
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
+
+
+class FP_FlaecheOhneDarstellung(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
+    """ Fläche, für die keine geplante Nutzung angegben werden kann """
+
+    __tablename__ = 'fp_flaeche_ohne_darstellung'
+    __mapper_args__ = {
+        'polymorphic_identity': 'fp_flaeche_ohne_darstellung',
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)

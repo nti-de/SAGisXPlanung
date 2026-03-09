@@ -1,15 +1,18 @@
 import logging
 import traceback
+import uuid
+from dataclasses import dataclass
+from typing import Type
 from uuid import uuid4
 
 from qgis.PyQt.QtCore import QSize
 from qgis.PyQt.QtGui import QIcon
 
 from geoalchemy2 import Geometry, WKTElement
+from qgis._core import QgsProject
 from qgis.core import QgsSingleSymbolRenderer, QgsCategorizedSymbolRenderer, QgsSymbol
 
-from sqlalchemy import Column, String, Date, Integer, Float, Enum, ForeignKey, event, CheckConstraint, Computed, Table, \
-    and_
+from sqlalchemy import Column, String, Date, Integer, Enum, ForeignKey, event, CheckConstraint, Computed, Table, and_
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
 from sqlalchemy.orm import relationship, Session
 
@@ -19,14 +22,15 @@ from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer
 from .conversions import XP_Rechtscharakter_EnumType
 from .core import LayerPriorityType
 from .enums import XP_BedeutungenBereich, XP_Rechtsstand, XP_Rechtscharakter
+from .types import LargeString, Angle, Length, GeometryType, XPEnum
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_geometry
 from SAGisXPlanung.config import export_version
+from SAGisXPlanung.core.helper import safe_edit
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
     RendererMixin, FeatureType
-from .types import LargeString, Angle, Length, GeometryType, XPEnum
-from ..MapLayerRegistry import MapLayerRegistry
-from ..core.helper import safe_edit
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
+from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +47,11 @@ xp_textabschnitt_assoc = Table(
 
 class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, RelationshipMixin, MapCanvasMixin, Base):
     """ Abstrakte Oberklasse für alle Klassen raumbezogener Pläne. """
+
+    @dataclass
+    class FlaechenschlussConfig:
+        class_type: Type
+        rechtscharakter_enum: Type
 
     __tablename__ = 'xp_plan'
 
@@ -143,10 +152,51 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
     def setGeometry(self, geom: QgsGeometry):
         self.raeumlicherGeltungsbereich = WKTElement(geom.asWkt(), srid=self.raeumlicherGeltungsbereich.srid)
 
+    def _flaechenschluss_config(self) -> "XP_Plan.FlaechenschlussConfig":
+        raise NotImplementedError
 
     def enforceFlaechenschluss(self):
-        """ Abstrakte Methode zum Erzwingen des Flächenschluss. Muss in jeder konkreten Klasse implementiert werden."""
-        raise NotImplementedError()
+        config = self._flaechenschluss_config()
+
+        geltungsbereich_geom = self.geometry()
+        results = []
+
+        for bereich in self.bereich:
+            flaechenschluss_geoms = [
+                p.geometry()
+                for p in bereich.planinhalt
+                if p.flaechenschluss and not isinstance(p, config.class_type)
+            ]
+
+            combined = QgsGeometry.unaryUnion(flaechenschluss_geoms) if flaechenschluss_geoms else QgsGeometry()
+
+            diff = geltungsbereich_geom.difference(combined)
+
+            areas_without_usage = [
+                p for p in bereich.planinhalt
+                if p.type == config.class_type.__tablename__
+            ]
+
+            if areas_without_usage:
+                fl = areas_without_usage[0]
+                fl.setGeometry(diff, srid=QgsProject.instance().crs().postgisSrid())
+            else:
+                fl = config.class_type()
+                fl.id = uuid.uuid4()
+                fl.flaechenschluss = True
+                fl.rechtscharakter = config.rechtscharakter_enum.Unbekannt
+                fl.setGeometry(diff, srid=QgsProject.instance().crs().postgisSrid())
+                bereich.planinhalt.append(fl)
+
+            results.append(
+                XPlanungItem(
+                    xtype=fl.__class__,
+                    xid=str(fl.id),
+                    parent_xid=str(bereich.id),
+                )
+            )
+
+        return results
 
     def edit_widget(self):
         from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
