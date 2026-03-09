@@ -10,7 +10,7 @@ from qgis.PyQt.QtWidgets import (
     QTextEdit, QMessageBox, QSpacerItem, QSizePolicy, QGridLayout, QListView, QStyledItemDelegate, QStyle,
     QStyleOptionViewItem
 )
-from qgis.PyQt.QtCore import Qt, pyqtSignal, QTimer, QRect, QAbstractListModel, QModelIndex, QVariant
+from qgis.PyQt.QtCore import Qt, pyqtSignal, QTimer, QRect, QAbstractListModel, QModelIndex, QVariant, NULL
 from qgis.PyQt.QtGui import QFont, QPalette, QColor, QPainter, QPen, QBrush, QIcon, QMouseEvent, QFontDatabase, QFontMetrics
 import json
 import uuid
@@ -158,7 +158,7 @@ class XPathModel(QAbstractListModel):
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid() or index.row() >= len(self._expressions):
-            return NULL
+            return None
 
         expression = self._expressions[index.row()]
 
@@ -169,7 +169,7 @@ class XPathModel(QAbstractListModel):
         elif role == Qt.ItemDataRole.FontRole:
             return self.font
 
-        return NULL
+        return None
 
     def insertRow(self, row, parent=QModelIndex()):
         return self.insertRows(row, 1, parent)

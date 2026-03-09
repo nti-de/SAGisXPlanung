@@ -64,12 +64,12 @@ ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'ArtenreicherGehoelzbes
 
 ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'Moor';;
 
-ALTER TYPE public.xp_spemassnahmentypen RENAME TO xp_spemassnahmentypen_old;
+ALTER TYPE "public"."xp_spemassnahmentypen" RENAME TO xp_spemassnahmentypen_old;
 
-CREATE TYPE public.xp_spemassnahmentypen AS ENUM('ArtenreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland', 'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache', 'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide', 'Sonstiges');
+CREATE TYPE "public"."xp_spemassnahmentypen" AS ENUM('ArtenreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland', 'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache', 'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide', 'Sonstiges');
 
 CREATE FUNCTION new_old_not_equals(
-                new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+                new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
             )
             RETURNS boolean AS $$
                 SELECT new_enum_val::text != CASE
@@ -80,13 +80,13 @@ CREATE FUNCTION new_old_not_equals(
             $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE OPERATOR != (
-            leftarg = public.xp_spemassnahmentypen,
-            rightarg = public.xp_spemassnahmentypen_old,
+            leftarg = "public"."xp_spemassnahmentypen",
+            rightarg = "public"."xp_spemassnahmentypen_old",
             procedure = new_old_not_equals
         );
 
 CREATE FUNCTION new_old_equals(
-                new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+                new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
             )
             RETURNS boolean AS $$
                 SELECT new_enum_val::text = CASE
@@ -97,28 +97,28 @@ CREATE FUNCTION new_old_equals(
             $$ LANGUAGE SQL IMMUTABLE;
 
 CREATE OPERATOR = (
-            leftarg = public.xp_spemassnahmentypen,
-            rightarg = public.xp_spemassnahmentypen_old,
+            leftarg = "public"."xp_spemassnahmentypen",
+            rightarg = "public"."xp_spemassnahmentypen_old",
             procedure = new_old_equals
         );
 
-ALTER TABLE public.xp_spe_daten 
-                ALTER COLUMN "klassifizMassnahme" TYPE public.xp_spemassnahmentypen 
+ALTER TABLE "public"."xp_spe_daten" 
+                ALTER COLUMN ""klassifizMassnahme"" TYPE "public"."xp_spemassnahmentypen" 
                 USING CASE 
-                WHEN "klassifizMassnahme"::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::public.xp_spemassnahmentypen
+                WHEN ""klassifizMassnahme""::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::"public"."xp_spemassnahmentypen"
 
-                ELSE "klassifizMassnahme"::text::public.xp_spemassnahmentypen
+                ELSE ""klassifizMassnahme""::text::"public"."xp_spemassnahmentypen"
                 END;
 
 DROP FUNCTION new_old_not_equals(
-            new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+            new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
         ) CASCADE;
 
 DROP FUNCTION new_old_equals(
-            new_enum_val public.xp_spemassnahmentypen, old_enum_val public.xp_spemassnahmentypen_old
+            new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
         ) CASCADE;
 
-DROP TYPE public.xp_spemassnahmentypen_old;
+DROP TYPE "public"."xp_spemassnahmentypen_old";
 
 ALTER TABLE bp_bereich ADD COLUMN verfahren bp_verfahren;;
 

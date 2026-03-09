@@ -1,5 +1,43 @@
 ## Changelog
 
+### [2.13.0] - 10.03.2025
+
+#### Neue Funktionen
+
+- neue Stile und Symbole:
+  - Denkmalschutz, Fußweg/Radweg, Freibad/Badeplatz, Sondergebiet (Militär), Wasserwirtschaft (Überschwemmungsgebiet, Regen-/Hochwasserrückhaltebecken)
+- Funktion zum Löschen von Objekten aus der Attributansicht (Kontextmenü)
+- Erfassung von generischen Attributen
+- Umsetzung fehlender Objekttypen:
+  - FP_Nutzungsbeschraenkung (3e8f21a7)
+  - BP_WasserwirtschaftsFlaeche (e578cd22)
+  - FP_FlaecheOhneDarstellung (b2ec6f25)
+
+#### Veränderungen
+
+- Anpassung des Menü zum Anlegen von Datenobjekten
+  - neue Gruppierung nach Basisklasse
+- Verbesserung des Layouts und Angleichung von Abständen zwischen UI-Elementen (2f4cc892, ad9183ac)
+
+#### Fehlerbehebungen
+
+- Fehler in Plan-Übersicht bei Sortierung wenn Spalte `id` ausgeblendet ist (7f6d54d3)
+- fehlerhafter Datentyp im Attribut `bezugshoehe` (e414e41e)
+- Fehler beim Laden von Stilen aus externen QML-Dateien (2a2d9a5a)
+- Korrektur der Darstellungsrichtung im Stil `BP_BauGrenze` (420e2e2a)
+- Reaktivierung des Civil3d-Imports (2f4cc892)
+- Fehler beim Löschen von `XP_TextAbschnitt`-Objekten (4ffec656)
+- fehlendes Eingabeelement für Liste von Zahlen (`int[0..*]`) (9ed51048)
+- Fehler beim Speichern von Attributen mit Wert `0` (9ed51048)
+- Fehler beim Speichern nachdem die Datenvalidierung einen Fehler markiert hat (5331f107)
+- Fehler beim GML-Import mit Default-Namespaces (ebd94ef0)
+- Korrektur der Multiplizität im Attribut `zweckbestimmung` der Objektklasse `FP_Gruen` (bbd5e675)
+
+#### Weiteres
+
+- Unterstützung für Qt6-basierende QGIS Builds (QGIS 4)
+- Migration zu SQLAlchemy 2.0
+
 ### [2.12.2] - 19.01.2025
 
 #### Neue Funktionen
