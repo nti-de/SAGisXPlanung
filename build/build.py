@@ -1,3 +1,4 @@
+import argparse
 import ast
 import re
 import shutil
@@ -50,9 +51,17 @@ except ImportError:
 # ------------------------------------------------------------
 # Build configuration
 # ------------------------------------------------------------
+parser = argparse.ArgumentParser(description="Build plugin variant")
+parser.add_argument(
+    "--target-name",
+    help="Target plugin name (default: <source>_pro)",
+)
+
+args = parser.parse_args()
+
 SRC_NAME = "SAGisXPlanung"
 SRC = Path("src") / SRC_NAME
-TARGET_NAME = SRC_NAME + "_pro"
+TARGET_NAME = args.target_name or (SRC_NAME + "_pro")
 DST = Path("dist") / TARGET_NAME
 
 

@@ -17,7 +17,7 @@ jobs:
 
   - script: |
       zensical build
-    displayName: 'Build Documentation with mkdocs'
+    displayName: 'Build Documentation with Zensical'
     workingDirectory: docs
 
   - task: CopyFiles@2
@@ -32,21 +32,29 @@ jobs:
       rootFolderOrFile: 'src/SAGisXPlanung'
       includeRootFolder: true
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_dev_$(Build.SourceBranchName).zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
       replaceExistingArchive: true
 
   - script: |
       python3 build/build.py
     displayName: 'Build release'
+    condition: and(
+        succeeded(),
+        not(endsWith(variables['Build.SourceBranchName'], '-ce'))
+      )
     workingDirectory: $(Build.SourcesDirectory)
 
   - task: ArchiveFiles@2
     displayName: 'Package release'
+    condition: and(
+      succeeded(),
+      not(endsWith(variables['Build.SourceBranchName'], '-ce'))
+      )
     inputs:
       rootFolderOrFile: 'dist/SAGisXPlanung_pro'
       includeRootFolder: true
       archiveType: 'zip'
-      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
+      archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_pro_$(Build.SourceBranchName).zip'
       replaceExistingArchive: true
 
   - task: PublishPipelineArtifact@1
@@ -64,6 +72,10 @@ jobs:
 - job: build_variants
   displayName: Build packaged plugin
   dependsOn: build_shared
+  condition: and(
+      succeeded(),
+      not(endsWith(variables['Build.SourceBranchName'], '-ce'))
+    )
   pool:
     vmImage: ubuntu-latest
 
@@ -103,14 +115,14 @@ jobs:
     displayName: 'Package Install ($(PY_ABI))'
 
   - script: |
-      python3 build/build.py
+      python3 build/build.py --target-name SAGisXPlanung
     displayName: 'Build release'
     workingDirectory: $(Build.SourcesDirectory)
 
   - task: ArchiveFiles@2
     displayName: 'Package release'
     inputs:
-      rootFolderOrFile: 'dist/SAGisXPlanung_pro'
+      rootFolderOrFile: 'dist/SAGisXPlanung'
       includeRootFolder: true
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName)_$(PLATFORM)-$(PY_ABI).zip'
