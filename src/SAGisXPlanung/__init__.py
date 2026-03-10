@@ -1,7 +1,6 @@
 import importlib
 import json
 import logging
-import os.path
 import os
 import platform
 import sys
@@ -176,7 +175,7 @@ def qgis_info():
 
 
 def classFactory(iface):
-    setup_logger(BASE_DIR, "SAGisXPlanung" if not RELEASE else "SAGisXPlanung_pro")
+    setup_logger(BASE_DIR)
 
     # logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
     logging.getLogger('qasync').setLevel(logging.ERROR)

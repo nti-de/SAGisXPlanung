@@ -25,8 +25,9 @@ class QgisLogHandler(logging.Handler):
             self.handleError(record)
 
 
-def setup_logger(base_dir, root_name="SAGisXPlanung"):
-    logger = logging.getLogger(root_name)
+def setup_logger(base_dir):
+    root_module_name = __name__.partition(".")[0]
+    logger = logging.getLogger(root_module_name)
     logger.setLevel(logging.DEBUG)
     logger.propagate = False
 
