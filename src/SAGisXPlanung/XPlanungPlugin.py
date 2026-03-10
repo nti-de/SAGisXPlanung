@@ -30,8 +30,8 @@ from SAGisXPlanung.utils import createXPlanungIndicators
 try:
     # __init.py__ may not be reloaded when upgrading through QGIS plugin manager
     # therefore only import when possible
-    from SAGisXPlanung import ALLOW_UPGRADE_FROM_QGIS, BASE_DIR, RELEASE
-except ImportError:
+    from SAGisXPlanung import BASE_DIR, RELEASE
+except ImportError as e:
     pass
 
 logger = logging.getLogger(__name__)
