@@ -1,7 +1,50 @@
-# SAGis XPlanung
+<p align="center">
+  <picture>
+    <img alt="SAGis XPlanung" src="src/SAGisXPlanung/gui/resources/sagis_icon.png">
+  </picture>
+</p>
 
-SAGis XPlanung ist eine Erweiterung für die GIS-Software QGIS zur [XPlanung](https://www.xleitstelle.de/xplanung/ueber_xplanung) - konformen 
-Erfassung von Flächennutzungsplänen, Bebauungsplänen und Raumordnungsplänen. 
+<h1 align="center">SAGis XPlanung</h1>
+
+<p align="center">
+  <strong>
+    QGIS Erweiterung zur Erfassung und Verwaltung von XPlanGML-Dokumenten
+  </strong>
+</p>
+
+<p align="center">
+  <a href="https://github.com/nti-de/SAGisXPlanung/actions"><img
+    src="https://github.com/nti-de/SAGisXPlanung/actions/workflows/main.yml/badge.svg"
+    alt="Build"
+  /></a>
+  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><img
+    src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fplugins.qgis.org%2Fplugins%2Fplugins.xml%3Fqgis%3D3.34&query=%2F%2Fpyqgis_plugin%5B%40name%3D'SAGis%20XPlanung'%5D%2Fdownloads&logo=qgis&logoColor=%23589632&label=QGIS%20Plugin%20Downloads&color=589632)"
+    alt="Downloads"
+  /></a>
+  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><img
+    src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fplugins.qgis.org%2Fplugins%2Fplugins.xml%3Fqgis%3D3.34&query=%2F%2Fpyqgis_plugin%5B%40name%3D'SAGis%20XPlanung'%5D%2F%40version&logo=qgis&logoColor=%23589632&label=QGIS%20Plugin%20Version&color=589632"
+    alt="Version"
+  /></a>
+  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><img
+    src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fplugins.qgis.org%2Fplugins%2Fplugins.xml%3Fqgis%3D3.34&query=round(%2F%2Fpyqgis_plugin%5B%40name%3D'SAGis%20XPlanung'%5D%2Faverage_vote%20*%20100)%20div%20100&suffix=%20%2F%205&logo=qgis&logoColor=%23589632&label=QGIS%20Stars&color=589632"
+    alt="Rating"
+  /></a>
+</p>
+
+<p align="center">
+  <a href="https://www.nti-group.com/de/produkte/sagis-loesungen/sagis-xplanung/"><strong>Homepage</strong></a>
+  &middot;
+  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><strong>QGIS Plugin Repository</strong></a>
+</p>
+
+SAGis XPlanung ist eine Erweiterung für die GIS-Software [QGIS](https://www.qgis.org) zur [XPlanung](https://www.xleitstelle.de/xplanung/ueber_xplanung) - konformen 
+Erfassung von Flächennutzungs-, Bebauungs-, Landschafts- und Raumordnungsplänen. 
+
+<p align="center">
+  <picture>
+    <img alt="SAGis XPlanung Screenshot" src="docs/docs/assets/screenshot_banner.png">
+  </picture>
+</p>
 
 ## Funktionen
 
@@ -78,12 +121,6 @@ um die benötigten Python-Module zu laden.
 > [!NOTE]  
 > Zum Testen stellt die [Leitstelle XPlanung/XBau](https://xleitstelle.de) im folgenden Repository Testdaten im XPlanGML-Format zur Verfügung: https://gitlab.opencode.de/xleitstelle/xplanung/testdaten
 
-<details><summary><b>Visualisierung Beispielplan mit SAGis XPlanung</b></summary>
-<div>
-  <img style="height: auto" src="docs/toc.png" width="24%" /> 
-  <img style="height: auto" src="docs/BPlan001_5-3.png" width="45%" />
-</div>
-</details>
 
 ### Kontakt
 

@@ -99,8 +99,8 @@ function Build-Documentation {
     # Navigate to the docs directory
     Set-Location -Path "$plugin_src_path\docs"
 
-    # Run the mkdocs build command
-    python3 -m mkdocs build
+    # Run the zensical build command
+    python3 -m zensical build
 
     # Define the source and destination paths for the documentation
     $docsSource = "$plugin_src_path\docs\site\*"

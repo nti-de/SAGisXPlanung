@@ -4,11 +4,15 @@ site_name: SAGis XPlanung Dokumentation
 site_url: https://mydomain.org/
 theme:
   name: material
+  language: de
   features:
     - search.suggest
     - search.highlight
     - navigation.expand
     - navigation.indexes
+    - navigation.sections
+    - navigation.path
+    - content.tooltips
   font:
     text: Overpass
   logo: assets/NTI_primary.png
@@ -38,8 +42,13 @@ extra:
   social:
     - icon: material/email
       link: mailto:qgis-de@nti.biz
+    - icon: material/github
+      link: github.com/nti-de/SAGisXPlanung
+    - icon: simple/qgis
+      link: github.com/nti-de/SAGisXPlanung
 
 markdown_extensions:
+  - abbr
   - attr_list
   - md_in_html
   - def_list
@@ -56,6 +65,9 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
 
 plugins:
   - tags
@@ -86,4 +98,4 @@ nav:
       - Codelisten: settings/codelists.md
       - Darstellung: settings/symbology.md
 
-copyright: Copyright &copy; 2024 NTI Deutschland GmbH
+copyright: Copyright &copy; 2026 NTI Deutschland GmbH
