@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Dict, Any
 from uuid import uuid4
 
@@ -348,9 +349,18 @@ class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):
         return f'{self.name}, {self.datum}'
 
     def __eq__(self, other):
-        if type(other) is type(self):
-            return self.name == other.name and str(self.datum) == str(other.datum)
-        return False
+        if not isinstance(other, type(self)):
+            return NotImplemented
+
+        def _to_date(d):
+            if isinstance(d, datetime):
+                return d.date()
+            return d
+
+        return (
+            self.name == other.name and
+            _to_date(self.datum) == _to_date(other.datum)
+        )
 
     @classmethod
     def avoid_export(cls):

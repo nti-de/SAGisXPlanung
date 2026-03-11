@@ -32,6 +32,7 @@
 - Fehler beim Speichern nachdem die Datenvalidierung einen Fehler markiert hat (5331f107)
 - Fehler beim GML-Import mit Default-Namespaces (ebd94ef0)
 - Korrektur der Multiplizität im Attribut `zweckbestimmung` der Objektklasse `FP_Gruen` (bbd5e675)
+- Duplikate in der DB beim Import von Objekten vom Typ `XP_GesetzlicheGrundlage` (68eb1a75)
 
 #### Weiteres
 
