@@ -38,26 +38,55 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        container: ['qgis/qgis:release-3_28', 'qgis/qgis:release-3_34']
+        container: ['qgis/qgis:latest', 'qgis/qgis:ltr-jammy']
 
-    container: ${{ matrix.container }}
+    container:
+      image: ${{ matrix.container }}
+      options: --user 0:0
 
     steps:
     
     - name: Checkout Project
       uses: actions/checkout@v4
+
+    - name: Install sudo
+      run: |
+        apt-get update
+        DEBIAN_FRONTEND=noninteractive apt-get -o Dpkg::Options::="--force-confold" -y install sudo
         
     - name: Install dependencies
       run: |
-        python3 -m pip install --upgrade pip
-        pip install pytest pytest-cov pytest-qt pytest-mock pytest-asyncio nest-asyncio
-        pip install -r requirements.txt
+        set -e
+        sudo apt install -y build-essential
+        
+        if python3 -m pip help install | grep -q break-system-packages; then
+            PIP_BREAK="--break-system-packages --ignore-installed"
+        else
+            PIP_BREAK=""
+        fi
+        
+        python3 -m pip install $PIP_BREAK --upgrade pip
+        python3 -m pip install $PIP_BREAK --upgrade setuptools
+        sudo apt-get install -y libgeos-dev python3-mock
+        
+        pip install $PIP_BREAK \
+            pytest \
+            pytest-azurepipelines \
+            pytest-cov \
+            pytest-qt \
+            pytest-mock \
+            pytest-asyncio \
+            pytest-qgis \
+            nest-asyncio
+        
+        pip install $PIP_BREAK -r requirements.txt
         
     - name: Unit Tests
       env:
         DISPLAY: :99
+        QT_QPA_PLATFORM: "offscreen"
       run: |
-        xvfb-run qgis_testrunner.sh tests.run_tests.run_all
+        python3 -m pytest --cache-clear --cov=src --cov-report=xml
 
   alembic-revision:
     name: Generate SQL Scripts
