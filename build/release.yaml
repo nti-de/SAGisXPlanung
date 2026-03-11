@@ -27,9 +27,14 @@ jobs:
       Contents: '**'
       TargetFolder: '$(Build.SourcesDirectory)/src/SAGisXPlanung/docs'
 
+  - script: |
+      python3 build/build.py --target-name SAGisXPlanung
+    displayName: 'Build release (SAGisXPlanung)'
+    workingDirectory: $(Build.SourcesDirectory)
+
   - task: ArchiveFiles@2
     inputs:
-      rootFolderOrFile: 'src/SAGisXPlanung'
+      rootFolderOrFile: 'dist/SAGisXPlanung'
       includeRootFolder: true
       archiveType: 'zip'
       archiveFile: '$(Build.ArtifactStagingDirectory)/SAGisXPlanung_$(Build.SourceBranchName).zip'
@@ -37,7 +42,7 @@ jobs:
 
   - script: |
       python3 build/build.py
-    displayName: 'Build release'
+    displayName: 'Build release (Pro Version)'
     condition: and(
         succeeded(),
         not(endsWith(variables['Build.SourceBranchName'], '-ce'))
