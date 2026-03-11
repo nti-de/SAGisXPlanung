@@ -5,6 +5,7 @@
 [general]
 name=SAGis XPlanung (Community Version)
 qgisMinimumVersion=3.28
+qgisMaximumVersion=4.99
 description=Plugin zur XPlanung-konformen Erfassung und Verwaltung von Bauleitplänen
 version=2.13.0
 author=NTI Deutschland GmbH
@@ -46,5 +47,3 @@ Category of the plugin: Raster, Vector, Database or Web
 
 # If the plugin can run on QGIS Server.
 server=False
-
-supportsQt6=True
