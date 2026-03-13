@@ -93,8 +93,7 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
                                       passive_deletes=True)
     hatGenerAttribut = relationship("XP_GenerAttribut", back_populates="plan", cascade="all, delete",
                                     passive_deletes=True, info={'link-type': 'abstract'})
-    externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete",
-                                   passive_deletes=True)
+    externeReferenz = relationship("XP_SpezExterneReferenz", back_populates="plan", cascade="all, delete")
 
     # XP_TextAbschnitt [0..*]
     texte = relationship("XP_TextAbschnitt",
