@@ -218,7 +218,7 @@ class TestMapLayerRegistry:
         poly.position = WKTElement('MULTIPOLYGON (((0 0, 1 1, 1 0, 0 0)))', srid=25833)
         session_mock = mocker.MagicMock()
         obj_mock = mocker.MagicMock()
-        session_mock.query.return_value.get.return_value = obj_mock
+        session_mock.get.return_value = obj_mock
         mocker.patch("SAGisXPlanung.Session.begin").return_value.__enter__.return_value = session_mock
 
         registry.onGeometriesChanged(vl.id(), {1: QgsGeometry()})

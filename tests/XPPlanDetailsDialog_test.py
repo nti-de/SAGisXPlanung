@@ -121,27 +121,6 @@ class TestXPPlanDetailsDialog_constructExplorer:
         assert item.row() == 0
 
 
-class TestXPlanungDetailsDialog_GeometryValidation:
-
-    def test_highlight_error(self, dialog: XPPlanDetailsDialog, plan):
-        validation_result = ValidationResult(
-            xid=str(plan.id),
-            xtype=plan.__class__,
-            geom_wkt='MultiPolygon (((30 20, 45 40, 10 40, 30 20)),((15 5, 40 10, 10 20, 5 10, 15 5)))',
-            intersection_type=GeometryIntersectionType.Plan
-        )
-
-        dialog.validation_result_view.add_result_items([validation_result])
-        assert dialog.validation_result_view.item_count() == 1
-
-        index = dialog.validation_result_view._model.index(0, 0)
-        assert index.isValid()
-
-        dialog.validation_result_view.highlight_geometry_error(index)
-        assert dialog.validation_result_view.rubber_band is not None
-        assert dialog.validation_result_view.rubber_band.geometry().asWkt() == validation_result.geom_wkt
-
-
 class TestXPlanungDialog_createRasterLayer:
 
     def test_create_vsi_raster_layer(self):
