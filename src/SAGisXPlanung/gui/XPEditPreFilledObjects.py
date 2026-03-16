@@ -150,7 +150,7 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
 
         # update data in database
         with Session.begin() as session:
-            obj = session.query(content.__class__).get(xid)
+            obj = session.get(content.__class__, xid)
 
             # copy over attributes
             for attr in obj.element_order(include_base=False, only_columns=True, export=True,
@@ -179,7 +179,7 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
         layout.insertWidget(0, self.tab_widget)
 
         with Session.begin() as session:
-            obj = session.query(cls).get(xid)
+            obj = session.get(cls, xid)
             for label, input_element in self.tab_widget.widget(0).fields.items():
                 attribute_value = getattr(obj, label)
                 input_element.setDefault(attribute_value)
@@ -190,7 +190,7 @@ class XPEditPreFilledObjectsDialog(QDialog, FORM_CLASS):
     def onDeleteObject(self, xid):
         cls = self.cbClass.itemData(self.cbClass.currentIndex())
         with Session.begin() as session:
-            obj_from_db = session.query(cls).get(xid)
+            obj_from_db = session.get(cls, xid)
 
             if not confirmObjectDeletion(obj_from_db):
                 return

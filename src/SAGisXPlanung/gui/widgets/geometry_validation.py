@@ -187,7 +187,7 @@ class ValidationWidget(QWidget):
     async def fill_geometric(self):
         async with loading_animation(self):
             with Session.begin() as session:
-                plan: XP_Plan = session.query(XP_Plan).get(self.plan_xid)
+                plan: XP_Plan = session.get(XP_Plan, self.plan_xid)
                 xplan_items = await asyncio.to_thread(plan.enforceFlaechenschluss)
             self.fill_geometric_completed.emit(xplan_items)
 

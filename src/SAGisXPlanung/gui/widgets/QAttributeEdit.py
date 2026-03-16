@@ -205,7 +205,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
     def _load_tree_node(xplan_item: XPlanungItem) -> TreeNode:
         with Session() as session:
             xtype = xplan_item.xtype
-            plan_content = session.query(xtype).get(xplan_item.xid)
+            plan_content = session.get(xtype, xplan_item.xid)
             base_classes = base_models(xtype)
 
             attribute_config = yaml.safe_load(QSettings().value(f"plugins/xplanung/attribute_config", '')) or {}

@@ -169,5 +169,5 @@ class MapLayerRegistry(Singleton):
                 return
 
             with Session.begin() as session:
-                plan_content = session.query(cls).get(xplanung_id)
+                plan_content = session.get(CLASSES[xplanung_type], xplanung_id)
                 plan_content.setGeometry(geometry)

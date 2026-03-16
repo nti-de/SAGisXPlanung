@@ -25,7 +25,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
         # setup display widget for XP_Nutzungsschablone
         if self.annotation_type == 'XP_Nutzungsschablone':
             with Session.begin() as session:
-                template = session.query(xplanung_item.xtype).get(xplanung_item.xid)
+                template = session.get(xplanung_item.xtype, xplanung_item.xid)
                 rows = template.zeilenAnz
                 if template.data_attributes is None:
                     template.data_attributes = BuildingTemplateCellDataType.as_default(int(rows))
@@ -60,7 +60,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
     @pyqtSlot(BuildingTemplateCellDataType, int)
     def on_template_cell_data_changed(self, cell_type: BuildingTemplateCellDataType, cell_index: int):
         with Session.begin() as session:
-            template = session.query(self._xplanung_item.xtype).get(self._xplanung_item.xid)
+            template = session.get(self._xplanung_item.xtype, self._xplanung_item.xid)
             template.data_attributes[cell_index] = cell_type
             # workaround for updating array element in database. arrays are not mutable in general
             flag_modified(template, 'data_attributes')
@@ -73,7 +73,7 @@ class QAttributeEditAnnotationItem(QAttributeEdit):
     @pyqtSlot(int, list)
     def on_template_rows_changed(self, row_count: int, cells: list):
         with Session.begin() as session:
-            template = session.query(self._xplanung_item.xtype).get(self._xplanung_item.xid)
+            template = session.get(self._xplanung_item.xtype, self._xplanung_item.xid)
             template.data_attributes = cells
             template.zeilenAnz = row_count
             # workaround for updating array element in database. arrays are not mutable in general

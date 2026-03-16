@@ -53,7 +53,7 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
         async with loading_animation(iface.layerTreeView()):
             with Session.begin() as session:
 
-                plan: XP_Plan = session.query(XP_Plan).get(plan_xid)
+                plan: XP_Plan = session.get(XP_Plan, plan_xid)
                 if plan is None:
                     raise Exception(f'plan with id {plan_xid} not found')
 

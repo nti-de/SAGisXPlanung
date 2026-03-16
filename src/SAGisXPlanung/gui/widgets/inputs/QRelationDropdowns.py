@@ -112,7 +112,7 @@ class QAddRelationDropdown(QWidget, BaseInputElement, metaclass=XPlanungInputMet
 
     def onDeleteObject(self, item_xid):
         with Session.begin() as session:
-            obj_from_db = session.query(self.cls).get(item_xid)
+            obj_from_db = session.get(self.cls, item_xid)
 
             if not confirmObjectDeletion(obj_from_db):
                 return

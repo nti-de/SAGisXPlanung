@@ -243,10 +243,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         with Session.begin() as session:
             parish_list = []
             for parish_name, parish_id in parish.items():
-                xp_gemeinde = session.query(XP_Gemeinde).get(parish_id)
+                xp_gemeinde = session.get(XP_Gemeinde, parish_id)
                 parish_list.append(xp_gemeinde)
 
-            plan = session.query(XP_Plan).options(lazyload('*'), load_only(XP_Plan.id)).get(self.plan_xid)
+            plan = session.get(XP_Plan, self.plan_xid, options=[lazyload('*'), load_only(XP_Plan.id)])
             setattr(plan, 'gemeinde', parish_list)
 
     def construct_explorer(self, plan):
@@ -261,7 +261,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.objectTree.model.addChild(node, parent_node, row)
 
         with Session.begin() as session:
-            obj = session.query(xplan_item.xtype).get(xplan_item.xid)
+            obj = session.get(xplan_item.xtype, xplan_item.xid)
             self.iterateRelation(obj, node)
 
     def showObjectTreeContextMenu(self, point):
@@ -362,7 +362,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def highlightPlanContent(self):
         item = self.objectTree.selectedItems()[0]
         with Session.begin() as session:
-            plan_content = session.query(item._data.xtype).get(item._data.xid)
+            plan_content = session.get(item._data.xtype, item._data.xid)
             iface.mapCanvas().flashGeometries([plan_content.geometry()], plan_content.srs())
 
     def onCreateDataClass(self, parent_item: ClassNode, data_class, attribute):
@@ -562,11 +562,11 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             items_to_delete = []
             if delete_map is not None:
                 for cls, xid in delete_map:
-                    items_to_delete.append(session.query(cls).get(xid))
+                    items_to_delete.append(session.get(cls, xid))
             elif uid is None:
-                items_to_delete.append(session.query(XP_Plan).get(self.plan_xid))
+                items_to_delete.append(session.get(XP_Plan, self.plan_xid))
             else:
-                items_to_delete.append(session.query(class_type).get(uid))
+                items_to_delete.append(session.get(class_type, uid))
 
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Warning)

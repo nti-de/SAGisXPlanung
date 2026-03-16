@@ -32,7 +32,7 @@ class XPEditObjectDialog(QDialog):
 
         # fill original values
         with Session.begin() as session:
-            obj = session.query(self.xplan_item.xtype).get(self.xplan_item.xid)
+            obj = session.get(self.xplan_item.xtype, self.xplan_item.xid)
             for label, input_element in self.tab_widget.widget(0).fields.items():
                 attribute_value = getattr(obj, label)
                 input_element.setDefault(attribute_value)
@@ -49,7 +49,7 @@ class XPEditObjectDialog(QDialog):
             return
 
         with Session.begin() as session:
-            obj = session.query(self.xplan_item.xtype).get(self.xplan_item.xid)
+            obj = session.get(self.xplan_item.xtype, self.xplan_item.xid)
 
             # copy over attributes
             for attr in obj.element_order(include_base=False, only_columns=True, export=True):
