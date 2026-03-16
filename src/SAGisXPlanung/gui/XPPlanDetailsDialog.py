@@ -9,7 +9,7 @@ import qasync
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction
+from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction, QVBoxLayout
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex
 from qgis.gui import QgsDockWidget
 from qgis.core import (Qgis)
@@ -38,7 +38,7 @@ from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
-from SAGisXPlanung.gui.widgets.geometry_validation_view import ValidationState
+from SAGisXPlanung.gui.widgets.geometry_validation import ValidationState, ValidationWidget
 from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
@@ -90,13 +90,11 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         self.searchEdit.textChanged.connect(self.objectTree.filter)
 
-        self.bValidate.clicked.connect(self.startValidation)
-
-        self.bFixAreas.clicked.connect(self.fillAreasWithoutUsage)
-        self.lFinished.setVisible(False)
-        self.reset_label.setVisible(False)
-        self.reset_label.mousePressEvent = self.onResetGeometryValidation
-        self.lErrorCount.setText('')
+        self.validation_widget = ValidationWidget()
+        self.validation_widget.fill_geometric_completed.connect(self.on_fill_geometric_completed)
+        validation_group_layout = QVBoxLayout()
+        self.validation_group.setLayout(validation_group_layout)
+        self.validation_group.layout().addWidget(self.validation_widget)
 
         self.parishEdit.hide()
         self.parishEdit.parishChanged.connect(self.onParishChanged)
@@ -109,8 +107,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.objectTree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.stackedWidget.currentChanged.connect(self.updateButtons)
 
-        self.validation_spinner = WaitingSpinner(self.validation_result_view, disableParentWhenSpinning=True, radius=5, lines=20,
-                                                 line_length=5, line_width=1, color=(0, 6, 128))
         self.init_spinner = WaitingSpinner(self, disableParentWhenSpinning=True, radius=5, lines=20,
                                            line_length=5, line_width=1, color=(0, 6, 128))
 
@@ -169,17 +165,15 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         async with self._init_lock:
             async with loading_animation(self):
-                self.lFinished.setVisible(False)
-                self.reset_label.setVisible(False)
-                self.lErrorCount.setText('')
                 self.undo_stack.clear()
-                self.validation_result_view.clear()
                 self.objectTree.clear()
 
                 if not keep_page:
                     self.stackedWidget.setCurrentIndex(0)
 
                 await asyncio.to_thread(_init)
+
+                self.validation_widget.set_plan_info(self.plan_xid, self.plan_type)
 
                 self.objectTree.expandAll()
 
@@ -598,86 +592,21 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             self.planDeleted.emit()
         return True, items_to_delete
 
-    @qasync.asyncSlot()
-    async def fillAreasWithoutUsage(self):
-        self.bFixAreas.setEnabled(False)
-        with Session.begin() as session:
-            plan: XP_Plan = session.query(XP_Plan).get(self.plan_xid)
-            loop = asyncio.get_running_loop()
-            xplan_items = await loop.run_in_executor(None, plan.enforceFlaechenschluss)
+    @qasync.asyncSlot(list)
+    async def on_fill_geometric_completed(self, xplan_items: List[XPlanungItem]):
+        for item in xplan_items:
+            m = self.objectTree.model
+            # find item
+            index_list = m.match(m.index(0, 0), XID_ROLE, item.xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
+            if index_list:
+                index_list[0].internalPointer().flag_new = True
+                m.dataChanged.emit(index_list[0], index_list[0])
+                continue
 
-            for item in xplan_items:
-                m = self.objectTree.model
-                # find item
-                index_list = m.match(m.index(0, 0), XID_ROLE, item.xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
-                if index_list:
-                    index_list[0].internalPointer().flag_new = True
-                    m.dataChanged.emit(index_list[0], index_list[0])
-                    continue
-
-                # else find parent and add new item
-                index_list = m.match(m.index(0, 0), XID_ROLE, item.parent_xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
-                if index_list:
-                    self.addExplorerItem(index_list[0], item, 0)
-
-        self.bFixAreas.setEnabled(True)
-        iface.messageBar().pushMessage("XPlanung", "Bilden des Flaechenschluss abgeschlossen", level=Qgis.MessageLevel.Info)
-
-    @qasync.asyncSlot()
-    async def startValidation(self):
-        self.validation_spinner.start()
-
-        self.bValidate.setEnabled(False)
-        self.lFinished.setVisible(False)
-        self.reset_label.setVisible(False)
-        self.lErrorCount.setText('')
-        self.validation_result_view.clear()
-
-        internal_error = False
-
-        try:
-            await asyncio.to_thread(self.validate_plan_geometric)
-        except Exception as e:
-            internal_error = True
-            logger.error(e)
-        finally:
-            error_count = self.validation_result_view.item_count()
-            if internal_error:
-                self.validation_result_view.clear()
-                self.validation_result_view.set_validation_state(ValidationState.ERROR)
-            elif error_count == 0:
-                self.validation_result_view.set_validation_state(ValidationState.SUCCESS)
-            else:
-                self.validation_result_view.set_validation_state(ValidationState.UNKNOWN)
-
-            self.lErrorCount.setText(f'{error_count} Fehler gefunden' if error_count else 'Keine Fehler gefunden')
-            if error_count:
-                self.reset_label.setVisible(True)
-
-            self.lFinished.setVisible(True)
-            self.bValidate.setEnabled(True)
-            self.validation_spinner.stop()
-
-    def validate_plan_geometric(self):
-        """
-        Validate geometric correctness of the opened plan
-        Tests for:
-        -   All geometries are valid
-        -   All geometries are within bounds of the plan
-        -   There are no gaps/overlaps between geometries
-        """
-        short_plan_type = str(self.plan_type.__name__[:2]).lower()
-
-        for func in VALIDATION_FUNCTIONS:
-            validation_results = func(self.plan_xid, short_plan_type)
-            self.validation_result_view.add_result_items(validation_results)
-
-    def onResetGeometryValidation(self, event):
-        self.validation_result_view.clear()
-
-        self.lFinished.setVisible(False)
-        self.reset_label.setVisible(False)
-        self.lErrorCount.setText('')
+            # else find parent and add new item
+            index_list = m.match(m.index(0, 0), XID_ROLE, item.parent_xid, -1, Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
+            if index_list:
+                self.addExplorerItem(index_list[0], item, 0)
 
 
 def _is_mapped(obj):
