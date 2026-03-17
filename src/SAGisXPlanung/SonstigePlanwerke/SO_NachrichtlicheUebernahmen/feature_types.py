@@ -3,7 +3,7 @@ from qgis.PyQt.QtGui import QColor
 from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes, Qgis,
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsGeometryGeneratorSymbolLayer,
-                       QgsMarkerSymbolLayer)
+                       QgsMarkerSymbolLayer, QgsProperty, QgsSymbolLayer)
 
 from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float
 from sqlalchemy.dialects.postgresql import UUID
@@ -409,6 +409,8 @@ class SO_Wasserwirtschaft(MixedGeometry, SO_Objekt):
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill_prop = QgsProperty.fromExpression(f"if (\"flaechenschluss\" = 'True', '#ffffff', 'transparent')")
+        fill.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyFillColor, fill_prop)
         symbol.appendSymbolLayer(fill)
 
         blue_strip = QgsGeometryGeneratorSymbolLayer.create({})

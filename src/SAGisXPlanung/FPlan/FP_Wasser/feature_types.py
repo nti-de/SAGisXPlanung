@@ -1,5 +1,6 @@
 from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsGeometryGeneratorSymbolLayer, Qgis)
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsGeometryGeneratorSymbolLayer, Qgis, QgsSymbolLayer,
+                       QgsProperty)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
@@ -76,6 +77,8 @@ class FP_Wasserwirtschaft(MixedGeometry, FP_Objekt):
         symbol.deleteSymbolLayer(0)
 
         fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill_prop = QgsProperty.fromExpression(f"if (\"flaechenschluss\" = 'True', '#ffffff', 'transparent')")
+        fill.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyFillColor, fill_prop)
         symbol.appendSymbolLayer(fill)
 
         blue_strip = QgsGeometryGeneratorSymbolLayer.create({})
