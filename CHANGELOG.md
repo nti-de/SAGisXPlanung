@@ -1,5 +1,21 @@
 ## Changelog
 
+### [2.13.1] - 19.03.2025
+
+#### Veränderungen
+
+- verbesserter Stil für Wasserwirtschaftsflächen (ff9a9f6a)
+- Redesign der Geometrievaldierung (f6166bae)
+
+#### Fehlerbehebungen
+
+- Fehler in SQL-Migration bei Null-Werten in `zweckbestimmung`-Attribut `FP_Gruen` (9266e796)
+- fehlerhaftes Verhalten, wobei das Löschen von Plänen aus der DB nicht alle Externen referenzen entfernt (5595b418) 
+
+#### Weiteres
+
+- Entfernen von SQLAlchemy-Abfragen im alten 1.x Stil; reduziert Warnungen im MessageLog (87cc95d2)
+
 ### [2.13.0] - 10.03.2025
 
 #### Neue Funktionen
