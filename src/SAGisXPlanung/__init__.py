@@ -85,7 +85,7 @@ except Exception as e:
 
 # =========================================================
 
-VERSION = '2.13.0'
+VERSION = '2.13.1'
 RELEASE = True
 COMPATIBLE_DB_REVISIONS = ['2b1452b49cc5']
 DEPENDENCIES = [

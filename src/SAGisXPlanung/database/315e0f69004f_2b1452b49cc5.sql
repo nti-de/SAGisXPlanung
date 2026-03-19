@@ -88,7 +88,13 @@ DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_gruen;
 
 DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_zweckbestimmung_gruen;
 
-ALTER TABLE fp_gruen ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[] using NULLIF(ARRAY[zweckbestimmung::xp_zweckbestimmunggruen], '{}');
+ALTER TABLE fp_gruen
+        ALTER COLUMN "zweckbestimmung"
+        TYPE xp_zweckbestimmunggruen[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY[zweckbestimmung::xp_zweckbestimmunggruen]
+        END;;
 
 CREATE TABLE fp_flaeche_ohne_darstellung (
     id UUID NOT NULL, 
