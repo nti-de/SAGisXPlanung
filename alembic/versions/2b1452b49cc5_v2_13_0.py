@@ -122,7 +122,15 @@ sa.Column('codelist_user_id', sa.UUID(), nullable=True),
 
     op.execute("DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_gruen")
     op.execute("DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_zweckbestimmung_gruen")
-    op.execute("""ALTER TABLE fp_gruen ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[] using NULLIF(ARRAY[zweckbestimmung::xp_zweckbestimmunggruen], '{}')""")
+    op.execute("""
+        ALTER TABLE fp_gruen
+        ALTER COLUMN "zweckbestimmung"
+        TYPE xp_zweckbestimmunggruen[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY[zweckbestimmung::xp_zweckbestimmunggruen]
+        END;
+    """)
 
     op.create_table('fp_flaeche_ohne_darstellung',
                     sa.Column('id', postgresql.UUID(), nullable=False),
