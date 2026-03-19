@@ -59,7 +59,7 @@ Dies betrifft die folgenden Bedingungen:
     <h4>Ausführen der Geometrieprüfung</h4>
     <ol>
         <li>
-            Mit dem Button <b>Geometrieprüfung starten</b> den Prozess starten. Je nach Menge der erfassten 
+            Mit dem Button <b>Prüfung starten</b> den Prozess starten. Je nach Menge der erfassten 
             Flächenschlussobjekte kann der Prozess einige Zeit in Anspruch nehmen
         </li>
         <li>
@@ -78,15 +78,19 @@ Dies betrifft die folgenden Bedingungen:
 </div>
 
 <div class="procedure">
-    <h4>Flächenschluss erzwingen</h4>
-    <ul>
-        <li>
-            Die Funktion <b>Flächenschluss erzwingen</b> ermöglicht es, Flächen, die mit keiner Festsetzung 
-            konfiguriert sind, mit einem Objekt des Typ <code>BP_FlaecheOhneFestsetzung</code> zu füllen. Dies ist 
-            hilfreich, um die Flächenschlussbedingung zu erfüllen, wenn nicht die komplette Fläche des Geltungsbereichs 
-            mit vektoriell erfassten Planinhalten gefüllt werden kann. 
-        </li>
-    </ul>
+    <h4>Weitere Aktionen</h4>
+    <table markdown="span">
+        <tr markdown="span">
+            <th>Flächenschluss erzwingen</th>
+            <td>
+                Die Funktion <b>Flächenschluss erzwingen</b> ermöglicht es, Flächen, die mit keiner Festsetzung 
+                konfiguriert sind, mit einem Objekt des Typ <code>BP_FlaecheOhneFestsetzung</code> oder 
+                <code>FP_FlaecheOhneDarstellung</code>zu füllen. Dies ist hilfreich, um die Flächenschlussbedingung zu 
+                erfüllen, wenn nicht die komplette Fläche des Geltungsbereichs mit vektoriell erfassten Planinhalten 
+                gefüllt werden kann. 
+            </td>
+        </tr>
+    </table>
 </div>
 
 
