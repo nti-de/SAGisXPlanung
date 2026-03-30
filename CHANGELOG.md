@@ -1,6 +1,6 @@
 ## Changelog
 
-### [2.13.1] - 19.03.2025
+### [2.13.1] - 19.03.2026
 
 #### Veränderungen
 
@@ -16,7 +16,7 @@
 
 - Entfernen von SQLAlchemy-Abfragen im alten 1.x Stil; reduziert Warnungen im MessageLog (87cc95d2)
 
-### [2.13.0] - 10.03.2025
+### [2.13.0] - 10.03.2026
 
 #### Neue Funktionen
 
@@ -55,7 +55,7 @@
 - Unterstützung für Qt6-basierende QGIS Builds (QGIS 4)
 - Migration zu SQLAlchemy 2.0
 
-### [2.12.2] - 19.01.2025
+### [2.12.2] - 19.01.2026
 
 #### Neue Funktionen
 
@@ -68,14 +68,14 @@
 - Anpassung Plugin-Bereitstellung Ubuntu >= 23.04 (173457c4)
 - Angleichung der Layout-Abstände (ef80498e)
 
-### [2.12.1] - 15.01.2025
+### [2.12.1] - 15.01.2026
 
 #### Fehlerbehebungen
 
 - Fehler beim Laden von XPlan-Layern bestehender Projekte (9403c89f)
 - Fehlende Aktualisierung von externen Referenzen bei Anpassung der Dateiquelle (999c69cd)
 
-### [2.12.0] - 09.01.2025
+### [2.12.0] - 09.01.2026
 
 #### Neue Funktionen
 
