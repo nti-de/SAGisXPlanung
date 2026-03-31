@@ -16,7 +16,7 @@ from SAGisXPlanung.XPlan.codelists import CodeListLegacy
 from SAGisXPlanung.XPlan.enums import XP_ExterneReferenzArt, XP_ExterneReferenzTyp, XP_SPEMassnahmenTypen, \
     XP_ArtHoehenbezug, XP_ArtHoehenbezugspunkt, XP_RechtscharakterPlanaenderung, XP_Aenderungsarten
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
-from SAGisXPlanung.XPlan.types import RefURL, RegExString, ConformityException, LargeString, Length
+from SAGisXPlanung.XPlan.types import RefURL, RegExString, ConformityException, LargeString, Length, XPEnum
 
 XP_PlanXP_GemeindeAssoc = Table('xp_plan_gemeinde', Base.metadata,
     Column('bp_plan_id', UUID(as_uuid=True), ForeignKey('bp_plan.id', ondelete='CASCADE')),
@@ -382,7 +382,7 @@ class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
     abweichenderHoehenbezug = Column(String)
-    hoehenbezug = Column(Enum(XP_ArtHoehenbezug))
+    hoehenbezug = Column(XPEnum(XP_ArtHoehenbezug, include_default=True))
     abweichenderBezugspunkt = Column(String)
     bezugspunkt = Column(Enum(XP_ArtHoehenbezugspunkt))
     hMin = Column(Length)
