@@ -85,7 +85,7 @@ except Exception as e:
 
 # =========================================================
 
-VERSION = '2.13.1'
+VERSION = '2.13.2'
 RELEASE = True
 COMPATIBLE_DB_REVISIONS = ['2b1452b49cc5']
 DEPENDENCIES = [
@@ -112,13 +112,17 @@ SessionAsync = None
 
 def setup_sqlalchemy():
     try:
-        from sqlalchemy.ext.asyncio import AsyncSession
-        from sqlalchemy.orm import declarative_base, sessionmaker
+        from sqlalchemy.ext.asyncio import AsyncSession, AsyncAttrs
+        from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
         global Base
         global Session
         global SessionAsync
-        Base = declarative_base()
+
+        class _Base(AsyncAttrs, DeclarativeBase):
+            pass
+
+        Base = _Base
         Session = sessionmaker()
         SessionAsync = sessionmaker(expire_on_commit=False, class_=AsyncSession)
     except Exception as e:

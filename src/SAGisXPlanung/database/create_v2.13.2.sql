@@ -1391,7 +1391,7 @@ ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'ArtenreicherGehoelzbes
 
 ALTER TYPE xp_spemassnahmentypen ADD VALUE IF NOT EXISTS 'Moor';;
 
-ALTER TYPE "public"."xp_spemassnahmentypen" RENAME TO xp_spemassnahmentypen_old;
+ALTER TYPE "public"."xp_spemassnahmentypen" RENAME TO "xp_spemassnahmentypen_old";
 
 CREATE TYPE "public"."xp_spemassnahmentypen" AS ENUM('ArtenreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland', 'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache', 'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide', 'Sonstiges');
 
@@ -1430,20 +1430,30 @@ CREATE OPERATOR = (
         );
 
 ALTER TABLE "public"."xp_spe_daten" 
-                ALTER COLUMN ""klassifizMassnahme"" TYPE "public"."xp_spemassnahmentypen" 
+                ALTER COLUMN "klassifizMassnahme" TYPE "public"."xp_spemassnahmentypen" 
                 USING CASE 
-                WHEN ""klassifizMassnahme""::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::"public"."xp_spemassnahmentypen"
+                WHEN "klassifizMassnahme"::text = 'ArtentreicherGehoelzbestand' THEN 'ArtenreicherGehoelzbestand'::"public"."xp_spemassnahmentypen"
 
-                ELSE ""klassifizMassnahme""::text::"public"."xp_spemassnahmentypen"
+                ELSE "klassifizMassnahme"::text::"public"."xp_spemassnahmentypen"
                 END;
+
+DROP OPERATOR IF EXISTS != (
+                "public"."xp_spemassnahmentypen",
+                "public"."xp_spemassnahmentypen_old"
+            );
 
 DROP FUNCTION new_old_not_equals(
             new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
-        ) CASCADE;
+        );
+
+DROP OPERATOR IF EXISTS = (
+                "public"."xp_spemassnahmentypen",
+                "public"."xp_spemassnahmentypen_old"
+            );
 
 DROP FUNCTION new_old_equals(
             new_enum_val "public"."xp_spemassnahmentypen", old_enum_val "public"."xp_spemassnahmentypen_old"
-        ) CASCADE;
+        );
 
 DROP TYPE "public"."xp_spemassnahmentypen_old";
 
@@ -4006,7 +4016,13 @@ DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_gruen;
 
 DROP TRIGGER IF EXISTS fp_gruen_sync_attr_zweckbestimmung ON fp_zweckbestimmung_gruen;
 
-ALTER TABLE fp_gruen ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[] using NULLIF(ARRAY[zweckbestimmung::xp_zweckbestimmunggruen], '{}');
+ALTER TABLE fp_gruen
+        ALTER COLUMN "zweckbestimmung"
+        TYPE xp_zweckbestimmunggruen[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY[zweckbestimmung::xp_zweckbestimmunggruen]
+        END;;
 
 CREATE TABLE fp_flaeche_ohne_darstellung (
     id UUID NOT NULL, 

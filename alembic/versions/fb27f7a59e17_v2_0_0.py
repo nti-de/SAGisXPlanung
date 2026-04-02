@@ -99,7 +99,7 @@ def upgrade():
                          'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
                          'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
                          'Sonstiges'],
-                        [TableReference('xp_spe_daten', '"klassifizMassnahme"')],
+                        [TableReference('xp_spe_daten', 'klassifizMassnahme')],
                         enum_values_to_rename=[('ArtentreicherGehoelzbestand', 'ArtenreicherGehoelzbestand')])
 
     # The previous statement has to be committed in order for the update to work.
@@ -1373,7 +1373,7 @@ def downgrade():
                          'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache',
                          'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide',
                          'Sonstiges'],
-                        [TableReference('xp_spe_daten', '"klassifizMassnahme"')],
+                        [TableReference('xp_spe_daten', 'klassifizMassnahme')],
                         enum_values_to_rename=[('ArtenreicherGehoelzbestand', 'ArtentreicherGehoelzbestand')])
 
     op.execute("ALTER TABLE bp_gemeinbedarf DROP COLUMN traeger")
