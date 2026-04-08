@@ -92,6 +92,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         self.validation_widget = ValidationWidget()
         self.validation_widget.fill_geometric_completed.connect(self.on_fill_geometric_completed)
+        self.validation_widget.revertible_action_completed.connect(lambda c: self.undo_stack.push(c))
         validation_group_layout = QVBoxLayout()
         self.validation_group.setLayout(validation_group_layout)
         self.validation_group.layout().addWidget(self.validation_widget)

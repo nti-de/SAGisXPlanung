@@ -2,13 +2,32 @@ import logging
 from typing import List, Any
 from contextlib import contextmanager
 
-from qgis.core import QgsFeatureRequest, QgsEditError
+from qgis.core import QgsFeatureRequest, QgsEditError, QgsGeometry
 
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
 
+
+def update_geometry(orm_xid: str, new_geometry: QgsGeometry):
+    layer = MapLayerRegistry().layer_by_orm_id(orm_xid)
+    if not layer:
+        logger.warning(f"QAttributeEdit::update_layer_geometry: layer is None for {orm_xid}")
+        return
+
+    feat_id = None
+    for key in layer.customPropertyKeys():
+        if 'xplanung/feat-' not in key:
+            continue
+        if layer.customProperty(key) == orm_xid:
+            feat_id = int(str(key).removeprefix("xplanung/feat-"))
+
+    with safe_edit(layer):
+        change_success = layer.changeGeometry(feat_id, new_geometry)
+
+    if change_success:
+        layer.triggerRepaint()
 
 def update_field_value(xplan_item: XPlanungItem, field_name: str, new_value: Any):
     update_field_values([xplan_item], {field_name: new_value})

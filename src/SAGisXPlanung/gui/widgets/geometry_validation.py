@@ -2,29 +2,36 @@ import asyncio
 import logging
 import os
 import re
+
 from enum import Enum
 from typing import List
 
 import qasync
+
 from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtCore import QAbstractTableModel, QModelIndex, Qt, QPointF, QRectF, pyqtSlot, pyqtSignal, QSize
-from qgis.PyQt.QtGui import QIcon, QColor, QPaintEvent, QPainter
+from qgis.PyQt.QtGui import QIcon, QColor, QPainter
 from qgis.PyQt.QtWidgets import (QTreeView, QAbstractItemView, QMenu, QAction, QLabel, QWidget, QVBoxLayout,
                                  QHBoxLayout, QPushButton, QToolButton, QSpacerItem, QSizePolicy)
 from qgis.PyQt import sip
 
 from qgis.gui import QgsGeometryRubberBand
-from qgis.core import (QgsPolygon, QgsRectangle, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon,
+from qgis.core import (QgsPolygon, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon, QgsGeometry,
                        QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
 from qgis.utils import iface
 
-from SAGisXPlanung import BASE_DIR, Session
+from SAGisXPlanung import BASE_DIR, Session, PYQT5
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.geometry_validation import ValidationResult, VALIDATION_FUNCTIONS
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import HighlightRowDelegate, HighlightRowProxyStyle, ApplicationColor, load_svg, \
     SVGButtonEventFilter
+from SAGisXPlanung.utils import full_version_required_warning
+
+if PYQT5:
+    from qgis.PyQt.QtWidgets import QUndoCommand
+else:
+    from qgis.PyQt.QtGui import QUndoCommand
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +79,7 @@ class ValidationWidget(QWidget):
     '''
 
     fill_geometric_completed = pyqtSignal(list)  # List[XPlanungItem]
+    revertible_action_completed = pyqtSignal(QUndoCommand)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -98,9 +106,14 @@ class ValidationWidget(QWidget):
         self._menu_action_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
         self._menu_action_button.setStyleSheet('QToolButton::menu-indicator { image: none; }')
         self._actions_menu = QMenu(self._menu_action_button)
+        self._actions_menu.setToolTipsVisible(True)
         layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'), color=ApplicationColor.Tertiary)
         refresh_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Tertiary)
-        self._actions_menu.addAction(layers_icon, 'Flächenschluss erzwingen', self.fill_geometric)
+        crop_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/crop_free.svg'), color=ApplicationColor.Tertiary)
+        fill_action = self._actions_menu.addAction(layers_icon, 'Flächenschluss erzwingen', self.fill_geometric)
+        fill_action.setToolTip('<qt>Füllt alle Lücken in der Flächenschlussebene mit einem Platzhalter ohne Festsetzung auf</qt>')
+        crop_action = self._actions_menu.addAction(crop_icon, 'Geltungsbereich aus Planinhalten berechnen', self.crop_plan_to_content)
+        crop_action.setToolTip('<qt>Berechnet den Geltungsbereich neu aus dem Zusammenschluss (Vereinigung) aller Planinhalte der Flächenschlussebene</qt>')
         self._actions_menu.addSeparator()
         self._actions_menu.addAction(refresh_icon, 'Zurücksetzen', self.reset_validation)
         self._menu_action_button.setMenu(self._actions_menu)
@@ -204,6 +217,10 @@ class ValidationWidget(QWidget):
         for func in VALIDATION_FUNCTIONS:
             validation_results = func(self.plan_xid, short_plan_type)
             self._validation_result_view.add_result_items(validation_results)
+
+    @qasync.asyncSlot()
+    async def crop_plan_to_content(self):
+        full_version_required_warning()
 
 
 class ValidationResultModel(QAbstractTableModel):

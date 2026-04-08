@@ -90,6 +90,17 @@ Dies betrifft die folgenden Bedingungen:
                 gefüllt werden kann. 
             </td>
         </tr>
+        <tr markdown="span">
+            <th>Geltungsbereich aus Planinhalten berechnen</th>
+            <td>
+                Die Funktion <b>Geltungsbereich aus Planinhalten berechnen</b> vereinigt die Geometrien aller Planinhalte
+                der Flächenschlussebene (<code>flaechenschluss=true</code>) und setzt daraus den Geltungsbereich des 
+                Planwerks. Dieser Prozess erfolgt in zwei Schritten: <ol>
+                <li>Anpassung aller <code>*P_Bereich</code>-Geometrien aus Vereinigung der enthaltenen Planinhalte</li>
+                <li>Anpassung der <code>*P_Plan</code>-Geometrie aus Zusammenschluss der Bereiche des Plans</li>
+                </ol>
+            </td>
+        </tr>
     </table>
 </div>
 

@@ -3,14 +3,16 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Union
 
+from geoalchemy2 import WKBElement
 from qgis.PyQt.QtCore import pyqtSignal, QModelIndex, QObject
+from qgis.core import QgsGeometry
 from sqlalchemy.orm import make_transient, load_only, RelationshipProperty, ONETOMANY
-from sqlalchemy import inspect as sa_inspect
+from sqlalchemy import inspect as sa_inspect, update, func, select
 
-from SAGisXPlanung import Session, Base, PYQT5
+from SAGisXPlanung import Session, PYQT5
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.callback_registry import CallbackRegistry
-from SAGisXPlanung.core.helper import find_true_class
+from SAGisXPlanung.core.helper import find_true_class, update_geometry
 
 if PYQT5:
     from qgis.PyQt.QtWidgets import QUndoCommand
@@ -25,6 +27,7 @@ class CommandType(Enum):
     ATTRIBUTE_CHANGED = auto()
     OBJECT_DELETED = auto()
     RELATION_UNLINKED = auto()
+    GEOMETRIES_CHANGED = auto()
 
 
 class SignalProxy(QObject):
@@ -191,3 +194,43 @@ def collect_tree(obj) -> list[tuple[type, dict]]:
 
     _recurse(obj)
     return result
+
+
+class ChangeGeometriesCommand(QUndoCommand):
+    command_type = CommandType.GEOMETRIES_CHANGED
+
+    @dataclass
+    class GeometryUpdate:
+        orm_item: XPlanungItem
+        new_geom: QgsGeometry
+        old_geom: QgsGeometry = None
+
+    def __init__(self, updates: list[GeometryUpdate]):
+        self.count = len(updates)
+        text = f'Geometrie von {self.count} Objekt{"en" if self.count > 1 else ""} angepasst'
+
+        super().__init__(text)
+
+        self._updates = updates
+        self._apply_geometry = update_geometry
+
+    def redo(self):
+        for update in self._updates:
+            with Session.begin() as session:
+                self.update_geometry_in_db(session, update.orm_item, update.new_geom)
+            self._apply_geometry(update.orm_item.xid, update.new_geom)
+
+    def undo(self):
+        for update in self._updates:
+            with Session.begin() as session:
+                self.update_geometry_in_db(session, update.orm_item, update.old_geom)
+            self._apply_geometry(update.orm_item.xid, update.old_geom)
+
+    def update_geometry_in_db(self, session, orm_item, geom: QgsGeometry):
+        orm_class = orm_item.xtype
+        geom_column_name = orm_class.__geometry_column_name__
+
+        geom_column = getattr(orm_class, geom_column_name)
+
+        orm_object = session.get(orm_class, orm_item.xid, options=[load_only(geom_column)])
+        orm_object.setGeometry(geom)
