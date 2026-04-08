@@ -29,6 +29,12 @@ BP_DetailSondernutzungCodelistAssoc = Table('assoc_detail_sondernutzung', Base.m
     Column('codelist_id', UUID(as_uuid=True), ForeignKey('codelist_values.id'))
 )
 
+BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc = Table('assoc_detail_gemeinschaftsanlagen', Base.metadata,
+    Column('codelist_user_id', UUID(as_uuid=True), ForeignKey('bp_gemeinschaftsanlage.id', ondelete='CASCADE')),
+    Column('codelist_user_v6_id', UUID(as_uuid=True), ForeignKey('bp_zweckbestimmung_gemeinschaftsanlage.id', ondelete='CASCADE')),
+    Column('codelist_id', UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+)
+
 
 class BP_DetailSondernutzung(CodeListValue):
     codelist_user = relationship("BP_KomplexeSondernutzung", back_populates="detail",
@@ -36,4 +42,16 @@ class BP_DetailSondernutzung(CodeListValue):
 
     __mapper_args__ = {
         "polymorphic_identity": "BP_DetailSondernutzung",
+    }
+
+
+class BP_DetailZweckbestGemeinschaftsanlagen(CodeListValue):
+    codelist_user = relationship("BP_GemeinschaftsanlagenFlaeche",
+                                 back_populates="detaillierteZweckbestimmung",
+                                 secondary=BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc)
+    codelist_user_v6 = relationship("BP_KomplexeZweckbestGemeinschaftsanlagen", back_populates="detail",
+                                    secondary=BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc)
+
+    __mapper_args__ = {
+        "polymorphic_identity": "BP_DetailZweckbestGemeinschaftsanlagen",
     }

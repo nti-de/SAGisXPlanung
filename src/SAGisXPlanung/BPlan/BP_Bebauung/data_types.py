@@ -7,8 +7,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
-from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailSondernutzungCodelistAssoc
-from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen
+from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailSondernutzungCodelistAssoc, \
+    BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc
+from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform, BP_ZweckbestimmungNebenanlagen, \
+    BP_ZweckbestimmungGemeinschaftsanlagen
 from SAGisXPlanung.XPlan.enums import XP_Sondernutzungen
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 from SAGisXPlanung.XPlan.types import Angle, ConformityException
@@ -121,3 +123,29 @@ class BP_KomplexeZweckbestNebenanlagen(RelationshipMixin, ElementOrderMixin, Bas
     @classmethod
     def avoid_export(cls):
         return ['nebenanlage']
+
+
+class BP_KomplexeZweckbestGemeinschaftsanlagen(RelationshipMixin, ElementOrderMixin, Base):
+    """ Spezifikation der Zweckbestimmung einer Gemeinschaftsanlage. """
+
+    __tablename__ = 'bp_zweckbestimmung_gemeinschaftsanlage'
+    __avoidRelation__ = ['gemeinschaftsanlage']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    allgemein = Column(Enum(BP_ZweckbestimmungGemeinschaftsanlagen), nullable=False)
+
+    detail = relationship('BP_DetailZweckbestGemeinschaftsanlagen', back_populates='codelist_user_v6',
+                          secondary=BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc, info={
+                              'form-type': 'inline'
+                          })
+
+    textlicheErgaenzung = Column(String)
+    aufschrift = Column(String)
+
+    gemeinschaftsanlage_id = Column(UUID(as_uuid=True), ForeignKey('bp_gemeinschaftsanlage.id', ondelete='CASCADE'))
+    gemeinschaftsanlage = relationship('BP_GemeinschaftsanlagenFlaeche', back_populates='rel_zweckbestimmung')
+
+    @classmethod
+    def avoid_export(cls):
+        return ['gemeinschaftsanlage']

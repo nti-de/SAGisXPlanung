@@ -103,6 +103,28 @@ class BP_ZweckbestimmungNebenanlagen(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
 
 
+class BP_ZweckbestimmungGemeinschaftsanlagen(XPlanungEnumMixin, Enum):
+    """ Spezifikation der Zweckbestimmung einer Gemeinschaftsanlage. """
+
+    Gemeinschaftsstellplaetze = 1000
+    Gemeinschaftsgaragen = 2000
+    Spielplatz = 3000
+    Carport = 3100
+    GemeinschaftsTiefgarage = 3200
+    Nebengebaeude = 3300
+    AbfallSammelanlagen = 3400
+    EnergieVerteilungsanlagen = 3500
+    AbfallWertstoffbehaelter = 3600
+    Freizeiteinrichtungen = 3700
+    Laermschutzanlagen = 3800
+    AbwasserRegenwasser = 3900
+    Ausgleichsmassnahmen = 4000
+    Fahrradstellplaetze = 4100
+    Gemeinschaftsdachgaerten = 4200
+    GemeinschaftlichNutzbareDachflaechen = 4300
+    Sonstiges = 9999
+
+
 class BP_NebenanlagenAusschlussTyp(XPlanungEnumMixin, Enum):
     """ Art des Ausschlusses. """
 

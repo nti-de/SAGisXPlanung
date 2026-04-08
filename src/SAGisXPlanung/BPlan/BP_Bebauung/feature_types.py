@@ -9,15 +9,17 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingl
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt, QSize
 
-from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, Boolean, event
+from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, Boolean, event, Table
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
+from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
-                                                   BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
-                                                   BP_TypWohngebaeudeFlaeche)
+                                                    BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
+                                                    BP_TypWohngebaeudeFlaeche,
+                                                    BP_ZweckbestimmungGemeinschaftsanlagen)
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, TableCellFactory
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
@@ -29,6 +31,11 @@ from SAGisXPlanung.XPlan.types import Angle, Area, Length, Volume, Scale, Confor
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
 logger = logging.getLogger(__name__)
+
+BP_GemeinschaftsanlagenFlaecheEigentuemerAssoc = Table('assoc_gemeinschaftsanlage_eigentuemer', BP_Objekt.metadata,
+    Column('gemeinschaftsanlage_id', UUID(as_uuid=True), ForeignKey('bp_gemeinschaftsanlage.id', ondelete='CASCADE')),
+    Column('baugebiet_id', UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
+)
 
 
 class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
@@ -596,6 +603,70 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
         red_outline.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         symbol.appendSymbolLayer(red_outline)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
+class BP_GemeinschaftsanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Fläche für Gemeinschaftsanlagen (§ 9 Abs. 1 Nr. 22 BauGB). """
+
+    __tablename__ = 'bp_gemeinschaftsanlage'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_gemeinschaftsanlage',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    zweckbestimmung = Column(ARRAY(Enum(BP_ZweckbestimmungGemeinschaftsanlagen)),
+                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+
+    detaillierteZweckbestimmung = relationship(
+        'BP_DetailZweckbestGemeinschaftsanlagen',
+        back_populates='codelist_user',
+        secondary=BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc,
+        info={
+            'xplan_version': XPlanVersion.FIVE_THREE,
+            'form-type': 'inline'
+        }
+    )
+
+    rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGemeinschaftsanlagen",
+                                       back_populates="gemeinschaftsanlage",
+                                       cascade="all, delete", passive_deletes=True, info={
+                                           'xplan_version': XPlanVersion.SIX,
+                                           'xplan_attribute': 'zweckbestimmung'
+                                       })
+
+    eigentuemer = relationship('BP_BaugebietsTeilFlaeche', secondary=BP_GemeinschaftsanlagenFlaecheEigentuemerAssoc,
+                               info={'link': 'xlink-only'})
+
+    Zmax = Column(Integer)
+
+    def layer_fields(self):
+        return {
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
+            'skalierung': self.skalierung if self.skalierung else '',
+            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
+        }
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill.setStrokeColor(QColor('#e31a1c'))
+        fill.setStrokeWidth(0.5)
+        symbol.appendSymbolLayer(fill)
+
         return symbol
 
     @classmethod
