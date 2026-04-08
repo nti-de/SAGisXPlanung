@@ -1,5 +1,16 @@
 ## Changelog
 
+### [2.13.2] - 08.04.2026
+
+#### Neue Funktionen
+
+- Hinzufügen einer Funktion zum automatischen Generieren des Geltungsbereichs aus Zusammenschluss aller Flächenschluss-Objekte (50d44bb6)
+
+#### Fehlerbehebungen
+
+- Attribut `hoehenbezug` in `XP_Hoehenangabe` sollte optional sein (03d677e0)
+- kritischer Fehler in Datenbankrevision behoben, der das Anlegen des Datenbankschemas in Version 2.13.x bisher verhindert hat (2fc61d5b)
+
 ### [2.13.1] - 19.03.2026
 
 #### Veränderungen
