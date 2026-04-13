@@ -40,6 +40,7 @@ from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 from SAGisXPlanung.gui.widgets.geometry_validation import ValidationState, ValidationWidget
 from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget
+from SAGisXPlanung.utils import full_version_required_warning
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -349,8 +350,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         if all(obj.xtype == xp_items[0].xtype for obj in xp_items):
             multi_edit_action = QAction(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit_note.svg')),
                                         'Gewählte Objekte bearbeiten', menu)
-            multi_edit_action.triggered.connect(lambda state, items=xp_items:
-                                                self.insertWidgetIntoNewPage(MultiEditWidget(items)))
+            multi_edit_action.triggered.connect(lambda state, items=xp_items: full_version_required_warning())
             menu.addAction(multi_edit_action)
             menu.addSeparator()
 
