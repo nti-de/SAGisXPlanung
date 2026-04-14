@@ -41,5 +41,5 @@ class TestGeometry_geom_type_as_layer_url:
 
     def test_geom_type_as_layer_url(self):
         assert geom_type_as_layer_url(QgsWkbTypes.PointGeometry).lower() == 'point'
-        assert geom_type_as_layer_url(QgsWkbTypes.LineGeometry).lower() == 'linestring'
-        assert geom_type_as_layer_url(QgsWkbTypes.PolygonGeometry).lower() == 'polygon'
+        assert geom_type_as_layer_url(QgsWkbTypes.LineGeometry).lower() == 'multilinestring'
+        assert geom_type_as_layer_url(QgsWkbTypes.PolygonGeometry).lower() == 'multipolygon'
