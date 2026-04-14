@@ -1417,10 +1417,30 @@ Denkmalschutz_Bodendenkmal.svg:
 # endregion
 
 # region Sonstiges
-Kennzeichnung_Schadstoffe.svg:
-  category: Sonstiges
-  name: Schadsfoffbelasteter Boden
-Hoehenlage_SW.svg:
-  category: Sonstiges
-  name: Höhenlage bei Festsetzungen
+nutzungsform_privat:
+  type:
+    circle:
+      static-text: ö
+      fill: transparent
+      stroke: transparent
+      stroke-width: 0.25
+  name: Nutzungsform Privat
+  attribute:
+    - xpath:
+        - nutzungsform
+      type: XP_Nutzungsform
+      value: 1000
+nutzungsform_oeffentlich:
+  type:
+    circle:
+      static-text: ö
+      fill: transparent
+      stroke: transparent
+      stroke-width: 0.25
+  name: Nutzungsform Öffentlich
+  attribute:
+    - xpath:
+        - nutzungsform
+      type: XP_Nutzungsform
+      value: 2000
 # endregion

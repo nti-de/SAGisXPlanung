@@ -1,5 +1,6 @@
 from qgis.PyQt.QtCore import Qt, QSize
 from qgis.PyQt.QtGui import QColor
+from qgis._core import QgsRuleBasedRenderer, QgsLinePatternFillSymbolLayer, QgsLineSymbol
 from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkbTypes, Qgis,
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsGeometryGeneratorSymbolLayer,
@@ -328,10 +329,44 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
         return symbol
 
     @classmethod
+    def besondere_zweckbest_polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        symbol.appendSymbolLayer(fill)
+
+        line_pattern = QgsLinePatternFillSymbolLayer()
+        line_pattern_symbol: QgsLineSymbol = QgsLineSymbol.createSimple({})
+        line_pattern_symbol.deleteSymbolLayer(0)
+        line_pattern_layer = QgsSimpleLineSymbolLayer(QColor('#fbdd19'))
+        line_pattern_layer.setWidth(2)
+        line_pattern_layer.setWidthUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line_pattern_symbol.appendSymbolLayer(line_pattern_layer)
+        line_pattern.setDistanceUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        line_pattern.setSubSymbol(line_pattern_symbol)
+        symbol.appendSymbolLayer(line_pattern)
+
+        return symbol
+
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
-            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+            default_symbol = cls.polygon_symbol()
+            root_rule = QgsRuleBasedRenderer.Rule(None)
+            besondere_zweckbest_rule = QgsRuleBasedRenderer.Rule(cls.besondere_zweckbest_polygon_symbol())
+            besondere_zweckbest_rule.setFilterExpression('"hatDarstellungMitBesondZweckbest" = \'True\'')
+            besondere_zweckbest_rule.setLabel('Besondere Zweckbestimmung')
+            root_rule.appendChild(besondere_zweckbest_rule)
+
+            default_rule = QgsRuleBasedRenderer.Rule(default_symbol)
+            default_rule.setIsElse(True)
+            default_rule.setLabel('Default')
+
+            root_rule.appendChild(default_rule)
+            return QgsRuleBasedRenderer(root_rule)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
