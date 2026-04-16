@@ -138,3 +138,11 @@ class BP_TypWohngebaeudeFlaeche(XPlanungEnumMixin, Enum):
     Wohngebaeude = 1000
     GebaeudeFoerderung = 2000
     GebaeudeStaedtebaulicherVertrag = 3000
+
+
+class BP_GebaeudeStellungTypen(XPlanungEnumMixin, Enum):
+    """ Art der Spezifikation der Gebaeudestellung. """
+
+    Firstrichtung = 1000
+    Dachneigungsrichtung = 2000
+    StellungBaulAnlagen = 3000

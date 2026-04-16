@@ -19,7 +19,8 @@ from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailZweckbestGemeinsc
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
                                                     BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
                                                     BP_TypWohngebaeudeFlaeche,
-                                                    BP_ZweckbestimmungGemeinschaftsanlagen)
+                                                    BP_ZweckbestimmungGemeinschaftsanlagen,
+                                                    BP_GebaeudeStellungTypen)
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, TableCellFactory
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
@@ -707,6 +708,42 @@ class BP_NichtUeberbaubareGrundstuecksflaeche(PolygonGeometry, UeberlagerungsObj
         fill.setBrushStyle(Qt.BrushStyle.BDiagPattern)
         symbol.appendSymbolLayer(fill)
 
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
+@xp_version(versions=[XPlanVersion.SIX])
+class BP_GebaeudeStellung(LineGeometry, BP_Objekt):
+    """ Gestaltungs-Festsetzung der Firstrichtung bzw. Dach-Ausrichtung. """
+
+    __tablename__ = 'bp_gebaeude_stellung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    typ = Column(XPEnum(BP_GebaeudeStellungTypen), nullable=False)
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        line = QgsSimpleLineSymbolLayer.create({})
+        line.setColor(QColor('#1f1f1f'))
+        line.setWidth(0.7)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+
+        symbol.appendSymbolLayer(line)
         return symbol
 
     @classmethod

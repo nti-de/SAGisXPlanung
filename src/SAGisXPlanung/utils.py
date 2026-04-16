@@ -25,7 +25,7 @@ from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_Kom
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
     BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche, \
     BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche, BP_GemeinschaftsanlagenFlaeche, \
-    BP_NichtUeberbaubareGrundstuecksflaeche
+    BP_NichtUeberbaubareGrundstuecksflaeche, BP_GebaeudeStellung
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -168,6 +168,7 @@ CLASSES = {
     'BP_BaugebietsTeilFlaeche': BP_BaugebietsTeilFlaeche,
     'BP_BauGrenze': BP_BauGrenze,
     'BP_BauLinie': BP_BauLinie,
+    'BP_GebaeudeStellung': BP_GebaeudeStellung,
     'BP_Dachgestaltung': BP_Dachgestaltung,
     'BP_KomplexeZweckbestGruen': BP_KomplexeZweckbestGruen,
     'BP_KomplexeZweckbestSpielSportanlage': BP_KomplexeZweckbestSpielSportanlage,
