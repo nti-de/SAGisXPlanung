@@ -325,3 +325,53 @@ class BP_EinfahrtPunkt(PointGeometry, BP_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
+class BP_EinfahrtsbereichLinie(LineGeometry, BP_Objekt):
+    """ Linienhaft modellierter Einfahrtsbereich (§9 Abs. 1 Nr. 11 und Abs. 6 BauGB). """
+
+    __tablename__ = 'bp_einfahrtsbereich'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_einfahrtsbereich',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    typ = Column(XPEnum(BP_EinfahrtTypen, include_default=True))
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        line = QgsSimpleLineSymbolLayer.create({})
+        line.setColor(QColor('black'))
+        line.setWidth(0.1)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+
+        if Qgis.versionInt() >= 32400:
+            shape = Qgis.MarkerShape.Triangle
+        else:
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Triangle
+        triangle_symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=1.2)
+        triangle_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+
+        marker_line = QgsMarkerLineSymbolLayer(interval=3)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+        marker_symbol = QgsMarkerSymbol()
+        marker_symbol.deleteSymbolLayer(0)
+        marker_symbol.appendSymbolLayer(triangle_symbol_layer)
+        marker_line.setSubSymbol(marker_symbol)
+
+        symbol.appendSymbolLayer(line)
+        symbol.appendSymbolLayer(marker_line)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))

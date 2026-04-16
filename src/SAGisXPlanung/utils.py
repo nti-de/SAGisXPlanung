@@ -41,7 +41,8 @@ from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
-    BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt
+    BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt, \
+    BP_EinfahrtsbereichLinie
 from SAGisXPlanung.BPlan.BP_Wasser.codelists import BP_DetailZweckbestWasserwirtschaft
 from SAGisXPlanung.BPlan.BP_Wasser.feature_types import BP_GewaesserFlaeche, BP_WasserwirtschaftsFlaeche
 from SAGisXPlanung.FPlan.FP_Aufschuettung_Abgrabung_Bodenschaetze.feature_types import FP_Abgrabung, FP_Aufschuettung
@@ -178,6 +179,7 @@ CLASSES = {
     'BP_NutzungsartenGrenze': BP_NutzungsartenGrenze,
     'BP_BereichOhneEinAusfahrtLinie': BP_BereichOhneEinAusfahrtLinie,
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
+    'BP_EinfahrtsbereichLinie': BP_EinfahrtsbereichLinie,
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
     'BP_Immissionsschutz': BP_Immissionsschutz,
     'BP_AbgrabungsFlaeche': BP_AbgrabungsFlaeche,
