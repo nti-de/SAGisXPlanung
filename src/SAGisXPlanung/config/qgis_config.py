@@ -51,6 +51,7 @@ class QgsConfig:
     CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
     NEXUS_SETTINGS = 'plugins/xplanung/nexus/settings'
     LAST_EXPORT_PATH = 'plugins/xplanung/last_export_dir'
+    LAST_SELECTED_PLAN = 'plugins/xplanung/last_selected_plan'
     XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
 
     @staticmethod
@@ -158,6 +159,16 @@ class QgsConfig:
     def set_last_export_directory(directory: str):
         qs = QSettings()
         qs.setValue(QgsConfig.LAST_EXPORT_PATH, directory)
+
+    @staticmethod
+    def last_selected_plan() -> str:
+        qs = QSettings()
+        return qs.value(QgsConfig.LAST_SELECTED_PLAN, "")
+
+    @staticmethod
+    def set_last_selected_plan(plan_xid: str):
+        qs = QSettings()
+        qs.setValue(QgsConfig.LAST_SELECTED_PLAN, plan_xid)
 
     @staticmethod
     def xplan24_accounts() -> typing.List[XPlanung24Account]:

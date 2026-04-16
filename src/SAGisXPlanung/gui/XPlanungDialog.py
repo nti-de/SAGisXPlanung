@@ -8,7 +8,7 @@ from typing import List
 import qasync
 from qgis.PyQt.QtWidgets import QMessageBox
 
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsProject, QgsLayerTreeGroup
 from qgis.PyQt import QtWidgets, sip
 from qgis.PyQt.QtGui import QIcon, QCursor, QKeySequence
 from qgis.PyQt.QtCore import Qt, pyqtSlot, QItemSelectionModel, QUrl, QDir
@@ -27,6 +27,7 @@ from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_
 from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import XID_ROLE
 from SAGisXPlanung.utils import CLASSES
+from SAGisXPlanung.config.qgis_config import QgsConfig
 from SAGisXPlanung.gui.XPCreatePlanDialog import XPCreatePlanDialog
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
 # don't remove following dependency, it is needed for promoting a ComboBox to QPlanComboBox via qt designer
@@ -89,7 +90,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.iface.mapCanvas().mapToolSet.connect(self.onMapToolChanged)
 
         self.details_dialog = XPPlanDetailsDialog(parent=iface.mainWindow())
-        self.details_dialog.planDeleted.connect(self.cbPlaene.refresh)
+        self.details_dialog.planDeleted.connect(self.refresh_plans)
         self.details_dialog.nameChanged.connect(self.onPlanNameChanged)
 
         self.progress_widget.setVisible(False)
@@ -112,6 +113,8 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         ], class_='QPushButton')
         apply_color(self.button_show_all, ApplicationColor.Secondary)
 
+        self.apply_preferred_plan_selection()
+
         logger.debug('setup init completed')
 
     def __del__(self):
@@ -123,6 +126,33 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
     def selectedPlan(self):
         return self.cbPlaene.currentPlanId()
+
+    def _try_select_plan(self, plan_xid: str) -> bool:
+        if not plan_xid:
+            return False
+        index = self.cbPlaene.findData(str(plan_xid))
+        if index < 0:
+            return False
+        self.cbPlaene.setCurrentIndex(index)
+        return True
+
+    def _persist_current_plan_selection(self):
+        plan_xid = self.cbPlaene.currentPlanId()
+        if plan_xid:
+            QgsConfig.set_last_selected_plan(str(plan_xid))
+
+    def apply_preferred_plan_selection(self, plan_xid: str = None):
+        if self.cbPlaene.count() == 0:
+            return
+
+        plan_xid = plan_xid or QgsConfig.last_selected_plan()
+        if self._try_select_plan(plan_xid):
+            self._persist_current_plan_selection()
+            return
+
+        if self.cbPlaene.currentIndex() == -1:
+            self.cbPlaene.setCurrentIndex(0)
+        self._persist_current_plan_selection()
 
     @qasync.asyncSlot()
     async def onOpened(self):
@@ -137,6 +167,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.bExport.setEnabled(False)
         if i != -1:
             xid = self.cbPlaene.currentPlanId()
+            self._persist_current_plan_selection()
             await self.details_dialog.initialize_data(xid)
         else:
             self.details_dialog.hide()
@@ -167,8 +198,13 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         self.nexus_dialog = NexusDialog(self)
         self.nexus_dialog.accessAttributesRequested.connect(self.showObjectAttributes)
-        self.nexus_dialog.dataUpdated.connect(self.cbPlaene.refresh)
+        self.nexus_dialog.dataUpdated.connect(self.refresh_plans)
         self.nexus_dialog.show()
+
+    @pyqtSlot()
+    def refresh_plans(self):
+        self.cbPlaene.refresh()
+        self.apply_preferred_plan_selection()
 
     def showCreateForm(self):
         """
@@ -176,7 +212,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         """
 
         def _show_dialog(d):
-            d.finished.connect(lambda: self.cbPlaene.refresh())
+            d.finished.connect(self.refresh_plans)
             d.show()
 
         if self.rbBPlan.isChecked():
@@ -263,7 +299,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             import_result = await self.import_task
 
             self.fwImportPath.setFilePath("")
-            self.cbPlaene.refresh()
+            self.refresh_plans()
             plan_name = import_result.plan_name
             if import_result.warnings:
                 warn_info_text = '\n\n '.join(w for w in import_result.warnings)

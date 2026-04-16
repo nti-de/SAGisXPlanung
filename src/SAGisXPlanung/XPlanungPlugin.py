@@ -175,7 +175,7 @@ class XPlanung(QObject):
     def run(self):
         if self.is_valid_db():
             if self.first_start:
-                self.dockWidget.cbPlaene.refresh()
+                self.dockWidget.refresh_plans()
             self.dockWidget.show()
 
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started
@@ -190,7 +190,7 @@ class XPlanung(QObject):
         if not self.is_valid_db():
             self.dockWidget.hide()
 
-        self.dockWidget.cbPlaene.refresh()
+        self.dockWidget.refresh_plans()
 
     @pyqtSlot()
     def on_help_menu_clicked(self):
@@ -273,17 +273,28 @@ class XPlanung(QObject):
 
     def on_project_loaded(self):
         logger.debug('project loaded')
+
+        project_plan_xid = []
         layers = QgsProject.instance().layerTreeRoot().findGroups(recursive=True)
         for group in layers:
             if not isinstance(group, QgsLayerTreeGroup) or 'xplanung_id' not in group.customProperties():
                 continue
 
             try:
+                plan_xid = group.customProperty('xplanung_id')
+                project_plan_xid.append(plan_xid)
                 for tree_layer in group.findLayers():
                     MapLayerRegistry().addLayer(tree_layer.layer(), add_to_legend=False)
-                asyncio.create_task(load_on_canvas(group.customProperty('xplanung_id'), layer_group=group))
+                asyncio.create_task(load_on_canvas(plan_xid, layer_group=group))
             except Exception as e:
                 logger.exception(e)
+
+        if len(project_plan_xid) == 1:
+            # if one plan is within a project, open it in the workspace
+            self.dockWidget.apply_preferred_plan_selection(project_plan_xid[0])
+        else:
+            # else open default in workspace
+            self.dockWidget.apply_preferred_plan_selection()
 
     def onRowsInserted(self, parent, first, last):
         model = self.iface.layerTreeView().layerTreeModel()
