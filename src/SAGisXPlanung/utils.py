@@ -19,12 +19,13 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.codelists import BP_SonstPlanArt, BP_St
 from SAGisXPlanung.BPlan.BP_Basisobjekte.data_types import BP_VeraenderungssperreDaten
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich, BP_Objekt, BP_TextAbschnitt
 from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailArtDerBaulNutzung, BP_DetailDachform, \
-    BP_DetailSondernutzung, BP_DetailZweckbestGemeinschaftsanlagen
+    BP_DetailSondernutzung, BP_DetailZweckbestGemeinschaftsanlagen, BP_NutzungNichtUeberbaubGrundstFlaeche
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_KomplexeSondernutzung, \
     BP_KomplexeZweckbestNebenanlagen, BP_KomplexeZweckbestGemeinschaftsanlagen
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
     BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche, \
-    BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche, BP_GemeinschaftsanlagenFlaeche
+    BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche, BP_GemeinschaftsanlagenFlaeche, \
+    BP_NichtUeberbaubareGrundstuecksflaeche
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -151,6 +152,7 @@ CLASSES = {
     'BP_GemeinbedarfsFlaeche': BP_GemeinbedarfsFlaeche,
     'BP_SpielSportanlagenFlaeche': BP_SpielSportanlagenFlaeche,
     'BP_GemeinschaftsanlagenFlaeche': BP_GemeinschaftsanlagenFlaeche,
+    'BP_NichtUeberbaubareGrundstuecksflaeche': BP_NichtUeberbaubareGrundstuecksflaeche,
     'BP_GruenFlaeche': BP_GruenFlaeche,
     'BP_LandwirtschaftsFlaeche': BP_LandwirtschaftsFlaeche,
     'BP_WaldFlaeche': BP_WaldFlaeche,
@@ -284,6 +286,7 @@ CLASSES = {
     'BP_DetailDachform': BP_DetailDachform,
     'BP_DetailSondernutzung': BP_DetailSondernutzung,
     'BP_DetailZweckbestGemeinschaftsanlagen': BP_DetailZweckbestGemeinschaftsanlagen,
+    'BP_NutzungNichtUeberbaubGrundstFlaeche': BP_NutzungNichtUeberbaubGrundstFlaeche,
     'BP_DetailZweckbestWasserwirtschaft': BP_DetailZweckbestWasserwirtschaft,
 
     'FP_SonstPlanArt': FP_SonstPlanArt,

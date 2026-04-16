@@ -679,6 +679,46 @@ class BP_GemeinschaftsanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_O
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
+class BP_NichtUeberbaubareGrundstuecksflaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festlegung der nicht-ueberbaubaren Grundstuecksflaeche. """
+
+    __tablename__ = 'bp_nicht_ueberbaubare_grundstuecksflaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    nutzung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    nutzung = relationship('BP_NutzungNichtUeberbaubGrundstFlaeche',
+                           back_populates='bp_nicht_ueberbaubare_grundstuecksflaechen',
+                           foreign_keys=[nutzung_id], info={
+                               'form-type': 'inline'
+                           })
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill.setStrokeColor(QColor('#3d3d3d'))
+        fill.setStrokeWidth(0.4)
+        fill.setBrushStyle(Qt.BrushStyle.BDiagPattern)
+        symbol.appendSymbolLayer(fill)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
 @xp_version(versions=[XPlanVersion.SIX])
 class BP_WohngebaeudeFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Fläche für die Errichtung von Wohngebäuden in einem Bebauungsplan zur Wohnraumversorgung gemäß §9 Absatz 2d

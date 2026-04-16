@@ -55,3 +55,15 @@ class BP_DetailZweckbestGemeinschaftsanlagen(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "BP_DetailZweckbestGemeinschaftsanlagen",
     }
+
+
+class BP_NutzungNichtUeberbaubGrundstFlaeche(CodeListValue):
+    bp_nicht_ueberbaubare_grundstuecksflaechen = relationship(
+        "BP_NichtUeberbaubareGrundstuecksflaeche",
+        back_populates="nutzung",
+        foreign_keys='BP_NichtUeberbaubareGrundstuecksflaeche.nutzung_id'
+    )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "BP_NutzungNichtUeberbaubGrundstFlaeche",
+    }
