@@ -37,7 +37,7 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types 
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
     BP_SchutzPflegeEntwicklungsFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
-    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche
+    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
@@ -147,6 +147,7 @@ CLASSES = {
 
     'BP_Objekt': BP_Objekt,
     'BP_GenerischesObjekt': BP_GenerischesObjekt,
+    'BP_HoehenMass': BP_HoehenMass,
     'BP_FlaecheOhneFestsetzung': BP_FlaecheOhneFestsetzung,
     'BP_BesondererNutzungszweckFlaeche': BP_BesondererNutzungszweckFlaeche,
     'BP_GemeinbedarfsFlaeche': BP_GemeinbedarfsFlaeche,

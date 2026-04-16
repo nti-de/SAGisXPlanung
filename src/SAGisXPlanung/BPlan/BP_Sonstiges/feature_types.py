@@ -207,3 +207,19 @@ class BP_GenerischesObjekt(MixedGeometry, BP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+
+
+class BP_HoehenMass(MixedGeometry, BP_Objekt):
+    """ Festsetzungen und Hinweise zu Hoehenangaben gemaess §9 BauGB. """
+
+    __tablename__ = 'bp_hoehen_mass'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_hoehen_mass',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
