@@ -66,7 +66,8 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import F
 from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung, FP_AusgleichsFlaeche
 from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutz
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
-    FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung
+    FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung, \
+    FP_VorbehalteFlaeche
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
@@ -241,6 +242,7 @@ CLASSES = {
     'FP_Nutzungsbeschraenkung': FP_Nutzungsbeschraenkung,
     'FP_NutzungsbeschraenkungsFlaeche': FP_NutzungsbeschraenkungsFlaeche,
     'FP_FlaecheOhneDarstellung': FP_FlaecheOhneDarstellung,
+    'FP_VorbehalteFlaeche': FP_VorbehalteFlaeche,
 
     'SO_Objekt': SO_Objekt,
     'SO_Strassenverkehrsrecht': SO_Strassenverkehrsrecht,

@@ -168,3 +168,21 @@ class FP_FlaecheOhneDarstellung(PolygonGeometry, FlaechenschlussObjekt, FP_Objek
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+
+
+class FP_VorbehalteFlaeche(PolygonGeometry, FP_Objekt):
+    """ Flaechen auf denen bestimmte Vorbehalte wirksam sind. """
+
+    __tablename__ = 'fp_vorbehalte_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    vorbehalt = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
