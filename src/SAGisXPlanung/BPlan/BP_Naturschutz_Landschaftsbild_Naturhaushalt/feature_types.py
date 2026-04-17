@@ -79,6 +79,58 @@ class BP_AnpflanzungBindungErhaltung(MixedGeometry, BP_Objekt):
         return QIcon(os.path.abspath(os.path.join(BASE_DIR, 'symbole/BP_Naturschutz_Landschaftsbild_Naturhaushalt/Anpflanzen_Baum.svg')))
 
 
+class BP_AusgleichsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
+    """ Festsetzung einer Flaeche zum Ausgleich gemaess § 1a Abs. 3 und § 9 Abs. 1a BauGB. """
+
+    __tablename__ = 'bp_ausgleich'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_ausgleich',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    ziel = Column(Enum(XP_SPEZiele))
+    sonstZiel = Column(String)
+    massnahme = relationship("XP_SPEMassnahmenDaten", back_populates="bp_ausgleichsflaeche", cascade="all, delete",
+                             passive_deletes=True)
+    refMassnahmenText = relationship("XP_ExterneReferenz", back_populates="bp_ausgleichsflaeche_massnahme",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys='XP_ExterneReferenz.bp_ausgleichsflaeche_massnahme_id')
+    refLandschaftsplan = relationship("XP_ExterneReferenz", back_populates="bp_ausgleichsflaeche_plan",
+                                      cascade="all, delete", passive_deletes=True, uselist=False,
+                                      foreign_keys='XP_ExterneReferenz.bp_ausgleichsflaeche_plan_id')
+
+    @classmethod
+    def symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+        symbol.setClipFeaturesToExtent(False)
+
+        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        border.setWidth(0.5)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+
+        green_strip = QgsSimpleLineSymbolLayer(QColor(22, 206, 60))
+        green_strip.setWidth(3)
+        green_strip.setOffset(1.75)
+        green_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        green_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+
+        symbol.appendSymbolLayer(border)
+        symbol.appendSymbolLayer(green_strip)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
+
+
 class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
         (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB) """

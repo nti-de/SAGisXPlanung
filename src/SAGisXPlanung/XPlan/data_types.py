@@ -94,6 +94,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+                         'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
                          'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt',
                          'bp_wohngebaeude_flaeche', 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text',
                          'xp_rasterdarstellung_legende']
@@ -133,6 +134,16 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     bp_schutzflaeche_plan_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche_plan = relationship("BP_SchutzPflegeEntwicklungsFlaeche", foreign_keys=[bp_schutzflaeche_plan_id],
                                          back_populates="refLandschaftsplan")
+
+    bp_ausgleichsflaeche_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
+    bp_ausgleichsflaeche_massnahme = relationship("BP_AusgleichsFlaeche",
+                                                  foreign_keys=[bp_ausgleichsflaeche_massnahme_id],
+                                                  back_populates="refMassnahmenText")
+
+    bp_ausgleichsflaeche_plan_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
+    bp_ausgleichsflaeche_plan = relationship("BP_AusgleichsFlaeche",
+                                             foreign_keys=[bp_ausgleichsflaeche_plan_id],
+                                             back_populates="refLandschaftsplan")
 
     veraenderungssperre_id = Column(UUID(as_uuid=True), ForeignKey('bp_veraenderungssperre_daten.id', ondelete='CASCADE'))
     veraenderungssperre = relationship("BP_VeraenderungssperreDaten", back_populates="refBeschluss")
@@ -194,6 +205,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['file', 'georef_file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+                'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
                 'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche',
                 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text', 'xp_rasterdarstellung_legende']
 
@@ -298,7 +310,7 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Attribute für einer Schutz-, Pflege- oder Entwicklungsmaßnahme """
 
     __tablename__ = 'xp_spe_daten'
-    __avoidRelation__ = ['bp_schutzflaeche', 'fp_schutzflaeche']
+    __avoidRelation__ = ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'fp_schutzflaeche']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -309,12 +321,15 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     bp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche = relationship('BP_SchutzPflegeEntwicklungsFlaeche', back_populates='massnahme')
 
+    bp_ausgleichsflaeche_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
+    bp_ausgleichsflaeche = relationship('BP_AusgleichsFlaeche', back_populates='massnahme')
+
     fp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('fp_schutzflaeche.id', ondelete='CASCADE'))
     fp_schutzflaeche = relationship('FP_SchutzPflegeEntwicklung', back_populates='massnahme')
 
     @classmethod
     def avoid_export(cls):
-        return ['bp_schutzflaeche', 'fp_schutzflaeche']
+        return ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'fp_schutzflaeche']
 
 
 class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):
