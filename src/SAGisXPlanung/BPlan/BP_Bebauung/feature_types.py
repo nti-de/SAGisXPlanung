@@ -267,6 +267,41 @@ def receive_load(target, context):
     target.xplan_item = XPlanungItem(xid=str(target.id), xtype=BP_BaugebietsTeilFlaeche)
 
 
+class BP_AbstandsFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festsetzung eines abweichenden Masses der Tiefe der Abstandsflaeche. """
+
+    __tablename__ = 'bp_abstand'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_abstand',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    tiefe = Column(Length)
+
+    @classmethod
+    def symbol(cls):
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill.setStrokeColor(QColor('#005b96'))
+        fill.setStrokeWidth(0.5)
+        fill.setBrushStyle(Qt.BrushStyle.FDiagPattern)
+        symbol.appendSymbolLayer(fill)
+
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
+
+
 class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Festsetzung der überbaubaren Grundstücksfläche (§9, Abs. 1, Nr. 2 BauGB). """
 
