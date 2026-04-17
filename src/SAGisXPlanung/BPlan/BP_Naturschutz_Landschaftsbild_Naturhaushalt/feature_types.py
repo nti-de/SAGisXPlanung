@@ -14,7 +14,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
-from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry, FlaechenschlussObjekt
+from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType
 
 
@@ -156,6 +156,38 @@ class BP_AusgleichsMassnahme(MixedGeometry, BP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+class BP_EingriffsBereich(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Bereich, in dem ein auszugleichender Eingriff nach Naturschutzrecht zugelassen wird. """
+
+    __tablename__ = 'bp_eingriffsbereich'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_eingriffsbereich',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    def symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
+        fill.setStrokeColor(QColor('#c62828'))
+        fill.setStrokeWidth(0.5)
+        fill.setBrushStyle(Qt.BrushStyle.DiagCrossPattern)
+        symbol.appendSymbolLayer(fill)
+        return symbol
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(cls.symbol())
+
+    @classmethod
+    def previewIcon(cls):
+        return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
 
 
 class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
