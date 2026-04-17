@@ -204,3 +204,4 @@ class FP_UnverbindlicheVormerkung(MixedGeometry, FP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+

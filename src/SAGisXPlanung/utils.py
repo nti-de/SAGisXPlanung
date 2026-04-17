@@ -68,9 +68,10 @@ from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungI
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
     FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung, \
     FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung
-from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung
+from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung, \
+    FP_ZentralerVersorgungsbereichAuspraegung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
-from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung
+from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.feature_types import FP_VerEntsorgung, FP_ZentralerVersorgungsbereich
 from SAGisXPlanung.FPlan.FP_Verkehr.feature_types import FP_Strassenverkehr
 from SAGisXPlanung.FPlan.FP_Wasser.feature_types import FP_Gewaesser, FP_Wasserwirtschaft
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan, LP_Bereich, LP_Objekt, LP_TextAbschnitt
@@ -244,6 +245,7 @@ CLASSES = {
     'FP_FlaecheOhneDarstellung': FP_FlaecheOhneDarstellung,
     'FP_VorbehalteFlaeche': FP_VorbehalteFlaeche,
     'FP_UnverbindlicheVormerkung': FP_UnverbindlicheVormerkung,
+    'FP_ZentralerVersorgungsbereich': FP_ZentralerVersorgungsbereich,
 
     'SO_Objekt': SO_Objekt,
     'SO_Strassenverkehrsrecht': SO_Strassenverkehrsrecht,
@@ -317,6 +319,7 @@ CLASSES = {
     'FP_DetailArtDerBaulNutzung': FP_DetailArtDerBaulNutzung,
     'FP_DetailZweckbestVerEntsorgung': FP_DetailZweckbestVerEntsorgung,
     'FP_DetailZweckbestGemeinbedarf': FP_DetailZweckbestGemeinbedarf,
+    'FP_ZentralerVersorgungsbereichAuspraegung': FP_ZentralerVersorgungsbereichAuspraegung,
 
     'SO_DetailKlassifizNachDenkmalschutzrecht': SO_DetailKlassifizNachDenkmalschutzrecht,
     'SO_DetailKlassifizNachBodenschutzrecht': SO_DetailKlassifizNachBodenschutzrecht,

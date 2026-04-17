@@ -4,13 +4,14 @@ from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSing
 from qgis.PyQt.QtGui import QColor
 
 from sqlalchemy import Column, ForeignKey, Enum, ARRAY, String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declared_attr, relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import GeometryType
 
 
@@ -65,3 +66,26 @@ class FP_VerEntsorgung(MixedGeometry, FP_Objekt):
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
+
+
+class FP_ZentralerVersorgungsbereich(PolygonGeometry, UeberlagerungsObjekt, FP_Objekt):
+    """ Darstellung zentraler Versorgungsbereiche nach § 5 Abs. 2 Nr. 2d BauGB. """
+
+    __tablename__ = 'fp_zentraler_versorgungsbereich'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    auspraegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    auspraegung = relationship("FP_ZentralerVersorgungsbereichAuspraegung",
+                               back_populates="fp_zentraler_versorgungsbereich",
+                               foreign_keys=[auspraegung_id], info={
+                                   'form-type': 'inline'
+                               })
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)

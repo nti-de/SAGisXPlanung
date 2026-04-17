@@ -23,3 +23,4 @@ class XP_DetailTechnVorkehrungImmissionsschutz(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "XP_DetailTechnVorkehrungImmissionsschutz "
     }
+

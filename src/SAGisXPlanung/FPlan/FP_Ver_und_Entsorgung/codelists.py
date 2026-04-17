@@ -19,3 +19,15 @@ class FP_DetailZweckbestVerEntsorgung(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "FP_DetailZweckbestVerEntsorgung",
     }
+
+
+class FP_ZentralerVersorgungsbereichAuspraegung(CodeListValue):
+    fp_zentraler_versorgungsbereich = relationship(
+        "FP_ZentralerVersorgungsbereich",
+        back_populates="auspraegung",
+        foreign_keys='FP_ZentralerVersorgungsbereich.auspraegung_id'
+    )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "FP_ZentralerVersorgungsbereichAuspraegung"
+    }
