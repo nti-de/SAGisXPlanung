@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import Base, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Laerm.enums import BP_SchallleistungspegelTypen, BP_SchallleistungspegelBerechnungsgrundlage
-from SAGisXPlanung.XPlan.types import Sound, XPEnum
+from SAGisXPlanung.XPlan.types import Sound, XPEnum, Angle
 from SAGisXPlanung.core.mixins.mixins import RelationshipMixin, ElementOrderMixin
 
 
@@ -63,3 +63,28 @@ class BP_EmissionskontingentLaermGebiet(BP_EmissionskontingentLaerm):
     __mapper_args__ = {
         'polymorphic_identity': 'bp_emissionskontingent_laerm_gebiet',
     }
+
+
+class BP_Richtungssektor(RelationshipMixin, ElementOrderMixin, Base):
+    """ Zusatzkontingente Tag/Nacht der Laermemission fuer einen Richtungssektor. """
+
+    __tablename__ = 'bp_richtungssektor'
+    __avoidRelation__ = ['zusatzkontingent', 'zusatzkontingentFlaeche']
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+
+    winkelAnfang = Column(Angle, nullable=False)
+    winkelEnde = Column(Angle, nullable=False)
+    zkWertTag = Column(Sound, nullable=False)
+    zkWertNacht = Column(Sound, nullable=False)
+
+    zusatzkontingent_id = Column(UUID(as_uuid=True), ForeignKey('bp_zusatzkontingent_laerm.id', ondelete='CASCADE'))
+    zusatzkontingent = relationship('BP_ZusatzkontingentLaerm', back_populates='richtungssektor')
+
+    zusatzkontingentFlaeche_id = Column(UUID(as_uuid=True),
+                                        ForeignKey('bp_zusatzkontingent_laerm_flaeche.id', ondelete='CASCADE'))
+    zusatzkontingentFlaeche = relationship('BP_ZusatzkontingentLaermFlaeche', back_populates='richtungssektor')
+
+    @classmethod
+    def avoid_export(cls):
+        return ['zusatzkontingent', 'zusatzkontingentFlaeche']

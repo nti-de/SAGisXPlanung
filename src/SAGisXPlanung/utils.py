@@ -34,8 +34,10 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.data_types imp
     BP_KomplexeZweckbestLandwirtschaft, BP_KomplexeZweckbestWald
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche, \
     BP_LandwirtschaftsFlaeche, BP_WaldFlaeche
-from SAGisXPlanung.BPlan.BP_Laerm.data_types import BP_EmissionskontingentLaerm, BP_EmissionskontingentLaermGebiet
-from SAGisXPlanung.BPlan.BP_Laerm.feature_types import BP_RichtungssektorGrenze
+from SAGisXPlanung.BPlan.BP_Laerm.data_types import BP_EmissionskontingentLaerm, BP_EmissionskontingentLaermGebiet, \
+    BP_Richtungssektor
+from SAGisXPlanung.BPlan.BP_Laerm.feature_types import BP_RichtungssektorGrenze, BP_ZusatzkontingentLaerm, \
+    BP_ZusatzkontingentLaermFlaeche
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
     BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche, BP_AusgleichsMassnahme, BP_EingriffsBereich
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
@@ -185,7 +187,10 @@ CLASSES = {
     'BP_KomplexeZweckbestVerEntsorgung': BP_KomplexeZweckbestVerEntsorgung,
     'BP_EmissionskontingentLaerm': BP_EmissionskontingentLaerm,
     'BP_EmissionskontingentLaermGebiet': BP_EmissionskontingentLaermGebiet,
+    'BP_Richtungssektor': BP_Richtungssektor,
     'BP_RichtungssektorGrenze': BP_RichtungssektorGrenze,
+    'BP_ZusatzkontingentLaerm': BP_ZusatzkontingentLaerm,
+    'BP_ZusatzkontingentLaermFlaeche': BP_ZusatzkontingentLaermFlaeche,
     'BP_KomplexeZweckbestNebenanlagen': BP_KomplexeZweckbestNebenanlagen,
     'BP_KomplexeSondernutzung': BP_KomplexeSondernutzung,
     'BP_VeraenderungssperreDaten': BP_VeraenderungssperreDaten,
