@@ -95,6 +95,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
                          'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
+                         'fp_ausgleichsflaeche_massnahme', 'fp_ausgleichsflaeche_plan',
                          'bp_ausgleichsmassnahme_massnahme', 'bp_ausgleichsmassnahme_plan',
                          'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt',
                          'bp_wohngebaeude_flaeche', 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text',
@@ -144,6 +145,16 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     bp_ausgleichsflaeche_plan_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
     bp_ausgleichsflaeche_plan = relationship("BP_AusgleichsFlaeche",
                                              foreign_keys=[bp_ausgleichsflaeche_plan_id],
+                                             back_populates="refLandschaftsplan")
+
+    fp_ausgleichsflaeche_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('fp_ausgleich.id', ondelete='CASCADE'))
+    fp_ausgleichsflaeche_massnahme = relationship("FP_AusgleichsFlaeche",
+                                                  foreign_keys=[fp_ausgleichsflaeche_massnahme_id],
+                                                  back_populates="refMassnahmenText")
+
+    fp_ausgleichsflaeche_plan_id = Column(UUID(as_uuid=True), ForeignKey('fp_ausgleich.id', ondelete='CASCADE'))
+    fp_ausgleichsflaeche_plan = relationship("FP_AusgleichsFlaeche",
+                                             foreign_keys=[fp_ausgleichsflaeche_plan_id],
                                              back_populates="refLandschaftsplan")
 
     bp_ausgleichsmassnahme_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleichsmassnahme.id', ondelete='CASCADE'))
@@ -217,6 +228,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     def avoid_export(cls):
         return ['file', 'georef_file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
                 'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
+                'fp_ausgleichsflaeche_massnahme', 'fp_ausgleichsflaeche_plan',
                 'bp_ausgleichsmassnahme_massnahme', 'bp_ausgleichsmassnahme_plan',
                 'veraenderungssperre', 'grundstueck_ueberbaubar', 'xp_text_abschnitt', 'bp_wohngebaeude_flaeche',
                 'xp_rasterdarstellung_scan', 'xp_rasterdarstellung_text', 'xp_rasterdarstellung_legende']
@@ -322,7 +334,8 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Attribute für einer Schutz-, Pflege- oder Entwicklungsmaßnahme """
 
     __tablename__ = 'xp_spe_daten'
-    __avoidRelation__ = ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme', 'fp_schutzflaeche']
+    __avoidRelation__ = ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
+                         'fp_schutzflaeche', 'fp_ausgleichsflaeche']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
 
@@ -342,9 +355,13 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     fp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('fp_schutzflaeche.id', ondelete='CASCADE'))
     fp_schutzflaeche = relationship('FP_SchutzPflegeEntwicklung', back_populates='massnahme')
 
+    fp_ausgleichsflaeche_id = Column(UUID(as_uuid=True), ForeignKey('fp_ausgleich.id', ondelete='CASCADE'))
+    fp_ausgleichsflaeche = relationship('FP_AusgleichsFlaeche', back_populates='massnahme')
+
     @classmethod
     def avoid_export(cls):
-        return ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme', 'fp_schutzflaeche']
+        return ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
+                'fp_schutzflaeche', 'fp_ausgleichsflaeche']
 
 
 class XP_GesetzlicheGrundlage(RelationshipMixin, ElementOrderMixin, Base):

@@ -35,3 +35,31 @@ class FP_SchutzPflegeEntwicklung(MixedGeometry, FP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+
+
+class FP_AusgleichsFlaeche(MixedGeometry, FP_Objekt):
+    """ Flaechen und Massnahmen zum Ausgleich gemaess § 5 Abs. 2a BauGB. """
+
+    __tablename__ = 'fp_ausgleich'
+    __mapper_args__ = {
+        'polymorphic_identity': 'fp_ausgleich',
+    }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    ziel = Column(XPEnum(XP_SPEZiele, include_default=True))
+    sonstZiel = Column(String)
+    massnahme = relationship("XP_SPEMassnahmenDaten", back_populates="fp_ausgleichsflaeche", cascade="all, delete",
+                             passive_deletes=True)
+    refMassnahmenText = relationship("XP_ExterneReferenz", back_populates="fp_ausgleichsflaeche_massnahme",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys='XP_ExterneReferenz.fp_ausgleichsflaeche_massnahme_id')
+    refLandschaftsplan = relationship("XP_ExterneReferenz", back_populates="fp_ausgleichsflaeche_plan",
+                                      cascade="all, delete", passive_deletes=True, uselist=False,
+                                      foreign_keys='XP_ExterneReferenz.fp_ausgleichsflaeche_plan_id')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
