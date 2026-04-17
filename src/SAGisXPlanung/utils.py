@@ -37,7 +37,7 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types 
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
     BP_SchutzPflegeEntwicklungsFlaeche
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
-    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass
+    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
@@ -182,6 +182,7 @@ CLASSES = {
     'BP_KomplexeSondernutzung': BP_KomplexeSondernutzung,
     'BP_VeraenderungssperreDaten': BP_VeraenderungssperreDaten,
     'BP_NutzungsartenGrenze': BP_NutzungsartenGrenze,
+    'BP_AbstandsMass': BP_AbstandsMass,
     'BP_BereichOhneEinAusfahrtLinie': BP_BereichOhneEinAusfahrtLinie,
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
     'BP_EinfahrtsbereichLinie': BP_EinfahrtsbereichLinie,

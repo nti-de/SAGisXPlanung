@@ -5,15 +5,15 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpl
                        QgsSimpleLineSymbolLayer, QgsSimpleMarkerSymbolLayer, Qgis, QgsSimpleMarkerSymbolLayerBase)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt, QSize
-from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY
+from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY, Float
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen
+from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen, BP_AbstandsMassTypen
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
     UeberlagerungsObjekt
-from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum
+from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum, Angle
 
 logger = logging.getLogger(__name__)
 
@@ -157,6 +157,27 @@ class BP_NutzungsartenGrenze(LineGeometry, BP_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(64, 64))
+
+
+class BP_AbstandsMass(LineGeometry, BP_Objekt):
+    """ Darstellung von Masspfeilen oder Masskreisen zur Vermassung. """
+
+    __tablename__ = 'bp_abstands_mass'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    typ = Column(XPEnum(BP_AbstandsMassTypen, include_default=True))
+    wert = Column(Float)
+    startWinkel = Column(Angle)
+    endWinkel = Column(Angle)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
 
 
 class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):

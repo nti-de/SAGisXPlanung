@@ -19,3 +19,10 @@ class BP_AbgrenzungenTypen(XPlanungEnumMixin, Enum):
     Nutzungsartengrenze = 1000
     UnterschiedlicheHoehen = 2000
     SonstigeAbgrenzung = 9999
+
+
+class BP_AbstandsMassTypen(XPlanungEnumMixin, Enum):
+    """ Typ des Abstandsmaß-Objekts. """
+
+    Masspfeil = 1000
+    Masskreis = 2000
