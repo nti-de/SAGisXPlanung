@@ -131,6 +131,33 @@ class BP_AusgleichsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
 
 
+class BP_AusgleichsMassnahme(MixedGeometry, BP_Objekt):
+    """ Festsetzung einer Einzelmassnahme zum Ausgleich gemaess § 1a Abs. 3 und § 9 Abs. 1a BauGB. """
+
+    __tablename__ = 'bp_ausgleichsmassnahme'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_ausgleichsmassnahme',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    ziel = Column(Enum(XP_SPEZiele))
+    sonstZiel = Column(String)
+    massnahme = relationship("XP_SPEMassnahmenDaten", back_populates="bp_ausgleichsmassnahme", cascade="all, delete",
+                             passive_deletes=True)
+    refMassnahmenText = relationship("XP_ExterneReferenz", back_populates="bp_ausgleichsmassnahme_massnahme",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys='XP_ExterneReferenz.bp_ausgleichsmassnahme_massnahme_id')
+    refLandschaftsplan = relationship("XP_ExterneReferenz", back_populates="bp_ausgleichsmassnahme_plan",
+                                      cascade="all, delete", passive_deletes=True, uselist=False,
+                                      foreign_keys='XP_ExterneReferenz.bp_ausgleichsmassnahme_plan_id')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
 class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
         (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB) """

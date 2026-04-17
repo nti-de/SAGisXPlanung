@@ -35,7 +35,7 @@ from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.data_types imp
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche, \
     BP_LandwirtschaftsFlaeche, BP_WaldFlaeche
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
-    BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche
+    BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche, BP_AusgleichsMassnahme
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
     BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
@@ -165,6 +165,7 @@ CLASSES = {
     'BP_VerEntsorgung': BP_VerEntsorgung,
     'BP_AnpflanzungBindungErhaltung': BP_AnpflanzungBindungErhaltung,
     'BP_AusgleichsFlaeche': BP_AusgleichsFlaeche,
+    'BP_AusgleichsMassnahme': BP_AusgleichsMassnahme,
     'BP_SchutzPflegeEntwicklungsFlaeche': BP_SchutzPflegeEntwicklungsFlaeche,
     'BP_Wegerecht': BP_Wegerecht,
     'BP_BaugebietsTeilFlaeche': BP_BaugebietsTeilFlaeche,
