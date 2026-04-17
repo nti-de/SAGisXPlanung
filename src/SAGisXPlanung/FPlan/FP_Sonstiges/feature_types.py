@@ -186,3 +186,21 @@ class FP_VorbehalteFlaeche(PolygonGeometry, FP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+
+
+class FP_UnverbindlicheVormerkung(MixedGeometry, FP_Objekt):
+    """ Unverbindliche Vormerkung spaeterer Planungsabsichten. """
+
+    __tablename__ = 'fp_unverbindliche_vormerkung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    vormerkung = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
