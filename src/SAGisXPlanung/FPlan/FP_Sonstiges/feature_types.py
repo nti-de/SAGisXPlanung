@@ -9,7 +9,8 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutzCodelistAssoc
+from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutzCodelistAssoc, \
+    FP_DetailZweckbestimmungNachLandesrechtCodelistAssoc
 from SAGisXPlanung.FPlan.FP_Sonstiges.enums import FP_ZweckbestimmungPrivilegiertesVorhaben
 from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer, icon_renderer
@@ -205,3 +206,28 @@ class FP_UnverbindlicheVormerkung(MixedGeometry, FP_Objekt):
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
 
+
+class FP_DarstellungNachLandesrecht(MixedGeometry, FP_Objekt):
+    """ Planinhalt, der auf spezifischem Landesrecht beruht. """
+
+    __tablename__ = 'fp_darstellung_landesrecht'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    detailZweckbestimmung = relationship(
+        'FP_DetailZweckbestimmungNachLandesrecht',
+        back_populates='codelist_user',
+        secondary=FP_DetailZweckbestimmungNachLandesrechtCodelistAssoc,
+        info={
+            'form-type': 'inline'
+        }
+    )
+    kurzbeschreibung = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)

@@ -64,10 +64,11 @@ from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.data_types import FP_K
     FP_KomplexeZweckbestLandwirtschaft, FP_KomplexeZweckbestWald
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_Gruen, FP_Landwirtschaft, FP_WaldFlaeche
 from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung, FP_AusgleichsFlaeche
-from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutz
+from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutz, \
+    FP_DetailZweckbestimmungNachLandesrecht
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
     FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung, \
-    FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung
+    FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung, FP_DarstellungNachLandesrecht
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung, \
     FP_ZentralerVersorgungsbereichAuspraegung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
@@ -245,6 +246,7 @@ CLASSES = {
     'FP_FlaecheOhneDarstellung': FP_FlaecheOhneDarstellung,
     'FP_VorbehalteFlaeche': FP_VorbehalteFlaeche,
     'FP_UnverbindlicheVormerkung': FP_UnverbindlicheVormerkung,
+    'FP_DarstellungNachLandesrecht': FP_DarstellungNachLandesrecht,
     'FP_ZentralerVersorgungsbereich': FP_ZentralerVersorgungsbereich,
 
     'SO_Objekt': SO_Objekt,
@@ -319,6 +321,7 @@ CLASSES = {
     'FP_DetailArtDerBaulNutzung': FP_DetailArtDerBaulNutzung,
     'FP_DetailZweckbestVerEntsorgung': FP_DetailZweckbestVerEntsorgung,
     'FP_DetailZweckbestGemeinbedarf': FP_DetailZweckbestGemeinbedarf,
+    'FP_DetailZweckbestimmungNachLandesrecht': FP_DetailZweckbestimmungNachLandesrecht,
     'FP_ZentralerVersorgungsbereichAuspraegung': FP_ZentralerVersorgungsbereichAuspraegung,
 
     'SO_DetailKlassifizNachDenkmalschutzrecht': SO_DetailKlassifizNachDenkmalschutzrecht,
