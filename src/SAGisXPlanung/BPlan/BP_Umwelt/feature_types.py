@@ -8,10 +8,10 @@ from sqlalchemy import Column, ForeignKey, String
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich
+from SAGisXPlanung.BPlan.BP_Umwelt.enums import BP_Laermpegelbereich, BP_ZweckbestimmungenTMF
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ImmissionsschutzTypen, XP_TechnVorkehrungenImmissionsschutz
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum, Sound
 
 
@@ -79,3 +79,22 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         else:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+class BP_TechnischeMassnahmenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Flaeche fuer technische oder bauliche Massnahmen nach § 9 Abs. 1 Nr. 23 BauGB. """
+
+    __tablename__ = 'bp_technische_massnahmen'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_technische_massnahmen',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    zweckbestimmung = Column(XPEnum(BP_ZweckbestimmungenTMF, include_default=True), nullable=False)
+    technischeMassnahme = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

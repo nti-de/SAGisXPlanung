@@ -28,3 +28,11 @@ class BP_Laermpegelbereich(XPlanungEnumMixin, Enum):
     VII = 1600
     SpezifizierungBereich = 1700, XPlanVersion.SIX
 
+
+class BP_ZweckbestimmungenTMF(XPlanungEnumMixin, Enum):
+    """ Klassifikation technischer/baulicher Massnahmen nach §9 Abs. 1 Nr. 23 BauGB. """
+
+    Luftreinhaltung = 1000
+    NutzungErneurerbarerEnergien = 2000
+    MinderungStoerfallfolgen = 3000
+

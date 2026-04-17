@@ -40,7 +40,7 @@ from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_ty
     BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche, BP_AusgleichsMassnahme, BP_EingriffsBereich
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
     BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass
-from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz
+from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz, BP_TechnischeMassnahmenFlaeche
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
@@ -196,6 +196,7 @@ CLASSES = {
     'BP_EinfahrtsbereichLinie': BP_EinfahrtsbereichLinie,
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
     'BP_Immissionsschutz': BP_Immissionsschutz,
+    'BP_TechnischeMassnahmenFlaeche': BP_TechnischeMassnahmenFlaeche,
     'BP_AbgrabungsFlaeche': BP_AbgrabungsFlaeche,
     'BP_AufschuettungsFlaeche': BP_AufschuettungsFlaeche,
     'BP_KennzeichnungsFlaeche': BP_KennzeichnungsFlaeche,
