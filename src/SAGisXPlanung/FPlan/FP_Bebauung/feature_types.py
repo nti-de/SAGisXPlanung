@@ -179,3 +179,23 @@ class FP_BebauungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, FP_Objekt):
                                       'dürfen nur in folgenden Kombinationen belegt werden: '
                                       '<ul><li>GFZ</li><li>GFZmin und GFZmax</li></ul>', '5.3.1.4',
                                       self.__class__.__name__)
+
+
+class FP_KeineZentrAbwasserBeseitigungFlaeche(PolygonGeometry, FP_Objekt):
+    """ Bauflaeche ohne vorgesehene zentrale Abwasserbeseitigung (§ 5 Abs. 2 Nr. 1 BauGB). """
+
+    __tablename__ = 'fp_keine_zentr_abwasser_beseitigung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    def symbol(cls):
+        return QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsRuleBasedRenderer(cls.symbol())

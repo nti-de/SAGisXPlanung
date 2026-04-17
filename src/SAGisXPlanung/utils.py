@@ -55,7 +55,7 @@ from SAGisXPlanung.FPlan.FP_Basisobjekte.codelists import FP_SonstPlanArt, FP_St
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan, FP_Bereich, FP_Objekt, FP_TextAbschnitt
 from SAGisXPlanung.FPlan.FP_Bebauung.codelists import FP_DetailArtDerBaulNutzung
 from SAGisXPlanung.FPlan.FP_Bebauung.data_types import FP_KomplexeSondernutzung
-from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche
+from SAGisXPlanung.FPlan.FP_Bebauung.feature_types import FP_BebauungsFlaeche, FP_KeineZentrAbwasserBeseitigungFlaeche
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.codelists import FP_DetailZweckbestGemeinbedarf
 from SAGisXPlanung.FPlan.FP_Gemeinbedarf.data_types import FP_KomplexeZweckbestGemeinbedarf, \
     FP_KomplexeZweckbestSpielSportanlage
@@ -214,6 +214,7 @@ CLASSES = {
     'FP_Objekt': FP_Objekt,
     'FP_GenerischesObjekt': FP_GenerischesObjekt,
     'FP_BebauungsFlaeche': FP_BebauungsFlaeche,
+    'FP_KeineZentrAbwasserBeseitigungFlaeche': FP_KeineZentrAbwasserBeseitigungFlaeche,
     'FP_KomplexeSondernutzung': FP_KomplexeSondernutzung,
     'FP_Gemeinbedarf': FP_Gemeinbedarf,
     'FP_SpielSportanlage': FP_SpielSportanlage,
