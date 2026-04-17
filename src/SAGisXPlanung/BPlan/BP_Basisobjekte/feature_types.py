@@ -246,6 +246,14 @@ class BP_Objekt(XP_Objekt):
             'link-type': 'abstract'
         })
 
+    laermkontingent = relationship('BP_EmissionskontingentLaerm', back_populates='bp_objekt', uselist=False,
+                                   cascade='all, delete', passive_deletes=True,
+                                   foreign_keys='BP_EmissionskontingentLaerm.bp_objekt_id')
+
+    laermkontingentGebiet = relationship('BP_EmissionskontingentLaermGebiet', back_populates='bp_objekt_gebiet',
+                                         cascade='all, delete', passive_deletes=True,
+                                         foreign_keys='BP_EmissionskontingentLaerm.bp_objekt_gebiet_id')
+
     position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
                                                         name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')

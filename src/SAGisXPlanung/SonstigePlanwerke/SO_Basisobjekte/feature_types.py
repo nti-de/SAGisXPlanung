@@ -1,6 +1,7 @@
 
 from geoalchemy2 import Geometry, WKBElement
 from sqlalchemy import Column, ForeignKey, Enum, Boolean, Float, CheckConstraint
+from sqlalchemy.orm import relationship
 
 from qgis.core import QgsCoordinateReferenceSystem, QgsGeometry, QgsSingleSymbolRenderer, QgsSymbol
 
@@ -33,6 +34,20 @@ class SO_Objekt(XP_Objekt):
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
     flussrichtung = Column(Boolean)
     nordwinkel = Column(Angle)
+
+    laermkontingent = relationship('BP_EmissionskontingentLaerm', back_populates='so_objekt', uselist=False,
+                                   cascade='all, delete', passive_deletes=True,
+                                   foreign_keys='BP_EmissionskontingentLaerm.so_objekt_id',
+                                   info={
+                                        'xplan_version': XPlanVersion.SIX,
+                                   })
+
+    laermkontingentGebiet = relationship('BP_EmissionskontingentLaermGebiet', back_populates='so_objekt_gebiet',
+                                         cascade='all, delete', passive_deletes=True,
+                                         foreign_keys='BP_EmissionskontingentLaerm.so_objekt_gebiet_id',
+                                         info={
+                                             'xplan_version': XPlanVersion.SIX,
+                                         })
 
     def srs(self):
         return QgsCoordinateReferenceSystem(f'EPSG:{self.position.srid}')
