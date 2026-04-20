@@ -6,7 +6,7 @@ from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolL
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsGeometryGeneratorSymbolLayer,
                        QgsMarkerSymbolLayer, QgsProperty, QgsSymbolLayer)
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float, ARRAY
+from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float, ARRAY, Date
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -20,7 +20,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import S
     SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht, \
     SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht, SO_KlassifizNachBodenschutzrecht, \
     SO_KlassifizBauverbot, SO_RechtlicheGrundlageBauverbot, SO_KlassifizBaubeschraenkung, \
-    SO_RechtlicheGrundlageBaubeschraenkung
+    SO_RechtlicheGrundlageBaubeschraenkung, SO_GebietsArt, SO_RechtsstandGebietTyp
 from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
@@ -693,6 +693,48 @@ class SO_Forstrecht(MixedGeometry, SO_Objekt):
 
     name = Column(String)
     nummer = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+class SO_Gebiet(MixedGeometry, SO_Objekt):
+    """ Umgrenzung eines sonstigen Gebietes nach BauGB. """
+
+    __tablename__ = 'so_gebiet'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    gemeinde_id = Column(UUID(as_uuid=True), ForeignKey('xp_gemeinde.id'))
+    gemeinde = relationship("XP_Gemeinde", info={
+        'form-type': 'inline'
+    })
+
+    gebietsArt = Column(XPEnum(SO_GebietsArt, include_default=True))
+
+    sonstGebietsArt_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    sonstGebietsArt = relationship("SO_SonstGebietsArt", back_populates="so_gebiet_sonst_gebietsart",
+                                   foreign_keys=[sonstGebietsArt_id], info={
+                                       'form-type': 'inline'
+                                   })
+
+    rechtsstandGebiet = Column(XPEnum(SO_RechtsstandGebietTyp, include_default=True))
+
+    sonstRechtsstandGebiet_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    sonstRechtsstandGebiet = relationship("SO_SonstRechtsstandGebietTyp", back_populates="so_gebiet_sonst_rechtsstand",
+                                          foreign_keys=[sonstRechtsstandGebiet_id], info={
+                                              'form-type': 'inline'
+                                          })
+
+    aufstellungsbeschhlussDatum = Column(Date)
+    durchfuehrungStartDatum = Column(Date)
+    durchfuehrungEndDatum = Column(Date)
+    traegerMassnahme = Column(String)
 
     @classmethod
     @fallback_renderer

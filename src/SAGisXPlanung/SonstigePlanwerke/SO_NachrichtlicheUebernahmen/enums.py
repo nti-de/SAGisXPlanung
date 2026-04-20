@@ -252,3 +252,53 @@ class SO_RechtlicheGrundlageBaubeschraenkung(XPlanungEnumMixin, Enum):
     Luftverkehrsrecht = 1000
     Strassenverkehrsrecht = 2000
     SonstigesRecht = 9999
+
+
+class SO_GebietsArt(XPlanungEnumMixin, Enum):
+    """ Aufzaehlung von Gebietsausweisungen nach BauGB. """
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, _: int, version: XPlanVersion = None):
+        self._xplan_version = version
+
+    @property
+    def version(self) -> XPlanVersion:
+        return self._xplan_version
+
+    Umlegungsgebiet = 1000
+    StaedtebaulicheSanierung = 1100
+    StaedtebaulicheEntwicklungsmassnahme = 1200
+    Stadtumbaugebiet = 1300
+    SozialeStadt = 1400
+    BusinessImprovementDistrict = 1500
+    HousingImprovementDistrict = 1600
+
+    Erhaltungsverordnung = 1999, XPlanVersion.FIVE_THREE
+    ErhaltungsverordnungStaedtebaulicheGestalt = 2000, XPlanVersion.FIVE_THREE
+    ErhaltungsverordnungWohnbevoelkerung = 2100, XPlanVersion.FIVE_THREE
+    ErhaltungsverordnungUmstrukturierung = 2200, XPlanVersion.FIVE_THREE
+
+    Erhaltungsgebiet = 1700, XPlanVersion.SIX
+    ErhaltungsgebietStaedtebaulicheGestalt = 17000, XPlanVersion.SIX
+    ErhaltungsgebietWohnbevoelkerung = 17001, XPlanVersion.SIX
+    ErhaltungsgebietUmstrukturierung = 17002, XPlanVersion.SIX
+    StaedtebaulEntwicklungskonzeptInnenentwicklung = 2300, XPlanVersion.SIX
+    GebietMitAngespanntemWohnungsmarkt = 2400, XPlanVersion.SIX
+    GenehmigungWohnungseigentum = 2500, XPlanVersion.SIX
+
+    Sonstiges = 9999
+
+
+class SO_RechtsstandGebietTyp(XPlanungEnumMixin, Enum):
+    """ Aufzaehlung der moeglichen Rechtsstaende eines Gebietes. """
+
+    VorbereitendeUntersuchung = 1000
+    Aufstellung = 2000
+    Festlegung = 3000
+    Abgeschlossen = 4000
+    Verstetigung = 5000
+    Sonstiges = 9999

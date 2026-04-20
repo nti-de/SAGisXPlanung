@@ -73,3 +73,21 @@ class SO_DetailKlassifizNachForstrecht(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "SO_DetailKlassifizNachForstrecht",
     }
+
+
+class SO_SonstGebietsArt(CodeListValue):
+    so_gebiet_sonst_gebietsart = relationship("SO_Gebiet", back_populates="sonstGebietsArt",
+                                              foreign_keys='SO_Gebiet.sonstGebietsArt_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "SO_SonstGebietsArt",
+    }
+
+
+class SO_SonstRechtsstandGebietTyp(CodeListValue):
+    so_gebiet_sonst_rechtsstand = relationship("SO_Gebiet", back_populates="sonstRechtsstandGebiet",
+                                               foreign_keys='SO_Gebiet.sonstRechtsstandGebiet_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "SO_SonstRechtsstandGebietTyp",
+    }
