@@ -81,6 +81,40 @@ class FP_NutzungsbeschraenkungsFlaeche(PolygonGeometry, UeberlagerungsObjekt, FP
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
 
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class FP_TextlicheDarstellungsFlaeche(PolygonGeometry, UeberlagerungsObjekt, FP_Objekt):
+    """ Bereich, in dem textliche Darstellungen ueber refTextInhalt gelten. """
+
+    __tablename__ = 'fp_textliche_darstellungsflaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+@xp_version(versions=[XPlanVersion.SIX])
+class FP_TextAbschnittFlaeche(PolygonGeometry, UeberlagerungsObjekt, FP_Objekt):
+    """ Bereich, in dem Textabschnitte ueber refTextInhalt gelten. """
+
+    __tablename__ = 'fp_textabschnittsflaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
 @xp_version(versions=[XPlanVersion.SIX])
 class FP_Nutzungsbeschraenkung(MixedGeometry, FP_Objekt):
     """ Umgrenzungen von Flächen für Nutzungsbeschränkungen oder für Vorkehrungen zum Schutz gegen schädliche

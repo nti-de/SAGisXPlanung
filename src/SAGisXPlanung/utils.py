@@ -69,7 +69,8 @@ from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungI
     FP_DetailZweckbestimmungNachLandesrecht, FP_DetailMassnahmeKlimawandel
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
     FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung, \
-    FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung, FP_DarstellungNachLandesrecht
+    FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung, FP_DarstellungNachLandesrecht, FP_TextlicheDarstellungsFlaeche, \
+    FP_TextAbschnittFlaeche
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.codelists import FP_DetailZweckbestVerEntsorgung, \
     FP_ZentralerVersorgungsbereichAuspraegung
 from SAGisXPlanung.FPlan.FP_Ver_und_Entsorgung.data_types import FP_KomplexeZweckbestVerEntsorgung
@@ -239,6 +240,8 @@ CLASSES = {
     'FP_SchutzPflegeEntwicklung': FP_SchutzPflegeEntwicklung,
     'FP_AusgleichsFlaeche': FP_AusgleichsFlaeche,
     'FP_Kennzeichnung': FP_Kennzeichnung,
+    'FP_TextlicheDarstellungsFlaeche': FP_TextlicheDarstellungsFlaeche,
+    'FP_TextAbschnittFlaeche': FP_TextAbschnittFlaeche,
     'FP_KomplexeZweckbestGemeinbedarf': FP_KomplexeZweckbestGemeinbedarf,
     'FP_KomplexeZweckbestSpielSportanlage': FP_KomplexeZweckbestSpielSportanlage,
     'FP_KomplexeZweckbestGruen': FP_KomplexeZweckbestGruen,
