@@ -46,3 +46,21 @@ class SO_DetailKlassifizNachSonstigemRecht(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "SO_DetailKlassifizNachSonstigemRecht",
     }
+
+
+class SO_DetailKlassifizBauverbot(CodeListValue):
+    so_bauverbotszone = relationship("SO_Bauverbotszone", back_populates="detailArtDerFestlegung",
+                                     foreign_keys='SO_Bauverbotszone.detailArtDerFestlegung_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "SO_DetailKlassifizBauverbot",
+    }
+
+
+class SO_DetailKlassifizBaubeschraenkung(CodeListValue):
+    so_baubeschraenkung = relationship("SO_Baubeschraenkung", back_populates="detailArtDerFestlegung",
+                                       foreign_keys='SO_Baubeschraenkung.detailArtDerFestlegung_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "SO_DetailKlassifizBaubeschraenkung",
+    }

@@ -18,7 +18,9 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import (SO_Kla
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import SO_StrassenEinteilung, \
     SO_KlassifizWasserwirtschaft, SO_KlassifizNachLuftverkehrsrecht, SO_LaermschutzzoneTypen, \
     SO_KlassifizNachSonstigemRecht, SO_KlassifizNachStrassenverkehrsrecht, \
-    SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht, SO_KlassifizNachBodenschutzrecht
+    SO_KlassifizGewaesserv5, SO_KlassifizNachWasserrecht, SO_KlassifizNachBodenschutzrecht, \
+    SO_KlassifizBauverbot, SO_RechtlicheGrundlageBauverbot, SO_KlassifizBaubeschraenkung, \
+    SO_RechtlicheGrundlageBaubeschraenkung
 from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
@@ -602,6 +604,64 @@ class SO_SonstigesRecht(MixedGeometry, SO_Objekt):
                                           })
 
     name = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class SO_Bauverbotszone(MixedGeometry, SO_Objekt):
+    """ Bereich, in denen Verbote/Beschraenkungen fuer bauliche Anlagen bestehen (v5.3). """
+
+    __tablename__ = 'so_bauverbotszone'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizBauverbot, include_default=True))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizBauverbot", back_populates="so_bauverbotszone",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
+
+    rechtlicheGrundlage = Column(XPEnum(SO_RechtlicheGrundlageBauverbot, include_default=True))
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+@xp_version(versions=[XPlanVersion.SIX])
+class SO_Baubeschraenkung(MixedGeometry, SO_Objekt):
+    """ Bereich, in denen Verbote/Beschraenkungen fuer bauliche Anlagen bestehen (v6.0). """
+
+    __tablename__ = 'so_baubeschraenkung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizBaubeschraenkung, include_default=True))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizBaubeschraenkung", back_populates="so_baubeschraenkung",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
+
+    rechtlicheGrundlage = Column(XPEnum(SO_RechtlicheGrundlageBaubeschraenkung, include_default=True))
+    name = Column(String)
+    nummer = Column(String)
 
     @classmethod
     @fallback_renderer

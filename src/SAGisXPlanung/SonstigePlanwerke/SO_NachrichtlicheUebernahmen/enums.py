@@ -218,3 +218,37 @@ class SO_KlassifizNachSonstigemRecht(XPlanungEnumMixin, Enum):
     Lärmschutzbereich = 1700, XPlanVersion.SIX
     SchutzzoneLeitungstrasse = 1800, XPlanVersion.SIX
     Sonstiges = 9999
+
+
+class SO_KlassifizBauverbot(XPlanungEnumMixin, Enum):
+    """ Klassifizierung von Bauverboten/Baubeschraenkungen (v5.3). """
+
+    Bauverbotszone = 1000
+    Baubeschraenkungszone = 2000
+    Waldabstand = 3000
+    SonstigeBeschraenkung = 9999
+
+
+class SO_RechtlicheGrundlageBauverbot(XPlanungEnumMixin, Enum):
+    """ Rechtliche Grundlage eines Bauverbots bzw. einer Baubeschraenkung (v5.3). """
+
+    Luftverkehrsrecht = 1000
+    Strassenverkehrsrecht = 2000
+    SonstigesRecht = 9999
+
+
+class SO_KlassifizBaubeschraenkung(XPlanungEnumMixin, Enum):
+    """ Klassifizierung eines Bauverbots bzw. einer Baubeschraenkung (v6.0). """
+
+    Bauverbotszone = 1000
+    Baubeschraenkungszone = 2000
+    Waldabstand = 3000
+    SonstigeBeschraenkung = 9999
+
+
+class SO_RechtlicheGrundlageBaubeschraenkung(XPlanungEnumMixin, Enum):
+    """ Rechtliche Grundlage eines Bauverbots bzw. einer Baubeschraenkung (v6.0). """
+
+    Luftverkehrsrecht = 1000
+    Strassenverkehrsrecht = 2000
+    SonstigesRecht = 9999
