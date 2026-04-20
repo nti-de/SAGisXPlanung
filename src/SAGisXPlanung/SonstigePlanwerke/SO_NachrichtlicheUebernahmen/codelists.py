@@ -64,3 +64,12 @@ class SO_DetailKlassifizBaubeschraenkung(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "SO_DetailKlassifizBaubeschraenkung",
     }
+
+
+class SO_DetailKlassifizNachForstrecht(CodeListValue):
+    so_forstrecht = relationship("SO_Forstrecht", back_populates="detailArtDerFestlegung",
+                                 foreign_keys='SO_Forstrecht.detailArtDerFestlegung_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "SO_DetailKlassifizNachForstrecht",
+    }

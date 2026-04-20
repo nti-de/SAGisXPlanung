@@ -101,12 +101,13 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen import SO_Schi
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.codelists import \
     SO_DetailKlassifizNachDenkmalschutzrecht, SO_DetailKlassifizNachSchienenverkehrsrecht, \
     SO_DetailKlassifizNachLuftverkehrsrecht, SO_DetailKlassifizNachSonstigemRecht, \
-    SO_DetailKlassifizNachBodenschutzrecht, SO_DetailKlassifizBauverbot, SO_DetailKlassifizBaubeschraenkung
+    SO_DetailKlassifizNachBodenschutzrecht, SO_DetailKlassifizBauverbot, SO_DetailKlassifizBaubeschraenkung, \
+    SO_DetailKlassifizNachForstrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.data_types import SO_KomplexeZweckbestStrassenverkehr, \
     SO_KomplexeFestlegungGewaesser
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr, SO_Gewaesser, \
     SO_Wasserwirtschaft, SO_Luftverkehrsrecht, SO_SonstigesRecht, SO_Strassenverkehrsrecht, SO_Wasserrecht, \
-    SO_Bodenschutzrecht, SO_Bauverbotszone, SO_Baubeschraenkung
+    SO_Bodenschutzrecht, SO_Bauverbotszone, SO_Baubeschraenkung, SO_Forstrecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht, SO_SchutzgebietSonstigesRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.codelists import SO_DetailKlassifizSchutzgebietSonstRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
@@ -270,6 +271,7 @@ CLASSES = {
     'SO_SonstigesRecht': SO_SonstigesRecht,
     'SO_Bauverbotszone': SO_Bauverbotszone,
     'SO_Baubeschraenkung': SO_Baubeschraenkung,
+    'SO_Forstrecht': SO_Forstrecht,
     'SO_TextAbschnitt': SO_TextAbschnitt,
 
     # 5.1 LP_Basisobjekte
@@ -338,6 +340,7 @@ CLASSES = {
     'SO_DetailKlassifizNachSonstigemRecht': SO_DetailKlassifizNachSonstigemRecht,
     'SO_DetailKlassifizBauverbot': SO_DetailKlassifizBauverbot,
     'SO_DetailKlassifizBaubeschraenkung': SO_DetailKlassifizBaubeschraenkung,
+    'SO_DetailKlassifizNachForstrecht': SO_DetailKlassifizNachForstrecht,
     'SO_DetailKlassifizSchutzgebietSonstRecht': SO_DetailKlassifizSchutzgebietSonstRecht,
 
     'XP_DetailTechnVorkehrungImmissionsschutz': XP_DetailTechnVorkehrungImmissionsschutz,

@@ -6,7 +6,7 @@ from qgis.core import (QgsSymbol, QgsSimpleFillSymbolLayer, QgsSimpleLineSymbolL
                        QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsGeometryGeneratorSymbolLayer,
                        QgsMarkerSymbolLayer, QgsProperty, QgsSymbolLayer)
 
-from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float
+from sqlalchemy import Column, ForeignKey, Enum, String, Boolean, Integer, Float, ARRAY
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -26,6 +26,7 @@ from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
+from SAGisXPlanung.XPlan.enums import XP_EigentumsartWald, XP_ZweckbestimmungWald, XP_WaldbetretungTyp
 
 
 class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
@@ -660,6 +661,36 @@ class SO_Baubeschraenkung(MixedGeometry, SO_Objekt):
                                           })
 
     rechtlicheGrundlage = Column(XPEnum(SO_RechtlicheGrundlageBaubeschraenkung, include_default=True))
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
+class SO_Forstrecht(MixedGeometry, SO_Objekt):
+    """ Festlegung nach Forstrecht. """
+
+    __tablename__ = 'so_forstrecht'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(XP_EigentumsartWald, include_default=True))
+
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizNachForstrecht", back_populates="so_forstrecht",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
+
+    funktion = Column(ARRAY(Enum(XP_ZweckbestimmungWald)))
+    betreten = Column(ARRAY(Enum(XP_WaldbetretungTyp)))
+
     name = Column(String)
     nummer = Column(String)
 
