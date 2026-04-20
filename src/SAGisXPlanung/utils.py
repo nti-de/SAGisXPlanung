@@ -25,7 +25,8 @@ from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung, BP_Kom
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze, BP_BauLinie, \
     BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche, \
     BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche, BP_GemeinschaftsanlagenFlaeche, \
-    BP_NichtUeberbaubareGrundstuecksflaeche, BP_GebaeudeStellung, BP_AbstandsFlaeche, BP_AbweichungVonBaugrenze
+    BP_NichtUeberbaubareGrundstuecksflaeche, BP_GebaeudeStellung, BP_AbstandsFlaeche, BP_AbweichungVonBaugrenze, \
+    BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -166,6 +167,7 @@ CLASSES = {
     'BP_BesondererNutzungszweckFlaeche': BP_BesondererNutzungszweckFlaeche,
     'BP_AbstandsFlaeche': BP_AbstandsFlaeche,
     'BP_AbweichungVonBaugrenze': BP_AbweichungVonBaugrenze,
+    'BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche': BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche,
     'BP_GemeinbedarfsFlaeche': BP_GemeinbedarfsFlaeche,
     'BP_SpielSportanlagenFlaeche': BP_SpielSportanlagenFlaeche,
     'BP_GemeinschaftsanlagenFlaeche': BP_GemeinschaftsanlagenFlaeche,

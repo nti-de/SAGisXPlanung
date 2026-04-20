@@ -318,6 +318,22 @@ class BP_AbweichungVonBaugrenze(LineGeometry, BP_Objekt):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry))
 
 
+class BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Flaechenhafte Festlegung des Umfangs der Abweichung von der ueberbaubaren Grundstuecksflaeche. """
+
+    __tablename__ = 'bp_abweichung_ueberbaubare_grundstuecksflaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
 class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Festsetzung der überbaubaren Grundstücksfläche (§9, Abs. 1, Nr. 2 BauGB). """
 
