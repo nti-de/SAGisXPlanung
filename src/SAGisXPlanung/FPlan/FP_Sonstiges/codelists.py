@@ -16,7 +16,6 @@ FP_DetailZweckbestimmungNachLandesrechtCodelistAssoc = Table('assoc_detail_lande
     Column('codelist_id', UUID(as_uuid=True), ForeignKey('codelist_values.id'))
 )
 
-
 class XP_DetailTechnVorkehrungImmissionsschutz(CodeListValue):
     """ Detaillierte Klassifizierung der auf der Fläche zu treffenden baulichen oder
         sonstigen technischen Vorkehrungen. """
@@ -39,4 +38,16 @@ class FP_DetailZweckbestimmungNachLandesrecht(CodeListValue):
 
     __mapper_args__ = {
         "polymorphic_identity": "FP_DetailZweckbestimmungNachLandesrecht"
+    }
+
+
+class FP_DetailMassnahmeKlimawandel(CodeListValue):
+    codelist_user = relationship(
+        "FP_AnpassungKlimawandel",
+        back_populates="detailMassnahme",
+        foreign_keys='FP_AnpassungKlimawandel.detailMassnahme_id'
+    )
+
+    __mapper_args__ = {
+        "polymorphic_identity": "FP_DetailMassnahmeKlimawandel"
     }

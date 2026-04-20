@@ -1,9 +1,11 @@
 import logging
 
 from sqlalchemy import Column, ForeignKey, String, Boolean
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
+from SAGisXPlanung.FPlan.FP_Sonstiges.enums import FP_MassnahmeKlimawandelTypen
 from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_SPEZiele
@@ -58,6 +60,33 @@ class FP_AusgleichsFlaeche(MixedGeometry, FP_Objekt):
     refLandschaftsplan = relationship("XP_ExterneReferenz", back_populates="fp_ausgleichsflaeche_plan",
                                       cascade="all, delete", passive_deletes=True, uselist=False,
                                       foreign_keys='XP_ExterneReferenz.fp_ausgleichsflaeche_plan_id')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
+
+
+class FP_AnpassungKlimawandel(MixedGeometry, FP_Objekt):
+    """ Massnahmen zur Anpassung an den Klimawandel (§ 5 Abs. 2 Nr. 2c BauGB). """
+
+    __tablename__ = 'fp_anpassung_klimawandel'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    massnahme = Column(XPEnum(FP_MassnahmeKlimawandelTypen, include_default=True))
+    detailMassnahme_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailMassnahme = relationship(
+        'FP_DetailMassnahmeKlimawandel',
+        back_populates='codelist_user',
+        foreign_keys=[detailMassnahme_id],
+        info={
+            'form-type': 'inline'
+        }
+    )
 
     @classmethod
     @fallback_renderer

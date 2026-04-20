@@ -1,5 +1,6 @@
 from enum import Enum
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 
 
@@ -35,3 +36,25 @@ class FP_ZweckbestimmungPrivilegiertesVorhaben(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
     StandortEinzelhof = 99990
     BebauteFlaecheAussenbereich = 99991
+
+
+class FP_MassnahmeKlimawandelTypen(XPlanungEnumMixin, Enum):
+    """ Klassifikation von Massnahmen zur Anpassung an den Klimawandel. """
+
+    def __new__(cls, *args, **kwds):
+        obj = object.__new__(cls)
+        obj._value_ = args[0]
+        return obj
+
+    def __init__(self, _: int, version: XPlanVersion = None):
+        self._xplan_version = version
+
+    @property
+    def version(self) -> XPlanVersion:
+        return self._xplan_version
+
+    ErhaltFreiflaechen = 1000
+    ErhaltPrivGruen = 10000
+    ErhaltOeffentlGruen = 10001
+    ErhaltKaltluftschneise = 10002, XPlanVersion.SIX
+    SonstMassnahme = 9999

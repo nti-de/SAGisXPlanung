@@ -63,9 +63,10 @@ from SAGisXPlanung.FPlan.FP_Gemeinbedarf.feature_types import FP_Gemeinbedarf, F
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.data_types import FP_KomplexeZweckbestGruen, \
     FP_KomplexeZweckbestLandwirtschaft, FP_KomplexeZweckbestWald
 from SAGisXPlanung.FPlan.FP_Landwirtschaft_Wald_und_Gruen.feature_types import FP_Gruen, FP_Landwirtschaft, FP_WaldFlaeche
-from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung, FP_AusgleichsFlaeche
+from SAGisXPlanung.FPlan.FP_Naturschutz.feature_types import FP_SchutzPflegeEntwicklung, FP_AusgleichsFlaeche, \
+    FP_AnpassungKlimawandel
 from SAGisXPlanung.FPlan.FP_Sonstiges.codelists import XP_DetailTechnVorkehrungImmissionsschutz, \
-    FP_DetailZweckbestimmungNachLandesrecht
+    FP_DetailZweckbestimmungNachLandesrecht, FP_DetailMassnahmeKlimawandel
 from SAGisXPlanung.FPlan.FP_Sonstiges.feature_types import FP_GenerischesObjekt, FP_Kennzeichnung, \
     FP_PrivilegiertesVorhaben, FP_Nutzungsbeschraenkung, FP_NutzungsbeschraenkungsFlaeche, FP_FlaecheOhneDarstellung, \
     FP_VorbehalteFlaeche, FP_UnverbindlicheVormerkung, FP_DarstellungNachLandesrecht
@@ -247,6 +248,7 @@ CLASSES = {
     'FP_VorbehalteFlaeche': FP_VorbehalteFlaeche,
     'FP_UnverbindlicheVormerkung': FP_UnverbindlicheVormerkung,
     'FP_DarstellungNachLandesrecht': FP_DarstellungNachLandesrecht,
+    'FP_AnpassungKlimawandel': FP_AnpassungKlimawandel,
     'FP_ZentralerVersorgungsbereich': FP_ZentralerVersorgungsbereich,
 
     'SO_Objekt': SO_Objekt,
@@ -322,6 +324,7 @@ CLASSES = {
     'FP_DetailZweckbestVerEntsorgung': FP_DetailZweckbestVerEntsorgung,
     'FP_DetailZweckbestGemeinbedarf': FP_DetailZweckbestGemeinbedarf,
     'FP_DetailZweckbestimmungNachLandesrecht': FP_DetailZweckbestimmungNachLandesrecht,
+    'FP_DetailMassnahmeKlimawandel': FP_DetailMassnahmeKlimawandel,
     'FP_ZentralerVersorgungsbereichAuspraegung': FP_ZentralerVersorgungsbereichAuspraegung,
 
     'SO_DetailKlassifizNachDenkmalschutzrecht': SO_DetailKlassifizNachDenkmalschutzrecht,
