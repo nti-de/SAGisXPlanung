@@ -35,3 +35,11 @@ class SO_KlassifizSchutzgebietWasserrecht(XPlanungEnumMixin, Enum):
     Heilquellenschutzgebiet = 2000
     Sonstiges = 9999
 
+
+class SO_KlassifizSchutzgebietSonstRecht(XPlanungEnumMixin, Enum):
+    """ Klassifizierung von Schutzgebieten nach sonstigem Recht (v5.3). """
+
+    Laermschutzbereich = 1000
+    SchutzzoneLeitungstrasse = 2000
+    Sonstiges = 9999
+

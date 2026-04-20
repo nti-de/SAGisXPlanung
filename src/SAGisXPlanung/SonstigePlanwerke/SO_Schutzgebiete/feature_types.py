@@ -4,13 +4,17 @@ from qgis.core import (QgsSymbol, QgsSimpleLineSymbolLayer, QgsUnitTypes, QgsWkb
                        QgsSingleSymbolRenderer, QgsSymbolLayerUtils)
 
 from sqlalchemy import Column, ForeignKey, Enum, String
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_KlassifizSchutzgebietWasserrecht, SO_SchutzzonenWasserrecht
+from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.codelists import SO_DetailKlassifizSchutzgebietSonstRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.enums import SO_SchutzzonenNaturschutzrecht
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.enums import XP_KlassifizSchutzgebietNaturschutzrecht
+from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.enums import SO_KlassifizSchutzgebietSonstRecht
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
@@ -105,3 +109,30 @@ class SO_SchutzgebietWasserrecht(PolygonGeometry, SO_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class SO_SchutzgebietSonstigesRecht(MixedGeometry, SO_Objekt):
+    """ Schutzgebiet nach sonstigem Recht (nur XPlanung 5.3). """
+
+    __tablename__ = 'so_schutzgebiet_sonstiges_recht'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    artDerFestlegung = Column(XPEnum(SO_KlassifizSchutzgebietSonstRecht, include_default=True))
+    detailArtDerFestlegung_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    detailArtDerFestlegung = relationship("SO_DetailKlassifizSchutzgebietSonstRecht",
+                                          back_populates="so_schutzgebiet_sonstiges_recht",
+                                          foreign_keys=[detailArtDerFestlegung_id], info={
+                                              'form-type': 'inline'
+                                          })
+    name = Column(String)
+    nummer = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))

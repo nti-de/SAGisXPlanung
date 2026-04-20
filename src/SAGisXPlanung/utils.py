@@ -107,7 +107,8 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.data_types imp
 from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types import SO_Strassenverkehr, SO_Gewaesser, \
     SO_Wasserwirtschaft, SO_Luftverkehrsrecht, SO_SonstigesRecht, SO_Strassenverkehrsrecht, SO_Wasserrecht, \
     SO_Bodenschutzrecht
-from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht
+from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht, SO_SchutzgebietSonstigesRecht
+from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.codelists import SO_DetailKlassifizSchutzgebietSonstRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
     XP_Nutzungsschablone
@@ -258,6 +259,7 @@ CLASSES = {
     'SO_Bodenschutzrecht': SO_Bodenschutzrecht,
     'SO_Luftverkehrsrecht': SO_Luftverkehrsrecht,
     'SO_SchutzgebietWasserrecht': SO_SchutzgebietWasserrecht,
+    'SO_SchutzgebietSonstigesRecht': SO_SchutzgebietSonstigesRecht,
     'SO_SchutzgebietNaturschutzrecht': SO_SchutzgebietNaturschutzrecht,
     'SO_Wasserwirtschaft': SO_Wasserwirtschaft,
     'SO_Gewaesser': SO_Gewaesser,
@@ -332,6 +334,7 @@ CLASSES = {
     'SO_DetailKlassifizNachSchienenverkehrsrecht': SO_DetailKlassifizNachSchienenverkehrsrecht,
     'SO_DetailKlassifizNachLuftverkehrsrecht': SO_DetailKlassifizNachLuftverkehrsrecht,
     'SO_DetailKlassifizNachSonstigemRecht': SO_DetailKlassifizNachSonstigemRecht,
+    'SO_DetailKlassifizSchutzgebietSonstRecht': SO_DetailKlassifizSchutzgebietSonstRecht,
 
     'XP_DetailTechnVorkehrungImmissionsschutz': XP_DetailTechnVorkehrungImmissionsschutz,
 
