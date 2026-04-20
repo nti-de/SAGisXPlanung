@@ -302,6 +302,22 @@ class BP_AbstandsFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
+class BP_AbweichungVonBaugrenze(LineGeometry, BP_Objekt):
+    """ Linienhafte Festlegung des Umfangs der Abweichung von der Baugrenze. """
+
+    __tablename__ = 'bp_abweichung_baugrenze'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry))
+
+
 class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Festsetzung der überbaubaren Grundstücksfläche (§9, Abs. 1, Nr. 2 BauGB). """
 
