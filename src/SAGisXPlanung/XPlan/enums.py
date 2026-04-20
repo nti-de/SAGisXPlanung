@@ -83,6 +83,25 @@ class XP_Rechtsstand(XPlanungEnumMixin, Enum):
     Fortfallend = 3000
 
 
+class XP_GrenzeTypen(XPlanungEnumMixin, Enum):
+    """ Aufzaehlung der verschiedenen Typen von Grenzen. """
+
+    Bundesgrenze = 1000
+    Landesgrenze = 1100
+    Regierungsbezirksgrenze = 1200
+    Bezirksgrenze = 1250
+    Kreisgrenze = 1300
+    Gemeindegrenze = 1400
+    Verbandsgemeindegrenze = 1450
+    Samtgemeindegrenze = 1500
+    Mitgliedsgemeindegrenze = 1510
+    Amtsgrenze = 1550
+    Stadtteilgrenze = 1600
+    VorgeschlageneGrundstuecksgrenze = 2000
+    GrenzeBestehenderBebauungsplan = 2100
+    SonstGrenze = 9999
+
+
 class XP_AllgArtDerBaulNutzung(XPlanungEnumMixin, Enum):
     """ Spezifikation der allgemeinen Art der baulichen Nutzung """
 

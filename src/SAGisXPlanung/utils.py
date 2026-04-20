@@ -111,8 +111,9 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.feature_types 
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete import SO_SchutzgebietWasserrecht, SO_SchutzgebietSonstigesRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.codelists import SO_DetailKlassifizSchutzgebietSonstRecht
 from SAGisXPlanung.SonstigePlanwerke.SO_Schutzgebiete.feature_types import SO_SchutzgebietNaturschutzrecht
-from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.codelists import SO_DetailKlassifizGelaendemorphologie
-from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.feature_types import SO_Gelaendemorphologie
+from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.codelists import SO_DetailKlassifizGelaendemorphologie, \
+    SO_SonstGrenzeTypen
+from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.feature_types import SO_Gelaendemorphologie, SO_Grenze
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt, XP_PPO, XP_PTO, \
     XP_Nutzungsschablone
 from SAGisXPlanung.XPlan.XP_Raster.feature_types import XP_Rasterdarstellung
@@ -265,6 +266,7 @@ CLASSES = {
     'SO_SchutzgebietSonstigesRecht': SO_SchutzgebietSonstigesRecht,
     'SO_SchutzgebietNaturschutzrecht': SO_SchutzgebietNaturschutzrecht,
     'SO_Gelaendemorphologie': SO_Gelaendemorphologie,
+    'SO_Grenze': SO_Grenze,
     'SO_Wasserwirtschaft': SO_Wasserwirtschaft,
     'SO_Gewaesser': SO_Gewaesser,
     'SO_Wasserrecht': SO_Wasserrecht,
@@ -349,6 +351,7 @@ CLASSES = {
     'SO_DetailKlassifizNachForstrecht': SO_DetailKlassifizNachForstrecht,
     'SO_DetailKlassifizSchutzgebietSonstRecht': SO_DetailKlassifizSchutzgebietSonstRecht,
     'SO_DetailKlassifizGelaendemorphologie': SO_DetailKlassifizGelaendemorphologie,
+    'SO_SonstGrenzeTypen': SO_SonstGrenzeTypen,
 
     'XP_DetailTechnVorkehrungImmissionsschutz': XP_DetailTechnVorkehrungImmissionsschutz,
 
