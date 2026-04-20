@@ -180,6 +180,24 @@ class BP_AbstandsMass(LineGeometry, BP_Objekt):
         return generic_objects_renderer(geom_type)
 
 
+class BP_FestsetzungNachLandesrecht(MixedGeometry, BP_Objekt):
+    """ Planinhalt mit Festsetzung nach Landesrecht. """
+
+    __tablename__ = 'bp_festsetzung_landesrecht'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    kurzbeschreibung = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
+
+
 class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Flächen für Kennzeichnungen gemäß §9 Abs. 5 BauGB. """
 

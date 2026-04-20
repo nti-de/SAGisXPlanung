@@ -42,7 +42,8 @@ from SAGisXPlanung.BPlan.BP_Laerm.feature_types import BP_RichtungssektorGrenze,
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
     BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche, BP_AusgleichsMassnahme, BP_EingriffsBereich
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
-    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass
+    BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass, \
+    BP_FestsetzungNachLandesrecht
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz, BP_TechnischeMassnahmenFlaeche
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
@@ -209,6 +210,7 @@ CLASSES = {
     'BP_VeraenderungssperreDaten': BP_VeraenderungssperreDaten,
     'BP_NutzungsartenGrenze': BP_NutzungsartenGrenze,
     'BP_AbstandsMass': BP_AbstandsMass,
+    'BP_FestsetzungNachLandesrecht': BP_FestsetzungNachLandesrecht,
     'BP_BereichOhneEinAusfahrtLinie': BP_BereichOhneEinAusfahrtLinie,
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
     'BP_EinfahrtsbereichLinie': BP_EinfahrtsbereichLinie,
