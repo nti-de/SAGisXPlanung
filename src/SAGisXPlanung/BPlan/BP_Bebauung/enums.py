@@ -146,3 +146,18 @@ class BP_GebaeudeStellungTypen(XPlanungEnumMixin, Enum):
     Firstrichtung = 1000
     Dachneigungsrichtung = 2000
     StellungBaulAnlagen = 3000
+
+
+class BP_SpezielleBauweiseTypen(XPlanungEnumMixin, Enum):
+    """ Aufzaehlung verschiedener Typen spezieller Bauweisen. """
+
+    Durchfahrt = 1000
+    Durchgang = 1100
+    DurchfahrtDurchgang = 1200
+    Auskragung = 1300
+    Arkade = 1400
+    Luftgeschoss = 1500
+    Bruecke = 1600
+    Tunnel = 1700
+    Rampe = 1800
+    Sonstiges = 9999

@@ -20,7 +20,7 @@ from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise
                                                     BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
                                                     BP_TypWohngebaeudeFlaeche,
                                                     BP_ZweckbestimmungGemeinschaftsanlagen,
-                                                    BP_GebaeudeStellungTypen)
+                                                    BP_GebaeudeStellungTypen, BP_SpezielleBauweiseTypen)
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, TableCellFactory
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
@@ -660,6 +660,35 @@ class BP_RegelungVergnuegungsstaetten(PolygonGeometry, UeberlagerungsObjekt, BP_
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     zulaessigkeit = Column(XPEnum(BP_Zulaessigkeit, include_default=True))
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
+class BP_SpezielleBauweise(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festsetzung der speziellen Bauweise oder baulichen Besonderheit. """
+
+    __tablename__ = 'bp_spezielle_bauweise'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    typ = Column(XPEnum(BP_SpezielleBauweiseTypen, include_default=True))
+
+    sonstTyp_id = Column(UUID(as_uuid=True), ForeignKey('codelist_values.id'))
+    sonstTyp = relationship('BP_SpezielleBauweiseSonstTypen', back_populates='bp_spezielle_bauweise',
+                            foreign_keys=[sonstTyp_id], info={
+                                'form-type': 'inline'
+                            })
+
+    Bmin = Column(Length)
+    Bmax = Column(Length)
+    Tmin = Column(Length)
+    Tmax = Column(Length)
 
     @classmethod
     @fallback_renderer

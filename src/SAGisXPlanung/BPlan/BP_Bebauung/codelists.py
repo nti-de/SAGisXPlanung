@@ -67,3 +67,12 @@ class BP_NutzungNichtUeberbaubGrundstFlaeche(CodeListValue):
     __mapper_args__ = {
         "polymorphic_identity": "BP_NutzungNichtUeberbaubGrundstFlaeche",
     }
+
+
+class BP_SpezielleBauweiseSonstTypen(CodeListValue):
+    bp_spezielle_bauweise = relationship("BP_SpezielleBauweise", back_populates="sonstTyp",
+                                         foreign_keys='BP_SpezielleBauweise.sonstTyp_id')
+
+    __mapper_args__ = {
+        "polymorphic_identity": "BP_SpezielleBauweiseSonstTypen",
+    }
