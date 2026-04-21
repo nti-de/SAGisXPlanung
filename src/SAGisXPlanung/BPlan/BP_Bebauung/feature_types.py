@@ -440,6 +440,22 @@ class BP_GebaeudeFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
 
 
+class BP_PersGruppenBestimmteFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Flaeche fuer Wohngebaeude fuer Personengruppen mit besonderem Wohnbedarf. """
+
+    __tablename__ = 'bp_persgruppen_bestimmte_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
 class BP_BauGrenze(LineGeometry, BP_Objekt):
     """ Festsetzung einer Baugrenze (§9 Abs. 1 Nr. 2 BauGB, §22 und 23 BauNVO). """
 
