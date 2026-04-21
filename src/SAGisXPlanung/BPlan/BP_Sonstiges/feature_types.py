@@ -5,12 +5,15 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpl
                        QgsSimpleLineSymbolLayer, QgsSimpleMarkerSymbolLayer, Qgis, QgsSimpleMarkerSymbolLayerBase)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt, QSize
-from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY, Float
+from sqlalchemy import Column, ForeignKey, Boolean, String, Enum, ARRAY, Float, Date
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 
+from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen, BP_AbstandsMassTypen
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
-from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung
+from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung, XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
     UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Length, GeometryType, XPEnum, Angle
@@ -214,6 +217,42 @@ class BP_FestsetzungNachLandesrecht(MixedGeometry, BP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         return generic_objects_renderer(geom_type)
+
+
+class BP_Veraenderungssperre(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Raeumliche Ausweisung einer Veraenderungssperre. """
+
+    __tablename__ = 'bp_veraenderungssperre'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    veraenderungssperreBeschlussDatum = Column(Date, info={
+        'xplan_version': XPlanVersion.FIVE_THREE,
+    })
+    veraenderungssperreStartDatum = Column(Date, info={
+        'xplan_version': XPlanVersion.FIVE_THREE,
+    })
+    gueltigkeitsDatum = Column(Date, info={
+        'xplan_version': XPlanVersion.FIVE_THREE,
+    })
+    verlaengerung = Column(XPEnum(XP_VerlaengerungVeraenderungssperre, include_default=True), info={
+        'xplan_version': XPlanVersion.FIVE_THREE,
+    })
+
+    daten_id = Column(UUID(as_uuid=True), ForeignKey('bp_veraenderungssperre_daten.id'), info={
+        'xplan_version': XPlanVersion.SIX,
+    })
+    daten = relationship("BP_VeraenderungssperreDaten", info={
+        'xplan_version': XPlanVersion.SIX,
+    })
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
 
 
 class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
