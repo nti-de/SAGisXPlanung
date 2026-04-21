@@ -54,6 +54,24 @@ class BP_FlaecheOhneFestsetzung(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
+class BP_FreiFlaeche(PolygonGeometry, BP_Objekt):
+    """ Umgrenzung von Flaechen, die von Bebauung freizuhalten sind. """
+
+    __tablename__ = 'bp_freiflaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    nutzung = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
+
+
 class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Festsetzung von Flächen, die mit Geh-, Fahr-, und Leitungsrechten zugunsten der Allgemeinheit, eines
         Erschließungsträgers, oder eines beschränkten Personenkreises belastet sind (§ 9 Abs. 1 Nr. 21 und Abs. 6
