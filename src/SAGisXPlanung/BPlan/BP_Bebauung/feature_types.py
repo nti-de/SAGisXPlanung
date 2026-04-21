@@ -649,6 +649,24 @@ class BP_NebenanlagenAusschlussFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
 
+class BP_RegelungVergnuegungsstaetten(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Festsetzung zur Zulaessigkeit von Vergnuegungsstaetten gemaess BauGB. """
+
+    __tablename__ = 'bp_regelung_vergnuegungsstaetten'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    zulaessigkeit = Column(XPEnum(BP_Zulaessigkeit, include_default=True))
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
 class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Fläche für Nebenanlagen, die auf Grund anderer Vorschriften für die Nutzung von Grundstücken erforderlich sind,
     wie Spiel-, Freizeit- und Erholungsflächen sowie die Fläche für Stellplätze und Garagen mit ihren Einfahrten

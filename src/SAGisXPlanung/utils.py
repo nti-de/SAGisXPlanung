@@ -26,7 +26,7 @@ from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaec
     BP_BesondererNutzungszweckFlaeche, BP_NebenanlagenFlaeche, BP_UeberbaubareGrundstuecksFlaeche, \
     BP_NebenanlagenAusschlussFlaeche, BP_WohngebaeudeFlaeche, BP_GemeinschaftsanlagenFlaeche, \
     BP_NichtUeberbaubareGrundstuecksflaeche, BP_GebaeudeStellung, BP_AbstandsFlaeche, BP_AbweichungVonBaugrenze, \
-    BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche, BP_GebaeudeFlaeche
+    BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche, BP_GebaeudeFlaeche, BP_RegelungVergnuegungsstaetten
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.data_types import BP_KomplexeZweckbestSpielSportanlage, \
     BP_KomplexeZweckbestGemeinbedarf
 from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types import BP_GemeinbedarfsFlaeche, \
@@ -217,6 +217,7 @@ CLASSES = {
     'BP_EinfahrtPunkt': BP_EinfahrtPunkt,
     'BP_EinfahrtsbereichLinie': BP_EinfahrtsbereichLinie,
     'BP_NebenanlagenFlaeche': BP_NebenanlagenFlaeche,
+    'BP_RegelungVergnuegungsstaetten': BP_RegelungVergnuegungsstaetten,
     'BP_Immissionsschutz': BP_Immissionsschutz,
     'BP_TechnischeMassnahmenFlaeche': BP_TechnischeMassnahmenFlaeche,
     'BP_AbgrabungsFlaeche': BP_AbgrabungsFlaeche,
