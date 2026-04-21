@@ -4,10 +4,12 @@ from sqlalchemy import Column, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from SAGisXPlanung import Base
+from SAGisXPlanung import Base, XPlanVersion
+from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.core.mixins.mixins import FeatureType, ElementOrderMixin, RelationshipMixin
 
 
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
 class XP_Rasterdarstellung(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     """ Georeferenzierte Rasterdarstellung eines Plans. Das über refScan referierte Rasterbild zeigt den Basisplan,
         dessen Geltungsbereich durch den Geltungsbereich des Gesamtplans (Attribut geltungsbereich von XP_Plan)
@@ -25,7 +27,8 @@ class XP_Rasterdarstellung(FeatureType, RelationshipMixin, ElementOrderMixin, Ba
     # [1..*]
     refScan = relationship("XP_ExterneReferenz", back_populates="xp_rasterdarstellung_scan",
                            cascade="all, delete", passive_deletes=True,
-                           foreign_keys='XP_ExterneReferenz.xp_rasterdarstellung_scan_id')
+                           foreign_keys='XP_ExterneReferenz.xp_rasterdarstellung_scan_id',
+                           info={'nullable': False})
     # [0..1]
     refText = relationship("XP_ExterneReferenz", back_populates="xp_rasterdarstellung_text",
                            cascade="all, delete", passive_deletes=True, uselist=False,

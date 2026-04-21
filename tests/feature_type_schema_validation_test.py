@@ -14,6 +14,7 @@ from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_PlanArt
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
 from SAGisXPlanung.GML.GMLWriter import GMLWriter
 from SAGisXPlanung.core.mixins.mixins import FeatureType
+from SAGisXPlanung.core.abstract_types import is_abstract_in_version
 from SAGisXPlanung.utils import CLASSES, OBJECT_BASE_TYPES, PLAN_BASE_TYPES, BEREICH_BASE_TYPES
 
 
@@ -226,6 +227,9 @@ def test_feature_type_export_validates_xsd(model_cls, schema_version, xplan_sche
 
     if hasattr(model_cls, "xp_versions") and version not in model_cls.xp_versions:
         pytest.skip(f"{model_cls.__name__} is not part of schema version {schema_version}")
+
+    if is_abstract_in_version(model_cls, version):
+        pytest.skip(f"{model_cls.__name__} is abstract in schema version {schema_version}")
 
     writer = GMLWriter(_minimal_plan(), version=version)
     feature_instance = _create_instance(model_cls, version, depth=0, stack=set())
