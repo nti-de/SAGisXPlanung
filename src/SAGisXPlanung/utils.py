@@ -36,7 +36,7 @@ from SAGisXPlanung.BPlan.BP_Gemeinbedarf_Spiel_und_Sportanlagen.feature_types im
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.data_types import BP_KomplexeZweckbestGruen, \
     BP_KomplexeZweckbestLandwirtschaft, BP_KomplexeZweckbestWald
 from SAGisXPlanung.BPlan.BP_Landwirtschaft_Wald_und_Gruenflaechen.feature_types import BP_GruenFlaeche, \
-    BP_LandwirtschaftsFlaeche, BP_WaldFlaeche
+    BP_LandwirtschaftsFlaeche, BP_WaldFlaeche, BP_KleintierhaltungFlaeche
 from SAGisXPlanung.BPlan.BP_Laerm.data_types import BP_EmissionskontingentLaerm, BP_EmissionskontingentLaermGebiet, \
     BP_Richtungssektor
 from SAGisXPlanung.BPlan.BP_Laerm.feature_types import BP_RichtungssektorGrenze, BP_ZusatzkontingentLaerm, \
@@ -177,6 +177,7 @@ CLASSES = {
     'BP_GemeinschaftsanlagenFlaeche': BP_GemeinschaftsanlagenFlaeche,
     'BP_NichtUeberbaubareGrundstuecksflaeche': BP_NichtUeberbaubareGrundstuecksflaeche,
     'BP_GruenFlaeche': BP_GruenFlaeche,
+    'BP_KleintierhaltungFlaeche': BP_KleintierhaltungFlaeche,
     'BP_LandwirtschaftsFlaeche': BP_LandwirtschaftsFlaeche,
     'BP_WaldFlaeche': BP_WaldFlaeche,
     'BP_StrassenVerkehrsFlaeche': BP_StrassenVerkehrsFlaeche,

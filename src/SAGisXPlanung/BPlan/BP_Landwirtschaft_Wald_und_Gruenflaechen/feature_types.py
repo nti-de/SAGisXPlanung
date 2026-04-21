@@ -103,6 +103,22 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
 
+class BP_KleintierhaltungFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
+    """ Flaeche fuer Anlagen der Kleintierhaltung. """
+
+    __tablename__ = 'bp_kleintierhaltung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
 class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Festsetzungen für die Landwirtschaft (§ 9, Abs. 1, Nr. 18a BauGB) """
 
