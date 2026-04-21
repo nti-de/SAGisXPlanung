@@ -106,7 +106,7 @@ class FP_SpielSportanlage(MixedGeometry, FP_Objekt):
                                            'xplan_attribute': 'zweckbestimmung'
                                        })
 
-    zugunstenVon = Column(String)
+    zugunstenVon = Column(String, info={'xplan_version': XPlanVersion.SIX})
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

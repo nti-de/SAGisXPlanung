@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <!--Erzeugt mit KIT (www.kit.edu) UmlToXmlTransformation-Software, Erstellungsdatum: 05.11.2020 15:14:06-->
 <schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xplan="http://www.xplanung.de/xplangml/5/3" targetNamespace="http://www.xplanung.de/xplangml/5/3" xmlns:gml="http://www.opengis.net/gml/3.2" elementFormDefault="qualified" version="5.3">
-  <include schemaLocation="../../../../../../Downloads/XPlanGML_5_3 XML-Schema Dateien(1)/XPlanGML_Basisschema.xsd" />
-  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="../../../../../../Downloads/XPlanGML_5_3 XML-Schema Dateien(1)/gmlProfile/gmlProfilexplan.xsd" />
+  <include schemaLocation="XPlanGML_Basisschema.xsd" />
+  <import namespace="http://www.opengis.net/gml/3.2" schemaLocation="gmlProfile/gmlProfilexplan.xsd" />
   <!--=========================================================================================-->
   <!--SO_Bereich-->
   <!--=========================================================================================-->

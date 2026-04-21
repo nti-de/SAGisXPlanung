@@ -44,10 +44,6 @@ class BP_RichtungssektorGrenze(LineGeometry, BP_Objekt):
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
-    @classmethod
-    def avoid_export(cls):
-        return []
-
 
 class BP_ZusatzkontingentLaerm(PointGeometry, BP_Objekt):
     """ Parametrische Spezifikation zusaetzlicher Laermemissionskontingente. """
@@ -77,10 +73,6 @@ class BP_ZusatzkontingentLaerm(PointGeometry, BP_Objekt):
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
-    @classmethod
-    def avoid_export(cls):
-        return []
-
 
 class BP_ZusatzkontingentLaermFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Flaechenhafte Spezifikation zusaetzlicher Laermemissionskontingente. """
@@ -94,7 +86,9 @@ class BP_ZusatzkontingentLaermFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_
 
     bezeichnung = Column(String)
     richtungssektor = relationship('BP_Richtungssektor', back_populates='zusatzkontingentFlaeche',
-                                   cascade='all, delete', passive_deletes=True, uselist=False)
+                                   cascade='all, delete', passive_deletes=True, uselist=False, info={
+                                       'nullable': False
+                                   })
 
     @classmethod
     def symbol(cls):
@@ -114,6 +108,3 @@ class BP_ZusatzkontingentLaermFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(16, 16))
 
-    @classmethod
-    def avoid_export(cls):
-        return []

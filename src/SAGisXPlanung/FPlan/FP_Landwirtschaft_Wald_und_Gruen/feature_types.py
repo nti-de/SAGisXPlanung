@@ -36,7 +36,7 @@ class FP_Gruen(MixedGeometry, FP_Objekt):
                                        })
 
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
-    zugunstenVon = Column(String)
+    zugunstenVon = Column(String, info={'xplan_version': XPlanVersion.SIX})
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:

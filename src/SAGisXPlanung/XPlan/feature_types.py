@@ -382,7 +382,8 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
     gehoertZuBereich_id = Column(UUID(as_uuid=True), ForeignKey('xp_bereich.id', ondelete='CASCADE'))
     gehoertZuBereich = relationship('XP_Bereich', back_populates='planinhalt', info={
         'link': 'xlink-only',
-        'form-type': 'hidden'
+        'form-type': 'hidden',
+        'nullable': False
     })
 
     wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt",

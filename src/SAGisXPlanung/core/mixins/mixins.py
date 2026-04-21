@@ -106,16 +106,32 @@ class PointGeometry(GeometryObject):
 
     @classmethod
     def hidden_inputs(cls):
-        return ['flaechenschluss']
+        parent = getattr(super(), "hidden_inputs", None)
+        hidden_inputs = parent() if parent else []
+        return hidden_inputs + ['flaechenschluss', 'flussrichtung']
 
     @classmethod
     def avoid_export(cls):
-        return ['flaechenschluss']
+        parent = getattr(super(), "avoid_export", None)
+        avoid_export = parent() if parent else []
+        return avoid_export + ['flaechenschluss', 'flussrichtung']
 
 
 class PolygonGeometry(GeometryObject):
     """ Mixin zum Klassifizieren von Klassen als Flächengeometrien"""
     __geometry_type__ = QgsWkbTypes.GeometryType.PolygonGeometry
+
+    @classmethod
+    def hidden_inputs(cls):
+        parent = getattr(super(), "hidden_inputs", None)
+        hidden_inputs = parent() if parent else []
+        return hidden_inputs + ['flussrichtung', 'nordwinkel']
+
+    @classmethod
+    def avoid_export(cls):
+        parent = getattr(super(), "avoid_export", None)
+        avoid_export = parent() if parent else []
+        return avoid_export + ['flussrichtung', 'nordwinkel']
 
 
 class LineGeometry(GeometryObject):
@@ -125,12 +141,12 @@ class LineGeometry(GeometryObject):
     @classmethod
     def hidden_inputs(cls):
         h = super(LineGeometry, cls).hidden_inputs()
-        return h + ['flaechenschluss']
+        return h + ['flaechenschluss', 'flussrichtung', 'nordwinkel']
 
     @classmethod
     def avoid_export(cls):
         h = super(LineGeometry, cls).avoid_export()
-        return h + ['flaechenschluss']
+        return h + ['flaechenschluss', 'flussrichtung', 'nordwinkel']
 
 
 class FlaechenschlussObjekt:

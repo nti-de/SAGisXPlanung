@@ -191,7 +191,7 @@ class BP_AbstandsMass(LineGeometry, BP_Objekt):
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     typ = Column(XPEnum(BP_AbstandsMassTypen, include_default=True))
-    wert = Column(Float)
+    wert = Column(Length)  # TODO: customizable UOM, this can take m or grad as unit
     startWinkel = Column(Angle)
     endWinkel = Column(Angle)
 
@@ -265,6 +265,7 @@ class BP_Veraenderungssperre(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     })
     daten = relationship("BP_VeraenderungssperreDaten", info={
         'xplan_version': XPlanVersion.SIX,
+        'nullable': False
     })
 
     @classmethod

@@ -318,6 +318,7 @@ class BP_AbweichungVonBaugrenze(LineGeometry, BP_Objekt):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry))
 
 
+@xp_version(versions=[XPlanVersion.SIX])
 class BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Flaechenhafte Festlegung des Umfangs der Abweichung von der ueberbaubaren Grundstuecksflaeche. """
 
@@ -327,6 +328,18 @@ class BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche(PolygonGeometry, Ueberlag
     }
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
+@xp_version(versions=[XPlanVersion.FIVE_THREE])
+class BP_AbweichungVonUeberbaubererGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Flaechenhafte Festlegung des Umfangs der Abweichung von der ueberbaubaren Grundstuecksflaeche. """
+
+    __table__ = BP_AbweichungVonUeberbaubarerGrundstuecksFlaeche.__table__
 
     @classmethod
     @fallback_renderer

@@ -4,7 +4,7 @@
   <include schemaLocation="XPlanGML_Basisschema.xsd" />
   <include schemaLocation="XPlanGML_BPlan.xsd" />
   <include schemaLocation="XPlanGML_FPlan.xsd" />
-<!--  <include schemaLocation="XPlanGML_Raumordnungsplan.xsd" />-->
-<!--  <include schemaLocation="XPlanGML_LPlan_Kernmodell.xsd" />-->
-<!--  <include schemaLocation="XPlanGML_SonstigePlanwerke.xsd" />-->
+  <include schemaLocation="XPlanGML_Raumordnungsplan.xsd" />
+  <include schemaLocation="XPlanGML_LPlan_Kernmodell.xsd" />
+  <include schemaLocation="XPlanGML_SonstigePlanwerke.xsd" />
 </schema>

@@ -24,7 +24,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_NachrichtlicheUebernahmen.enums import S
 from SAGisXPlanung.XPlan.core import LayerPriorityType, xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, Area, Length, Volume, XPEnum
 from SAGisXPlanung.XPlan.enums import XP_EigentumsartWald, XP_ZweckbestimmungWald, XP_WaldbetretungTyp
 
@@ -700,7 +700,7 @@ class SO_Forstrecht(MixedGeometry, SO_Objekt):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
 
-class SO_Gebiet(MixedGeometry, SO_Objekt):
+class SO_Gebiet(PolygonGeometry, SO_Objekt):
     """ Umgrenzung eines sonstigen Gebietes nach BauGB. """
 
     __tablename__ = 'so_gebiet'

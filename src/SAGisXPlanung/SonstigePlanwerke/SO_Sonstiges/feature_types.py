@@ -8,7 +8,7 @@ from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.enums import SO_KlassifizGelaendemorphologie
 from SAGisXPlanung.XPlan.enums import XP_GrenzeTypen
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, LineGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
 
@@ -40,7 +40,7 @@ class SO_Gelaendemorphologie(MixedGeometry, SO_Objekt):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
 
 
-class SO_Grenze(MixedGeometry, SO_Objekt):
+class SO_Grenze(LineGeometry, SO_Objekt):
     """ Grenze einer Verwaltungseinheit oder sonstige Grenze in raumbezogenen Plaenen. """
 
     __tablename__ = 'so_grenze'
