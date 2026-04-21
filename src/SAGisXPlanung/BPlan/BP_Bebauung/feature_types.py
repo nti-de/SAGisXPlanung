@@ -424,6 +424,22 @@ class BP_UeberbaubareGrundstuecksFlaeche(PolygonGeometry, UeberlagerungsObjekt, 
         return QgsSingleSymbolRenderer(cls.symbol())
 
 
+class BP_GebaeudeFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Grundrissflaeche eines existierenden Gebaeudes. """
+
+    __tablename__ = 'bp_gebaeude_flaeche'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+
+
 class BP_BauGrenze(LineGeometry, BP_Objekt):
     """ Festsetzung einer Baugrenze (§9 Abs. 1 Nr. 2 BauGB, §22 und 23 BauNVO). """
 
