@@ -219,6 +219,24 @@ class BP_FestsetzungNachLandesrecht(MixedGeometry, BP_Objekt):
         return generic_objects_renderer(geom_type)
 
 
+class BP_UnverbindlicheVormerkung(MixedGeometry, BP_Objekt):
+    """ Unverbindliche Vormerkung spaeterer Planungsabsichten. """
+
+    __tablename__ = 'bp_unverbindliche_vormerkung'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    vormerkung = Column(String)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return generic_objects_renderer(geom_type)
+
+
 class BP_Veraenderungssperre(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     """ Raeumliche Ausweisung einer Veraenderungssperre. """
 
