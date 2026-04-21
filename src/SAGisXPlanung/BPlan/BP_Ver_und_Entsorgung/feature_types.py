@@ -11,7 +11,7 @@ from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
-from SAGisXPlanung.core.mixins.mixins import MixedGeometry
+from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import Area, Length, Volume, GeometryType
 
 
@@ -109,3 +109,19 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     @classmethod
     def previewIcon(cls):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.polygon_symbol(), QSize(16, 16))
+
+
+class BP_ZentralerVersorgungsbereich(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
+    """ Zentraler Versorgungsbereich gemaess § 9 Abs. 2a BauGB. """
+
+    __tablename__ = 'bp_zentraler_versorgungsbereich'
+    __mapper_args__ = {
+        'polymorphic_identity': __tablename__,
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))

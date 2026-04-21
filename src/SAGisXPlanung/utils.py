@@ -48,7 +48,7 @@ from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestset
     BP_FestsetzungNachLandesrecht, BP_FreiFlaeche
 from SAGisXPlanung.BPlan.BP_Umwelt.feature_types import BP_Immissionsschutz, BP_TechnischeMassnahmenFlaeche
 from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.data_types import BP_KomplexeZweckbestVerEntsorgung
-from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung
+from SAGisXPlanung.BPlan.BP_Ver_und_Entsorgung.feature_types import BP_VerEntsorgung, BP_ZentralerVersorgungsbereich
 from SAGisXPlanung.BPlan.BP_Verkehr.feature_types import BP_StrassenVerkehrsFlaeche, BP_StrassenbegrenzungsLinie, \
     BP_VerkehrsflaecheBesondererZweckbestimmung, BP_BereichOhneEinAusfahrtLinie, BP_EinfahrtPunkt, \
     BP_EinfahrtsbereichLinie
@@ -185,6 +185,7 @@ CLASSES = {
     'BP_StrassenbegrenzungsLinie': BP_StrassenbegrenzungsLinie,
     'BP_GewaesserFlaeche': BP_GewaesserFlaeche,
     'BP_VerEntsorgung': BP_VerEntsorgung,
+    'BP_ZentralerVersorgungsbereich': BP_ZentralerVersorgungsbereich,
     'BP_AnpflanzungBindungErhaltung': BP_AnpflanzungBindungErhaltung,
     'BP_AusgleichsFlaeche': BP_AusgleichsFlaeche,
     'BP_AusgleichsMassnahme': BP_AusgleichsMassnahme,
