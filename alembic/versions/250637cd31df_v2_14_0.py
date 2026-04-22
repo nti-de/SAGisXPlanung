@@ -111,8 +111,7 @@ def upgrade():
 
     for enum_name, *labels in NEW_ENUMS:
         enum = postgresql.ENUM(*labels, name=enum_name, create_type=False)
-        if not context.is_offline_mode():
-            enum.create(op.get_bind(), checkfirst=True)
+        enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table('bp_abstand',
     sa.Column('id', sa.UUID(), nullable=False),

@@ -246,7 +246,7 @@ def upgrade():
                                              'Bekanntmachung', 'Rechtsverbindlich', 'Informell',
                                              name='xp_externereferenztyp'), nullable=True),
                     sa.Column('plan_id', postgresql.UUID(as_uuid=True), nullable=True),
-                    sa.CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
+                    sa.CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)', name=op.f('ck_xp_spez_externe_referenz_referenz_name_or_url_not_null')),
                     sa.ForeignKeyConstraint(['plan_id'], ['xp_plan.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
                     )
@@ -430,7 +430,7 @@ def upgrade():
                     sa.Column('file', postgresql.BYTEA(), nullable=True),
                     sa.Column('bereich_id', postgresql.UUID(as_uuid=True), nullable=True),
                     sa.Column('baugebiet_id', postgresql.UUID(as_uuid=True), nullable=True),
-                    sa.CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
+                    sa.CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)', name=op.f('ck_xp_spez_externe_referenz_referenz_name_or_url_not_null')),
                     sa.ForeignKeyConstraint(['baugebiet_id'], ['bp_baugebiet.id'], ondelete='CASCADE'),
                     sa.ForeignKeyConstraint(['bereich_id'], ['xp_bereich.id'], ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id')
