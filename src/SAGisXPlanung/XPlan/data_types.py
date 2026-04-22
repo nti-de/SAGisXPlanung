@@ -91,7 +91,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
 
     __tablename__ = 'xp_externe_referenz'
     __table_args__ = (
-        CheckConstraint('NOT("referenzName" IS NULL AND "referenzURL" IS NULL)'),
+        CheckConstraint(sqltext='NOT("referenzName" IS NULL AND "referenzURL" IS NULL)', name='referenz_name_or_url_not_null'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
                          'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',

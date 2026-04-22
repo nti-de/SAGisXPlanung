@@ -34,6 +34,9 @@ class XPathField(types.TypeDecorator):
     python_type = str
     cache_ok = True
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class LargeString(types.TypeDecorator):
     """ Datentyp für lange textliche Beschreibungen """
@@ -41,12 +44,18 @@ class LargeString(types.TypeDecorator):
     python_type = str
     cache_ok = True
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class RefURL(types.TypeDecorator):
     """ Datentyp für URLs zu externen Referenzen """
     impl = types.String
     python_type = str
     cache_ok = True
+
+    def __repr__(self):
+        return self.impl.__repr__()
 
 
 class Angle(types.TypeDecorator, XPlanungMeasureType):
@@ -60,6 +69,9 @@ class Angle(types.TypeDecorator, XPlanungMeasureType):
     MIN_VALUE = 0
     MAX_VALUE = 360
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class Area(types.TypeDecorator, XPlanungMeasureType):
     """ Repräsentation des XPlanGML AreaType """
@@ -71,6 +83,9 @@ class Area(types.TypeDecorator, XPlanungMeasureType):
     UOM = 'm2'
     MIN_VALUE = 0
     MAX_VALUE = sys.float_info.max
+
+    def __repr__(self):
+        return self.impl.__repr__()
 
 
 class Volume(types.TypeDecorator, XPlanungMeasureType):
@@ -84,6 +99,9 @@ class Volume(types.TypeDecorator, XPlanungMeasureType):
     MIN_VALUE = 0
     MAX_VALUE = sys.float_info.max
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class Length(types.TypeDecorator, XPlanungMeasureType):
     """ Repräsentation des XPlanGML LengthType """
@@ -96,17 +114,23 @@ class Length(types.TypeDecorator, XPlanungMeasureType):
     MIN_VALUE = 0
     MAX_VALUE = sys.float_info.max
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class Scale(types.TypeDecorator, XPlanungMeasureType):
     """ Repräsentation des XPlanGML ScaleType """
 
-    impl = types.Integer
+    impl = types.Float
     python_type = int
     cache_ok = True
 
     UOM = '%'
     MIN_VALUE = 0
     MAX_VALUE = 100
+
+    def __repr__(self):
+        return self.impl.__repr__()
 
 
 class Sound(types.TypeDecorator, XPlanungMeasureType):
@@ -119,6 +143,9 @@ class Sound(types.TypeDecorator, XPlanungMeasureType):
     UOM = 'dB'
     MIN_VALUE = 0
     MAX_VALUE = sys.float_info.max
+
+    def __repr__(self):
+        return self.impl.__repr__()
 
 
 class RegExString(types.TypeDecorator):
@@ -133,6 +160,9 @@ class RegExString(types.TypeDecorator):
     python_type = str
     cache_ok = True
 
+    def __repr__(self):
+        return self.impl.__repr__()
+
 
 class XPEnum(types.TypeDecorator):
     """ Enum-Datentyp der Information über die Möglichkeit der Anzeige eines Platzhalters enthält"""
@@ -146,3 +176,6 @@ class XPEnum(types.TypeDecorator):
 
     def process_bind_param(self, value, dialect):
         return value
+
+    def __repr__(self):
+        return self.impl.__repr__()

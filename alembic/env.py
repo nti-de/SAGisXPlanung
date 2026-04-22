@@ -59,6 +59,13 @@ def compile_update_with_pragma(element, compiler, **kw):
     return sql + PRAGMA
 
 
+def include_name(name, type_, parent_names):
+    if type_ == "table":
+        return name in target_metadata.tables
+    else:
+        return True
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -78,7 +85,9 @@ def run_migrations_offline():
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         process_revision_directives=alembic_helpers.writer,
-        render_item=alembic_helpers.render_item,
+        include_name=include_name,
+        include_schemas=False,
+        # render_item=render_item,
         # include_object=include_object
     )
 
@@ -104,7 +113,9 @@ def run_migrations_online():
             connection=connection,
             target_metadata=target_metadata,
             process_revision_directives=alembic_helpers.writer,
-            render_item=alembic_helpers.render_item,
+            user_module_prefix='sa.',
+            include_name=include_name,
+            include_schemas=False,
         )
 
         with context.begin_transaction():

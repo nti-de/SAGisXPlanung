@@ -12,6 +12,7 @@ from pathlib import Path
 from qgis.PyQt.QtCore import QCoreApplication, QT_VERSION_STR
 from qgis.core import Qgis, QgsApplication
 from qgis.PyQt.uic import compiler
+from sqlalchemy import MetaData
 
 import SAGisXPlanung
 from SAGisXPlanung.log_handler import setup_logger
@@ -87,7 +88,7 @@ except Exception as e:
 
 VERSION = '2.13.3'
 RELEASE = True
-COMPATIBLE_DB_REVISIONS = ['2b1452b49cc5']
+COMPATIBLE_DB_REVISIONS = ['250637cd31df']
 DEPENDENCIES = [
     'requests',
     'packaging',
@@ -120,7 +121,13 @@ def setup_sqlalchemy():
         global SessionAsync
 
         class _Base(AsyncAttrs, DeclarativeBase):
-            pass
+            metadata = MetaData(naming_convention={
+                "ix": "ix_%(column_0_label)s",
+                "uq": "uq_%(table_name)s_%(column_0_name)s",
+                "ck": "ck_%(table_name)s_`%(constraint_name)s`",
+                "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+                "pk": "pk_%(table_name)s"
+            })
 
         Base = _Base
         Session = sessionmaker()
