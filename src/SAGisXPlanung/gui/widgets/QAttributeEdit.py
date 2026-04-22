@@ -376,7 +376,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
     @pyqtSlot(str)
     def onFilterTextChanged(self, text: str):
-        self.proxyModel.setFilterFixedString(text)
+        self.proxyModel.setFilterRegularExpression(text)
 
     @pyqtSlot(QModelIndex, QEvent)
     def on_relation_clicked(self, index: QModelIndex, event: QEvent):
@@ -768,8 +768,15 @@ class AttributeTreeFilterProxyModel(QSortFilterProxyModel):
             attribute_text = str(attribute_name) if attribute_name else ""
             value_text = str(value) if value else ""
 
-            matches_attribute = filter_regex.indexIn(attribute_text) >= 0
-            matches_value = filter_regex.indexIn(value_text) >= 0
+            try:
+                match = filter_regex.match(attribute_text)
+                matches_attribute = match.hasMatch()
+                match = filter_regex.match(value_text)
+                matches_value = match.hasMatch()
+            except AttributeError:
+                # try match QRegExp for qt < 5.12
+                matches_attribute = filter_regex.indexIn(attribute_text) >= 0
+                matches_value = filter_regex.indexIn(value_text) >= 0
 
             text_matches = matches_attribute or matches_value
 
