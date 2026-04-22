@@ -45,7 +45,7 @@ CREATE TABLE xp_gesetzliche_grundlage (
     name VARCHAR, 
     datum DATE, 
     detail VARCHAR, 
-    PRIMARY KEY (id)
+    CONSTRAINT pk_xp_gesetzliche_grundlage PRIMARY KEY (id)
 );
 
 ALTER TYPE xp_externereferenztyp ADD VALUE IF NOT EXISTS 'Schutzgebietsverordnung';;

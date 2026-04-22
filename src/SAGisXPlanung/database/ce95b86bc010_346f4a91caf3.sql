@@ -8,8 +8,8 @@ CREATE TABLE bp_nebenanlage (
     id UUID NOT NULL, 
     zweckbestimmung bp_zweckbestimmungnebenanlagen[], 
     "Zmax" INTEGER, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_nebenanlage PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_nebenanlage_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE bp_zweckbestimmung_nebenanlagen (
@@ -18,8 +18,8 @@ CREATE TABLE bp_zweckbestimmung_nebenanlagen (
     "textlicheErgaenzung" VARCHAR, 
     aufschrift VARCHAR, 
     nebenanlage_id UUID, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(nebenanlage_id) REFERENCES bp_nebenanlage (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_zweckbestimmung_nebenanlagen PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_zweckbestimmung_nebenanlagen_nebenanlage_id_bp_ne_6d0e FOREIGN KEY(nebenanlage_id) REFERENCES bp_nebenanlage (id) ON DELETE CASCADE
 );
 
 CREATE TYPE so_klassifiznachluftverkehrsrecht AS ENUM ('Flughafen', 'Landeplatz', 'Segelfluggelaende', 'HubschrauberLandeplatz', 'Ballonstartplatz', 'Haengegleiter', 'Gleitsegler', 'Laermschutzbereich', 'Baubeschraenkungsbereich', 'Sonstiges');
@@ -33,9 +33,9 @@ CREATE TABLE so_luftverkehr (
     name VARCHAR, 
     nummer VARCHAR, 
     laermschutzzone so_laermschutzzonetypen, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_luftverkehr PRIMARY KEY (id), 
+    CONSTRAINT "fk_so_luftverkehr_detailArtDerFestlegung_id_codelist_values" FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
+    CONSTRAINT fk_so_luftverkehr_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE xp_rechtscharakterplanaenderung AS ENUM ('Aenderung', 'Ergaenzung', 'Aufhebung', 'Aufhebungsverfahren', 'Ueberplanung');
@@ -53,23 +53,23 @@ CREATE TABLE xp_verbundener_plan (
     "wurdeGeaendertVon_verbundenerPlan_id" UUID, 
     "aendertPlan_verbundenerPlan_id" UUID, 
     "wurdeGeaendertVonPlan_verbundenerPlan_id" UUID, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY("aendert_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
-    FOREIGN KEY("wurdeGeaendertVon_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
-    FOREIGN KEY("aendertPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE, 
-    FOREIGN KEY("wurdeGeaendertVonPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE
+    CONSTRAINT pk_xp_verbundener_plan PRIMARY KEY (id), 
+    CONSTRAINT "fk_xp_verbundener_plan_aendert_verbundenerPlan_id_xp_plan" FOREIGN KEY("aendert_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
+    CONSTRAINT "fk_xp_verbundener_plan_wurdeGeaendertVon_verbundenerPla_1047" FOREIGN KEY("wurdeGeaendertVon_verbundenerPlan_id") REFERENCES xp_plan (id) ON DELETE CASCADE, 
+    CONSTRAINT "fk_xp_verbundener_plan_aendertPlan_verbundenerPlan_id_x_3c06" FOREIGN KEY("aendertPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE, 
+    CONSTRAINT "fk_xp_verbundener_plan_wurdeGeaendertVonPlan_verbundene_adf0" FOREIGN KEY("wurdeGeaendertVonPlan_verbundenerPlan_id") REFERENCES xp_bereich (id) ON DELETE CASCADE
 );
 
 CREATE TABLE bp_generisches_objekt (
     id UUID NOT NULL, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_generisches_objekt PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_generisches_objekt_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE fp_generisches_objekt (
     id UUID NOT NULL, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_generisches_objekt PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_generisches_objekt_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE bp_laermpegelbereich AS ENUM ('I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'SpezifizierungBereich');
@@ -86,22 +86,22 @@ CREATE TABLE bp_immissionsschutz (
     "massgeblAussenLaermpegelNacht" FLOAT, 
     typ xp_immissionsschutztypen, 
     "technVorkehrung" xp_technvorkehrungenimmissionsschutz, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_immissionsschutz PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_immissionsschutz_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE bp_abgrabung (
     id UUID NOT NULL, 
     abbaugut VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_abgrabung PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_abgrabung_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE bp_aufschuettung (
     id UUID NOT NULL, 
     aufschuettungsmaterial VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_aufschuettung PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_aufschuettung_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE so_klassifiznachsonstigemrecht AS ENUM ('Bauschutzbereich', 'Berggesetz', 'Richtfunkverbindung', 'Truppenuebungsplatz', 'VermessungsKatasterrecht', 'Rekultivierungsflaeche', 'Renaturierungsflaeche', 'Lärmschutzbereich', 'SchutzzoneLeitungstrasse', 'Sonstiges');
@@ -112,9 +112,9 @@ CREATE TABLE so_sonstiges_recht (
     "artDerFestlegung" so_klassifiznachsonstigemrecht, 
     "detailArtDerFestlegung_id" UUID, 
     name VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_sonstiges_recht PRIMARY KEY (id), 
+    CONSTRAINT "fk_so_sonstiges_recht_detailArtDerFestlegung_id_codelist_values" FOREIGN KEY("detailArtDerFestlegung_id") REFERENCES codelist_values (id), 
+    CONSTRAINT fk_so_sonstiges_recht_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 DELETE FROM bp_einfahrtpunkt WHERE id NOT IN (SELECT id FROM bp_objekt);
@@ -123,11 +123,11 @@ DELETE FROM bp_keine_ein_ausfahrt WHERE id NOT IN (SELECT id FROM bp_objekt);
 
 DELETE FROM bp_nutzungsgrenze WHERE id NOT IN (SELECT id FROM bp_objekt);
 
-ALTER TABLE bp_einfahrtpunkt ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+ALTER TABLE bp_einfahrtpunkt ADD CONSTRAINT fk_bp_einfahrtpunkt_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
 
-ALTER TABLE bp_keine_ein_ausfahrt ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+ALTER TABLE bp_keine_ein_ausfahrt ADD CONSTRAINT fk_bp_keine_ein_ausfahrt_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
 
-ALTER TABLE bp_nutzungsgrenze ADD FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
+ALTER TABLE bp_nutzungsgrenze ADD CONSTRAINT fk_bp_nutzungsgrenze_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE;
 
 ALTER TABLE bp_komplexe_sondernutzung ADD COLUMN detail_id UUID;
 
@@ -139,7 +139,7 @@ ALTER TABLE lp_plan ALTER COLUMN "rechtlicheAussenwirkung" SET NOT NULL;
 
 ALTER TABLE so_strassenverkehr ALTER COLUMN "hatDarstellungMitBesondZweckbest" SET NOT NULL;
 
-ALTER TABLE xp_objekt ADD FOREIGN KEY("gesetzlicheGrundlage_id") REFERENCES xp_gesetzliche_grundlage (id);
+ALTER TABLE xp_objekt ADD CONSTRAINT "fk_xp_objekt_gesetzlicheGrundlage_id_xp_gesetzliche_grundlage" FOREIGN KEY("gesetzlicheGrundlage_id") REFERENCES xp_gesetzliche_grundlage (id);
 
 UPDATE alembic_version SET version_num='346f4a91caf3' WHERE alembic_version.version_num = 'ce95b86bc010'; --- # pragma: allowlist secret;
 

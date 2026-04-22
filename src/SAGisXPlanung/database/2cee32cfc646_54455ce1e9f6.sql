@@ -9,8 +9,8 @@ CREATE TABLE bp_schutzflaeche (
     ziel xp_speziele, 
     "sonstZiel" VARCHAR, 
     "istAusgleich" BOOLEAN, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_schutzflaeche PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_schutzflaeche_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE xp_spemassnahmentypen AS ENUM ('ArtentreicherGehoelzbestand', 'NaturnaherWald', 'ExtensivesGruenland', 'Feuchtgruenland', 'Obstwiese', 'NaturnaherUferbereich', 'Roehrichtzone', 'Ackerrandstreifen', 'Ackerbrache', 'Gruenlandbrache', 'Sukzessionsflaeche', 'Hochstaudenflur', 'Trockenrasen', 'Heide', 'Sonstiges');
@@ -21,8 +21,8 @@ CREATE TABLE xp_spe_daten (
     "massnahmeText" VARCHAR, 
     "massnahmeKuerzel" VARCHAR, 
     bp_schutzflaeche_id UUID, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(bp_schutzflaeche_id) REFERENCES bp_schutzflaeche (id) ON DELETE CASCADE
+    CONSTRAINT pk_xp_spe_daten PRIMARY KEY (id), 
+    CONSTRAINT fk_xp_spe_daten_bp_schutzflaeche_id_bp_schutzflaeche FOREIGN KEY(bp_schutzflaeche_id) REFERENCES bp_schutzflaeche (id) ON DELETE CASCADE
 );
 
 CREATE TYPE bp_wegerechttypen AS ENUM ('Gehrecht', 'Fahrrecht', 'Radfahrrecht', 'Leitungsrecht', 'Sonstiges');
@@ -34,8 +34,8 @@ CREATE TABLE bp_wegerecht (
     thema VARCHAR, 
     breite FLOAT, 
     "istSchmal" BOOLEAN, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_wegerecht PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_wegerecht_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE xp_bundeslaender AS ENUM ('BB', 'BE', 'BW', 'BY', 'HB', 'HE', 'HH', 'MV', 'NI', 'NW', 'RP', 'SH', 'SL', 'SN', 'ST', 'TH', 'Bund');
@@ -65,8 +65,8 @@ CREATE TABLE rp_plan (
     verfahren rp_verfahren, 
     "amtlicherSchluessel" VARCHAR, 
     genehmigungsbehoerde VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES xp_plan (id) ON DELETE CASCADE
+    CONSTRAINT pk_rp_plan PRIMARY KEY (id), 
+    CONSTRAINT fk_rp_plan_id_xp_plan FOREIGN KEY(id) REFERENCES xp_plan (id) ON DELETE CASCADE
 );
 
 CREATE TABLE rp_bereich (
@@ -77,9 +77,9 @@ CREATE TABLE rp_bereich (
     "versionLPLGText" VARCHAR, 
     geltungsmassstab INTEGER, 
     "gehoertZuPlan_id" UUID, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY("gehoertZuPlan_id") REFERENCES rp_plan (id) ON DELETE CASCADE, 
-    FOREIGN KEY(id) REFERENCES xp_bereich (id) ON DELETE CASCADE
+    CONSTRAINT pk_rp_bereich PRIMARY KEY (id), 
+    CONSTRAINT "fk_rp_bereich_gehoertZuPlan_id_rp_plan" FOREIGN KEY("gehoertZuPlan_id") REFERENCES rp_plan (id) ON DELETE CASCADE, 
+    CONSTRAINT fk_rp_bereich_id_xp_bereich FOREIGN KEY(id) REFERENCES xp_bereich (id) ON DELETE CASCADE
 );
 
 CREATE TYPE lp_planart AS ENUM ('Landschaftsprogramm', 'Landschaftsrahmenplan', 'Landschaftsplan', 'Gruenordnungsplan', 'Sonstiges');
@@ -103,16 +103,16 @@ CREATE TABLE lp_plan (
     "planbeschlussDatum" DATE, 
     "inkrafttretenDatum" DATE, 
     "sonstVerfahrensDatum" DATE, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES xp_plan (id) ON DELETE CASCADE
+    CONSTRAINT pk_lp_plan PRIMARY KEY (id), 
+    CONSTRAINT fk_lp_plan_id_xp_plan FOREIGN KEY(id) REFERENCES xp_plan (id) ON DELETE CASCADE
 );
 
 CREATE TABLE lp_bereich (
     id UUID NOT NULL, 
     "gehoertZuPlan_id" UUID, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY("gehoertZuPlan_id") REFERENCES lp_plan (id) ON DELETE CASCADE, 
-    FOREIGN KEY(id) REFERENCES xp_bereich (id) ON DELETE CASCADE
+    CONSTRAINT pk_lp_bereich PRIMARY KEY (id), 
+    CONSTRAINT "fk_lp_bereich_gehoertZuPlan_id_lp_plan" FOREIGN KEY("gehoertZuPlan_id") REFERENCES lp_plan (id) ON DELETE CASCADE, 
+    CONSTRAINT fk_lp_bereich_id_xp_bereich FOREIGN KEY(id) REFERENCES xp_bereich (id) ON DELETE CASCADE
 );
 
 ALTER TABLE xp_externe_referenz ADD COLUMN bp_schutzflaeche_massnahme_id UUID;

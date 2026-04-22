@@ -6,9 +6,9 @@ CREATE TABLE assoc_detail_zweckgemeinbedarf (
     codelist_user_id UUID, 
     codelist_user_v6_id UUID, 
     codelist_id UUID, 
-    FOREIGN KEY(codelist_id) REFERENCES codelist_values (id), 
-    FOREIGN KEY(codelist_user_id) REFERENCES fp_gemeinbedarf (id) ON DELETE CASCADE, 
-    FOREIGN KEY(codelist_user_v6_id) REFERENCES fp_zweckbestimmung_gemeinbedarf (id) ON DELETE CASCADE
+    CONSTRAINT fk_assoc_detail_zweckgemeinbedarf_codelist_id_codelist_values FOREIGN KEY(codelist_id) REFERENCES codelist_values (id), 
+    CONSTRAINT fk_assoc_detail_zweckgemeinbedarf_codelist_user_id_fp_g_d4b9 FOREIGN KEY(codelist_user_id) REFERENCES fp_gemeinbedarf (id) ON DELETE CASCADE, 
+    CONSTRAINT fk_assoc_detail_zweckgemeinbedarf_codelist_user_v6_id_f_6dd0 FOREIGN KEY(codelist_user_v6_id) REFERENCES fp_zweckbestimmung_gemeinbedarf (id) ON DELETE CASCADE
 );
 
 DROP TABLE IF EXISTS civil_line;
@@ -86,11 +86,11 @@ DELETE FROM xp_objekt
 
         DELETE FROM so_objekt WHERE GeometryType(position) IN ('GEOMETRYCOLLECTION');;
 
-ALTER TABLE bp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
+ALTER TABLE bp_objekt ADD CONSTRAINT "ck_bp_objekt_`prevent_geometry_collection`" CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
-ALTER TABLE fp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
+ALTER TABLE fp_objekt ADD CONSTRAINT "ck_fp_objekt_`prevent_geometry_collection`" CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
-ALTER TABLE so_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
+ALTER TABLE so_objekt ADD CONSTRAINT "ck_so_objekt_`prevent_geometry_collection`" CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
 CREATE TYPE so_klassifiznachstrassenverkehrsrecht AS ENUM ('Bundesautobahn', 'Bundesstrasse', 'LandesStaatsstrasse', 'Kreisstrasse', 'SonstOeffentlStrasse');
 
@@ -99,8 +99,8 @@ CREATE TABLE so_strassenverkehrsrecht (
     "artDerFestlegung" so_klassifiznachstrassenverkehrsrecht, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_strassenverkehrsrecht PRIMARY KEY (id), 
+    CONSTRAINT fk_so_strassenverkehrsrecht_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION temp_convert(v_input text)
@@ -174,8 +174,8 @@ CREATE TABLE so_wasserrecht (
     "istNatuerlichesUberschwemmungsgebiet" BOOLEAN, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_wasserrecht PRIMARY KEY (id), 
+    CONSTRAINT fk_so_wasserrecht_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE xp_klassifizschutzgebietnaturschutzrecht AS ENUM ('Naturschutzgebiet', 'Nationalpark', 'Biosphaerenreservat', 'Landschaftsschutzgebiet', 'Naturpark', 'Naturdenkmal', 'GeschuetzterLandschaftsBestandteil', 'GesetzlichGeschuetztesBiotop', 'Natura2000', 'GebietGemeinschaftlicherBedeutung', 'EuropaeischesVogelschutzgebiet', 'NationalesNaturmonument', 'Sonstiges');
@@ -188,8 +188,8 @@ CREATE TABLE so_naturschutz (
     zone so_schutzzonennaturschutzrecht, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_naturschutz PRIMARY KEY (id), 
+    CONSTRAINT fk_so_naturschutz_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE fp_zweckbestimmungprivilegiertesvorhaben AS ENUM ('LandForstwirtschaft', 'Aussiedlerhof', 'Altenteil', 'Reiterhof', 'Gartenbaubetrieb', 'Baumschule', 'OeffentlicheVersorgung', 'Wasser', 'Gas', 'Waerme', 'Elektrizitaet', 'Telekommunikation', 'Abwasser', 'OrtsgebundenerGewerbebetrieb', 'BesonderesVorhaben', 'BesondereUmgebungsAnforderung', 'NachteiligeUmgebungsWirkung', 'BesondereZweckbestimmung', 'ErneuerbareEnergien', 'Windenergie', 'Wasserenergie', 'Solarenergie', 'Biomasse', 'Kernenergie', 'NutzungKernerergie', 'EntsorgungRadioaktiveAbfaelle', 'Sonstiges', 'StandortEinzelhof', 'BebauteFlaecheAussenbereich');
@@ -198,8 +198,8 @@ CREATE TABLE fp_privilegiertes_vorhaben (
     id UUID NOT NULL, 
     zweckbestimmung fp_zweckbestimmungprivilegiertesvorhaben, 
     vorhaben VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_privilegiertes_vorhaben PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_privilegiertes_vorhaben_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE lp_raumkonkretisierung AS ENUM ('Scharf', 'Suchraum', 'Unscharf', 'Position', 'Raumunkonkret', 'Unbekannt');
@@ -212,13 +212,13 @@ CREATE TABLE lp_objekt (
     flaechenschluss BOOLEAN, 
     flussrichtung BOOLEAN, 
     nordwinkel INTEGER, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES xp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_lp_objekt PRIMARY KEY (id), 
+    CONSTRAINT fk_lp_objekt_id_xp_objekt FOREIGN KEY(id) REFERENCES xp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_lp_objekt_position ON lp_objekt USING gist (position);
 
-ALTER TABLE lp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
+ALTER TABLE lp_objekt ADD CONSTRAINT "ck_lp_objekt_`prevent_geometry_collection`" CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
 UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608'; --- # pragma: allowlist secret;
 

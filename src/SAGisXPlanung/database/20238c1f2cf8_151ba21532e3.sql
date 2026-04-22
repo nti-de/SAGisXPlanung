@@ -85,15 +85,15 @@ create or replace function bp_baugebiet_sync_attr_sondernutzung() returns trigge
 CREATE TABLE fp_abgrabung (
     id UUID NOT NULL, 
     abbaugut VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_abgrabung PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_abgrabung_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE fp_aufschuettung (
     id UUID NOT NULL, 
     aufschuettungsmaterial VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_aufschuettung PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_aufschuettung_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TABLE fp_schutzflaeche (
@@ -101,8 +101,8 @@ CREATE TABLE fp_schutzflaeche (
     ziel xp_speziele, 
     "sonstZiel" VARCHAR, 
     "istAusgleich" BOOLEAN, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_schutzflaeche PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_schutzflaeche_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 ALTER TABLE xp_spe_daten ADD COLUMN fp_schutzflaeche_id UUID;
@@ -114,8 +114,8 @@ CREATE TABLE fp_kennzeichnung (
     zweckbestimmung xp_zweckbestimmungkennzeichnung[], 
     "istVerdachtsflaeche" BOOLEAN, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_fp_kennzeichnung PRIMARY KEY (id), 
+    CONSTRAINT fk_fp_kennzeichnung_id_fp_objekt FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
 UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8'; --- # pragma: allowlist secret;

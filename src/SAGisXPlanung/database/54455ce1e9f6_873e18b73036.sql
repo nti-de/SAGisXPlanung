@@ -13,8 +13,8 @@ CREATE TABLE xp_nutzungsschablone (
     "zeilenAnz" INTEGER NOT NULL, 
     hidden BOOLEAN, 
     data_attributes buildingtemplatecelldatatype[], 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES xp_po (id) ON DELETE CASCADE
+    CONSTRAINT pk_xp_nutzungsschablone PRIMARY KEY (id), 
+    CONSTRAINT fk_xp_nutzungsschablone_id_xp_po FOREIGN KEY(id) REFERENCES xp_po (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_xp_nutzungsschablone_position ON xp_nutzungsschablone USING gist (position);

@@ -86,17 +86,17 @@ CREATE TABLE bp_grundstueck_ueberbaubar (
     "bebauungSeitlicheGrenze" bp_grenzbebauung, 
     "geschossMin" INTEGER, 
     "geschossMax" INTEGER, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_grundstueck_ueberbaubar PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_grundstueck_ueberbaubar_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 ALTER TABLE bp_dachgestaltung ADD COLUMN grundstueck_ueberbaubar_id UUID;
 
-ALTER TABLE bp_dachgestaltung ADD FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
+ALTER TABLE bp_dachgestaltung ADD CONSTRAINT fk_bp_dachgestaltung_grundstueck_ueberbaubar_id_bp_grun_7341 FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
 
 ALTER TABLE xp_externe_referenz ADD COLUMN grundstueck_ueberbaubar_id UUID;
 
-ALTER TABLE xp_externe_referenz ADD FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
+ALTER TABLE xp_externe_referenz ADD CONSTRAINT fk_xp_externe_referenz_grundstueck_ueberbaubar_id_bp_gr_1813 FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
 
 UPDATE alembic_version SET version_num='20238c1f2cf8' WHERE alembic_version.version_num = '1983d6b6e2c1'; --- # pragma: allowlist secret;
 

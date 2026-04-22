@@ -4,8 +4,8 @@ BEGIN;
 
 CREATE TABLE bp_flaeche_ohne_festsetzung (
     id UUID NOT NULL, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_bp_flaeche_ohne_festsetzung PRIMARY KEY (id), 
+    CONSTRAINT fk_bp_flaeche_ohne_festsetzung_id_bp_objekt FOREIGN KEY(id) REFERENCES bp_objekt (id) ON DELETE CASCADE
 );
 
 ALTER TABLE bp_objekt ALTER COLUMN rechtscharakter SET NOT NULL;

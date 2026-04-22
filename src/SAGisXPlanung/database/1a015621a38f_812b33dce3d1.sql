@@ -11,8 +11,8 @@ CREATE TABLE so_objekt (
     flaechenschluss BOOLEAN, 
     flussrichtung BOOLEAN, 
     nordwinkel INTEGER, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES xp_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_objekt PRIMARY KEY (id), 
+    CONSTRAINT fk_so_objekt_id_xp_objekt FOREIGN KEY(id) REFERENCES xp_objekt (id) ON DELETE CASCADE
 );
 
 CREATE INDEX idx_so_objekt_position ON so_objekt USING gist (position);
@@ -25,8 +25,8 @@ CREATE TABLE so_denkmalschutz (
     weltkulturerbe BOOLEAN, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_denkmalschutz PRIMARY KEY (id), 
+    CONSTRAINT fk_so_denkmalschutz_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE so_klassifiznachschienenverkehrsrecht AS ENUM ('Bahnanlage', 'DB_Bahnanlage', 'Personenbahnhof', 'Fernbahnhof', 'Gueterbahnhof', 'Bahnlinie', 'Personenbahnlinie', 'Regionalbahn', 'Kleinbahn', 'Gueterbahnlinie', 'WerksHafenbahn', 'Seilbahn', 'OEPNV', 'Strassenbahn', 'UBahn', 'SBahn', 'OEPNV_Haltestelle', 'Sonstiges');
@@ -36,8 +36,8 @@ CREATE TABLE so_schienenverkehr (
     "artDerFestlegung" so_klassifiznachschienenverkehrsrecht, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_schienenverkehr PRIMARY KEY (id), 
+    CONSTRAINT fk_so_schienenverkehr_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 CREATE TYPE so_klassifizschutzgebietwasserrecht AS ENUM ('Wasserschutzgebiet', 'QuellGrundwasserSchutzgebiet', 'OberflaechengewaesserSchutzgebiet', 'Heilquellenschutzgebiet', 'Sonstiges');
@@ -50,8 +50,8 @@ CREATE TABLE so_wasserschutz (
     zone so_schutzzonenwasserrecht, 
     name VARCHAR, 
     nummer VARCHAR, 
-    PRIMARY KEY (id), 
-    FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
+    CONSTRAINT pk_so_wasserschutz PRIMARY KEY (id), 
+    CONSTRAINT fk_so_wasserschutz_id_so_objekt FOREIGN KEY(id) REFERENCES so_objekt (id) ON DELETE CASCADE
 );
 
 UPDATE bp_baugebiet SET sondernutzung=NULL WHERE sondernutzung='KeineSondernutzung'::xp_sondernutzungen;;
