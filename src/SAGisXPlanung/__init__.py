@@ -70,7 +70,7 @@ def compile_ui_file(ui_file):
         winfo = compiler.UICompiler().compileUi(ui_file, code_string)
 
     ui_globals = {}
-    exec(code_string.getvalue(), ui_globals)
+    exec(code_string.getvalue(), ui_globals) # nosec B102 (trusted generated code from qt ui compiler)
     return ui_globals[winfo["uiclass"]]
 
 

@@ -178,7 +178,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
             plan.bereich.append(bereich)
 
             for table, mapper in mappings.items():
-                s = text(f"SELECT id FROM {table} WHERE plan_id = :xid AND ST_INTERSECTS(geom, ST_GeomFromText(:wkt))")
+                s = text(f"SELECT id FROM {table} WHERE plan_id = :xid AND ST_INTERSECTS(geom, ST_GeomFromText(:wkt))") # nosec B608 (only trusted input)
                 res = conn.execute(s, {"xid": plan_xid, "wkt": bereich_poly.wkt})
                 for row in res:
                     feedback.pushDebugInfo(f"Verarbeitung des Planinhalts: {row.id}")
@@ -191,7 +191,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
     def processPlaninhalt(self, planinhalt_xid, table, mapper, conn, feedback) -> XP_Objekt:
         # RemoveRepeatedPoints does not remove duplicated points from geometry column directly, most likely a bug???
         # dump to wkt and create new geometry as workaround
-        s = text(f"SELECT layer, rechtscharakter, ST_AsText(RemoveRepeatedPoints(ST_GeomFromText(ST_AsText(geom)))) AS g, ST_SRID(geom) AS srid FROM {table} WHERE id = :xid")
+        s = text(f"SELECT layer, rechtscharakter, ST_AsText(RemoveRepeatedPoints(ST_GeomFromText(ST_AsText(geom)))) AS g, ST_SRID(geom) AS srid FROM {table} WHERE id = :xid") # nosec B608 (only trusted input)
         res = conn.execute(s, {"xid": planinhalt_xid}).first()
 
         # for each civil-styleid, check if the id is in the layer string, if yes create the corresponding object
@@ -213,7 +213,7 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
 
             # parse properties from Civil3D
             if civil_style.civil_properties:
-                s = text(f"SELECT name, value FROM {civil_style.property_table.table_name} WHERE {civil_style.property_table.id_column} = :xid")
+                s = text(f"SELECT name, value FROM {civil_style.property_table.table_name} WHERE {civil_style.property_table.id_column} = :xid") # nosec B608 (only trusted input)
                 res = conn.execute(s, {"xid": planinhalt_xid})
                 for row in res:
                     for civil_prop in civil_style.civil_properties:

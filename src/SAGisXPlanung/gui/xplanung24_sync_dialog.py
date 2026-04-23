@@ -338,7 +338,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         url = 'https://6tkb6m5vzc.execute-api.eu-central-1.amazonaws.com/dev/rest/public/2.0/plans'
         headers = {"Authorization": api_key}
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
 
         data = response.json()
@@ -352,7 +352,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         url = f'https://6tkb6m5vzc.execute-api.eu-central-1.amazonaws.com/dev/rest/public/2.0/plan/{plan_id}/planfile'
         headers = {"Authorization": api_key}
 
-        response = requests.get(url, headers=headers)
+        response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
         data = response.json()
         download_url = data.get('data')
@@ -360,7 +360,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         if not download_url:
             raise ValueError(f"No download URL in response for plan {plan_id}")
 
-        gml_response = requests.get(download_url)
+        gml_response = requests.get(download_url, timeout=10)
         gml_response.raise_for_status()
 
         return GMLInputData(
@@ -496,6 +496,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
                 "gml": (f"{plan_name}.gml", gml_data, "application/gml+xml")
             }
 
-            r = requests.post(upload_url, headers=headers, files=files)
+            r = requests.post(upload_url, headers=headers, files=files, timeout=10)
+            r.raise_for_status()
 
             return r, plan_name

@@ -79,15 +79,15 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 AND ST_IsValid(b.position)
                 AND a.flaechenschluss = TRUE
                 AND b.flaechenschluss = TRUE
-                AND {short_plan_type}_bereich."gehoertZuPlan_id" = '{plan_id}'
+                AND {short_plan_type}_bereich."gehoertZuPlan_id" = :plan_id
                 AND (
                     ST_Overlaps(a.position, b.position)
                     OR st_within(a.position, b.position)
                 )
                 AND NOT ST_IsEmpty(polygon_geom);
-        """)
+        """) # nosec B608 (only trusted input)
 
-        res = session.execute(stmt).all()
+        res = session.execute(stmt, {"plan_id": plan_id}).all()
         for row in res:
             error_type = GeometryIntersectionType.FullyWithin if row.is_within else GeometryIntersectionType.Planinhalt
             validation_result = ValidationResult(
@@ -126,7 +126,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 xp_plan.id = :planid AND
                 ST_IsValid(xp_bereich.geltungsbereich) AND
                 NOT st_coveredby(xp_bereich.geltungsbereich, st_buffer(xp_plan."raeumlicherGeltungsbereich", {GRID_TOLERANCE}));
-        """)
+        """) # nosec B608 (only trusted input)
         stmt = stmt.bindparams(planid=plan_id)
 
         res = session.execute(stmt).all()
@@ -170,7 +170,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 {short_plan_type}_bereich."gehoertZuPlan_id" = :planid AND
                 ST_IsValid(a.position) AND
                 NOT st_coveredby(a.position, st_buffer(xp_bereich.geltungsbereich, {GRID_TOLERANCE}));
-        """)
+        """) # nosec B608 (only trusted input)
         stmt = stmt.bindparams(planid=plan_id)
 
         res = session.execute(stmt).all()
@@ -236,7 +236,7 @@ def _validate_geometry_valid(plan_id, short_plan_type: str) -> List[ValidationRe
                 SELECT id, "raeumlicherGeltungsbereich" AS geom, 'xp_plan' FROM xp_plan
                 WHERE xp_plan.id = :planid
             ) AS all_geometries;
-        """)
+        """) # nosec B608 (only trusted input)
         stmt = stmt.bindparams(planid=plan_id)
 
         res = session.execute(stmt).all()
@@ -295,9 +295,9 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 GROUP BY {short_plan_type}_bereich."gehoertZuPlan_id"
                 ) as plan_contents
             INNER JOIN xp_plan ON plan_contents.plan_id = xp_plan.id
-            WHERE xp_plan.id = '{plan_id}';
-        """)
-        res = session.execute(stmt)
+            WHERE xp_plan.id = :plan_id;
+        """) # nosec B608 (only trusted input)
+        res = session.execute(stmt, {"plan_id": plan_id})
         for row in res:
             validation_result = ValidationResult(
                 xid=str(row.id),
