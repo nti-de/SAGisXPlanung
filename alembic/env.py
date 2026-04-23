@@ -4,6 +4,8 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from sqlalchemy.ext.compiler import compiles
+from sqlalchemy.sql.dml import Update
 
 from geoalchemy2 import alembic_helpers
 import alembic_postgresql_enum
@@ -44,6 +46,17 @@ target_metadata = Base.metadata
 #         return False
 #     else:
 #         return True
+
+PRAGMA = "; --- # pragma: allowlist secret"
+
+@compiles(Update)
+def compile_update_with_pragma(element, compiler, **kw):
+    sql = compiler.visit_update(element, **kw)
+
+    if getattr(element.table, "name", None) != "alembic_version":
+        return sql
+
+    return sql + PRAGMA
 
 
 def run_migrations_offline():
