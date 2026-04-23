@@ -515,7 +515,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     """ Ein Abschnitt der textlich formulierten Inhalte des Plans. """
 
     __tablename__ = 'xp_text_abschnitt'
-    __avoidRelation__ = ['xp_bereich', 'xp_objekt', 'xp_plan', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
+    __avoidRelation__ = ['xp_bereich', 'xp_objekt', 'xp_plan', 'bp_objekte', 'fp_objekte', 'bp_baugebiet',
                          'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte',
                          'xp_plaene', 'xp_plaene_v6']
 
@@ -566,16 +566,20 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     )
 
     # BP_Objekt [0..*] (v5.3)
-    bp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('bp_objekt.id', ondelete='CASCADE'))
-    bp_objekt = relationship("BP_Objekt", back_populates="refTextInhalt",
-                             foreign_keys=[bp_objekt_id],
-                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+    bp_objekte = relationship("BP_Objekt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="refTextInhalt",
+        passive_deletes=True,
+        info={'xplan_version': XPlanVersion.FIVE_THREE}
+    )
 
     # FP_Objekt [0..*] (v5.3)
-    fp_objekt_id = Column(UUID(as_uuid=True), ForeignKey('fp_objekt.id', ondelete='CASCADE'))
-    fp_objekt = relationship("FP_Objekt", back_populates="refTextInhalt",
-                             foreign_keys=[fp_objekt_id],
-                             info={'xplan_version': XPlanVersion.FIVE_THREE})
+    fp_objekte = relationship("FP_Objekt",
+        secondary=xp_textabschnitt_assoc,
+        back_populates="refTextInhalt",
+        passive_deletes=True,
+        info={'xplan_version': XPlanVersion.FIVE_THREE}
+    )
 
     # BP_BaugebietsTeilFlaeche [0..*] (v6)
     bp_baugebiet_id = Column(UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE'))
@@ -600,7 +604,7 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['xp_plan', 'xp_bereich', 'xp_objekt', 'bp_objekt', 'fp_objekt', 'bp_baugebiet',
+        return ['xp_plan', 'xp_bereich', 'xp_objekt', 'bp_objekte', 'fp_objekte', 'bp_baugebiet',
                 'bp_nebenanlagen_ausschluss_flaeche', 'bp_wohngebaeude_flaeche', 'xp_objekte',
                 'xp_plaene', 'xp_plaene_v6']
 
@@ -617,6 +621,8 @@ def delete_textabschnitt_orphans(session, ctx):
             ~XP_TextAbschnitt.xp_plaene_v6.any(),
             ~XP_TextAbschnitt.xp_bereich.any(),
             ~XP_TextAbschnitt.xp_objekte.any(),
+            ~XP_TextAbschnitt.bp_objekte.any(),
+            ~XP_TextAbschnitt.fp_objekte.any(),
         )
     ).delete(synchronize_session=False)
 

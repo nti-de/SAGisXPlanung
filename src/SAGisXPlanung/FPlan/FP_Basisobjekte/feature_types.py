@@ -16,7 +16,7 @@ from SAGisXPlanung.XPlan.conversions import FP_Rechtscharakter_EnumType
 from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_GesetzlicheGrundlageAssoc
-from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt, xp_textabschnitt_assoc
 from SAGisXPlanung.XPlan.types import GeometryType
 
 
@@ -182,7 +182,8 @@ class FP_Objekt(XP_Objekt):
 
     # XP_TextAbschnitt [0..*] (v5.3)
     refTextInhalt = relationship("XP_TextAbschnitt",
-         back_populates="fp_objekt",
+         secondary=xp_textabschnitt_assoc,
+         back_populates="fp_objekte",
          cascade="all, delete", passive_deletes=True,
          info={
              'xplan_version': XPlanVersion.FIVE_THREE,
