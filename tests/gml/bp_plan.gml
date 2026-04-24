@@ -187,7 +187,7 @@
         </xplan:XP_Hoehenangabe>
       </xplan:hoehenangabe>
       <xplan:rechtscharakter>1000</xplan:rechtscharakter>
-      <xplan:refTextInhalt xlink:href="#GML_aeab4e2a-1b84-4c23-af10-cd94f8a82921"/>
+      <xplan:refTextInhalt xlink:href="#GML_6e9040bf-2876-4397-b264-f23b54bf03c6"/>
       <xplan:position>
         <gml:Polygon gml:id="Gml_CC1417C9-6D68-43F6-9998-8F48F395633B" srsName="EPSG:25832">
           <gml:exterior>
@@ -247,7 +247,8 @@
       <xplan:rechtsstand>1000</xplan:rechtsstand>
       <xplan:gehoertZuBereich xlink:href="#GML_30101d2a-21e2-4d0e-a820-0df812038b86" />
       <xplan:rechtscharakter>1000</xplan:rechtscharakter>
-      <xplan:refTextInhalt xlink:href="#Gml_103ED703-06EF-4A47-AFC5-C100DC6D87B0" />
+      <xplan:refTextInhalt xlink:href="#GML_6e9040bf-2876-4397-b264-f23b54bf03c6"/>
+      <xplan:refTextInhalt xlink:href="#GML_c2bf69b7-1e3f-413e-bf23-2ebfd483f2b1"/>
       <xplan:position>
         <gml:Polygon gml:id="Gml_077AB8C0-1E11-465B-9DB1-2082805294D6" srsName="EPSG:25832">
           <gml:exterior>
@@ -277,6 +278,7 @@
       <xplan:wirdDargestelltDurch xlink:href="GML_c4a14650-11b2-4303-a321-accc1623ba59" />
       <xplan:wirdDargestelltDurch xlink:href="GML_491338bd-921b-443e-8cce-4b4c9bc1aad0" />
       <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+      <xplan:refTextInhalt xlink:href="#GML_6e9040bf-2876-4397-b264-f23b54bf03c6"/>
       <xplan:position>
         <gml:Polygon srsName="EPSG:25832" gml:id="GML_9315e58c-ee79-4e4a-85fa-993709ccfc29">
           <gml:exterior>
@@ -331,6 +333,20 @@
       </xplan:position>
       <xplan:drehwinkel uom="grad">0</xplan:drehwinkel>
     </xplan:XP_PTO>
+  </gml:featureMember>
+  <gml:featureMember>
+    <xplan:BP_TextAbschnitt gml:id="GML_6e9040bf-2876-4397-b264-f23b54bf03c6">
+      <xplan:schluessel>§12 Abs. 2</xplan:schluessel>
+      <xplan:text>ref1</xplan:text>
+      <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+    </xplan:BP_TextAbschnitt>
+  </gml:featureMember>
+  <gml:featureMember>
+    <xplan:BP_TextAbschnitt gml:id="GML_c2bf69b7-1e3f-413e-bf23-2ebfd483f2b1">
+      <xplan:schluessel>§11 Abs. 6</xplan:schluessel>
+      <xplan:text>ref2</xplan:text>
+      <xplan:rechtscharakter>1000</xplan:rechtscharakter>
+    </xplan:BP_TextAbschnitt>
   </gml:featureMember>
   <xplan:XP_Nutzungsschablone gml:id="GML_491338bd-921b-443e-8cce-4b4c9bc1aad0">
       <gml:boundedBy>

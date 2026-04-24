@@ -39,6 +39,12 @@ class GMLReader:
         self.nsmap.pop(None, None)
         self.import_version = XPlanVersion.from_namespace(self.nsmap['xplan'])
 
+        self._obj_cache = {}
+        self._nodes_by_gml_id = {
+            node_id: node for node in self.root.xpath('//*[@gml:id]', namespaces=self.nsmap)
+            if (id_nodes := node.xpath('@gml:id', namespaces=self.nsmap)) and (node_id := id_nodes[0])
+        }
+
         self.object_count = int(self.root.xpath("count(//gml:featureMember)", namespaces=self.nsmap))
         self.progress_callback = progress_callback
         self.current_progress = 0
@@ -97,6 +103,14 @@ class GMLReader:
         type_name = etree.QName(gml).localname
         if type_name not in CLASSES.keys():
             return
+
+        gml_id = None
+        if id_nodes := gml.xpath('@gml:id', namespaces=self.nsmap):
+            gml_id = id_nodes[0]
+
+        if gml_id is not None and gml_id in self._obj_cache:
+            return self._obj_cache[gml_id]
+
         object_type = CLASSES[type_name]
         if object_type in OBJECT_BASE_TYPES:
             self.warnings.append(f'Basisklasse vom Typ {object_type.__name__} ignoriert... Bitte ein spezifisches '
@@ -104,12 +118,16 @@ class GMLReader:
             return
 
         if hasattr(object_type, 'from_xplan_node'):
-            return object_type.from_xplan_node(gml)
+            value = object_type.from_xplan_node(gml)
+            if gml_id is not None and value is not None:
+                self._obj_cache[gml_id] = value
+            return value
 
         obj = object_type()
-        if id_nodes := gml.xpath('@gml:id', namespaces=self.nsmap):
-            obj_id = id_nodes[0]
+        if gml_id is not None:
+            obj_id = gml_id
             obj.id = obj_id[obj_id.find('_') + 1:]
+            self._obj_cache[gml_id] = obj
 
         for node in gml.iterchildren():
             node_name = etree.QName(node).localname
@@ -120,7 +138,6 @@ class GMLReader:
                 continue
 
             node_name = object_type.attribute_by_version(node_name, self.import_version)
-
             if node_name in [r[0] for r in obj.relationships()]:
                 if is_codelist_attribute(object_type, node_name):
                     codelist = CodeListValue.codelist_class(object_type, node_name)
@@ -131,14 +148,13 @@ class GMLReader:
                     if not xlink_refs:
                         continue
                     linked_node_id = str(xlink_refs[0]).lstrip('#')
-                    linked_node = self.root.xpath(f"(//*[@gml:id='{linked_node_id}'])[1]", namespaces=self.nsmap)
-                    if not linked_node:
+                    linked_node = self._nodes_by_gml_id.get(linked_node_id)
+                    if linked_node is None:
                         self.warnings.append(f'xlink verweist auf ein Objekt, das nicht in der XPlanGML-Datei'
                                              f' vorliegt. (ID: {linked_node_id}, Zeile: {node.sourceline})')
                         continue
 
-                    node.append(linked_node[0])
-                    value = self.read_xp_object(linked_node[0])
+                    value = self.read_xp_object(linked_node)
 
                     if isinstance(value, XP_Nutzungsschablone):
                         if value.zeilenAnz is not None:
@@ -164,12 +180,10 @@ class GMLReader:
                             f'ein gültiger Auswahlwert ist (Zeile: {gml.sourceline})')
                         continue
                 if (a := getattr(obj, node_name)) is not None:
-                    a.append(value)
+                    if value not in a:
+                        a.append(value)
                 else:
                     setattr(obj, node_name, value)
-
-                gml.remove(node)
-                del node
                 continue
 
             # edge case where same named column exists in base class which should be used

@@ -123,9 +123,14 @@ class TestGMLReader_readPlan:
         assert baugebiet.wirdDargestelltDurch[0].drehwinkel == '4.20'
         assert isinstance(baugebiet.wirdDargestelltDurch[1], XP_PTO)
         assert baugebiet.wirdDargestelltDurch[1].schriftinhalt == '(B)'
+        assert len(baugebiet.refTextInhalt) == 1
+        assert baugebiet.refTextInhalt[0].text == 'ref1'
 
         wegerecht = next(p for p in plan.bereich[1].planinhalt if isinstance(p, BP_Wegerecht))
         assert wegerecht.flaechenschluss is False
+        assert len(wegerecht.refTextInhalt) == 2
+        assert wegerecht.refTextInhalt[0].text == 'ref1'
+        assert wegerecht.refTextInhalt[1].text == 'ref2'
 
         assert plan.hatGenerAttribut
         assert isinstance(plan.hatGenerAttribut[0], XP_IntegerAttribut)
