@@ -271,6 +271,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         self.bImport.setEnabled(False)
         self.bImport.repaint()
+        self.progress_label.setText('0')
+        self.progress_label.setVisible(True)
+        self.progress_text.setText('Objekte gelesen')
         self.progress_widget.setVisible(True)
         prev_cursor = self.cursor()
 
@@ -300,7 +303,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
             self.fwImportPath.setFilePath("")
             self.refresh_plans()
-            plan_name = import_result.plan_name
+            plan_xid, plan_name = import_result.plan_xid, import_result.plan_name
             if import_result.warnings:
                 warn_info_text = '\n\n '.join(w for w in import_result.warnings)
                 iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} importiert! "
@@ -309,6 +312,8 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             else:
                 iface.messageBar().pushMessage("XPlanung", f"Planwerk {plan_name} erfolgreich importiert!",
                                                level=Qgis.MessageLevel.Success)
+
+            self.apply_preferred_plan_selection(plan_xid)
 
         except CancelledError:
             self.cancellation_token.set()
@@ -327,6 +332,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             self.cancellation_token.clear()
             raise CancelledError()
         self.progress_label.setText(f'{progress[0]}/{progress[1]}')
+        if 0 < progress[1] <= progress[0]:
+            self.progress_label.setVisible(False)
+            self.progress_text.setText('Speichern in Datenbank...')
 
     def on_cancel_import(self):
         if self.import_task and not self.import_task.cancelled():

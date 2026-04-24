@@ -256,7 +256,13 @@
        <item>
         <widget class="QWidget" name="progress_widget" native="true">
          <layout class="QHBoxLayout" name="layout_progress">
+          <property name="topMargin">
+           <number>6</number>
+          </property>
           <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -277,7 +283,7 @@ color: #374151;</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="progress_text">
             <property name="styleSheet">
              <string notr="true">font-weight: 400;
 color: #374151;</string>

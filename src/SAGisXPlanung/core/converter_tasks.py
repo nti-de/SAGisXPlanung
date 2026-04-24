@@ -19,7 +19,7 @@ from SAGisXPlanung.config import export_version, QgsConfig
 logger = logging.getLogger(__name__)
 
 
-ImportResult = namedtuple('ImportResult', ['plan_name', 'warnings'])
+ImportResult = namedtuple('ImportResult', ['plan_xid', 'plan_name', 'warnings'])
 
 
 @dataclass
@@ -89,7 +89,7 @@ def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int
             progress_callback=progress_callback,
             session=session
         )
-        result = ImportResult(reader.plan.name, reader.warnings)
+        result = ImportResult(reader.plan.id, reader.plan.name, reader.warnings)
         if overwrite:
             session.expunge_all()
             session.merge(reader.plan)
