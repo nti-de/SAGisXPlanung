@@ -203,8 +203,8 @@ class SO_Denkmalschutzrecht(MixedGeometry, SO_Objekt):
             return QgsSingleSymbolRenderer(cls.polygon_symbol())
         if geom_type == QgsWkbTypes.GeometryType.PointGeometry:
             return icon_renderer('Denkmalschutz', QgsSymbol.defaultSymbol(geom_type),
-                                 'SO_SonstigeGebiete', geometry_type=geom_type,
-                                 scale_factor=5)
+                                 'SO_NachrichtlicheUebernahmen', geometry_type=geom_type,
+                                 scale_factor=1)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')
