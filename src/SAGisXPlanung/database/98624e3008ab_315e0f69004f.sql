@@ -47,7 +47,7 @@ ALTER TABLE xp_externe_referenz ADD COLUMN georef_file BYTEA;
 
 ALTER TABLE xp_externe_referenz ADD COLUMN "referenzMimeType_id" uuid REFERENCES codelist_values(id);;
 
-UPDATE alembic_version SET version_num='315e0f69004f' WHERE alembic_version.version_num = '98624e3008ab';
+UPDATE alembic_version SET version_num='315e0f69004f' WHERE alembic_version.version_num = '98624e3008ab'; --- # pragma: allowlist secret;
 
 COMMIT;
 

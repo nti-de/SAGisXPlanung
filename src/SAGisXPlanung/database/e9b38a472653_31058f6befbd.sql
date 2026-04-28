@@ -315,7 +315,7 @@ ALTER TABLE xp_po ADD COLUMN art VARCHAR[];
 
 ALTER TABLE xp_po ADD COLUMN index INTEGER[];
 
-UPDATE alembic_version SET version_num='31058f6befbd' WHERE alembic_version.version_num = 'e9b38a472653';
+UPDATE alembic_version SET version_num='31058f6befbd' WHERE alembic_version.version_num = 'e9b38a472653'; --- # pragma: allowlist secret;
 
 COMMIT;
 

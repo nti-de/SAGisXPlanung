@@ -98,7 +98,7 @@ ALTER TABLE xp_externe_referenz ADD COLUMN grundstueck_ueberbaubar_id UUID;
 
 ALTER TABLE xp_externe_referenz ADD FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
 
-UPDATE alembic_version SET version_num='20238c1f2cf8' WHERE alembic_version.version_num = '1983d6b6e2c1';
+UPDATE alembic_version SET version_num='20238c1f2cf8' WHERE alembic_version.version_num = '1983d6b6e2c1'; --- # pragma: allowlist secret;
 
 COMMIT;
 

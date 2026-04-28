@@ -89,7 +89,7 @@ create table civil_gemeinde
                     references civil_plan
         );;
 
-UPDATE alembic_version SET version_num='873e18b73036' WHERE alembic_version.version_num = '54455ce1e9f6';
+UPDATE alembic_version SET version_num='873e18b73036' WHERE alembic_version.version_num = '54455ce1e9f6'; --- # pragma: allowlist secret;
 
 COMMIT;
 

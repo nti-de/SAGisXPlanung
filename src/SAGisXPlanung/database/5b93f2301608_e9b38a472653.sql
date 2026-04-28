@@ -220,7 +220,7 @@ CREATE INDEX idx_lp_objekt_position ON lp_objekt USING gist (position);
 
 ALTER TABLE lp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
-UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608';
+UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608'; --- # pragma: allowlist secret;
 
 COMMIT;
 

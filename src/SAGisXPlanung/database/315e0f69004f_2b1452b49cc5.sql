@@ -102,7 +102,7 @@ CREATE TABLE fp_flaeche_ohne_darstellung (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='2b1452b49cc5' WHERE alembic_version.version_num = '315e0f69004f';
+UPDATE alembic_version SET version_num='2b1452b49cc5' WHERE alembic_version.version_num = '315e0f69004f'; --- # pragma: allowlist secret;
 
 COMMIT;
 

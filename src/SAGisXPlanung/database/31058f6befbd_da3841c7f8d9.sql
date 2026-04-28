@@ -219,7 +219,7 @@ ALTER TABLE fp_plan DROP COLUMN "versionSonstRechtsgrundlage_id";
 
 ALTER TYPE xp_abemassnahmentypen ADD VALUE IF NOT EXISTS 'AnpflanzungBindungErhaltung';;
 
-UPDATE alembic_version SET version_num='da3841c7f8d9' WHERE alembic_version.version_num = '31058f6befbd';
+UPDATE alembic_version SET version_num='da3841c7f8d9' WHERE alembic_version.version_num = '31058f6befbd'; --- # pragma: allowlist secret;
 
 COMMIT;
 

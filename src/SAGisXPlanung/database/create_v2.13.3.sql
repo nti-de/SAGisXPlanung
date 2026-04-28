@@ -415,7 +415,7 @@ ALTER TABLE xp_bereich DROP COLUMN srs;
 
 ALTER TABLE xp_plan DROP COLUMN srs;
 
-UPDATE alembic_version SET version_num='20c50b38b0af' WHERE alembic_version.version_num = 'cfbf4d3b2a9d';
+UPDATE alembic_version SET version_num='20c50b38b0af' WHERE alembic_version.version_num = 'cfbf4d3b2a9d'; --- # pragma: allowlist secret;
 
 -- Running upgrade 20c50b38b0af -> 2cee32cfc646
 
@@ -849,7 +849,7 @@ ALTER TABLE bp_dachgestaltung ADD CONSTRAINT fk_dachgestaltung_gemeinbedarf FORE
 
 ALTER TABLE bp_dachgestaltung ADD CONSTRAINT fk_dachgestaltung_besondere_nutzung FOREIGN KEY(besondere_nutzung_id) REFERENCES bp_besondere_nutzung (id) ON DELETE CASCADE;
 
-UPDATE alembic_version SET version_num='2cee32cfc646' WHERE alembic_version.version_num = '20c50b38b0af';
+UPDATE alembic_version SET version_num='2cee32cfc646' WHERE alembic_version.version_num = '20c50b38b0af'; --- # pragma: allowlist secret;
 
 -- Running upgrade 2cee32cfc646 -> 54455ce1e9f6
 
@@ -1012,7 +1012,7 @@ UPDATE xp_plan_gemeinde g SET fp_plan_id = xp.id FROM xp_plan xp WHERE xp.id = g
 
 ALTER TABLE xp_plan_gemeinde DROP COLUMN plan_id;
 
-UPDATE alembic_version SET version_num='54455ce1e9f6' WHERE alembic_version.version_num = '2cee32cfc646';
+UPDATE alembic_version SET version_num='54455ce1e9f6' WHERE alembic_version.version_num = '2cee32cfc646'; --- # pragma: allowlist secret;
 
 -- Running upgrade 54455ce1e9f6 -> 873e18b73036
 
@@ -1103,7 +1103,7 @@ create table civil_gemeinde
                     references civil_plan
         );;
 
-UPDATE alembic_version SET version_num='873e18b73036' WHERE alembic_version.version_num = '54455ce1e9f6';
+UPDATE alembic_version SET version_num='873e18b73036' WHERE alembic_version.version_num = '54455ce1e9f6'; --- # pragma: allowlist secret;
 
 -- Running upgrade 873e18b73036 -> 1a015621a38f
 
@@ -1191,7 +1191,7 @@ CREATE TABLE fp_wald (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='1a015621a38f' WHERE alembic_version.version_num = '873e18b73036';
+UPDATE alembic_version SET version_num='1a015621a38f' WHERE alembic_version.version_num = '873e18b73036'; --- # pragma: allowlist secret;
 
 -- Running upgrade 1a015621a38f -> 812b33dce3d1
 
@@ -1265,7 +1265,7 @@ UPDATE xp_ppo SET symbol_path = replace(symbol_path, 'BP_VerEntsorgung', 'BP_Ver
 
 UPDATE xp_ppo SET symbol_path = replace(symbol_path, 'BP_SpielSportanlagenFlaeche', 'BP_Gemeinbedarf_Spiel_und_Sportanlagen');;
 
-UPDATE alembic_version SET version_num='812b33dce3d1' WHERE alembic_version.version_num = '1a015621a38f';
+UPDATE alembic_version SET version_num='812b33dce3d1' WHERE alembic_version.version_num = '1a015621a38f'; --- # pragma: allowlist secret;
 
 -- Running upgrade 812b33dce3d1 -> 0a6f00a1f663
 
@@ -1313,7 +1313,7 @@ UPDATE xp_externe_referenz SET type='xp_spez_externe_referenz' WHERE id in (SELE
 
 UPDATE xp_externe_referenz SET type='xp_externe_referenz' WHERE type IS NULL;
 
-UPDATE alembic_version SET version_num='0a6f00a1f663' WHERE alembic_version.version_num = '812b33dce3d1';
+UPDATE alembic_version SET version_num='0a6f00a1f663' WHERE alembic_version.version_num = '812b33dce3d1'; --- # pragma: allowlist secret;
 
 -- Running upgrade 0a6f00a1f663 -> b93ec8372df6
 
@@ -1325,7 +1325,7 @@ ALTER TABLE xp_bereich ALTER COLUMN "geltungsbereich" type geometry(Geometry);;
 
 ALTER TABLE xp_bereich ADD CONSTRAINT check_geometry_type CHECK (st_dimension("geltungsbereich") = 2);;
 
-UPDATE alembic_version SET version_num='b93ec8372df6' WHERE alembic_version.version_num = '0a6f00a1f663';
+UPDATE alembic_version SET version_num='b93ec8372df6' WHERE alembic_version.version_num = '0a6f00a1f663'; --- # pragma: allowlist secret;
 
 -- Running upgrade b93ec8372df6 -> fb27f7a59e17
 
@@ -2523,7 +2523,7 @@ ALTER TABLE xp_plan_gemeinde ADD COLUMN lp_plan_id uuid REFERENCES lp_plan(id) O
         ALTER TABLE lp_plan ADD COLUMN "startBedingungen" VARCHAR;
         ALTER TABLE lp_plan ADD COLUMN "endeBedingungen" VARCHAR;;
 
-UPDATE alembic_version SET version_num='fb27f7a59e17' WHERE alembic_version.version_num = 'b93ec8372df6';
+UPDATE alembic_version SET version_num='fb27f7a59e17' WHERE alembic_version.version_num = 'b93ec8372df6'; --- # pragma: allowlist secret;
 
 -- Running upgrade fb27f7a59e17 -> 8cdbef1a55d6
 
@@ -2535,7 +2535,7 @@ ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeInfra
 
 ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeSicherheitOrdnung';
 
-UPDATE alembic_version SET version_num='8cdbef1a55d6' WHERE alembic_version.version_num = 'fb27f7a59e17';
+UPDATE alembic_version SET version_num='8cdbef1a55d6' WHERE alembic_version.version_num = 'fb27f7a59e17'; --- # pragma: allowlist secret;
 
 -- Running upgrade 8cdbef1a55d6 -> ce95b86bc010
 
@@ -2672,7 +2672,7 @@ CREATE TYPE bp_einfahrttypen AS ENUM (
             PRIMARY KEY (id)
         );;
 
-UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.version_num = '8cdbef1a55d6';
+UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.version_num = '8cdbef1a55d6'; --- # pragma: allowlist secret;
 
 -- Running upgrade ce95b86bc010 -> 346f4a91caf3
 
@@ -2815,7 +2815,7 @@ ALTER TABLE so_strassenverkehr ALTER COLUMN "hatDarstellungMitBesondZweckbest" S
 
 ALTER TABLE xp_objekt ADD FOREIGN KEY("gesetzlicheGrundlage_id") REFERENCES xp_gesetzliche_grundlage (id);
 
-UPDATE alembic_version SET version_num='346f4a91caf3' WHERE alembic_version.version_num = 'ce95b86bc010';
+UPDATE alembic_version SET version_num='346f4a91caf3' WHERE alembic_version.version_num = 'ce95b86bc010'; --- # pragma: allowlist secret;
 
 -- Running upgrade 346f4a91caf3 -> 1983d6b6e2c1
 
@@ -2857,7 +2857,7 @@ CREATE TABLE assoc_detail_zweckversorgung (
     FOREIGN KEY(codelist_user_id) REFERENCES fp_zweckbestimmung_versorgung (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='1983d6b6e2c1' WHERE alembic_version.version_num = '346f4a91caf3';
+UPDATE alembic_version SET version_num='1983d6b6e2c1' WHERE alembic_version.version_num = '346f4a91caf3'; --- # pragma: allowlist secret;
 
 -- Running upgrade 1983d6b6e2c1 -> 20238c1f2cf8
 
@@ -2957,7 +2957,7 @@ ALTER TABLE xp_externe_referenz ADD COLUMN grundstueck_ueberbaubar_id UUID;
 
 ALTER TABLE xp_externe_referenz ADD FOREIGN KEY(grundstueck_ueberbaubar_id) REFERENCES bp_grundstueck_ueberbaubar (id) ON DELETE CASCADE;
 
-UPDATE alembic_version SET version_num='20238c1f2cf8' WHERE alembic_version.version_num = '1983d6b6e2c1';
+UPDATE alembic_version SET version_num='20238c1f2cf8' WHERE alembic_version.version_num = '1983d6b6e2c1'; --- # pragma: allowlist secret;
 
 -- Running upgrade 20238c1f2cf8 -> 151ba21532e3
 
@@ -3077,7 +3077,7 @@ CREATE TABLE fp_kennzeichnung (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8';
+UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8'; --- # pragma: allowlist secret;
 
 -- Running upgrade 151ba21532e3 -> 5b93f2301608
 
@@ -3089,7 +3089,7 @@ ALTER TYPE buildingtemplatecelldatatype ADD VALUE IF NOT EXISTS 'GrundGeschossfl
 
 ALTER TABLE so_strassenverkehr ALTER COLUMN nutzungsform DROP NOT NULL;;
 
-UPDATE alembic_version SET version_num='5b93f2301608' WHERE alembic_version.version_num = '151ba21532e3';
+UPDATE alembic_version SET version_num='5b93f2301608' WHERE alembic_version.version_num = '151ba21532e3'; --- # pragma: allowlist secret;
 
 -- Running upgrade 5b93f2301608 -> e9b38a472653
 
@@ -3311,7 +3311,7 @@ CREATE INDEX idx_lp_objekt_position ON lp_objekt USING gist (position);
 
 ALTER TABLE lp_objekt ADD CONSTRAINT prevent_geometry_collection CHECK (GeometryType(position) NOT IN ('GEOMETRYCOLLECTION'));
 
-UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608';
+UPDATE alembic_version SET version_num='e9b38a472653' WHERE alembic_version.version_num = '5b93f2301608'; --- # pragma: allowlist secret;
 
 -- Running upgrade e9b38a472653 -> 31058f6befbd
 
@@ -3628,7 +3628,7 @@ ALTER TABLE xp_po ADD COLUMN art VARCHAR[];
 
 ALTER TABLE xp_po ADD COLUMN index INTEGER[];
 
-UPDATE alembic_version SET version_num='31058f6befbd' WHERE alembic_version.version_num = 'e9b38a472653';
+UPDATE alembic_version SET version_num='31058f6befbd' WHERE alembic_version.version_num = 'e9b38a472653'; --- # pragma: allowlist secret;
 
 -- Running upgrade 31058f6befbd -> da3841c7f8d9
 
@@ -3849,7 +3849,7 @@ ALTER TABLE fp_plan DROP COLUMN "versionSonstRechtsgrundlage_id";
 
 ALTER TYPE xp_abemassnahmentypen ADD VALUE IF NOT EXISTS 'AnpflanzungBindungErhaltung';;
 
-UPDATE alembic_version SET version_num='da3841c7f8d9' WHERE alembic_version.version_num = '31058f6befbd';
+UPDATE alembic_version SET version_num='da3841c7f8d9' WHERE alembic_version.version_num = '31058f6befbd'; --- # pragma: allowlist secret;
 
 -- Running upgrade da3841c7f8d9 -> 98624e3008ab
 
@@ -3877,7 +3877,7 @@ ALTER TABLE lp_objekt ALTER COLUMN nordwinkel TYPE FLOAT USING nordwinkel::float
 
 ALTER TABLE bp_plan ADD CONSTRAINT ck_planart_not_empty_no_nulls CHECK ("planArt" <> '{}' and array_position("planArt", null) is null);;
 
-UPDATE alembic_version SET version_num='98624e3008ab' WHERE alembic_version.version_num = 'da3841c7f8d9';
+UPDATE alembic_version SET version_num='98624e3008ab' WHERE alembic_version.version_num = 'da3841c7f8d9'; --- # pragma: allowlist secret;
 
 -- Running upgrade 98624e3008ab -> 315e0f69004f
 
@@ -3926,7 +3926,7 @@ ALTER TABLE xp_externe_referenz ADD COLUMN georef_file BYTEA;
 
 ALTER TABLE xp_externe_referenz ADD COLUMN "referenzMimeType_id" uuid REFERENCES codelist_values(id);;
 
-UPDATE alembic_version SET version_num='315e0f69004f' WHERE alembic_version.version_num = '98624e3008ab';
+UPDATE alembic_version SET version_num='315e0f69004f' WHERE alembic_version.version_num = '98624e3008ab'; --- # pragma: allowlist secret;
 
 -- Running upgrade 315e0f69004f -> 2b1452b49cc5
 
@@ -4030,7 +4030,7 @@ CREATE TABLE fp_flaeche_ohne_darstellung (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='2b1452b49cc5' WHERE alembic_version.version_num = '315e0f69004f';
+UPDATE alembic_version SET version_num='2b1452b49cc5' WHERE alembic_version.version_num = '315e0f69004f'; --- # pragma: allowlist secret;
 
 COMMIT;
 

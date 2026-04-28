@@ -161,7 +161,7 @@ UPDATE xp_plan_gemeinde g SET fp_plan_id = xp.id FROM xp_plan xp WHERE xp.id = g
 
 ALTER TABLE xp_plan_gemeinde DROP COLUMN plan_id;
 
-UPDATE alembic_version SET version_num='54455ce1e9f6' WHERE alembic_version.version_num = '2cee32cfc646';
+UPDATE alembic_version SET version_num='54455ce1e9f6' WHERE alembic_version.version_num = '2cee32cfc646'; --- # pragma: allowlist secret;
 
 COMMIT;
 

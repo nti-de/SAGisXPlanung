@@ -135,7 +135,7 @@ CREATE TYPE bp_einfahrttypen AS ENUM (
             PRIMARY KEY (id)
         );;
 
-UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.version_num = '8cdbef1a55d6';
+UPDATE alembic_version SET version_num='ce95b86bc010' WHERE alembic_version.version_num = '8cdbef1a55d6'; --- # pragma: allowlist secret;
 
 COMMIT;
 

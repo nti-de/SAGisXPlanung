@@ -1,5 +1,24 @@
 ## Changelog
 
+### [2.13.3] - 28.04.2026
+
+#### Veränderungen
+
+- Layer werden automatisch als multi-part konfiguriert, sodass QGIS-Werkzeuge für Multi-Geometrien funktionieren (1fd7622c)
+- Planauswahl behällt Auswahl des zuletzt bearbeiteten Plans (e36ba23c)
+- Beim Öffnen von QGIS-Projekte mit XPlan-Daten wird automatisch der Plan im Arbeitsbereich geöffnet (e36ba23c)
+- verbesserte Status-Beschreibung des GML-Import (60e49723)
+
+#### Fehlerbehebungen
+
+- Button in Mehrfach-Bearbeitung funktioniert nicht (c6c350f8)
+- Style für `SO_Strassenverkehr` mit besonderer Zweckbestimmung (b9272150)
+- Suche in Attributansicht funktioniert nicht bei Qt-Versionen > 5.12 (15948e06)
+- Fehler beim Löschen von Plänen mit `hatGenerAttribut`-relation (0b40e2d4)
+- Fehler beim GML-Import von Plänen mit Mehrfachbelegung im Attribut `refTextInhalt` (131258f5, ea0f3a15)
+- Korrektur des Stils SO_Denkmalschutzrecht (ecf28291)
+
+
 ### [2.13.2] - 08.04.2026
 
 #### Neue Funktionen

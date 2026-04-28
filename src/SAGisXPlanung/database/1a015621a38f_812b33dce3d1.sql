@@ -72,7 +72,7 @@ UPDATE xp_ppo SET symbol_path = replace(symbol_path, 'BP_VerEntsorgung', 'BP_Ver
 
 UPDATE xp_ppo SET symbol_path = replace(symbol_path, 'BP_SpielSportanlagenFlaeche', 'BP_Gemeinbedarf_Spiel_und_Sportanlagen');;
 
-UPDATE alembic_version SET version_num='812b33dce3d1' WHERE alembic_version.version_num = '1a015621a38f';
+UPDATE alembic_version SET version_num='812b33dce3d1' WHERE alembic_version.version_num = '1a015621a38f'; --- # pragma: allowlist secret;
 
 COMMIT;
 

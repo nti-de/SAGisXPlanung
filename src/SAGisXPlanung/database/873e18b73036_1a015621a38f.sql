@@ -86,7 +86,7 @@ CREATE TABLE fp_wald (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='1a015621a38f' WHERE alembic_version.version_num = '873e18b73036';
+UPDATE alembic_version SET version_num='1a015621a38f' WHERE alembic_version.version_num = '873e18b73036'; --- # pragma: allowlist secret;
 
 COMMIT;
 

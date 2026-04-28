@@ -118,7 +118,7 @@ CREATE TABLE fp_kennzeichnung (
     FOREIGN KEY(id) REFERENCES fp_objekt (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8';
+UPDATE alembic_version SET version_num='151ba21532e3' WHERE alembic_version.version_num = '20238c1f2cf8'; --- # pragma: allowlist secret;
 
 COMMIT;
 

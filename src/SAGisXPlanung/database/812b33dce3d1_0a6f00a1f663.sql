@@ -46,7 +46,7 @@ UPDATE xp_externe_referenz SET type='xp_spez_externe_referenz' WHERE id in (SELE
 
 UPDATE xp_externe_referenz SET type='xp_externe_referenz' WHERE type IS NULL;
 
-UPDATE alembic_version SET version_num='0a6f00a1f663' WHERE alembic_version.version_num = '812b33dce3d1';
+UPDATE alembic_version SET version_num='0a6f00a1f663' WHERE alembic_version.version_num = '812b33dce3d1'; --- # pragma: allowlist secret;
 
 COMMIT;
 

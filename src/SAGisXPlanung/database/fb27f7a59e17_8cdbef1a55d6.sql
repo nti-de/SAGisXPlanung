@@ -10,7 +10,7 @@ ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeInfra
 
 ALTER TYPE xp_zweckbestimmunggemeinbedarf ADD VALUE IF NOT EXISTS 'SonstigeSicherheitOrdnung';
 
-UPDATE alembic_version SET version_num='8cdbef1a55d6' WHERE alembic_version.version_num = 'fb27f7a59e17';
+UPDATE alembic_version SET version_num='8cdbef1a55d6' WHERE alembic_version.version_num = 'fb27f7a59e17'; --- # pragma: allowlist secret;
 
 COMMIT;
 

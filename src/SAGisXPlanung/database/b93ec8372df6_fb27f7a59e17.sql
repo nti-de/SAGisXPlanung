@@ -1196,7 +1196,7 @@ ALTER TABLE xp_plan_gemeinde ADD COLUMN lp_plan_id uuid REFERENCES lp_plan(id) O
         ALTER TABLE lp_plan ADD COLUMN "startBedingungen" VARCHAR;
         ALTER TABLE lp_plan ADD COLUMN "endeBedingungen" VARCHAR;;
 
-UPDATE alembic_version SET version_num='fb27f7a59e17' WHERE alembic_version.version_num = 'b93ec8372df6';
+UPDATE alembic_version SET version_num='fb27f7a59e17' WHERE alembic_version.version_num = 'b93ec8372df6'; --- # pragma: allowlist secret;
 
 COMMIT;
 

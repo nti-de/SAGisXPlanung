@@ -40,7 +40,7 @@ CREATE TABLE assoc_detail_zweckversorgung (
     FOREIGN KEY(codelist_user_id) REFERENCES fp_zweckbestimmung_versorgung (id) ON DELETE CASCADE
 );
 
-UPDATE alembic_version SET version_num='1983d6b6e2c1' WHERE alembic_version.version_num = '346f4a91caf3';
+UPDATE alembic_version SET version_num='1983d6b6e2c1' WHERE alembic_version.version_num = '346f4a91caf3'; --- # pragma: allowlist secret;
 
 COMMIT;
 

@@ -14,7 +14,7 @@ ALTER TABLE xp_bereich DROP COLUMN srs;
 
 ALTER TABLE xp_plan DROP COLUMN srs;
 
-UPDATE alembic_version SET version_num='20c50b38b0af' WHERE alembic_version.version_num = 'cfbf4d3b2a9d';
+UPDATE alembic_version SET version_num='20c50b38b0af' WHERE alembic_version.version_num = 'cfbf4d3b2a9d'; --- # pragma: allowlist secret;
 
 COMMIT;
 

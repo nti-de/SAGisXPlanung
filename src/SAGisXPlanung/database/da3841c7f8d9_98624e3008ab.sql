@@ -26,7 +26,7 @@ ALTER TABLE lp_objekt ALTER COLUMN nordwinkel TYPE FLOAT USING nordwinkel::float
 
 ALTER TABLE bp_plan ADD CONSTRAINT ck_planart_not_empty_no_nulls CHECK ("planArt" <> '{}' and array_position("planArt", null) is null);;
 
-UPDATE alembic_version SET version_num='98624e3008ab' WHERE alembic_version.version_num = 'da3841c7f8d9';
+UPDATE alembic_version SET version_num='98624e3008ab' WHERE alembic_version.version_num = 'da3841c7f8d9'; --- # pragma: allowlist secret;
 
 COMMIT;
 
