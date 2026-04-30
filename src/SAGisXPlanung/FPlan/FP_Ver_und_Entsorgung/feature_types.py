@@ -1,15 +1,16 @@
-from typing import List
-
-from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer)
+from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer,
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtCore import Qt
 
 from sqlalchemy import Column, ForeignKey, Enum, ARRAY, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declared_attr, relationship
+from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
-from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer, generic_objects_renderer
+from SAGisXPlanung.XPlan.core import LayerPriorityType
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry, UeberlagerungsObjekt
 from SAGisXPlanung.XPlan.types import GeometryType
@@ -75,6 +76,7 @@ class FP_ZentralerVersorgungsbereich(PolygonGeometry, UeberlagerungsObjekt, FP_O
     __mapper_args__ = {
         'polymorphic_identity': __tablename__,
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
@@ -86,6 +88,23 @@ class FP_ZentralerVersorgungsbereich(PolygonGeometry, UeberlagerungsObjekt, FP_O
                                })
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        colored_strip = QgsSimpleLineSymbolLayer(QColor('#001be4'))
+        colored_strip.setWidth(2.0)
+        colored_strip.setOffset(1.0)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        symbol.appendSymbolLayer(colored_strip)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return generic_objects_renderer(geom_type)
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            raise ValueError('Renderer of FP_ZentralerVersorgungsbereich should only be called with polygon geometry')

@@ -1,7 +1,7 @@
 import logging
 
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpleFillSymbolLayer, QgsSymbolLayerUtils,
-                       QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes,
+                       QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsGeometryGeneratorSymbolLayer,
                        QgsSimpleLineSymbolLayer, QgsSimpleMarkerSymbolLayer, Qgis, QgsSimpleMarkerSymbolLayerBase)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import Qt, QSize
@@ -70,9 +70,32 @@ class BP_FreiFlaeche(PolygonGeometry, BP_Objekt):
     nutzung = Column(String)
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        jagged_strip = QgsGeometryGeneratorSymbolLayer.create({})
+        jagged_strip.setSymbolType(Qgis.SymbolType.Fill)
+        jagged_strip.setColor(QColor('transparent'))
+        jagged_strip.setStrokeColor(QColor('black'))
+        jagged_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        jagged_strip.setGeometryExpression("difference($geometry, triangular_wave(buffer($geometry, -1), 5, 1))")
+        sub_symbol = jagged_strip.subSymbol()
+        fill_layer = sub_symbol.symbolLayer(0)
+        fill_layer.setStrokeWidth(0.2)
+        fill_layer.setStrokeColor(QColor('black'))
+        fill_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        symbol.appendSymbolLayer(jagged_strip)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return generic_objects_renderer(geom_type)
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            raise ValueError('Renderer of BP_FreiFlaeche should only be called with polygon geometry')
 
 
 class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):

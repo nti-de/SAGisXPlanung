@@ -2,12 +2,14 @@ from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from qgis.core import QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbol
+from qgis.core import (QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbol, QgsPointPatternFillSymbolLayer, QgsMarkerSymbol,
+                       QgsSimpleMarkerSymbolLayer, QgsUnitTypes)
+from qgis.PyQt.QtGui import QColor
 
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.enums import SO_KlassifizGelaendemorphologie
 from SAGisXPlanung.XPlan.enums import XP_GrenzeTypen
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry, LineGeometry
 from SAGisXPlanung.XPlan.types import GeometryType, XPEnum
 
@@ -35,9 +37,33 @@ class SO_Gelaendemorphologie(MixedGeometry, SO_Objekt):
     nummer = Column(String)
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        marker_pattern = QgsPointPatternFillSymbolLayer()
+        marker_pattern.setDistanceX(5.0)
+        marker_pattern.setDistanceY(5.0)
+        marker_pattern_symbol: QgsMarkerSymbol = QgsMarkerSymbol.createSimple({})
+        marker_pattern_symbol.deleteSymbolLayer(0)
+        marker_pattern_layer = QgsSimpleMarkerSymbolLayer()
+        marker_pattern_layer.setColor(QColor('black'))
+        marker_pattern_layer.setSize(0.5)
+        marker_pattern_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        marker_pattern_symbol.appendSymbolLayer(marker_pattern_layer)
+        marker_pattern.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        marker_pattern.setSubSymbol(marker_pattern_symbol)
+        symbol.appendSymbolLayer(marker_pattern)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            return generic_objects_renderer(geom_type)
 
 
 class SO_Grenze(LineGeometry, SO_Objekt):

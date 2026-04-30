@@ -3,9 +3,9 @@ import os
 import uuid
 from typing import List
 
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsPointXY, QgsGeometry, QgsSingleSymbolRenderer, QgsUnitTypes,
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsUnitTypes,
                        QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer, QgsSymbolLayerUtils,
-                       QgsSimpleFillSymbolLayer)
+                       QgsSimpleFillSymbolLayer, QgsFillSymbol, QgsLinePatternFillSymbolLayer)
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt, QSize
 
@@ -21,7 +21,7 @@ from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise
                                                     BP_TypWohngebaeudeFlaeche,
                                                     BP_ZweckbestimmungGemeinschaftsanlagen,
                                                     BP_GebaeudeStellungTypen, BP_SpezielleBauweiseTypen)
-from SAGisXPlanung.XPlan.core import xp_version
+from SAGisXPlanung.XPlan.core import xp_version, LayerPriorityType
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType, TableCellFactory
 from SAGisXPlanung.core.buildingtemplate.template_cells import TableCell
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
@@ -450,7 +450,20 @@ class BP_GebaeudeFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            props = {
+                'color': '#dcdcdc',  # Transparent fill
+                'outline_width': '0.1',  # Width
+            }
+            fill_layer = QgsSimpleFillSymbolLayer.create(props)
+            symbol = QgsFillSymbol()
+            symbol.changeSymbolLayer(0, fill_layer)
+            symbol.setOpacity(0.75)
+            renderer = QgsSingleSymbolRenderer(symbol)
+
+            return renderer
+        else:
+            raise ValueError('Renderer of BP_GebaeudeFlaeche should only be called with polygon geometry')
 
 
 class BP_PersGruppenBestimmteFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
@@ -675,7 +688,28 @@ class BP_NebenanlagenAusschlussFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP
 
     @classmethod
     def renderer(cls, geom_type: GeometryType):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            symbol = QgsSymbol.defaultSymbol(geom_type)
+            symbol.setColor(QColor('black'))
+            symbol.deleteSymbolLayer(0)
+
+            hatch_layer = QgsLinePatternFillSymbolLayer()
+            hatch_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+            hatch_layer.setDistance(4.0)
+            hatch_layer.setLineAngle(135.0)
+
+            line_symbol = hatch_layer.subSymbol()
+            line_layer = line_symbol.symbolLayer(0)
+            line_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+            line_layer.setWidth(0.3)
+            line_layer.setColor(QColor(0, 0, 0))
+            line_layer.setPenStyle(Qt.PenStyle.DashLine)
+
+            symbol.appendSymbolLayer(hatch_layer)
+
+            return QgsSingleSymbolRenderer(symbol)
+        else:
+            raise ValueError('Renderer of BP_NebenanlagenAusschlussFlaeche should only be called with polygon geometry')
 
 
 class BP_RegelungVergnuegungsstaetten(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
@@ -685,15 +719,33 @@ class BP_RegelungVergnuegungsstaetten(PolygonGeometry, UeberlagerungsObjekt, BP_
     __mapper_args__ = {
         'polymorphic_identity': __tablename__,
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     zulaessigkeit = Column(XPEnum(BP_Zulaessigkeit, include_default=True))
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        colored_strip = QgsSimpleLineSymbolLayer(QColor('#cb199e'))
+        colored_strip.setWidth(0.3)
+        colored_strip.setOffset(0.15)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        symbol.appendSymbolLayer(colored_strip)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            raise ValueError('Renderer of BP_RegelungVergnuegungsstaetten should only be called with polygon geometry')
 
 
 class BP_SpezielleBauweise(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
@@ -759,6 +811,7 @@ class BP_NebenanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
 
         red_outline = QgsSimpleLineSymbolLayer(QColor('red'))
         red_outline.setWidth(0.3)
+        red_outline.setOffset(0.15)
         red_outline.setPenStyle(Qt.PenStyle.DashLine)
         red_outline.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
@@ -822,11 +875,13 @@ class BP_GemeinschaftsanlagenFlaeche(PolygonGeometry, UeberlagerungsObjekt, BP_O
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
-        fill = QgsSimpleFillSymbolLayer(QColor('#ffffff'))
-        fill.setStrokeColor(QColor('#e31a1c'))
-        fill.setStrokeWidth(0.5)
-        symbol.appendSymbolLayer(fill)
+        red_outline = QgsSimpleLineSymbolLayer(QColor('red'))
+        red_outline.setWidth(0.3)
+        red_outline.setOffset(0.15)
+        red_outline.setPenStyle(Qt.PenStyle.DashLine)
+        red_outline.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
+        symbol.appendSymbolLayer(red_outline)
         return symbol
 
     @classmethod

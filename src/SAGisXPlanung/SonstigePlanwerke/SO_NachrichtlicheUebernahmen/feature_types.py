@@ -60,7 +60,7 @@ class SO_Schienenverkehrsrecht(MixedGeometry, SO_Objekt):
 
         line = QgsSimpleLineSymbolLayer.create({})
         line.setColor(QColor(0, 0, 0))
-        line.setWidth(0.5)
+        line.setWidth(0.3)
         line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         line.setPenStyle(Qt.PenStyle.SolidLine)
         symbol.appendSymbolLayer(line)
@@ -697,7 +697,15 @@ class SO_Forstrecht(MixedGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+            symbol.deleteSymbolLayer(0)
+            fill = QgsSimpleFillSymbolLayer(QColor('#17a8a5'))
+            symbol.appendSymbolLayer(fill)
+            return QgsSingleSymbolRenderer(symbol)
+        elif geom_type is not None:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        raise Exception('parameter geometryType should not be None')
 
 
 class SO_Gebiet(PolygonGeometry, SO_Objekt):
@@ -707,6 +715,7 @@ class SO_Gebiet(PolygonGeometry, SO_Objekt):
     __mapper_args__ = {
         'polymorphic_identity': __tablename__,
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("so_objekt.id", ondelete='CASCADE'), primary_key=True)
 
@@ -737,6 +746,23 @@ class SO_Gebiet(PolygonGeometry, SO_Objekt):
     traegerMassnahme = Column(String)
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        border = QgsSimpleLineSymbolLayer.create({})
+        border.setColor(QColor('black'))
+        border.setWidth(0.2)
+        border.setPenStyle(Qt.PenStyle.DashDotLine)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+        symbol.appendSymbolLayer(border)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            raise ValueError('Renderer of SO_Gebiet should only be called with polygon geometry')

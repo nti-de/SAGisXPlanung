@@ -605,6 +605,18 @@ bauweise_einzelhaeuser_doppelhaeuser:
     - xpath: bebauungsArt
       type: BP_BebauungsArt
       value: 4000
+gemeinschaftsstellplaetze:
+  type:
+    text:
+      pattern: "GSt"
+      stroke: black
+  name: Gemeinschaftsstellplätze
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestGemeinschaftsanlagen/allgemein
+      type: BP_ZweckbestimmungGemeinschaftsanlagen
+      value: 1000
 # endregion
 
 # region BP_Gemeinbedarf_Spiel_und_Sportanlagen
@@ -1250,6 +1262,12 @@ Parkierungsflaeche.svg:
       value:
         - 1000
         - 3300
+    - xpath:
+        - artDerFestlegung/SO_KomplexeZweckbestStrassenverkehr/allgemein
+      type: SO_ZweckbestimmungStrassenverkehr
+      value:
+        - 1600
+        - 16000
 Fussgaengerbereich.svg:
   type:
     svg:

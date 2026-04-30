@@ -198,4 +198,5 @@ class FP_KeineZentrAbwasserBeseitigungFlaeche(PolygonGeometry, FP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
+        # TODO: PlanZV 15.1
         return QgsRuleBasedRenderer(cls.symbol())

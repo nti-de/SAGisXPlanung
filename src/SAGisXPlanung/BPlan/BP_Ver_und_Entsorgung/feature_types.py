@@ -1,14 +1,14 @@
-from typing import List
-
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSymbolLayerUtils, QgsSimpleFillSymbolLayer, QgsSingleSymbolRenderer)
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSymbolLayerUtils, QgsSimpleFillSymbolLayer, QgsSingleSymbolRenderer,
+                       QgsSimpleLineSymbolLayer, QgsUnitTypes)
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import QSize
+from qgis.PyQt.QtCore import QSize, Qt
 
 from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String
-from sqlalchemy.orm import relationship, declared_attr
+from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungVerEntsorgung
 from SAGisXPlanung.core.mixins.mixins import MixedGeometry, PolygonGeometry, UeberlagerungsObjekt
@@ -118,10 +118,28 @@ class BP_ZentralerVersorgungsbereich(PolygonGeometry, UeberlagerungsObjekt, BP_O
     __mapper_args__ = {
         'polymorphic_identity': __tablename__,
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     @classmethod
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        colored_strip = QgsSimpleLineSymbolLayer(QColor('#001be4'))
+        colored_strip.setWidth(0.3)
+        colored_strip.setOffset(0.15)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        symbol.appendSymbolLayer(colored_strip)
+
+        return symbol
+
+    @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.PolygonGeometry))
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            raise ValueError('Renderer of BP_ZentralerVersorgungsbereich should only be called with polygon geometry')

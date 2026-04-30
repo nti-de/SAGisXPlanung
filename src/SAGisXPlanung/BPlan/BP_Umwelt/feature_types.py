@@ -1,3 +1,4 @@
+from qgis._core import QgsGeometryGeneratorSymbolLayer
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsUnitTypes, Qgis,
                        QgsSimpleMarkerSymbolLayerBase, QgsMarkerLineSymbolLayer, QgsMarkerSymbol,
                        QgsSimpleMarkerSymbolLayer, QgsSimpleLineSymbolLayer)
@@ -44,32 +45,22 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
         symbol.deleteSymbolLayer(0)
 
-        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
-        border.setWidth(0.5)
-        border.setOffset(0.25)
-        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        jagged_strip = QgsGeometryGeneratorSymbolLayer.create({})
+        jagged_strip.setSymbolType(Qgis.SymbolType.Fill)
+        jagged_strip.setColor(QColor('black'))
+        jagged_strip.setStrokeColor(QColor('black'))
+        jagged_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        jagged_strip.setGeometryExpression("difference($geometry, triangular_wave($geometry, 8, 2))")
+        sub_symbol = jagged_strip.subSymbol()
+        fill_layer = sub_symbol.symbolLayer(0)
+        fill_layer.setStrokeWidth(0)
+        fill_layer.setStrokeColor(QColor('black'))
+        fill_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        symbol.appendSymbolLayer(jagged_strip)
 
-        if Qgis.versionInt() >= 32400:
-            shape = Qgis.MarkerShape.ArrowHeadFilled
-        else:
-            shape = QgsSimpleMarkerSymbolLayerBase.Shape.ArrowHeadFilled
-        arrowhead_symbol = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#000000'), size=6)
-        arrowhead_symbol.setAngle(270)
-        arrowhead_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+        simple_line = QgsSimpleLineSymbolLayer.create({})
+        symbol.appendSymbolLayer(simple_line)
 
-        marker_line = QgsMarkerLineSymbolLayer(interval=10)
-        marker_line.setAverageAngleLength(0)
-        marker_line.setOffset(3.5)
-        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
-        marker_symbol = QgsMarkerSymbol()
-        marker_symbol.deleteSymbolLayer(0)
-        marker_symbol.setAngle(270)
-        marker_symbol.appendSymbolLayer(arrowhead_symbol)
-        marker_line.setSubSymbol(marker_symbol)
-
-        symbol.appendSymbolLayer(border)
-        symbol.appendSymbolLayer(marker_line)
         return symbol
 
     @classmethod
