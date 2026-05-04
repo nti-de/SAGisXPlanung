@@ -15,7 +15,8 @@ from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
-from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc
+from SAGisXPlanung.BPlan.BP_Bebauung.codelists import BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc, \
+    BP_DetailSondernutzungCodelistAssoc
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import (BP_Zulaessigkeit, BP_Bauweise, BP_BebauungsArt, BP_GrenzBebauung,
                                                     BP_ZweckbestimmungNebenanlagen, BP_NebenanlagenAusschlussTyp,
                                                     BP_TypWohngebaeudeFlaeche,
@@ -137,6 +138,14 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
                                                  foreign_keys=[detaillierteArtDerBaulNutzung_id], info={
                                                      'form-type': 'inline'
                                                  })
+
+    detaillierteSondernutzung = relationship("BP_DetailSondernutzung",
+        secondary=BP_DetailSondernutzungCodelistAssoc,
+        back_populates="bp_baugebiet",
+        info={
+            'xplan_version': XPlanVersion.FIVE_THREE,
+            'form-type': 'inline'
+        })
 
     nutzungText = Column(String, info={'xplan_version': XPlanVersion.FIVE_THREE})
     abweichungBauNVO = Column(Enum(XP_AbweichungBauNVOTypen))

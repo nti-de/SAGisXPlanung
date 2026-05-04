@@ -26,6 +26,7 @@ class BP_DetailDachform(CodeListValue):
 
 BP_DetailSondernutzungCodelistAssoc = Table('assoc_detail_sondernutzung', Base.metadata,
     Column('codelist_user_id', UUID(as_uuid=True), ForeignKey('bp_komplexe_sondernutzung.id', ondelete='CASCADE')),
+    Column('bp_baugebiet_id', UUID(as_uuid=True), ForeignKey('bp_baugebiet.id', ondelete='CASCADE')),
     Column('codelist_id', UUID(as_uuid=True), ForeignKey('codelist_values.id'))
 )
 
@@ -39,6 +40,9 @@ BP_DetailZweckbestGemeinschaftsanlagenCodelistAssoc = Table('assoc_detail_gemein
 class BP_DetailSondernutzung(CodeListValue):
     codelist_user = relationship("BP_KomplexeSondernutzung", back_populates="detail",
                                  secondary=BP_DetailSondernutzungCodelistAssoc)
+
+    bp_baugebiet = relationship("BP_BaugebietsTeilFlaeche", back_populates="detaillierteSondernutzung",
+                                secondary=BP_DetailSondernutzungCodelistAssoc)
 
     __mapper_args__ = {
         "polymorphic_identity": "BP_DetailSondernutzung",

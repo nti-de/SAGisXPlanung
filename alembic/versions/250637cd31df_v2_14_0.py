@@ -525,6 +525,12 @@ def upgrade():
     op.add_column("fp_objekt", sa.Column("nordwinkel", sa.Float(), nullable=True))
     op.add_column("bp_objekt", sa.Column("flussrichtung", sa.Boolean(), nullable=True))
     op.add_column("bp_objekt", sa.Column("nordwinkel", sa.Float(), nullable=True))
+
+    op.add_column('assoc_detail_sondernutzung', sa.Column('bp_baugebiet_id', sa.UUID(), nullable=True))
+    op.create_foreign_key(op.f('fk_assoc_detail_sondernutzung_bp_baugebiet_id_bp_baugebiet'),
+                          'assoc_detail_sondernutzung', 'bp_baugebiet', ['bp_baugebiet_id'], ['id'], ondelete='CASCADE')
+    op.execute("ALTER TABLE assoc_detail_sondernutzung DROP CONSTRAINT IF EXISTS assoc_detail_sondernutzung_pkey;")
+    op.execute("ALTER TABLE assoc_detail_sondernutzung ALTER COLUMN codelist_user_id DROP NOT NULL;")
     # ### end Alembic commands ###
 
 
@@ -612,5 +618,7 @@ def downgrade():
     op.drop_column("fp_objekt", "flussrichtung")
     op.drop_column("bp_objekt", "nordwinkel")
     op.drop_column("bp_objekt", "flussrichtung")
+
+    op.drop_column('assoc_detail_sondernutzung', 'bp_baugebiet_id')
 
     # ### end Alembic commands ###
