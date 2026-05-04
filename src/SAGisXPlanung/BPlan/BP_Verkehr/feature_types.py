@@ -1,7 +1,8 @@
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpleLineSymbolLayer,
                        QgsSymbolLayerUtils, QgsSimpleFillSymbolLayer, QgsUnitTypes, QgsSymbolLayer,
                        QgsLinePatternFillSymbolLayer, QgsLineSymbol, Qgis, QgsSimpleMarkerSymbolLayerBase,
-                       QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsSimpleMarkerSymbolLayer, QgsProperty)
+                       QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsSimpleMarkerSymbolLayer, QgsProperty,
+                       QgsMarkerSymbolLayer)
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
@@ -308,8 +309,9 @@ class BP_EinfahrtPunkt(PointGeometry, BP_Objekt):
             shape = Qgis.MarkerShape.Triangle
         else:
             shape = QgsSimpleMarkerSymbolLayerBase.Shape.Triangle
-        triangle_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=5)
+        triangle_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=2)
         triangle_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        triangle_layer.setVerticalAnchorPoint(QgsMarkerSymbolLayer.VerticalAnchorPoint.Top)
 
         angle_prop = QgsProperty.fromField("nordwinkel")
         triangle_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyAngle, angle_prop)

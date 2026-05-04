@@ -2,14 +2,15 @@ import logging
 import os
 from typing import List
 
-from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp, QgsRuleBasedRenderer,
-                       QgsUnitTypes)
+from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSimpleLineSymbolLayer, QgsLimitedRandomColorRamp,
+                       QgsRuleBasedRenderer, QgsUnitTypes, QgsSingleSymbolRenderer, Qgis, QgsMarkerLineSymbolLayer,
+                       QgsSimpleMarkerSymbolLayer, QgsSimpleMarkerSymbolLayerBase, QgsMarkerSymbol)
 from qgis.PyQt.QtGui import QColor, QIcon
 from qgis.PyQt.QtCore import Qt
 
 from sqlalchemy import Column, ForeignKey, Float, Enum, String, ARRAY
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declared_attr, relationship
+from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Objekt
@@ -192,11 +193,39 @@ class FP_KeineZentrAbwasserBeseitigungFlaeche(PolygonGeometry, FP_Objekt):
     id = Column(ForeignKey("fp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
     @classmethod
-    def symbol(cls):
-        return QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+    def polygon_symbol(cls) -> QgsSymbol:
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        line_layer = QgsSimpleLineSymbolLayer()
+        line_layer.setColor(QColor('black'))
+        line_layer.setWidth(0.5)
+        line_layer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+
+        if Qgis.versionInt() >= 32400:
+            shape = Qgis.MarkerShape.Square
+        else:
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.Square
+        triangle_symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('#fbfd82'), size=8)
+        triangle_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+
+        marker_line = QgsMarkerLineSymbolLayer(interval=20)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        marker_line.setOffset(4)
+        marker_symbol = QgsMarkerSymbol()
+        marker_symbol.deleteSymbolLayer(0)
+        marker_symbol.appendSymbolLayer(triangle_symbol_layer)
+        marker_line.setSubSymbol(marker_symbol)
+
+        symbol.appendSymbolLayer(line_layer)
+        symbol.appendSymbolLayer(marker_line)
+
+        return symbol
 
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        # TODO: PlanZV 15.1
-        return QgsRuleBasedRenderer(cls.symbol())
+        if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
+            return QgsSingleSymbolRenderer(cls.polygon_symbol())
+        else:
+            return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
