@@ -11,12 +11,14 @@ from geoalchemy2 import WKBElement, WKTElement
 from osgeo import ogr, osr
 from sqlalchemy.orm import RelationshipProperty
 
+from qgis.core import Qgis
+
 from SAGisXPlanung import XPlanVersion, VERSION
 from SAGisXPlanung.GML.geometry import enforce_wkb_constraints
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject, FeatureType
+from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject, FeatureType, MixedGeometry
 from SAGisXPlanung.utils import is_url
 
 logger = logging.getLogger(__name__)
@@ -221,8 +223,41 @@ class GMLWriter:
         return parse_etree(gml)
 
     @staticmethod
+    def should_exclude_for_mixed_geom(xplan_object, attr) -> bool:
+        if not hasattr(xplan_object, '__geometry_column_name__'):
+            return False
+        geom = getattr(xplan_object, xplan_object.__geometry_column_name__, None)
+        if geom is None:
+            return False
+        if not (isinstance(xplan_object, MixedGeometry) or issubclass(xplan_object.__class__, MixedGeometry)):
+            return False
+        
+        exclude_attrs = set()
+        if isinstance(geom, WKBElement):
+            wkb_hex = enforce_wkb_constraints(geom.data.hex())
+            ogr_geom = ogr.CreateGeometryFromWkb(bytes.fromhex(wkb_hex))
+        elif isinstance(geom, WKTElement):
+            ogr_geom = ogr.CreateGeometryFromWkt(geom.data)
+        else:
+            return False
+        
+        if ogr_geom is not None:
+            geom_type = ogr_geom.GetGeometryType()
+            if geom_type == ogr.wkbPolygon or geom_type == ogr.wkbMultiPolygon:
+                exclude_attrs = {'flussrichtung', 'nordwinkel'}
+            elif geom_type == ogr.wkbLineString or geom_type == ogr.wkbMultiLineString:
+                exclude_attrs = {'flaechenschluss', 'nordwinkel'}
+            elif geom_type == ogr.wkbPoint or geom_type == ogr.wkbMultiPoint:
+                exclude_attrs = {'flaechenschluss', 'flussrichtung'}
+        
+        return attr in exclude_attrs
+
+    @staticmethod
     def write_attribute(node, xplan_object, attr, version: XPlanVersion):
         value = getattr(xplan_object, attr)
+
+        if GMLWriter.should_exclude_for_mixed_geom(xplan_object, attr):
+            return
 
         if value is None:
             # enforce writing of attribute `flaechenschluss` even if its value is None
