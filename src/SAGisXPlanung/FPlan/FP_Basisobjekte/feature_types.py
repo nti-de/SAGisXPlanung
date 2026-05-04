@@ -17,7 +17,7 @@ from SAGisXPlanung.XPlan.core import xp_version
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_GesetzlicheGrundlageAssoc
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt, xp_textabschnitt_assoc
-from SAGisXPlanung.XPlan.types import GeometryType
+from SAGisXPlanung.XPlan.types import GeometryType, Angle
 
 
 class FP_Plan(XP_Plan):
@@ -195,6 +195,8 @@ class FP_Objekt(XP_Objekt):
     position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
                                                         name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
+    flussrichtung = Column(Boolean)
+    nordwinkel = Column(Angle)
 
     # TODO: why was this required in the first place? there is nothing similar for BP?
     # def __getattribute__(self, name):

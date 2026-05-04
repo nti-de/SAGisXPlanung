@@ -521,6 +521,10 @@ def upgrade():
 
     sa.Enum('application/pdf', 'application/zip', 'application/xml', 'application/msword', 'application/msexcel', 'application/vnd.ogc.sld+xml', 'application/vnd.ogc.wms_xml', 'application/vnd.ogc.gml', 'application/vnd.shp', 'application/vnd.dbf', 'application/vnd.shx', 'application/octet-stream', 'image/vnd.dxf', 'image/vnd.dwg', 'image/jpg', 'image/png', 'image/tiff', 'image/bmp', 'image/ecw', 'image/svg+xml', 'text/html', 'text/plain', name='xp_mime_types').drop(op.get_bind())
 
+    op.add_column("fp_objekt", sa.Column("flussrichtung", sa.Boolean(), nullable=True))
+    op.add_column("fp_objekt", sa.Column("nordwinkel", sa.Float(), nullable=True))
+    op.add_column("bp_objekt", sa.Column("flussrichtung", sa.Boolean(), nullable=True))
+    op.add_column("bp_objekt", sa.Column("nordwinkel", sa.Float(), nullable=True))
     # ### end Alembic commands ###
 
 
@@ -602,5 +606,11 @@ def downgrade():
 
     table_types_list = ', '.join(f"'{t}'" for t in NEW_TABLE_TYPES)
     op.execute(sa.text(f"DELETE FROM xp_objekt WHERE type IN ({table_types_list})"))
+
+
+    op.drop_column("fp_objekt", "nordwinkel")
+    op.drop_column("fp_objekt", "flussrichtung")
+    op.drop_column("bp_objekt", "nordwinkel")
+    op.drop_column("bp_objekt", "flussrichtung")
 
     # ### end Alembic commands ###

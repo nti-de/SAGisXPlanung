@@ -20,7 +20,7 @@ from SAGisXPlanung.XPlan.data_types import XP_PlanXP_GemeindeAssoc, XP_PlanXP_Ge
 from SAGisXPlanung.XPlan.enums import XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt, XP_TextAbschnitt, xp_textabschnitt_assoc
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_Verfahren, BP_Rechtsstand, BP_PlanArt, BP_Rechtscharakter
-from SAGisXPlanung.XPlan.types import XPEnum, GeometryType
+from SAGisXPlanung.XPlan.types import XPEnum, GeometryType, Angle
 
 logger = logging.getLogger(__name__)
 
@@ -257,6 +257,8 @@ class BP_Objekt(XP_Objekt):
     position = Column(Geometry(), CheckConstraint("GeometryType(position) NOT IN ('GEOMETRYCOLLECTION')",
                                                         name='prevent_geometry_collection'))
     flaechenschluss = Column(Boolean, doc='Flächenschluss')
+    flussrichtung = Column(Boolean)
+    nordwinkel = Column(Angle)
 
     def srs(self):
         return QgsCoordinateReferenceSystem(f'EPSG:{self.position.srid}')
