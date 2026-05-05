@@ -1,15 +1,16 @@
+import os
 from dataclasses import dataclass
 
-from qgis.PyQt.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel
+from qgis.PyQt.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel, QRect
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit,
-                             QListView, QLabel, QStyledItemDelegate, QHBoxLayout)
+from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit, QStyleOptionButton, QStyle, QApplication,
+                             QListView, QLabel, QStyledItemDelegate, QHBoxLayout, QStyleOptionViewItem)
 from sqlalchemy import select
 
-from SAGisXPlanung import Session
+from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper import find_true_class
-from SAGisXPlanung.gui.style import ApplicationColor
+from SAGisXPlanung.gui.style import ApplicationColor, load_svg
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
 style = """
@@ -44,8 +45,6 @@ QListView {{
 QListView::item {{
     border: 1px solid #e5e7eb;
     border-radius: 6px;
-    padding: 12px;
-    margin-top: 10px;
     background-color: white;
 }}
 
@@ -132,66 +131,150 @@ class RelatedObjectModel(QAbstractListModel):
 
 
 class RelatedObjectDelegate(QStyledItemDelegate):
-    """Custom delegate for rendering list items with code, title and description"""
+    """Debug version: paints all layout rects with bright red outlines"""
+
+    CHECKBOX_SIZE = 18
+    LEFT_MARGIN = 12
+    CHECKBOX_TEXT_SPACING = 12
 
     def paint(self, painter, option, index):
-        # Let the default paint handle selection/hover states
-        super().paint(painter, option, index)
+        rect = option.rect.adjusted(0, 5, 0, -5)
+        option_copy = QStyleOptionViewItem(option)
+        option_copy.rect = rect
 
-        # Get data
+        option.widget.style().drawPrimitive(
+            QStyle.PrimitiveElement.PE_PanelItemViewItem,
+            option_copy,
+            painter,
+            option.widget
+        )
+
         code = index.data(RelatedObjectModel.CodeRole)
         title = index.data(RelatedObjectModel.TitleRole)
         description = index.data(RelatedObjectModel.DescriptionRole)
 
         painter.save()
 
-        # Define text areas
-        rect = option.rect
-        text_rect = rect.adjusted(12, 16, -12, -16)
+        rect = option_copy.rect
+        # -------------------------
+        # Checkbox
+        # -------------------------
+        indicator_width = QApplication.style().pixelMetric(
+            QStyle.PixelMetric.PM_IndicatorWidth
+        )
+        indicator_height = QApplication.style().pixelMetric(
+            QStyle.PixelMetric.PM_IndicatorHeight
+        )
 
-        # Draw code (bold, black)
+        checkbox_rect = QRect(
+            rect.left() + self.LEFT_MARGIN,
+            rect.top() + (rect.height() - indicator_height) // 2,
+            indicator_width,
+            indicator_height
+        )
+
+        checkbox_option = QStyleOptionButton()
+        checkbox_option.rect = checkbox_rect
+        checkbox_option.state |= QStyle.StateFlag.State_Enabled
+
+        if option.state & QStyle.StateFlag.State_Selected:
+            checkbox_option.state |= QStyle.StateFlag.State_On
+        else:
+            checkbox_option.state |= QStyle.StateFlag.State_Off
+
+        QApplication.style().drawControl(
+            QStyle.ControlElement.CE_CheckBox,
+            checkbox_option,
+            painter
+        )
+
+        # -------------------------
+        # Text content area
+        # -------------------------
+        padding = 12
+
+        text_left = checkbox_rect.right() + self.CHECKBOX_TEXT_SPACING
+        text_rect = QRect(
+            text_left,
+            rect.top() + padding,
+            rect.width() - (text_left - rect.left()) - padding,
+            rect.height() - (2 * padding)
+        )
+
+        # -------------------------
+        # Code (Bold Title)
+        # -------------------------
         painter.setPen(Qt.GlobalColor.black)
         code_font = painter.font()
         code_font.setBold(True)
         code_font.setPointSize(10)
         painter.setFont(code_font)
-        painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, code)
 
-        # Calculate vertical offset for title
         code_height = painter.fontMetrics().height()
-        title_rect = text_rect.adjusted(0, code_height + 2, 0, 0)
+        code_rect = QRect(
+            text_rect.left(),
+            text_rect.top(),
+            text_rect.width(),
+            code_height
+        )
+        fm = painter.fontMetrics()
+        elided_code_text = fm.elidedText(code,  Qt.TextElideMode.ElideRight, code_rect.width())
 
-        # Draw title (brown/orange color)
-        painter.setPen(Qt.GlobalColor.darkRed)
+        painter.setPen(Qt.GlobalColor.black)
+        painter.drawText(code_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, elided_code_text)
+        # -------------------------
+        # Title (is subtitle)
+        # -------------------------
         title_font = painter.font()
         title_font.setBold(False)
         title_font.setPointSize(9)
         painter.setFont(title_font)
-        painter.drawText(title_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, title)
 
-        # Calculate vertical offset for description
         title_height = painter.fontMetrics().height()
-        desc_rect = title_rect.adjusted(0, title_height + 2, 0, 0)
 
-        # Draw description (gray, wrapped)
-        painter.setPen(Qt.GlobalColor.gray)
+        title_rect = QRect(
+            text_rect.left(),
+            code_rect.bottom() + 3,
+            text_rect.width(),
+            title_height
+        )
+
+        painter.setPen(Qt.GlobalColor.darkRed)
+        painter.drawText(
+            title_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
+            title
+        )
+
+        # -------------------------
+        # Description
+        # -------------------------
         desc_font = painter.font()
         desc_font.setPointSize(9)
         painter.setFont(desc_font)
 
-        # Word wrap description
+        desc_rect = QRect(
+            text_rect.left(),
+            title_rect.bottom() + 3,
+            text_rect.width(),
+            text_rect.bottom() - (title_rect.bottom() + 3)
+        )
+
         fm = painter.fontMetrics()
-        desc_rect_height = rect.bottom() - desc_rect.top() - 8
-        elided_text = fm.elidedText(description, Qt.TextElideMode.ElideRight,
-                                    desc_rect.width() * 2)  # Allow 2 lines approximately
-        painter.drawText(desc_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
-                         elided_text)
+        elided_text = fm.elidedText(description, Qt.TextElideMode.ElideRight, desc_rect.width())
+
+        painter.setPen(Qt.GlobalColor.gray)
+        painter.drawText(
+            desc_rect,
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
+            elided_text
+        )
 
         painter.restore()
 
     def sizeHint(self, option, index):
         # Set fixed height for items
-        return QSize(option.rect.width(), 85)
+        return QSize(option.rect.width(), 92)
 
 
 class SelectRelatedWidget(QWidget):
@@ -224,7 +307,6 @@ class SelectRelatedWidget(QWidget):
         create_new_widget.layout().setContentsMargins(0, 10, 0, 10)
         self.data_input_widget = QXPlanTabWidget(create_type)
         create_new_widget.layout().addWidget(self.data_input_widget)
-        self.tab_widget.insertTab(0, create_new_widget, "Neu erstellen")
 
         # Tab 2: Search existing
         search_existing_widget = QWidget(self)
@@ -252,6 +334,8 @@ class SelectRelatedWidget(QWidget):
         self.list_view.setSelectionMode(QListView.SelectionMode.MultiSelection)
         self.list_view.setEditTriggers(QListView.EditTrigger.NoEditTriggers)
         self.list_view.setWordWrap(True)
+        # self.list_view.setSpacing(10)
+        self.list_view.setContentsMargins(0, 0, 0, 0)
 
         # Setup model
         self.model = RelatedObjectModel(self)
@@ -269,7 +353,12 @@ class SelectRelatedWidget(QWidget):
 
         search_layout.addWidget(self.list_view)
 
+        self.tab_widget.insertTab(0, create_new_widget, "Neu erstellen")
         self.tab_widget.insertTab(1, search_existing_widget, "Vorhandene durchsuchen")
+        add_circle_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/add_circle.svg'), color=ApplicationColor.Tertiary)
+        manage_search_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/manage_search.svg'), color=ApplicationColor.Tertiary)
+        self.tab_widget.tabBar().setTabIcon(0, add_circle_icon)
+        self.tab_widget.tabBar().setTabIcon(1, manage_search_icon)
 
         main_layout.addWidget(self.tab_widget)
 
