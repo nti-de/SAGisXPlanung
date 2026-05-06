@@ -12,9 +12,10 @@ from geoalchemy2 import Geometry, WKTElement
 from qgis._core import QgsProject
 from qgis.core import QgsSingleSymbolRenderer, QgsCategorizedSymbolRenderer, QgsSymbol
 
-from sqlalchemy import Column, String, Date, Integer, Enum, ForeignKey, event, CheckConstraint, Computed, Table, and_
+from sqlalchemy import Column, String, Date, Integer, Enum, ForeignKey, event, CheckConstraint, Computed, Table, and_, \
+    select, union_all
 from sqlalchemy.dialects.postgresql import UUID, TSVECTOR
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship, Session, with_polymorphic
 
 from qgis.core import (QgsCoordinateReferenceSystem, QgsGeometry, QgsVectorLayer, QgsFeatureRequest,
                        QgsSymbolLayerUtils, QgsRuleBasedRenderer)
@@ -28,7 +29,7 @@ from SAGisXPlanung.GML.geometry import geometry_from_spatial_element, correct_ge
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.helper import safe_edit
 from SAGisXPlanung.core.mixins.mixins import ElementOrderMixin, PolygonGeometry, MapCanvasMixin, RelationshipMixin, \
-    RendererMixin, FeatureType
+    RendererMixin, FeatureType, PlanLinkedMixin
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 
@@ -512,7 +513,7 @@ def correct_geometry_trigger(mapper, connection, target):
         setattr(target, target.__geometry_column_name__, corrected_geom)
 
 
-class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
+class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, PlanLinkedMixin, Base):
     """ Ein Abschnitt der textlich formulierten Inhalte des Plans. """
 
     __tablename__ = 'xp_text_abschnitt'
@@ -612,6 +613,40 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def renderer(cls, geom_type: GeometryType):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+    @classmethod
+    def get_plan_query(cls, object_id):
+        from ..utils import BEREICH_BASE_TYPES
+        statements = [
+            select(XP_Plan.id)
+                .select_from(cls)
+                .join(cls.xp_plaene)
+                .where(cls.id == object_id)
+        ]
+
+        for bereich_cls in BEREICH_BASE_TYPES:
+            stmt = (
+                select(XP_Plan.id)
+                .select_from(cls)
+                .join(cls.xp_bereich.of_type(bereich_cls))
+                .join(getattr(bereich_cls, "gehoertZuPlan"))
+                .where(cls.id == object_id)
+            )
+            statements.append(stmt)
+
+        for bereich_cls in BEREICH_BASE_TYPES:
+            statements.append(
+                select(XP_Plan.id)
+                .select_from(cls)
+                .join(cls.xp_objekte)
+                .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
+                .join(getattr(bereich_cls, "gehoertZuPlan"))
+                .where(cls.id == object_id)
+            )
+
+        union_subq = union_all(*statements).subquery()
+
+        return select(union_subq.c.id).distinct()
 
 
 @event.listens_for(Session, 'after_flush')

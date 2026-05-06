@@ -429,3 +429,20 @@ class MapCanvasMixin:
             cls.on_layer_created(layer)
 
         return layer
+
+
+class PlanLinkedMixin:
+    """
+    Mixin for ORM classes that can need to resolve their relation to a XP_Plan.
+    """
+
+    @classmethod
+    def get_plan_query(cls, object_id):
+        raise NotImplementedError(
+            f"{cls.__name__} must implement get_plan_query(object_id)"
+        )
+
+    @classmethod
+    def get_plan_xids(cls, session, object_id) -> list[str]:
+        stmt = cls.get_plan_query(object_id)
+        return [str(pid) for pid in session.execute(stmt).scalars().unique().all()]

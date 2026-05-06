@@ -369,7 +369,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
     def onCreateDataClass(self, parent_item: ClassNode, data_class, attribute):
         rel = sa_inspect(parent_item._data.xtype).relationships[attribute]
         if rel.direction == MANYTOMANY:
-            widget = SelectRelatedWidget(data_class, parent_item._data, attribute)
+            widget = SelectRelatedWidget(data_class, parent_item._data, attribute, self.plan_xid)
         else:
             widget = QXPlanTabWidget(data_class, parent_item._data.xtype)
 

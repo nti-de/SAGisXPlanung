@@ -1,17 +1,21 @@
+import logging
 import os
 from dataclasses import dataclass
 
 from qgis.PyQt.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel, QRect
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit, QStyleOptionButton, QStyle, QApplication,
-                             QListView, QLabel, QStyledItemDelegate, QHBoxLayout, QStyleOptionViewItem)
-from sqlalchemy import select
+                             QListView, QLabel, QStyledItemDelegate, QHBoxLayout, QStyleOptionViewItem, QCheckBox)
+from sqlalchemy import select, inspect
 
 from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper import find_true_class
+from SAGisXPlanung.core.mixins.mixins import PlanLinkedMixin
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
+
+logger = logging.getLogger(__name__)
 
 style = """
 QLabel[objectName="description_label"] {{
@@ -278,11 +282,12 @@ class RelatedObjectDelegate(QStyledItemDelegate):
 
 
 class SelectRelatedWidget(QWidget):
-    def __init__(self, create_type: type, parent_item: XPlanungItem, orm_attribute: str, parent=None):
+    def __init__(self, create_type: type, parent_item: XPlanungItem, orm_attribute: str, plan_xid: str = None, parent=None):
         super().__init__(parent)
         self.create_type = create_type
         self.parent_item = parent_item
         self.orm_attribute = orm_attribute
+        self.plan_xid = plan_xid
 
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -328,6 +333,13 @@ class SelectRelatedWidget(QWidget):
         header_layout.addWidget(self.selected_count)
         search_layout.addLayout(header_layout)
 
+        sub_header_layout = QHBoxLayout()
+        self.select_filter_current_plan = QCheckBox("Nur Objekte des Plans")
+        self.select_filter_current_plan.setChecked(True)
+        self.select_filter_current_plan.stateChanged.connect(self.on_filter_current_plan_changed)
+        sub_header_layout.addWidget(self.select_filter_current_plan)
+        search_layout.addLayout(sub_header_layout)
+
         # List view with model
         self.list_view = QListView(self)
         self.list_view.setUniformItemSizes(True)
@@ -371,7 +383,8 @@ class SelectRelatedWidget(QWidget):
         self._load_data()
 
     def _load_data(self):
-        items = []
+        self._all_items = []
+        self._filtered_items = []
         with Session() as session:
             orm_objects = session.query(self.create_type).all()
             true_class = find_true_class(self.parent_item.xtype, self.orm_attribute)
@@ -380,14 +393,61 @@ class SelectRelatedWidget(QWidget):
             parent_obj = result.scalar_one()
             selected_orm_objects = getattr(parent_obj, self.orm_attribute)
             for i, o in enumerate(orm_objects):
-                xplan_item = XPlanungItem(xid=str(o.id), xtype=self.create_type)
-                items.append(RelatedObjectItem(o.schluessel, o.gesetzlicheGrundlage, o.text, xplan_item))
-
-            self.model.setItems(items)
+                item_plan_xids = self._get_plan_xids(o)
+                xplan_item = XPlanungItem(
+                    xid=str(o.id),
+                    xtype=self.create_type,
+                )
+                xplan_item.plan_xids = set(str(pid) for pid in item_plan_xids) if item_plan_xids else set()
+                related_item = RelatedObjectItem(o.schluessel, o.gesetzlicheGrundlage, o.text, xplan_item)
+                self._all_items.append(related_item)
 
             self._selected_ids = {str(o.id) for o in selected_orm_objects}
+            self._apply_filter()
             self.restore_view_selection()
             self.update_selected_count()
+
+    def _get_plan_xids(self, orm_object) -> list[str | None] | None:
+        if orm_object is None:
+            return []
+
+        orm_cls = type(orm_object)
+
+        if not issubclass(orm_cls, PlanLinkedMixin):
+            logger.warning(f"{orm_cls.__name__} "f"does not implement PlanLinkedMixin")
+            return []
+
+        session = inspect(orm_object).session
+        if session is None:
+            raise ValueError("Object is not attached to a session.")
+
+        object_id = inspect(orm_object).identity[0]
+
+        try:
+            plan_ids = orm_cls.get_plan_xids(session, object_id)
+            return plan_ids
+
+        except Exception as e:
+            logger.error(f"{orm_cls.__name__} ({object_id}): {e}")
+            return []
+
+    def _apply_filter(self):
+        filter_enabled = self.select_filter_current_plan.isChecked()
+        if filter_enabled and self.plan_xid:
+            self._filtered_items = [
+                item for item in self._all_items if self.plan_xid in item.xplan_item.plan_xids
+            ]
+            print(self.plan_xid, len(self._filtered_items), len(self._all_items))
+        else:
+            self._filtered_items = self._all_items
+        self.model.setItems(self._filtered_items)
+
+    def on_filter_current_plan_changed(self, state):
+        self._syncing_selection = True
+        self._apply_filter()
+        self.restore_view_selection()
+        self._syncing_selection = False
+        self.update_selected_count()
 
     def on_view_selection_changed(self, selected, deselected):
         if self._syncing_selection:
