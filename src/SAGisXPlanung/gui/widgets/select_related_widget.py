@@ -12,10 +12,12 @@ from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.core.mixins.mixins import PlanLinkedMixin
-from SAGisXPlanung.gui.style import ApplicationColor, load_svg
+from SAGisXPlanung.gui.style import ApplicationColor, load_svg, EmptyStateFilter
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
 logger = logging.getLogger(__name__)
+
+EMPTY_STATE_FILTER_HINT = "Suchbegriff oder Filter entfernen um alle Objekte zu finden..."
 
 style = """
 QLabel[objectName="description_label"] {{
@@ -132,6 +134,41 @@ class RelatedObjectModel(QAbstractListModel):
         self.beginInsertRows(QModelIndex(), row, row)
         self._items.append(item)
         self.endInsertRows()
+
+
+class RelatedObjectProxyModel(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.plan_xid = None
+        self.filter_current_plan = False
+
+    def setPlanFilter(self, plan_xid: str | None, enabled: bool):
+        self.plan_xid = plan_xid
+        self.filter_current_plan = enabled
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row, source_parent):
+        model = self.sourceModel()
+        index = model.index(source_row, 0, source_parent)
+
+        code = model.data(index, RelatedObjectModel.CodeRole) or ""
+        title = model.data(index, RelatedObjectModel.TitleRole) or ""
+        desc = model.data(index, RelatedObjectModel.DescriptionRole) or ""
+
+        # Text filter
+        search = self.filterRegularExpression().pattern().lower()
+        if search:
+            combined = f"{code} {title} {desc}".lower()
+            if search not in combined:
+                return False
+
+        # Plan filter
+        if self.filter_current_plan and self.plan_xid:
+            item = model._items[source_row]
+            if self.plan_xid not in item.xplan_item.plan_xids:
+                return False
+
+        return True
 
 
 class RelatedObjectDelegate(QStyledItemDelegate):
@@ -351,17 +388,23 @@ class SelectRelatedWidget(QWidget):
 
         # Setup model
         self.model = RelatedObjectModel(self)
-        self.proxy_model = QSortFilterProxyModel(self)
+        self.proxy_model = RelatedObjectProxyModel(self)
         self.proxy_model.setSourceModel(self.model)
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        self.proxy_model.setFilterRole(RelatedObjectModel.CodeRole)
+        self.proxy_model.setPlanFilter(self.plan_xid, True)
 
         self.list_view.setModel(self.proxy_model)
         self.list_view.selectionModel().selectionChanged.connect(self.on_view_selection_changed)
 
-        # Setup custom delegate
+        # Setup custom delegate and event filters
         self.delegate = RelatedObjectDelegate(self)
         self.list_view.setItemDelegate(self.delegate)
+        self.list_empty_state = EmptyStateFilter(self.list_view)
+        self.list_empty_state.set_icon(os.path.join(BASE_DIR, 'gui/resources/warning.svg')) \
+            .set_icon_size(16) \
+            .set_title("Keine Objekte gefunden") \
+            .set_subtitle(EMPTY_STATE_FILTER_HINT)
+
 
         search_layout.addWidget(self.list_view)
 
@@ -384,7 +427,6 @@ class SelectRelatedWidget(QWidget):
 
     def _load_data(self):
         self._all_items = []
-        self._filtered_items = []
         with Session() as session:
             orm_objects = session.query(self.create_type).all()
             true_class = find_true_class(self.parent_item.xtype, self.orm_attribute)
@@ -392,6 +434,7 @@ class SelectRelatedWidget(QWidget):
             result = session.execute(stmt)
             parent_obj = result.scalar_one()
             selected_orm_objects = getattr(parent_obj, self.orm_attribute)
+
             for i, o in enumerate(orm_objects):
                 item_plan_xids = self._get_plan_xids(o)
                 xplan_item = XPlanungItem(
@@ -403,7 +446,8 @@ class SelectRelatedWidget(QWidget):
                 self._all_items.append(related_item)
 
             self._selected_ids = {str(o.id) for o in selected_orm_objects}
-            self._apply_filter()
+            self.model.setItems(self._all_items)
+
             self.restore_view_selection()
             self.update_selected_count()
 
@@ -431,23 +475,19 @@ class SelectRelatedWidget(QWidget):
             logger.error(f"{orm_cls.__name__} ({object_id}): {e}")
             return []
 
-    def _apply_filter(self):
-        filter_enabled = self.select_filter_current_plan.isChecked()
-        if filter_enabled and self.plan_xid:
-            self._filtered_items = [
-                item for item in self._all_items if self.plan_xid in item.xplan_item.plan_xids
-            ]
-            print(self.plan_xid, len(self._filtered_items), len(self._all_items))
-        else:
-            self._filtered_items = self._all_items
-        self.model.setItems(self._filtered_items)
-
     def on_filter_current_plan_changed(self, state):
+        current_plan_filter_is_checked = self.select_filter_current_plan.isChecked()
         self._syncing_selection = True
-        self._apply_filter()
+
+        self.proxy_model.setPlanFilter(self.plan_xid, current_plan_filter_is_checked)
+        self.proxy_model.invalidateFilter()
         self.restore_view_selection()
         self._syncing_selection = False
-        self.update_selected_count()
+
+        if current_plan_filter_is_checked:
+            self.list_empty_state.set_subtitle(EMPTY_STATE_FILTER_HINT)
+        else:
+            self.list_empty_state.set_subtitle("")
 
     def on_view_selection_changed(self, selected, deselected):
         if self._syncing_selection:
@@ -488,11 +528,14 @@ class SelectRelatedWidget(QWidget):
 
     def on_search_filter_changed(self, filter_text: str):
         self._syncing_selection = True
-        self.proxy_model.setFilterFixedString(filter_text)
+        self.proxy_model.setFilterRegularExpression(filter_text)
         self.restore_view_selection()
         self._syncing_selection = False
 
-        self.update_selected_count()
+        if filter_text:
+            self.list_empty_state.set_subtitle(EMPTY_STATE_FILTER_HINT)
+        else:
+            self.list_empty_state.set_subtitle("")
 
     def is_create_new(self):
         return self.tab_widget.currentIndex() == 0
