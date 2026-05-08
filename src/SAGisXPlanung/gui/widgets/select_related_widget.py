@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from dataclasses import dataclass
@@ -12,6 +13,7 @@ from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.core.mixins.mixins import PlanLinkedMixin
+from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg, EmptyStateFilter
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
@@ -351,8 +353,8 @@ class SelectRelatedWidget(QWidget):
         create_new_widget.layout().addWidget(self.data_input_widget)
 
         # Tab 2: Search existing
-        search_existing_widget = QWidget(self)
-        search_layout = QVBoxLayout(search_existing_widget)
+        self.search_existing_widget = QWidget(self)
+        search_layout = QVBoxLayout(self.search_existing_widget)
         search_layout.setContentsMargins(0, 10, 0, 10)
 
         # header with search field and selection count
@@ -409,7 +411,7 @@ class SelectRelatedWidget(QWidget):
         search_layout.addWidget(self.list_view)
 
         self.tab_widget.insertTab(0, create_new_widget, "Neu erstellen")
-        self.tab_widget.insertTab(1, search_existing_widget, "Vorhandene durchsuchen")
+        self.tab_widget.insertTab(1, self.search_existing_widget, "Vorhandene durchsuchen")
         add_circle_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/add_circle.svg'), color=ApplicationColor.Tertiary)
         manage_search_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/manage_search.svg'), color=ApplicationColor.Tertiary)
         self.tab_widget.tabBar().setTabIcon(0, add_circle_icon)
@@ -423,33 +425,51 @@ class SelectRelatedWidget(QWidget):
 
         self._selected_ids: set[str] = set()
         self._syncing_selection = False
-        self._load_data()
 
-    def _load_data(self):
-        self._all_items = []
-        with Session() as session:
-            orm_objects = session.query(self.create_type).all()
-            true_class = find_true_class(self.parent_item.xtype, self.orm_attribute)
-            stmt = select(true_class).filter_by(id=self.parent_item.xid)
-            result = session.execute(stmt)
-            parent_obj = result.scalar_one()
-            selected_orm_objects = getattr(parent_obj, self.orm_attribute)
+        asyncio.create_task(self.load_data())
 
-            for i, o in enumerate(orm_objects):
-                item_plan_xids = self._get_plan_xids(o)
-                xplan_item = XPlanungItem(
-                    xid=str(o.id),
-                    xtype=self.create_type,
-                )
-                xplan_item.plan_xids = set(str(pid) for pid in item_plan_xids) if item_plan_xids else set()
-                related_item = RelatedObjectItem(o.schluessel, o.gesetzlicheGrundlage, o.text, xplan_item)
-                self._all_items.append(related_item)
+    async def load_data(self):
+        def _load_data_worker():
+            all_items = []
 
-            self._selected_ids = {str(o.id) for o in selected_orm_objects}
-            self.model.setItems(self._all_items)
+            with Session() as session:
+                orm_objects = session.query(self.create_type).all()
+                true_class = find_true_class(self.parent_item.xtype, self.orm_attribute)
+                stmt = select(true_class).filter_by(id=self.parent_item.xid)
+                result = session.execute(stmt)
+                parent_obj = result.scalar_one()
+                selected_orm_objects = getattr(parent_obj, self.orm_attribute)
 
-            self.restore_view_selection()
-            self.update_selected_count()
+                for o in orm_objects:
+                    item_plan_xids = self._get_plan_xids(o)
+
+                    xplan_item = XPlanungItem(
+                        xid=str(o.id),
+                        xtype=self.create_type,
+                    )
+                    xplan_item.plan_xids = set(str(pid) for pid in item_plan_xids) if item_plan_xids else set()
+
+                    related_item = RelatedObjectItem(
+                        o.schluessel,
+                        o.gesetzlicheGrundlage,
+                        o.text,
+                        xplan_item,
+                    )
+
+                    all_items.append(related_item)
+
+            return all_items, {str(o.id) for o in selected_orm_objects}
+
+        self.list_empty_state.set_active(False)
+
+        async with loading_animation(self.search_existing_widget):
+            items, selected_ids = await asyncio.to_thread(_load_data_worker)
+
+        self._selected_ids = selected_ids
+        self.model.setItems(items)
+        self.restore_view_selection()
+        self.update_selected_count()
+        self.list_empty_state.set_active(True)
 
     def _get_plan_xids(self, orm_object) -> list[str | None] | None:
         if orm_object is None:
