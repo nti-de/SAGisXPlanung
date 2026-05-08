@@ -643,6 +643,22 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, PlanLi
                 .join(getattr(bereich_cls, "gehoertZuPlan"))
                 .where(cls.id == object_id)
             )
+            statements.append(
+                select(XP_Plan.id)
+                .select_from(cls)
+                .join(cls.bp_objekte)
+                .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
+                .join(getattr(bereich_cls, "gehoertZuPlan"))
+                .where(cls.id == object_id)
+            )
+            statements.append(
+                select(XP_Plan.id)
+                .select_from(cls)
+                .join(cls.fp_objekte)
+                .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
+                .join(getattr(bereich_cls, "gehoertZuPlan"))
+                .where(cls.id == object_id)
+            )
 
         union_subq = union_all(*statements).subquery()
 
