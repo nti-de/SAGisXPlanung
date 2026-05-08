@@ -531,6 +531,75 @@ def upgrade():
                           'assoc_detail_sondernutzung', 'bp_baugebiet', ['bp_baugebiet_id'], ['id'], ondelete='CASCADE')
     op.execute("ALTER TABLE assoc_detail_sondernutzung DROP CONSTRAINT IF EXISTS assoc_detail_sondernutzung_pkey;")
     op.execute("ALTER TABLE assoc_detail_sondernutzung ALTER COLUMN codelist_user_id DROP NOT NULL;")
+
+    op.execute("DROP TRIGGER IF EXISTS bp_gemeinbedarf_sync_attr_zweckbestimmung ON bp_gemeinbedarf")
+    op.execute("DROP TRIGGER IF EXISTS bp_gemeinbedarf_sync_attr_zweckbestimmung ON bp_zweckbestimmung_gemeinbedarf")
+    op.execute("""
+        ALTER TABLE bp_gemeinbedarf
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggemeinbedarf[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY[zweckbestimmung::xp_zweckbestimmunggemeinbedarf]
+        END;
+        """)
+    op.execute("DROP TRIGGER IF EXISTS bp_gruenflaeche_sync_attr_zweckbestimmung ON bp_gruenflaeche")
+    op.execute("DROP TRIGGER IF EXISTS bp_gruenflaeche_sync_attr_zweckbestimmung ON bp_zweckbestimmung_gruen")
+    op.execute("""
+        ALTER TABLE bp_gruenflaeche
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmunggruen]
+        END;
+        """)
+    op.execute("DROP TRIGGER IF EXISTS bp_landwirtschaft_sync_attr_zweckbestimmung ON bp_landwirtschaft")
+    op.execute("DROP TRIGGER IF EXISTS bp_landwirtschaft_sync_attr_zweckbestimmung ON bp_zweckbestimmung_landwirtschaft")
+    op.execute("""
+        ALTER TABLE bp_landwirtschaft
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunglandwirtschaft[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmunglandwirtschaft]
+        END;
+       """)
+    op.execute("DROP TRIGGER IF EXISTS bp_wald_sync_attr_zweckbestimmung ON bp_wald")
+    op.execute("DROP TRIGGER IF EXISTS bp_wald_sync_attr_zweckbestimmung ON bp_zweckbestimmung_wald")
+    op.execute("""
+        ALTER TABLE bp_wald
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmungwald[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmungwald]
+        END;
+       """)
+    op.execute("""
+        ALTER TABLE bp_wald
+        ALTER COLUMN "betreten" TYPE xp_waldbetretungtyp[]
+        USING CASE
+            WHEN betreten IS NULL THEN NULL
+            WHEN betreten = 'KeineZusaetzlicheBetretung'::xp_waldbetretungtyp THEN NULL
+            ELSE ARRAY [betreten::xp_waldbetretungtyp]
+        END;
+       """)
+    op.execute("DROP TRIGGER IF EXISTS bp_versorgung_sync_attr_zweckbestimmung ON bp_versorgung")
+    op.execute("DROP TRIGGER IF EXISTS bp_versorgung_sync_attr_zweckbestimmung ON bp_zweckbestimmung_versorgung")
+    op.execute("""
+        ALTER TABLE bp_versorgung
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmungverentsorgung[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmungverentsorgung]
+        END;
+       """)
+    op.execute("""
+        ALTER TABLE bp_verkehr_besonders
+        ALTER COLUMN "zweckbestimmung" TYPE bp_zweckbestimmungstrassenverkehr[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::bp_zweckbestimmungstrassenverkehr]
+        END;
+       """)
+
     # ### end Alembic commands ###
 
 
@@ -621,4 +690,11 @@ def downgrade():
 
     op.drop_column('assoc_detail_sondernutzung', 'bp_baugebiet_id')
 
+    op.execute('ALTER TABLE bp_gemeinbedarf ALTER "zweckbestimmung" type xp_zweckbestimmunggemeinbedarf using "zweckbestimmung"[1]')
+    op.execute('ALTER TABLE bp_gruenflaeche ALTER "zweckbestimmung" type xp_zweckbestimmunggruen using "zweckbestimmung"[1]')
+    op.execute('ALTER TABLE bp_landwirtschaft ALTER "zweckbestimmung" type xp_zweckbestimmunglandwirtschaft using "zweckbestimmung"[1]')
+    op.execute('ALTER TABLE bp_wald ALTER "zweckbestimmung" type xp_zweckbestimmungwald using "zweckbestimmung"[1]')
+    op.execute('ALTER TABLE bp_wald ALTER "betreten" type xp_waldbetretungtyp using "betreten"[1]')
+    op.execute('ALTER TABLE bp_versorgung ALTER "zweckbestimmung" type xp_zweckbestimmungverentsorgung using "zweckbestimmung"[1]')
+    op.execute('ALTER TABLE bp_verkehr_besonders ALTER "zweckbestimmung" type bp_zweckbestimmungstrassenverkehr using "zweckbestimmung"[1]')
     # ### end Alembic commands ###

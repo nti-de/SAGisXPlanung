@@ -5,7 +5,7 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbo
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
-from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String
+from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, ARRAY
 from sqlalchemy.orm import relationship, declared_attr
 
 from SAGisXPlanung import XPlanVersion
@@ -71,7 +71,7 @@ class BP_GruenFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungGruen), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungGruen)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGruen", back_populates="gruenflaeche",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -129,7 +129,7 @@ class BP_LandwirtschaftsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objek
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungLandwirtschaft), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungLandwirtschaft)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestLandwirtschaft", back_populates="landwirtschaft",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -167,7 +167,7 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungWald), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungWald)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestWald", back_populates="waldflaeche",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -175,8 +175,8 @@ class BP_WaldFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
                                            'xplan_attribute': 'zweckbestimmung'
                                        })
 
-    eigentumsart = Column(Enum(XP_EigentumsartWald))
-    betreten = Column(Enum(XP_WaldbetretungTyp))
+    eigentumsart = Column(XPEnum(XP_EigentumsartWald, include_default=True))
+    betreten = Column(ARRAY(Enum(XP_WaldbetretungTyp)))
 
     @classmethod
     def symbol(cls) -> QgsSymbol:

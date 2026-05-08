@@ -5,7 +5,7 @@ from qgis.core import (QgsSimpleFillSymbolLayer, QgsSymbol, QgsWkbTypes, QgsSymb
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
-from sqlalchemy import Column, ForeignKey, String, Integer, Float, Enum
+from sqlalchemy import Column, ForeignKey, String, Integer, Float, Enum, ARRAY
 from sqlalchemy.orm import relationship, declared_attr
 
 from SAGisXPlanung import XPlanVersion
@@ -75,7 +75,7 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungGemeinbedarf), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungGemeinbedarf)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestGemeinbedarf", back_populates="gemeinbedarf",
                                        cascade="all, delete", passive_deletes=True, info={
@@ -91,7 +91,7 @@ class BP_GemeinbedarfsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt)
 
     def layer_fields(self):
         return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }

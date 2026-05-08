@@ -6,7 +6,7 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpl
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize
 
-from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String
+from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, ARRAY
 
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
@@ -14,7 +14,7 @@ from SAGisXPlanung.BPlan.BP_Verkehr.enums import BP_ZweckbestimmungStrassenverke
     BP_EinfahrtTypen
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
 from SAGisXPlanung.XPlan.core import xp_version
-from SAGisXPlanung.XPlan.renderer import fallback_renderer
+from SAGisXPlanung.XPlan.renderer import fallback_renderer, icon_renderer
 from SAGisXPlanung.XPlan.enums import XP_Nutzungsform
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, LineGeometry, FlaechenschlussObjekt, PointGeometry, \
     MixedGeometry
@@ -184,24 +184,10 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
     ZUzwingend = Column(Integer)
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
-    zweckbestimmung = Column(Enum(BP_ZweckbestimmungStrassenverkehr))
+    zweckbestimmung = Column(ARRAY(Enum(BP_ZweckbestimmungStrassenverkehr)))
     nutzungsform = Column(XPEnum(XP_Nutzungsform, include_default=True))
     # begrenzungslinie [0, *] ?
     zugunstenVon = Column(String)
-
-    __icon_map__ = [
-        ('Parkplatz', '"zweckbestimmung" LIKE \'1000\'', 'Parkierungsflaeche.svg'),
-        ('Fußgängerbereich', '"zweckbestimmung" LIKE \'1100\'', 'Fussgaengerbereich.svg'),
-        ('Verkehrsberuhigte Zone', '"zweckbestimmung" LIKE \'1200\'', 'VerkehrsberuhigterBereich.svg'),
-        ('Sonstiges', '', ''),
-    ]
-
-    def layer_fields(self):
-        return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
-            'skalierung': self.skalierung if self.skalierung else '',
-            'drehwinkel': self.drehwinkel if self.drehwinkel else ''
-        }
 
     @classmethod
     def polygon_symbol(cls) -> QgsSymbol:
@@ -228,7 +214,7 @@ class BP_VerkehrsflaecheBesondererZweckbestimmung(MixedGeometry, BP_Objekt):
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
-            return RuleBasedSymbolRenderer(cls.__icon_map__, cls.polygon_symbol(), 'BP_Verkehr')
+            return icon_renderer('Straßenverkehr', cls.polygon_symbol(), 'BP_Verkehr', geometry_type=geom_type)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

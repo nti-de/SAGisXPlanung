@@ -104,7 +104,7 @@ _renderer_expressions = {
         ('Sonstiges', '"zweckbestimmung" LIKE \'\'', ''),
     ],
     'Straßenverkehr': [
-        ('Parkplatz', '"zweckbestimmung" LIKE \'Parkplatz\'', 'Parkierungsflaeche.svg'),
+        ('Parkplatz', '"zweckbestimmung" LIKE \'Parkplatz\' OR "zweckbestimmung" LIKE \'Parkierungsflaeche\'', 'Parkierungsflaeche.svg'),
         ('Fußgängerbereich', '"zweckbestimmung" LIKE \'Fussgaengerbereich\'', 'Fussgaengerbereich.svg'),
         ('Verkehrsberuhigte Zone', '"zweckbestimmung" LIKE \'VerkehrsberuhigterBereich\'', 'VerkehrsberuhigterBereich.svg'),
         ('Radweg', '"zweckbestimmung" LIKE \'Radweg\'', 'Radweg.svg'),

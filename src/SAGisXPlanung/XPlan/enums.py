@@ -254,11 +254,10 @@ class XP_EigentumsartWald(XPlanungEnumMixin, Enum):
     Sonstiges = 9999
 
 
-class XP_WaldbetretungTyp(XPlanungEnumMixin, Enum):  # TODO: this should probably be a checkable combobox
+class XP_WaldbetretungTyp(XPlanungEnumMixin, Enum):
     """ Festlegung zusätzlicher, normalerweise nicht-gestatteter Aktivitäten, die in dem
         Wald ausgeführt werden dürfen, nach §14 Abs. 2 Bundeswaldgesetz """
 
-    KeineZusaetzlicheBetretung = None
     Radfahren = 1000
     Reiten = 2000
     Fahren = 3000

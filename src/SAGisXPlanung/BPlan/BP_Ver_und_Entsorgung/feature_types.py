@@ -3,7 +3,7 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSymbolLayerUtils, QgsSimpleFil
 from qgis.PyQt.QtGui import QColor
 from qgis.PyQt.QtCore import QSize, Qt
 
-from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String
+from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, ARRAY
 from sqlalchemy.orm import relationship
 
 from SAGisXPlanung import XPlanVersion
@@ -67,7 +67,7 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
     ZU = Column(Integer)
     ZU_Ausn = Column(Integer)
 
-    zweckbestimmung = Column(Enum(XP_ZweckbestimmungVerEntsorgung), info={'xplan_version': XPlanVersion.FIVE_THREE})
+    zweckbestimmung = Column(ARRAY(Enum(XP_ZweckbestimmungVerEntsorgung)), info={'xplan_version': XPlanVersion.FIVE_THREE})
 
     rel_zweckbestimmung = relationship("BP_KomplexeZweckbestVerEntsorgung", back_populates="versorgung",
                                        cascade="all, delete", passive_deletes=True,
@@ -81,7 +81,7 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
 
     def layer_fields(self):
         return {
-            'zweckbestimmung': self.zweckbestimmung.value if self.zweckbestimmung else '',
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }

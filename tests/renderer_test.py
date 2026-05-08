@@ -76,7 +76,7 @@ class TestRenderer:
         r = BP_VerkehrsflaecheBesondererZweckbestimmung.renderer(QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
-        assert len(r.rootRule().children()) == 4
+        assert len(r.rootRule().children()) == 6
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_ver_entsorgung_renderer(self):
