@@ -651,7 +651,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 if not orm_xid:
                     continue
                 delete_map.append((CLASSES[xtype], orm_xid))
-                print(delete_map)
+
             self.deletePlanContent(delete_map=delete_map)
             return
 

@@ -1,5 +1,6 @@
 import logging
 
+from qgis._core import QgsRuleBasedRenderer
 from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpleFillSymbolLayer, QgsSymbolLayerUtils,
                        QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsUnitTypes, QgsGeometryGeneratorSymbolLayer,
                        QgsSimpleLineSymbolLayer, QgsSimpleMarkerSymbolLayer, Qgis, QgsSimpleMarkerSymbolLayerBase)
@@ -141,7 +142,112 @@ class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(cls.symbol())
+        root_rule = QgsRuleBasedRenderer.Rule(None)
+
+        symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.PolygonGeometry)
+        symbol.deleteSymbolLayer(0)
+
+        border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        border.setWidth(0.1)
+        border.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        border.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        symbol.appendSymbolLayer(border)
+
+        outline_boxes_strip = QgsGeometryGeneratorSymbolLayer.create({})
+        outline_boxes_strip.setSymbolType(Qgis.SymbolType.Line)
+        outline_boxes_strip.setColor(QColor('black'))
+        outline_boxes_strip.setStrokeColor(QColor('black'))
+        outline_boxes_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        outline_boxes_strip.setGeometryExpression("""
+            collect_geometries(
+                array_foreach(
+                    geometries_to_array(
+                        segments_to_lines(
+                            exterior_ring($geometry)
+                        )
+                    ),
+                    if(
+                        length(@element) >= 3,
+                        with_variable(
+                            'remainder',
+                            length(@element) % 3,
+                            line_substring(
+                                @element,
+                                @remainder / 2,
+                                length(@element) - (@remainder / 2)
+                            )
+                        ),
+                        geom_from_wkt('LINESTRING EMPTY')
+                    )
+                )
+            )"""
+        )
+        symbol.appendSymbolLayer(outline_boxes_strip)
+
+        generator_symbol = outline_boxes_strip.subSymbol()
+        generator_symbol.deleteSymbolLayer(0)
+
+        if Qgis.versionInt() >= 32400:
+            shape = Qgis.MarkerShape.HalfSquare
+            shape_schmal = Qgis.MarkerShape.Line
+        else:
+            shape = QgsSimpleMarkerSymbolLayerBase.Shape.HalfSquare
+            shape_schmal = QgsSimpleMarkerSymbolLayerBase.Shape.Line
+
+
+        box_symbol = QgsSimpleMarkerSymbolLayer(
+            shape=shape,
+            color=QColor('transparent'),
+            strokeColor=QColor('#000000'),
+            size=3,
+            angle=90
+        )
+        box_symbol.setStrokeWidth(0.1)
+        box_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+
+        marker_line = QgsMarkerLineSymbolLayer(interval=5)
+        marker_line.setOffsetAlongLine(1.5)
+        marker_line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+        marker_symbol = QgsMarkerSymbol()
+        marker_symbol.deleteSymbolLayer(0)
+        marker_symbol.appendSymbolLayer(box_symbol)
+        marker_line.setSubSymbol(marker_symbol)
+        generator_symbol.appendSymbolLayer(marker_line)
+
+        default_rule = QgsRuleBasedRenderer.Rule(symbol)
+        default_rule.setIsElse(True)
+        default_rule.setLabel('Wegerecht: Standard')
+        root_rule.appendChild(default_rule)
+
+        # Clone the existing default symbol for the "istSchmal" rule
+        ist_schmal_symbol = symbol.clone()
+
+        ist_schmal_generator = ist_schmal_symbol.symbolLayer(1)  # border=0, geometry generator=1? adjust if needed
+        ist_schmal_generator_symbol = ist_schmal_generator.subSymbol()
+        ist_schmal_marker_line = ist_schmal_generator_symbol.symbolLayer(0)
+        ist_schmal_marker_symbol = ist_schmal_marker_line.subSymbol().clone()
+        ist_schmal_marker_symbol.deleteSymbolLayer(0)
+
+        line_symbol = QgsSimpleMarkerSymbolLayer(
+            shape=shape_schmal,
+            color=QColor('transparent'),
+            strokeColor=QColor('#000000'),
+            size=3,
+            angle=90
+        )
+        line_symbol.setStrokeWidth(0.5)
+        line_symbol.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+
+        ist_schmal_marker_symbol.appendSymbolLayer(line_symbol)
+        ist_schmal_marker_line.setSubSymbol(ist_schmal_marker_symbol)
+        ist_schmal_marker_line.setOffset(-0.25)
+
+        ist_schmal_rule = QgsRuleBasedRenderer.Rule(ist_schmal_symbol)
+        ist_schmal_rule.setFilterExpression('"istSchmal" = \'True\'')
+        ist_schmal_rule.setLabel('Wegerecht: Schmale Flächen')
+        root_rule.appendChild(ist_schmal_rule)
+
+        return QgsRuleBasedRenderer(root_rule)
 
     @classmethod
     def previewIcon(cls):
