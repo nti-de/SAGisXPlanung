@@ -1,6 +1,6 @@
 import pytest
 from qgis.PyQt.QtCore import QModelIndex, QItemSelectionModel
-from mock import Mock, patch, MagicMock
+from mock import Mock, patch, MagicMock, AsyncMock
 
 from SAGisXPlanung.XPlan.feature_types import XP_TextAbschnitt
 from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget, RelatedObjectModel, RelatedObjectItem
@@ -31,7 +31,7 @@ def sample_items():
 
 @pytest.fixture
 def widget(mock_xplan_item, sample_items):
-    with patch.object(SelectRelatedWidget, '_load_data') as mock_load:
+    with patch.object(SelectRelatedWidget, 'load_data', new_callable=AsyncMock), patch('asyncio.create_task'):
         widget = SelectRelatedWidget(
             create_type=XP_TextAbschnitt,
             parent_item=mock_xplan_item,
