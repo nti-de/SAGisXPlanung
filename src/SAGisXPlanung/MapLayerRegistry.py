@@ -1,6 +1,7 @@
 import logging
 from typing import Union
 
+from qgis.PyQt.QtCore import pyqtSignal
 from qgis.PyQt import QtCore
 from qgis.core import (QgsVectorLayer, QgsProject, QgsMapLayer, QgsAnnotationLayer, QgsLayerTreeGroup, QgsRasterLayer)
 from qgis.utils import iface
@@ -14,23 +15,25 @@ from SAGisXPlanung.config import QgsConfig
 logger = logging.getLogger(__name__)
 
 
-class Singleton:
-    _instances = {}
+class Singleton(type(QtCore.QObject), type):
+    def __init__(cls, name, bases, dict):
+        super().__init__(name, bases, dict)
+        cls._instance = None
 
-    def __new__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            if issubclass(cls, QtCore.QObject):
-                instance = QtCore.QObject.__new__(cls)
-            else:
-                instance = super().__new__(cls)
-            cls._instances[cls] = instance
-            if hasattr(instance, "init"):
-                instance.init(*args, **kwargs)
-        return cls._instances[cls]
+    def __call__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__call__(*args, **kwargs)
+            if hasattr(cls._instance, "init"):
+                cls._instance.init(*args, **kwargs)
+        return cls._instance
 
 
-class MapLayerRegistry(Singleton):
+class MapLayerRegistry(QtCore.QObject, metaclass=Singleton):
     _layers = []
+
+    features_deleted = pyqtSignal(QgsVectorLayer, list)
+    committed_features_removed = pyqtSignal(QgsVectorLayer, list)
+    after_rollback = pyqtSignal()
 
     def init(self):
         QgsProject.instance().layerStore().layerWillBeRemoved.connect(self.removeLayer)
@@ -83,6 +86,11 @@ class MapLayerRegistry(Singleton):
 
         if isinstance(layer, QgsVectorLayer):
             layer.committedGeometriesChanges.connect(self.onGeometriesChanged)
+            layer.featuresDeleted.connect(
+                lambda deleted_fids, lyr=layer: self.on_features_deleted(lyr, deleted_fids)
+            )
+            layer.committedFeaturesRemoved.connect(self.on_committed_features_removed)
+            layer.afterRollBack.connect(self.after_rollback.emit)
 
         self._layers.append(layer)
 
@@ -171,3 +179,10 @@ class MapLayerRegistry(Singleton):
             with Session.begin() as session:
                 plan_content = session.get(CLASSES[xplanung_type], xplanung_id)
                 plan_content.setGeometry(geometry)
+
+    def on_features_deleted(self, lyr, deleted_fids):
+        self.features_deleted.emit(lyr, deleted_fids)
+
+    def on_committed_features_removed(self, layer_id, deleted_fids):
+        layer = self.layerById(layer_id)
+        self.committed_features_removed.emit(layer, deleted_fids)

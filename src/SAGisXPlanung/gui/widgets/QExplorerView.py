@@ -1,6 +1,9 @@
 import logging
+from collections import defaultdict
 from enum import Enum
+from itertools import chain
 
+from qgis.PyQt.QtGui import QFont
 from qgis.PyQt.QtCore import (QAbstractItemModel, Qt, QModelIndex, QPoint, QAbstractProxyModel, QSortFilterProxyModel,
                               pyqtSlot, QPersistentModelIndex, QItemSelection, QSize)
 from qgis.PyQt.QtWidgets import (QTreeView)
@@ -9,6 +12,7 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle, FlagNewRole
 
 XID_ROLE = Qt.ItemDataRole.UserRole + 2
+PendingDeleteRole = Qt.ItemDataRole.UserRole + 3
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +105,7 @@ class ExplorerTreeModel(QAbstractItemModel):
         if nodes is None:
             nodes = []
         self._horizontal_header = ['Objektbaum']
+        self._pending_deletion_items =  defaultdict(list)
 
         self._root = CustomNode()
         for node in nodes:
@@ -112,6 +117,7 @@ class ExplorerTreeModel(QAbstractItemModel):
             item = self._root.child(i)
             del item
         self._root._children.clear()
+        self._pending_deletion_items.clear()
         self.endResetModel()
 
     def addChild(self, node, _parent=QModelIndex(), row=None):
@@ -136,14 +142,30 @@ class ExplorerTreeModel(QAbstractItemModel):
         self.endRemoveRows()
         return True
 
+    def flags(self, index):
+        flags = super().flags(index)
+
+        if index.data(PendingDeleteRole):
+            flags &= ~Qt.ItemFlag.ItemIsEnabled
+
+        return flags
+
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
         if not index.isValid():
             return None
         node = index.internalPointer()
+        if node.pending_delete:
+            if role == Qt.ItemDataRole.FontRole:
+                font = QFont()
+                font.setStrikeOut(True)
+                return font
+
         if role == Qt.ItemDataRole.DisplayRole:
             return node.data(index.column())
         if role == FlagNewRole:
             return node.flag_new
+        if role == PendingDeleteRole:
+            return node.pending_delete
         if role == XID_ROLE and isinstance(node, ClassNode):
             return node.xplanItem().xid
         return None
@@ -155,6 +177,52 @@ class ExplorerTreeModel(QAbstractItemModel):
                 return
             node.flag_new = value
             self.dataChanged.emit(index, index)
+        if role == PendingDeleteRole:
+            node = index.internalPointer()
+            if not node:
+                return
+            node.pending_delete = value
+            self.dataChanged.emit(index, index)
+
+    def mark_for_deletion(self, xid: str, layer_id: str, pending: bool):
+        index_list = self.match(self.index(0, 0), XID_ROLE, xid, 1,
+                                Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
+        if not index_list:
+            return
+
+        for idx in index_list:
+            node = idx.internalPointer()
+            node.pending_delete = pending
+            self._pending_deletion_items[layer_id].append(node)
+            self.dataChanged.emit(idx, idx, [Qt.ItemDataRole.FontRole])
+
+            for child_node in self._collect_children(node):
+                child_node.pending_delete = pending
+                child_index = self.indexForTreeItem(child_node)
+                self.dataChanged.emit(child_index, child_index, [Qt.ItemDataRole.FontRole])
+
+    def get_pending_deletes(self, layer_id: str) -> list['CustomNode']:
+        return self._pending_deletion_items[layer_id]
+
+    def discard_pending_deletes(self):
+        for node in chain.from_iterable(self._pending_deletion_items.values()):
+            node.pending_delete = False
+
+            for child_node in self._collect_children(node):
+                child_node.pending_delete = False
+
+                # child_index = self.indexForTreeItem(child_node)
+                # self.dataChanged.emit(child_index, child_index, [Qt.ItemDataRole.FontRole])
+
+        self._pending_deletion_items = []
+
+    def _collect_children(self, node: 'ClassNode') -> list['CustomNode']:
+        children = []
+        for i in range(node.childCount()):
+            child = node.child(i)
+            children.append(child)
+            children.extend(self._collect_children(child))
+        return children
 
     def headerData(self, col, orientation, role=Qt.ItemDataRole.DisplayRole):
         if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
@@ -460,6 +528,7 @@ class CustomNode:
         self._row = 0
 
         self.flag_new = new
+        self.pending_delete = False
         self.column_count = 1
 
     def data(self, column):
@@ -520,13 +589,3 @@ class ClassNode(CustomNode):
 
     def xplanItem(self):
         return self._data
-
-
-class CategoryNode(CustomNode):
-    def __init__(self, category_name):
-        self.category_name = category_name
-
-        super(CategoryNode, self).__init__()
-
-    def data(self, column):
-        return self.category_name

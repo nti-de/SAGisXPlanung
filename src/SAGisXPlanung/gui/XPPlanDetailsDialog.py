@@ -9,19 +9,19 @@ import qasync
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction, QVBoxLayout
+from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction, QVBoxLayout, QMessageBox
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex
+from qgis.core import QgsVectorLayer
 from qgis.gui import QgsDockWidget
-from qgis.core import (Qgis)
 from qgis.utils import iface
 from sqlalchemy import select, exists, inspect as sa_inspect
-from sqlalchemy.orm import lazyload, load_only, selectinload, class_mapper, RelationshipProperty, MANYTOMANY
-from sqlalchemy.orm.exc import UnmappedClassError
+from sqlalchemy.orm import lazyload, load_only, selectinload, RelationshipProperty, MANYTOMANY
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync, compile_ui_file, Base
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan
 from SAGisXPlanung.FPlan.FP_Basisobjekte.feature_types import FP_Plan
 from SAGisXPlanung.LPlan.LP_Basisobjekte.feature_types import LP_Plan
+from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.RPlan.RP_Basisobjekte.feature_types import RP_Plan
 from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Bereich, XP_Objekt
@@ -35,12 +35,11 @@ from SAGisXPlanung.gui.commands import (ObjectsDeletedCommand, XPUndoStack, Attr
                                         StackChangeType, CommandType)
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
-from SAGisXPlanung.core.geometry_validation import VALIDATION_FUNCTIONS
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
-from SAGisXPlanung.gui.widgets.geometry_validation import ValidationState, ValidationWidget
+from SAGisXPlanung.gui.widgets.geometry_validation import ValidationWidget
 from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget
-from SAGisXPlanung.utils import full_version_required_warning
+from SAGisXPlanung.utils import full_version_required_warning, CLASSES
 
 uifile = os.path.join(os.path.dirname(__file__), '../ui/XPlanung_plan_details.ui')
 FORM_CLASS = compile_ui_file(uifile)
@@ -139,6 +138,12 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bUndo.clicked.connect(self.undo_stack.undo)
         self.bRedo.clicked.connect(self.undo_stack.redo)
 
+        self._pending_deletion_items = []
+
+        MapLayerRegistry().features_deleted.connect(self._on_features_deleted)
+        MapLayerRegistry().committed_features_removed.connect(self._on_committed_features_removed)
+        MapLayerRegistry().after_rollback.connect(self._on_after_rollback)
+
     def changeEvent(self, event: QEvent):
         super(XPPlanDetailsDialog, self).changeEvent(event)
         # widget dock status is changing
@@ -215,7 +220,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                     index_list = model.match(model.index(0, 0), XID_ROLE, xplan_item.xid, -1,
                                              Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive)
                     if not index_list:
-                        return
+                        continue
                     index = index_list[0]
                     if not xplan_item.parent_xid:
                         parent = index.parent()
@@ -280,7 +285,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             menu.exec(self.objectTree.mapToGlobal(point))
             return
 
-        item: ClassNode = selected_indices[0].model().itemAtIndex(selected_indices[0])
+        selected_index = selected_indices[0]
+        item: ClassNode = selected_index.model().itemAtIndex(selected_index)
         if not item:
             return
 
@@ -292,7 +298,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         if item.parent():
             delete_action = QtWidgets.QAction(QIcon(self.deleteIcon), 'Planinhalt löschen')
-            delete_action.triggered.connect(lambda state, item_to_delete=item: self.onDeleteClick(item_to_delete))
+            delete_action.triggered.connect(lambda state, del_index=selected_index: self.delete_indices([del_index]))
             menu.addAction(delete_action)
 
         data_class_menu = QtWidgets.QMenu('Neues Datenobjekt hinzufügen')
@@ -524,25 +530,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         self.addExplorerItem(model.itemAtIndex(index_list[0]), xplan_item, row=row)
 
-    def onDeleteClick(self, item: ClassNode):
-        command = ObjectsDeletedCommand([(item.xplanItem(), item.row(), None)], self)
-        self.undo_stack.push(command)
-
     def delete_indices(self, indices: List[QModelIndex]):
         _to_delete = []
-        items = []
+
         for index in indices:
             item = index.model().itemAtIndex(index)
             parent_xid = item.xplanItem().parent_xid
             if any(d for d in _to_delete if parent_xid in d):
                 continue
-            _to_delete.append((item.xplanItem().xtype, item.xplanItem().xid))
-            items.append(item)
+            _to_delete.append((item.xplanItem(), item.row(), None))
 
-        deleted, _ = self.deletePlanContent(delete_map=_to_delete)
-        if deleted:
-            for i in items:
-                self.objectTree.removeItem(i)
+        command = ObjectsDeletedCommand(_to_delete, self)
+        self.undo_stack.push(command)
 
     @pyqtSlot(str)
     def onPlanNameChanged(self, updated_name: str):
@@ -609,10 +608,63 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
             if index_list:
                 self.addExplorerItem(index_list[0], item, 0)
 
+    def _collect_children(self, node: ClassNode) -> List[str]:
+        xids = []
+        for i in range(node.childCount()):
+            child = node.child(i)
+            xids.append(child.xplanItem().xid)
+            xids.extend(self._collect_children(child))
+        return xids
 
-def _is_mapped(obj):
-    try:
-        class_mapper(obj)
-    except UnmappedClassError:
-        return False
-    return True
+    @pyqtSlot(QgsVectorLayer, list)
+    def _on_features_deleted(self, layer, deleted_fids: list):
+        plan_xid = layer.customProperty(f'xplanung/plan-xid')
+        if self.plan_xid != plan_xid:
+            return
+
+        model = self.objectTree.model
+
+        for fid in deleted_fids:
+            orm_xid = layer.customProperty(f'xplanung/feat-{fid}')
+            if not orm_xid:
+                continue
+            model.mark_for_deletion(orm_xid, layer.id(), True)
+
+    @pyqtSlot(QgsVectorLayer, list)
+    def _on_committed_features_removed(self, layer, deleted_fids: list):
+        plan_xid = layer.customProperty(f'xplanung/plan-xid')
+        if self.plan_xid != plan_xid:
+            result = QMessageBox.warning(
+                self,
+                "XPlan-Objekte löschen",
+                f"Die entfernten Objekte gehören zu einem XPlan-Datensatz, der nicht im Arbeitsbereich geöffnet ist.\n\n"
+                f"XPlan-Objekte trotzdem unwiderruflich aus der Datenbank löschen?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
+            )
+            if result == QMessageBox.StandardButton.No:
+                return
+            delete_map = []
+            xtype = layer.customProperty(f'xplanung/type')
+            for fid in deleted_fids:
+                orm_xid = layer.customProperty(f'xplanung/feat-{fid}')
+                if not orm_xid:
+                    continue
+                delete_map.append((CLASSES[xtype], orm_xid))
+                print(delete_map)
+            self.deletePlanContent(delete_map=delete_map)
+            return
+
+        model = self.objectTree.model
+        to_delete = []
+        for node in model.get_pending_deletes(layer.id()):
+            if node and hasattr(node, 'xplanItem'):
+                item = node.xplanItem()
+                to_delete.append((item, node.row(), None))
+        if to_delete:
+            command = ObjectsDeletedCommand(to_delete, self)
+            self.undo_stack.push(command)
+        model._pending_deletion_items[layer.id()].clear()
+
+    def _on_after_rollback(self):
+        self.objectTree.model.discard_pending_deletes()

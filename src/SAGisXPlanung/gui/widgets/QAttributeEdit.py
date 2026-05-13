@@ -446,7 +446,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
                     )
 
                     if not parent_index_list:
-                        return
+                        continue
 
                     parent_node = parent_index_list[0].internalPointer()
 
