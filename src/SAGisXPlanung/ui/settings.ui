@@ -17,7 +17,7 @@
    <item>
     <widget class="QTabWidget" name="tabs">
      <property name="currentIndex">
-      <number>4</number>
+      <number>0</number>
      </property>
      <widget class="CommonConfigPage" name="tab_common">
       <property name="enabled">
@@ -73,8 +73,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>437</width>
-            <height>430</height>
+            <width>441</width>
+            <height>491</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -224,6 +224,29 @@
                 <property name="mouseTracking">
                  <bool>true</bool>
                 </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="attribute_form_group">
+             <property name="title">
+              <string>Objektformulare und Aktionen</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_2">
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="checkbox_open_xplan_featureform">
+                <property name="text">
+                 <string>Attributdialog durch SAGis XPlanung ersetzen</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QToolButton" name="info_open_featureform">
                 <property name="text">
                  <string>...</string>
                 </property>

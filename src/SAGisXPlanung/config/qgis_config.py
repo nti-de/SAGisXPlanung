@@ -53,6 +53,7 @@ class QgsConfig:
     LAST_EXPORT_PATH = 'plugins/xplanung/last_export_dir'
     LAST_SELECTED_PLAN = 'plugins/xplanung/last_selected_plan'
     XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
+    AUTO_REPLACE_ATTRIBUTE_FORM = 'plugins/xplanung/replace_attribute_form'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -188,4 +189,14 @@ class QgsConfig:
         qs = QSettings()
         data = [account.to_dict() for account in account_data]
         qs.setValue(QgsConfig.XPLAN24_ACCOUNT, json.dumps(data))
+
+    @staticmethod
+    def auto_replace_attribute_form() -> str:
+        qs = QSettings()
+        return qs.value(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, False)
+
+    @staticmethod
+    def set_auto_replace_attribute_form(replace: bool):
+        qs = QSettings()
+        qs.setValue(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, replace)
 

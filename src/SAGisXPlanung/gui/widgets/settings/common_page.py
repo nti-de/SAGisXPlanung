@@ -42,19 +42,22 @@ class CommonConfigPage(SettingsPage):
         self.ui.info_clean_geometry.setIcon(info_icon)
         self.ui.info_preserve_topology.setIcon(info_icon)
         self.ui.info_repeated_points.setIcon(info_icon)
+        self.ui.info_open_featureform.setIcon(info_icon)
         self.ui.info_clean_geometry.installEventFilter(self.info_button_highlight_filter)
         self.ui.info_preserve_topology.installEventFilter(self.info_button_highlight_filter)
         self.ui.info_repeated_points.installEventFilter(self.info_button_highlight_filter)
+        self.ui.info_open_featureform.installEventFilter(self.info_button_highlight_filter)
         self.ui.info_clean_geometry.setToolTip(
             '<qt>Beim Erfassen neuer Geometrien, wird automatisch der Umlaufsinn aller Stützpunkte angepasst und eventuell doppelt erfasste Stützpunkte werden entfernt.</qt>')
         self.ui.info_preserve_topology.setToolTip(
             '<qt>Die Geometriebereinigung erhält die topologische Struktur der Geometrien. Es werden nur doppelte, aufeinanderfolgende Stützpunkte entfernt.</qt>')
         self.ui.info_repeated_points.setToolTip(
             '<qt>Eine genauere Erkennung doppelter Stützpunkte wird angewendet. Die Geometriebereinigung entfernt auch doppelte Stützpunkte, die nicht aufeinanderfolgend sind. Dies kann jedoch zu Änderungen in der Topologie führen.</qt>')
+        self.ui.info_open_featureform.setToolTip('<qt>Beim Öffnen des Objektformulars, nach Abfrage eines Einzelobjekts auf der Karte, wird statt dem nativen QGIS-Dialog die Attributansicht vom SAGis XPLanung automatisch geöffnet.</qt>')
         self.ui.status_label.hide()
 
         self.set_validation_options()
-
+        self.ui.checkbox_open_xplan_featureform.setChecked(QgsConfig.auto_replace_attribute_form())
 
         button_style = '''
             QToolButton {
@@ -63,6 +66,7 @@ class CommonConfigPage(SettingsPage):
         '''
         self.ui.validation_options_group.setStyleSheet(button_style)
         self.ui.xplan24_group.setStyleSheet(button_style)
+        self.ui.attribute_form_group.setStyleSheet(button_style)
 
         self.ui.xplan24_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
@@ -133,6 +137,7 @@ class CommonConfigPage(SettingsPage):
             correct_method=GeometryCorrectionMethod.PreserveTopology if self.ui.radiobutton_preserve_topology.isChecked() else GeometryCorrectionMethod.RigorousRemoval
         )
         QgsConfig.set_geometry_validation_config(validation_config)
+        QgsConfig.set_auto_replace_attribute_form(self.ui.checkbox_open_xplan_featureform.isChecked())
 
     def edit_xplan24_item(self, index):
         account = index.data(Qt.ItemDataRole.DisplayRole)

@@ -3,7 +3,7 @@ from inspect import signature
 from typing import Tuple, Union, Any, Iterator, Iterable
 
 from qgis.core import (QgsFields, QgsFeature, QgsVectorLayer, QgsField, QgsAnnotationLayer,
-                       QgsWkbTypes)
+                       QgsWkbTypes, QgsEditFormConfig, Qgis)
 from qgis.PyQt.QtCore import QVariant
 from sqlalchemy.orm import RelationshipProperty, interfaces, ColumnProperty
 
@@ -422,6 +422,12 @@ class MapCanvasMixin:
         form_config = layer.editFormConfig()
         for i in range(len(fields)):
             form_config.setReadOnly(i, True)
+        try:
+            form_config.setInitCodeSource(Qgis.AttributeFormPythonInitCodeSource.Dialog)
+        except AttributeError:
+            form_config.setInitCodeSource(QgsEditFormConfig.CodeSourceDialog)
+        form_config.setInitFunction("on_sagis_xplan_attribute_form_open")
+        form_config.setInitCode("from SAGisXPlanung.core.attribute_form import on_sagis_xplan_attribute_form_open")
         layer.setEditFormConfig(form_config)
 
         # allow class to attach event listeners or customize the layer in a custom hook
