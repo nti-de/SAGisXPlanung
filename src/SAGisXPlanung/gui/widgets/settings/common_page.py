@@ -29,7 +29,7 @@ class CommonConfigPage(SettingsPage):
     def setup_ui(self, ui):
         self.ui = ui
 
-        self.ui.checkPath.stateChanged.connect(lambda state: self.ui.tbPath.setEnabled((not bool(state))))
+        self.ui.checkbox_ref_path.stateChanged.connect(lambda state: self.ui.export_path_edit.setEnabled((not bool(state))))
         self.ui.checkbox_clean_geometry.stateChanged.connect(self.checkbox_clean_geometry_state_changed)
 
         self.ui.cbXPlanVersion.addItems([e.value for e in XPlanVersion])
@@ -85,6 +85,13 @@ class CommonConfigPage(SettingsPage):
     def setup_data(self):
         self.set_xplan_version()
         self.set_validation_options()
+        self.ui.checkbox_open_xplan_featureform.setChecked(QgsConfig.auto_replace_attribute_form())
+        export_ref_path = QgsConfig.xplan_export_reference_path()
+        if not export_ref_path:
+            self.ui.checkbox_ref_path.setChecked(True)
+            self.ui.export_path_edit.setText('referenzen/')
+        else:
+            self.ui.export_path_edit.setText(export_ref_path)
 
     def closeEvent(self, event: QCloseEvent):
         self.ui.status_label.setText('')
@@ -126,11 +133,10 @@ class CommonConfigPage(SettingsPage):
             self.ui.radiobutton_repeated_points.setChecked(True)
 
     def save(self):
-        qs = QSettings()
-        if self.ui.checkPath.isChecked():
-            qs.setValue(f"plugins/xplanung/export_path", '')
-        else:
-            qs.setValue(f"plugins/xplanung/export_path", self.ui.tbPath.text())
+        export_ref_path = ''
+        if not self.ui.checkbox_ref_path.isChecked():
+            export_ref_path = self.ui.export_path_edit.text()
+        QgsConfig.set_xplan_export_reference_path(export_ref_path)
 
         validation_config = GeometryValidationConfig(
             correct_geometries=self.ui.checkbox_clean_geometry.isChecked(),

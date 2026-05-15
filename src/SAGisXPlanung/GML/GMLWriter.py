@@ -18,6 +18,7 @@ from SAGisXPlanung.GML.geometry import enforce_wkb_constraints
 from SAGisXPlanung.XPlan.XP_Praesentationsobjekte.feature_types import XP_AbstraktesPraesentationsobjekt
 from SAGisXPlanung.XPlan.data_types import XP_ExterneReferenz
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
+from SAGisXPlanung.config import QgsConfig
 from SAGisXPlanung.core.mixins.mixins import FlaechenschlussObjekt, UeberlagerungsObjekt, GeometryObject, FeatureType, MixedGeometry
 from SAGisXPlanung.utils import is_url
 
@@ -63,9 +64,7 @@ class GMLWriter:
         return xml
 
     def toArchive(self) -> BytesIO:
-        from qgis.PyQt.QtCore import QSettings
-        qs = QSettings()
-        path_prefix = qs.value(f"plugins/xplanung/export_path", '')
+        path_prefix = QgsConfig.xplan_export_reference_path()
 
         zip_buffer = BytesIO()
         with ZipFile(zip_buffer, mode='w') as zip_file:

@@ -74,7 +74,7 @@
             <x>0</x>
             <y>0</y>
             <width>441</width>
-            <height>491</height>
+            <height>449</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -119,14 +119,14 @@
                </widget>
               </item>
               <item row="1" column="1">
-               <widget class="QLineEdit" name="tbPath">
+               <widget class="QLineEdit" name="export_path_edit">
                 <property name="text">
                  <string>referenzen/</string>
                 </property>
                </widget>
               </item>
               <item row="2" column="1">
-               <widget class="QCheckBox" name="checkPath">
+               <widget class="QCheckBox" name="checkbox_ref_path">
                 <property name="text">
                  <string>Referenzen im Hauptordner speichern</string>
                 </property>

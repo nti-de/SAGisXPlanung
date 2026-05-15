@@ -14,6 +14,10 @@ from SAGisXPlanung.XPlan.types import GeometryType
 logger = logging.getLogger(__name__)
 
 
+def str2bool(v):
+  return str(v).lower() in ("true", "1")
+
+
 class ConfigSaveException(Exception):
     """Exception for cases, where values could not be written to the config entry"""
     pass
@@ -51,6 +55,7 @@ class QgsConfig:
     CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
     NEXUS_SETTINGS = 'plugins/xplanung/nexus/settings'
     LAST_EXPORT_PATH = 'plugins/xplanung/last_export_dir'
+    XPLAN_EXPORT_REFERENCE_PATH = 'plugins/xplanung/xplan_export_reference_path'
     LAST_SELECTED_PLAN = 'plugins/xplanung/last_selected_plan'
     XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
     AUTO_REPLACE_ATTRIBUTE_FORM = 'plugins/xplanung/replace_attribute_form'
@@ -191,12 +196,22 @@ class QgsConfig:
         qs.setValue(QgsConfig.XPLAN24_ACCOUNT, json.dumps(data))
 
     @staticmethod
-    def auto_replace_attribute_form() -> str:
+    def auto_replace_attribute_form() -> bool:
         qs = QSettings()
-        return qs.value(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, False)
+        return str2bool(qs.value(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, False))
 
     @staticmethod
     def set_auto_replace_attribute_form(replace: bool):
         qs = QSettings()
         qs.setValue(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, replace)
+
+    @staticmethod
+    def xplan_export_reference_path() -> str:
+        qs = QSettings()
+        return str(qs.value(QgsConfig.XPLAN_EXPORT_REFERENCE_PATH, ""))
+
+    @staticmethod
+    def set_xplan_export_reference_path(path: str):
+        qs = QSettings()
+        qs.setValue(QgsConfig.XPLAN_EXPORT_REFERENCE_PATH, path)
 
