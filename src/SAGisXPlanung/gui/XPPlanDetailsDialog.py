@@ -138,8 +138,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bUndo.clicked.connect(self.undo_stack.undo)
         self.bRedo.clicked.connect(self.undo_stack.redo)
 
-        self._pending_deletion_items = []
-
         MapLayerRegistry().features_deleted.connect(self._on_features_deleted)
         MapLayerRegistry().committed_features_removed.connect(self._on_committed_features_removed)
         MapLayerRegistry().after_rollback.connect(self._on_after_rollback)

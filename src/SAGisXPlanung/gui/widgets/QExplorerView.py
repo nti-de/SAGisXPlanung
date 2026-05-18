@@ -214,7 +214,7 @@ class ExplorerTreeModel(QAbstractItemModel):
                 # child_index = self.indexForTreeItem(child_node)
                 # self.dataChanged.emit(child_index, child_index, [Qt.ItemDataRole.FontRole])
 
-        self._pending_deletion_items = []
+        self._pending_deletion_items.clear()
 
     def _collect_children(self, node: 'ClassNode') -> list['CustomNode']:
         children = []
