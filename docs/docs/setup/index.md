@@ -1,3 +1,8 @@
+---
+hide:
+  - path
+---
+
 # Installation und Einrichtung
 
 Die Einrichtung von SAGis XPlanung setzt folgende Installationen voraus:
@@ -17,4 +22,4 @@ Installation ab Version 2.0 ist die Installation über den QGIS Plugin Manager m
 
 Zusätzlich zum QGIS-Plugin benötigt SAGis XPlanung eine PostgreSQL Datenbank.
 
-- [Einrichtung einer Datenbank]()
+- [Einrichtung einer Datenbank](database-setup.md)

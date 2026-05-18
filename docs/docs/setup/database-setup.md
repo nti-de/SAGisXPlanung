@@ -1,3 +1,8 @@
+---
+hide:
+  - path
+---
+
 # Einrichtung einer Datenquelle
 
 
@@ -12,7 +17,17 @@
         <table>
             <tr>
                 <th>Name</th>
-                <td>Beliebiger Name der zu erstellenden Datenbank</td>
+                <td>
+                    Beliebiger Name der zu erstellenden Datenbank
+                    <div class="admonition warning">
+                        <p class="admonition-title">Benennung der Datenbank</p>
+                        <p> 
+                            PostgresSQL erlaubt Namen, die mit kleinem Buchstaben (a-z) oder einem Unterstrich (_)
+                            beginnen. Die nachfolgenden Zeichen dürfen Buchstaben, Ziffern (0-9) oder Unterstriche 
+                            enthalten.
+                        </p>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <th>Host</th>
@@ -28,7 +43,17 @@
             </tr>
             <tr>
                 <th>Passwort</th>
-                <td>Passwort zur Authentifizierung im Zusammenhang mit dem gewählten Nutzernamen</td>
+                <td>
+                    Passwort zur Authentifizierung im Zusammenhang mit dem gewählten Nutzernamen
+                    <div class="admonition warning">
+                        <p class="admonition-title">Passwort der Datenbank</p>
+                        <p> 
+                            Das hier anzugebende Passwort ist kein neu zu wählendes Passwort, sondern das Passwort, 
+                            welches bei Installation der Datenbank gewählt wurde (Admin-Passwort) oder ein Ihrem User 
+                            zugewiesenes Passwort.
+                        </p>
+                    </div>
+                </td>
             </tr>
         </table>
         <figure markdown="span">

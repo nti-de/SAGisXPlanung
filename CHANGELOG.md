@@ -1,5 +1,25 @@
 ## Changelog
 
+### [2.14.0] - 19.05.2026
+#### Neue Funktionen
+
+- Unterstützung für über 40 weitere Objektklassen aus dem XPlanung-Datenmodell
+- Filterfunktion beim Zuweisen von Textabschnitten
+- Funktion zum Löschen von XPlan-Objekten über das native QGIS-Werkzeug "Ausgewähltes Löschen"
+- Optionale Einstellung zum automatischen Öffnen der SAGis-Attributansicht anstatt des QGIS-Objektformular bei Objektabfrage
+
+#### Veränderungen
+
+- diverse Stilverbesserungen (SO_Straßenverkehr, BP_Wegerecht, FP_KeineZentrAbwasserBeseitigungFlaeche, ...)
+- UI-Verbesserungen für die Auswahl von abhängigen Objekten in m:n-Beziehungen (bspw. bei Auswahl von TextAbschnitten) (84160401)
+
+#### Fehlerbehebungen
+
+- Korrektur der Kardinalität des Attributs `zweckbestimmung` auf diversen Objektklassen in XPlan-Version 5.3 (d927c233)
+- fehlende Information `nordwinkel` zur Rotation von Punktsymbolen hinzugefügt (f5c0a71d)
+- fehlendes Codelist-Attribut auf Objektklasse `BP_BaugebietsTeilFlaeche` hinzugefügt (46ae48c2)
+- fehlerhaftes Speichern der Export-Optionen aus den Einstellungen korrigiert (3678a9fa)
+
 ### [2.13.3] - 28.04.2026
 
 #### Veränderungen

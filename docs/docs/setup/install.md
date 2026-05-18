@@ -1,3 +1,8 @@
+---
+hide:
+  - path
+---
+
 # Installation des QGIS Plugins
 
 ## Installation aus QGIS Plugin Repository

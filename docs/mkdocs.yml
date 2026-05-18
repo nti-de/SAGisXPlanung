@@ -12,6 +12,8 @@ theme:
     - navigation.indexes
     - navigation.sections
     - navigation.path
+    - navigation.tabs
+    - navigation.tabs.sticky
     - content.tooltips
   font:
     text: Overpass
@@ -68,6 +70,8 @@ markdown_extensions:
   - pymdownx.snippets:
       auto_append:
         - includes/abbreviations.md
+  - zensical.extensions.glightbox:
+      auto: false
 
 plugins:
   - tags
@@ -76,26 +80,35 @@ plugins:
 
 nav:
   - Start: index.md
-  - Installation und Einrichtung:
-      - setup/index.md
-      - Installation: setup/install.md
-      - Einrichtung einer Datenquelle: setup/database-setup.md
-  - Anwendungsfälle:
-      - new-plan.md
-      - add-plancontent.md
-      - plan-import.md
-      - plan-export.md
-      - multi-edit.md
-      - map-display.md
-  - Elemente der Oberfläche:
-      - elements/main-dialog.md
-      - elements/plan-details.md
-      - elements/plan-overview.md
-  - Einstellungen:
-      - settings/index.md
-      - Formulare: settings/forms.md
-      - Datenbank: settings/database.md
-      - Codelisten: settings/codelists.md
-      - Darstellung: settings/symbology.md
+  - Installation:
+      - Installation und Einrichtung:
+        - setup/index.md
+        - Installation: setup/install.md
+        - Einrichtung einer Datenquelle: setup/database-setup.md
+  - Dokumentation:
+    - Anwendungsfälle:
+        - new-plan.md
+        - add-plancontent.md
+        - plan-import.md
+        - plan-export.md
+        - multi-edit.md
+        - map-display.md
+    - Elemente der Oberfläche:
+        - elements/main-dialog.md
+        - elements/plan-details.md
+        - elements/plan-overview.md
+    - Einstellungen:
+        - settings/index.md
+        - Allgemein: settings/general.md
+        - Formulare: settings/forms.md
+        - Datenbank: settings/database.md
+        - Codelisten: settings/codelists.md
+        - Darstellung: settings/symbology.md
+  - Projekt:
+      - Changelog:
+          - changelog/index.md
+          - Version 2.14.0: changelog/v214.md
+      - Allgemeines:
+          - Kontakt & Support: general/support.md
 
 copyright: Copyright &copy; 2026 NTI Deutschland GmbH
