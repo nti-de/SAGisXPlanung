@@ -7,7 +7,7 @@ hide:
 
 Die Einrichtung von SAGis XPlanung setzt folgende Installationen voraus:
 
-- **QGIS** (> 3.22)
+- **QGIS** (> 3.34, mind. Python-Version 3.12)
 - **PostgreSQL** (> 12) mit Erweiterung **PostGIS** (> 3.4)
 
 Zusätzlich wird eine Internetverbindung für das Laden einiger Komponenten der Anwendung bei der Installation benötigt.

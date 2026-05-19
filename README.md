@@ -77,7 +77,7 @@ Erfassung von Flächennutzungs-, Bebauungs-, Landschafts- und Raumordnungspläne
     
 ### Software-Vorraussetzungen
 
-- QGIS >= 3.28
+- QGIS >= 3.34 (mind. Python-Version 3.12)
 - PostgreSQL >= 12 mit PostGIS 3.4
 
 ### Installation 

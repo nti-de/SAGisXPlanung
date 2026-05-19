@@ -5,8 +5,8 @@ Weitere Aktionen im Dialog der Planübersicht:
 
 1. [Suchen, Sortieren und Filtern](#suchen-sortieren-und-filtern)
 2. [Planwerk-Aktionen](#planwerk-aktionen)
-3. [Tabellenimport](#)
-4. Navigationswerkzeuge zum Wechseln zwischen den Seiten
+3. [Austausch mit XPlanung24](#austausch-mit-xplanung24)
+4. [Tabellenimport](#)
 
 <div class="procedure" markdown="span">
     <h4>Planübersicht öffnen</h4>
@@ -58,6 +58,28 @@ Die Aktionsleiste unterhalb des Suchfelds bietet als Shortcuts den Zugriff auf e
         </td>
     </tr>
 </table>
+
+## Austausch mit XPlanung24
+
+Nach der Hinterlegung eines API-Schlüssels in den Einstellungen können Pläne direkt mit der Cloud-Plattform XPlanung24 ausgetauscht werden.
+
+=== "Upload von Plänen"
+
+    1. Gewünschte Pläne in der Planübersicht auswählen (Einzel- oder Mehrfachauswahl möglich)
+    2. Den XPlanung24-Dialog öffnen
+    3. Den gewünschten XPlanung24-Account aus der Dropdown-Liste auswählen
+    4. Über den Button _Hochladen_ die ausgewählten Pläne in die Webplattform übertragen
+
+    ![xplanung24-upload.png](../assets/xplanung24-upload.png)
+
+=== "Download von Plänen"
+
+    1. Den XPlanung24-Dialog öffnen
+    2. Den gewünschten XPlanung24-Account aus der Dropdown-Liste auswählen
+    3. Verfügbare Pläne zum Download auswählen (Einzel- oder Mehrfachauswahl möglich)
+    4. Über den Button _Herunterladen_ die ausgewählten Pläne aus XPlanung24 abrufen und in die lokale XPlan-Datenbank übernehmen
+
+    ![xplanung24-download.png](../assets/xplanung24-download.png)
 
 ## Navigationswerkzeuge
 

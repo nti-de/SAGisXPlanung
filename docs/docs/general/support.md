@@ -1,3 +1,8 @@
+---
+icon: lucide/contact
+---
+
+
 # Kontakt & Support
 Bei Fragen zur Anwendung, technischen Problemen oder allgemeinen Anliegen stehen wir Ihnen gerne zur Verfügung.
 

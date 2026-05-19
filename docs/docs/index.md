@@ -1,18 +1,17 @@
-<p align="center">
-  <picture>
-    <img alt="SAGis XPlanung" src="assets/icons/sagis_icon.png">
-  </picture>
-</p>
+---
+hide:
+  - navigation
+---
 
-<h1 align="center">SAGis XPlanung</h1>
+<div class="hero" markdown>
 
-<p align="center">
-  <strong>
-    QGIS Erweiterung zur Erfassung und Verwaltung von XPlanGML-Dokumenten
-  </strong>
-</p>
+# SAGis XPlanung
 
-<p align="center">
+<b>QGIS-Erweiterung zur Erfassung und Verwaltung von XPlanGML-Dokumenten</b>
+
+SAGis XPlanung unterstützt die standardkonforme Erstellung, Bearbeitung, Validierung und Verwaltung von Flächennutzungs-, Bebauungs-, Landschafts- und Raumordnungsplänen direkt in QGIS.
+
+<p>
   <a href="https://github.com/nti-de/SAGisXPlanung/actions"><img
     src="https://github.com/nti-de/SAGisXPlanung/actions/workflows/main.yml/badge.svg"
     alt="Build"
@@ -31,95 +30,136 @@
   /></a>
 </p>
 
-<p align="center">
-  <a href="https://www.nti-group.com/de/produkte/sagis-loesungen/sagis-xplanung/"><strong>Homepage</strong></a>
-  &middot;
-  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><strong>QGIS Plugin Repository</strong></a>
-</p>
+[Jetzt starten](setup/index.md){ .md-button .md-button--primary }
+[:simple-qgis: Plugin herunterladen](https://plugins.qgis.org/plugins/SAGisXPlanung/){ .md-button }
 
-SAGis XPlanung ist eine Erweiterung für die GIS-Software [QGIS](https://www.qgis.org) zur [XPlanung](https://www.xleitstelle.de/xplanung/ueber_xplanung) - konformen 
-Erfassung von Flächennutzungs-, Bebauungs-, Landschafts- und Raumordnungsplänen. 
+## Warum SAGis XPlanung?
 
-![QGIS Screenshot](assets/screenshot_banner.png)
+<div class="grid cards" markdown>
+
+-   :material-map-outline:{ .lg .middle }
+
+    **XPlanung-konforme Datenerfassung**
+
+    ---
+
+    Erstellen und verwalten Sie Planwerke standardkonform innerhalb Ihrer bestehenden QGIS-Umgebung.
+
+-   :material-database-import-outline:{ .lg .middle }
+
+    **Import & Export von XPlanGML**
+
+    ---
+
+    Nahtloser Austausch bestehender Datensätze über standardisierte Schnittstellen.
+
+-   :material-check-decagram:{ .lg .middle }
+
+    **Validierung & Geometrieprüfung**
+
+    ---
+
+    Sicherstellung von Datenqualität und Standardkonformität während der Bearbeitung.
+
+-   :material-palette-outline:{ .lg .middle }
+
+    **PlanZV-konforme Visualisierung**
+
+    ---
+
+    Intuitive Darstellung von Planinhalten gemäß geltender Standards.
+
+</div>
+
+[:material-web: Mehr erfahren...](https://www.nti-group.com/de/produkte/sagis-loesungen/sagis-xplanung/){ .md-button }
+
+---
 
 ## Erste Schritte
 
 <div class="grid cards" markdown>
 
--   :material-database-cog:{ .lg .middle } __Installation__
+-   :material-database-cog:{ .lg .middle }
+
+    **Installation**
 
     ---
 
-    Leitfaden zur Installation und Einrichtung von SAGis XPlanung
+    Schritt-für-Schritt Anleitung zur Installation und Einrichtung.
 
     [:octicons-arrow-right-24: Installation](setup/index.md)
 
+-   :material-map-plus:{ .lg .middle }
 
--   :map:{ .lg .middle } __Ersten XPlan erfassen__
+    **Ersten XPlan erfassen**
 
     ---
 
-    Vorgehensweise zum Erstellen eines XPlanung konformen Datensatzes
+    Erstellen Sie Ihren ersten standardkonformen Plan in wenigen Schritten.
 
     [:octicons-arrow-right-24: Plan erstellen](new-plan.md)
 
--   :material-database-import-outline:{ .lg .middle } __Import von XPlanGML-Dokumenten__
+-   :material-database-import:{ .lg .middle }
+
+    **XPlanGML importieren**
 
     ---
 
-    Bestehende XPlanung konforme Datensätze importieren
+    Übernehmen Sie bestehende Planwerke direkt in SAGis XPlanung.
 
-    [:octicons-arrow-right-24: XPlanGML-Import](plan-import.md)
+    [:octicons-arrow-right-24: Import starten](plan-import.md)
 
 </div>
 
-## Weitere Funktionen
+---
+
+## Erweiterte Funktionen
 
 <div class="grid cards" markdown>
--   [__Planinhalte hinzufügen__](add-plancontent.md)
+
+-   [**Planinhalte hinzufügen**](add-plancontent.md)
 
     ---
 
-    Erfassen von raumbezogenen Festsetzungen in einem Plan
+    Vollständige Erfassung raumbezogener Festsetzungen.
 
--   [__Geometrieprüfung__](elements/plan-details.md#geometrieprufung)
-
-    ---
-
-    Validieren der Anforderungen an erfasste Geometrien im Standard XPlanung
-
--   [__Export von XPlanGML-Dokumenten__](plan-export.md)
+-   [**Geometrieprüfung**](elements/plan-details.md#geometrieprufung)
 
     ---
 
-    Erstellen von XPlanGML-Dateien aus erfassten XPlan-Datensätzen
+    Automatische Validierung geometrischer Anforderungen.
 
-- [__Planinhalte bearbeiten__](elements/plan-details.md#bearbeiten-von-sachdaten)
+-   [**XPlanGML Export**](plan-export.md)
 
     ---
 
-    Anpassen von Geometrie und Sachdaten bestehender Planinhalte
+    Standardisierte Ausgabe Ihrer Planwerke.
+
+-   [**Planinhalte bearbeiten**](elements/plan-details.md#bearbeiten-von-sachdaten)
+
+    ---
+
+    Flexible Bearbeitung bestehender Datensätze.
+
 </div>
 
-## Programmversionen
+---
 
-Die Anwendung wird in zwei verschiedenen Versionen zur Verfügung gestellt. 
-Zum Überblick über die Funktionsunterschiede dient die folgende Tabelle:
+## Versionen im Überblick
 
-|                                                             | Community-Version   | Vollversion        |
-|-------------------------------------------------------------|---------------------|--------------------|
-| Teilvektorielle Erfassung                                   | :heavy_check_mark:  | :heavy_check_mark: |
-| Speichern externer Referenzen                               | :heavy_check_mark:  | :heavy_check_mark: |
-| Import von XPlanGML-Dokumenten                              | :heavy_check_mark:  | :heavy_check_mark: |
-| Visualisierung gemäß PlanZV                                 | :heavy_check_mark:  | :heavy_check_mark: |
-| Export von XPlanGML-Dokumenten                              | [^abbr1]            | :heavy_check_mark: |
-| Bearbeiten von XPlanung-Attributen                          | [^abbr1]            | :heavy_check_mark: |
-| Erfassung neuer Planinhalte <br/>(vollvektorielle Erfassung) |                     | :heavy_check_mark: |
-| Benutzerdefinierte Symbolisierung                           |                     | :heavy_check_mark: |
-| Tabellen-Import (Excel)                                   |                     | :heavy_check_mark: |
+| Funktion | Community-Version | Vollversion |
+|----------|------------------|-------------|
+| Teilvektorielle Erfassung | :heavy_check_mark: | :heavy_check_mark: |
+| Import von XPlanGML | :heavy_check_mark: | :heavy_check_mark: |
+| Visualisierung gemäß PlanZV | :heavy_check_mark: | :heavy_check_mark: |
+| Export von XPlanGML | Eingeschränkt | :heavy_check_mark: |
+| Bearbeitung von Attributen | Eingeschränkt | :heavy_check_mark: |
+| Vollvektorielle Erfassung |  | :heavy_check_mark: |
+| Benutzerdefinierte Symbolisierung |  | :heavy_check_mark: |
+| Tabellen-Import (Excel) |  | :heavy_check_mark: |
 
-Die Community-Version ist unter einer Open-Source Lizenz im Plugin-Verzeichnis vom QGIS zum 
-[Download](setup/install.md#installation-aus-qgis-plugin-repository) verfügbar.
+Die Community-Version ist kostenlos über das QGIS Plugin Repository verfügbar.
 
 
-[^abbr1]: Nur für Basisobjekte möglich (teilvektorielle Erfassung)
+[:simple-qgis: Zum QGIS-Repository](https://plugins.qgis.org/plugins/SAGisXPlanung/){ .md-button }
+[:material-github: Zum GitHub-Repository](https://github.com/nti-de/SAGisXPlanung){ .md-button }

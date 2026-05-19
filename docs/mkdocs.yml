@@ -45,9 +45,9 @@ extra:
     - icon: material/email
       link: mailto:qgis-de@nti.biz
     - icon: material/github
-      link: github.com/nti-de/SAGisXPlanung
+      link: https://github.com/nti-de/SAGisXPlanung
     - icon: simple/qgis
-      link: github.com/nti-de/SAGisXPlanung
+      link: https://github.com/nti-de/SAGisXPlanung
 
 markdown_extensions:
   - abbr
@@ -85,6 +85,7 @@ nav:
         - setup/index.md
         - Installation: setup/install.md
         - Einrichtung einer Datenquelle: setup/database-setup.md
+        - Update einer Installation: setup/update.md
   - Dokumentation:
     - Anwendungsfälle:
         - new-plan.md
@@ -110,5 +111,7 @@ nav:
           - Version 2.14.0: changelog/v214.md
       - Allgemeines:
           - Kontakt & Support: general/support.md
-
+          - FAQ: general/FAQ.md
+      - Integrationen:
+          - XPlanung24: integrations/xplanung24.md
 copyright: Copyright &copy; 2026 NTI Deutschland GmbH
