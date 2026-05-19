@@ -500,7 +500,93 @@ ALTER TABLE xp_spe_daten ADD CONSTRAINT fk_xp_spe_daten_fp_ausgleichsflaeche_id_
 
 DROP TYPE xp_mime_types;
 
-UPDATE alembic_version SET version_num='250637cd31df' WHERE alembic_version.version_num = '2b1452b49cc5';
+ALTER TABLE fp_objekt ADD COLUMN flussrichtung BOOLEAN;
+
+ALTER TABLE fp_objekt ADD COLUMN nordwinkel FLOAT;
+
+ALTER TABLE bp_objekt ADD COLUMN flussrichtung BOOLEAN;
+
+ALTER TABLE bp_objekt ADD COLUMN nordwinkel FLOAT;
+
+ALTER TABLE assoc_detail_sondernutzung ADD COLUMN bp_baugebiet_id UUID;
+
+ALTER TABLE assoc_detail_sondernutzung ADD CONSTRAINT fk_assoc_detail_sondernutzung_bp_baugebiet_id_bp_baugebiet FOREIGN KEY(bp_baugebiet_id) REFERENCES bp_baugebiet (id) ON DELETE CASCADE;
+
+ALTER TABLE assoc_detail_sondernutzung DROP CONSTRAINT IF EXISTS assoc_detail_sondernutzung_pkey;;
+
+ALTER TABLE assoc_detail_sondernutzung ALTER COLUMN codelist_user_id DROP NOT NULL;;
+
+DROP TRIGGER IF EXISTS bp_gemeinbedarf_sync_attr_zweckbestimmung ON bp_gemeinbedarf;
+
+DROP TRIGGER IF EXISTS bp_gemeinbedarf_sync_attr_zweckbestimmung ON bp_zweckbestimmung_gemeinbedarf;
+
+ALTER TABLE bp_gemeinbedarf
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggemeinbedarf[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY[zweckbestimmung::xp_zweckbestimmunggemeinbedarf]
+        END;;
+
+DROP TRIGGER IF EXISTS bp_gruenflaeche_sync_attr_zweckbestimmung ON bp_gruenflaeche;
+
+DROP TRIGGER IF EXISTS bp_gruenflaeche_sync_attr_zweckbestimmung ON bp_zweckbestimmung_gruen;
+
+ALTER TABLE bp_gruenflaeche
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunggruen[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmunggruen]
+        END;;
+
+DROP TRIGGER IF EXISTS bp_landwirtschaft_sync_attr_zweckbestimmung ON bp_landwirtschaft;
+
+DROP TRIGGER IF EXISTS bp_landwirtschaft_sync_attr_zweckbestimmung ON bp_zweckbestimmung_landwirtschaft;
+
+ALTER TABLE bp_landwirtschaft
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmunglandwirtschaft[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmunglandwirtschaft]
+        END;;
+
+DROP TRIGGER IF EXISTS bp_wald_sync_attr_zweckbestimmung ON bp_wald;
+
+DROP TRIGGER IF EXISTS bp_wald_sync_attr_zweckbestimmung ON bp_zweckbestimmung_wald;
+
+ALTER TABLE bp_wald
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmungwald[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmungwald]
+        END;;
+
+ALTER TABLE bp_wald
+        ALTER COLUMN "betreten" TYPE xp_waldbetretungtyp[]
+        USING CASE
+            WHEN betreten IS NULL THEN NULL
+            WHEN betreten = 'KeineZusaetzlicheBetretung'::xp_waldbetretungtyp THEN NULL
+            ELSE ARRAY [betreten::xp_waldbetretungtyp]
+        END;;
+
+DROP TRIGGER IF EXISTS bp_versorgung_sync_attr_zweckbestimmung ON bp_versorgung;
+
+DROP TRIGGER IF EXISTS bp_versorgung_sync_attr_zweckbestimmung ON bp_zweckbestimmung_versorgung;
+
+ALTER TABLE bp_versorgung
+        ALTER COLUMN "zweckbestimmung" TYPE xp_zweckbestimmungverentsorgung[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::xp_zweckbestimmungverentsorgung]
+        END;;
+
+ALTER TABLE bp_verkehr_besonders
+        ALTER COLUMN "zweckbestimmung" TYPE bp_zweckbestimmungstrassenverkehr[]
+        USING CASE
+            WHEN zweckbestimmung IS NULL THEN NULL
+            ELSE ARRAY [zweckbestimmung::bp_zweckbestimmungstrassenverkehr]
+        END;;
+
+UPDATE alembic_version SET version_num='250637cd31df' WHERE alembic_version.version_num = '2b1452b49cc5'; --- # pragma: allowlist secret;
 
 COMMIT;
 
