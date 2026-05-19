@@ -141,15 +141,13 @@ UPDATE bp_plan bp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id
 
 UPDATE fp_plan fp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id = fp.id;;
 
-ALTER TABLE xp_plan DROP CONSTRAINT xp_plan_plangeber_id_fkey;
-
 ALTER TABLE xp_plan DROP COLUMN plangeber_id;
 
 ALTER TABLE xp_plan_gemeinde ADD COLUMN bp_plan_id UUID;
 
 ALTER TABLE xp_plan_gemeinde ADD COLUMN fp_plan_id UUID;
 
-ALTER TABLE xp_plan_gemeinde DROP CONSTRAINT xp_plan_gemeinde_plan_id_fkey;
+ALTER TABLE xp_plan_gemeinde DROP CONSTRAINT fk_xp_plan_gemeinde_plan_id_xp_plan;
 
 ALTER TABLE xp_plan_gemeinde ADD CONSTRAINT xp_plan_gemeinde_bp_plan_id_fkey FOREIGN KEY(bp_plan_id) REFERENCES bp_plan (id) ON DELETE CASCADE;
 

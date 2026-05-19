@@ -6,9 +6,9 @@ UPDATE xp_po SET type='xp_pto' WHERE type='xp_tpo';;
 
 ALTER INDEX idx_xp_tpo_position RENAME TO idx_xp_pto_position;;
 
-ALTER TABLE xp_tpo RENAME CONSTRAINT xp_tpo_id_fkey TO xp_pto_id_fkey;;
+ALTER TABLE xp_tpo RENAME CONSTRAINT fk_xp_tpo_id_xp_po TO fk_xp_pto_id_xp_po;;
 
-ALTER TABLE xp_tpo RENAME CONSTRAINT xp_tpo_pkey TO xp_pto_pkey;;
+ALTER TABLE xp_tpo RENAME CONSTRAINT pk_xp_tpo TO pk_xp_pto;;
 
 ALTER TABLE xp_tpo RENAME TO xp_pto;;
 

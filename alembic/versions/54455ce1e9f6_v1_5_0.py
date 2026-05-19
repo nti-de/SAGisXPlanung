@@ -170,13 +170,13 @@ def upgrade():
     op.execute("UPDATE bp_plan bp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id = bp.id;")
     op.execute("UPDATE fp_plan fp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id = fp.id;")
 
-    op.drop_constraint('xp_plan_plangeber_id_fkey', 'xp_plan', type_='foreignkey')
+    # op.drop_constraint('xp_plan_plangeber_id_fkey', 'xp_plan', type_='foreignkey')
     op.drop_column('xp_plan', 'plangeber_id')
 
     # refactor gemeinde relations
     op.add_column('xp_plan_gemeinde', sa.Column('bp_plan_id', postgresql.UUID(as_uuid=True), nullable=True))
     op.add_column('xp_plan_gemeinde', sa.Column('fp_plan_id', postgresql.UUID(as_uuid=True), nullable=True))
-    op.drop_constraint('xp_plan_gemeinde_plan_id_fkey', 'xp_plan_gemeinde', type_='foreignkey')
+    op.drop_constraint('fk_xp_plan_gemeinde_plan_id_xp_plan', 'xp_plan_gemeinde', type_='foreignkey')
 
     op.create_foreign_key('xp_plan_gemeinde_bp_plan_id_fkey', 'xp_plan_gemeinde', 'bp_plan', ['bp_plan_id'], ['id'],
                           ondelete='CASCADE')

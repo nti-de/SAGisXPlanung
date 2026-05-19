@@ -992,15 +992,13 @@ UPDATE bp_plan bp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id
 
 UPDATE fp_plan fp SET plangeber_id = xp.plangeber_id FROM xp_plan xp WHERE xp.id = fp.id;;
 
-ALTER TABLE xp_plan DROP CONSTRAINT xp_plan_plangeber_id_fkey;
-
 ALTER TABLE xp_plan DROP COLUMN plangeber_id;
 
 ALTER TABLE xp_plan_gemeinde ADD COLUMN bp_plan_id UUID;
 
 ALTER TABLE xp_plan_gemeinde ADD COLUMN fp_plan_id UUID;
 
-ALTER TABLE xp_plan_gemeinde DROP CONSTRAINT xp_plan_gemeinde_plan_id_fkey;
+ALTER TABLE xp_plan_gemeinde DROP CONSTRAINT fk_xp_plan_gemeinde_plan_id_xp_plan;
 
 ALTER TABLE xp_plan_gemeinde ADD CONSTRAINT xp_plan_gemeinde_bp_plan_id_fkey FOREIGN KEY(bp_plan_id) REFERENCES bp_plan (id) ON DELETE CASCADE;
 
@@ -1273,9 +1271,9 @@ UPDATE xp_po SET type='xp_pto' WHERE type='xp_tpo';;
 
 ALTER INDEX idx_xp_tpo_position RENAME TO idx_xp_pto_position;;
 
-ALTER TABLE xp_tpo RENAME CONSTRAINT xp_tpo_id_fkey TO xp_pto_id_fkey;;
+ALTER TABLE xp_tpo RENAME CONSTRAINT fk_xp_tpo_id_xp_po TO fk_xp_pto_id_xp_po;;
 
-ALTER TABLE xp_tpo RENAME CONSTRAINT xp_tpo_pkey TO xp_pto_pkey;;
+ALTER TABLE xp_tpo RENAME CONSTRAINT pk_xp_tpo TO pk_xp_pto;;
 
 ALTER TABLE xp_tpo RENAME TO xp_pto;;
 

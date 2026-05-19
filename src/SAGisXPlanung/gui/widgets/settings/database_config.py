@@ -254,6 +254,7 @@ class DatabaseConfigPage(SettingsPage):
         service = qs.value(f"PostgreSQL/connections/{conn_name}/service", '')
         self.ui.tbUsername.setText(username)
         self.ui.tbPassword.setText(password)
+        print(service, type(service))
         self.ui.label_extra_info.setVisible(service != '')
         if service:
             t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Secondary};">{service}</span> angewendet...'
