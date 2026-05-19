@@ -431,7 +431,7 @@ class XP_Hoehenangabe(RelationshipMixin, ElementOrderMixin, Base):
     abweichenderHoehenbezug = Column(String)
     hoehenbezug = Column(XPEnum(XP_ArtHoehenbezug, include_default=True))
     abweichenderBezugspunkt = Column(String)
-    bezugspunkt = Column(Enum(XP_ArtHoehenbezugspunkt))
+    bezugspunkt = Column(XPEnum(XP_ArtHoehenbezugspunkt, include_default=True))
     hMin = Column(Length)
     hMax = Column(Length)
     hZwingend = Column(Length)
