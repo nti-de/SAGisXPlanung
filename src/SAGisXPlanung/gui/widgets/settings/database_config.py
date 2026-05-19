@@ -252,11 +252,12 @@ class DatabaseConfigPage(SettingsPage):
         username = qs.value(f"PostgreSQL/connections/{conn_name}/username", '')
         password = qs.value(f"PostgreSQL/connections/{conn_name}/password", '')
         service = qs.value(f"PostgreSQL/connections/{conn_name}/service", '')
+        service_text = str(service).strip() if service else ""
+
         self.ui.tbUsername.setText(username)
         self.ui.tbPassword.setText(password)
-        print(service, type(service))
-        self.ui.label_extra_info.setVisible(service != '')
-        if service:
+        self.ui.label_extra_info.setVisible(bool(service_text))
+        if service_text:
             t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Secondary};">{service}</span> angewendet...'
             self.ui.label_extra_info.setText(t)
 
