@@ -94,6 +94,7 @@ class CommonConfigPage(SettingsPage):
             self.ui.export_path_edit.setText(export_ref_path)
 
     def closeEvent(self, event: QCloseEvent):
+        self.ui.status_label.hide()
         self.ui.status_label.setText('')
         self.ui.status_action.setText('')
 

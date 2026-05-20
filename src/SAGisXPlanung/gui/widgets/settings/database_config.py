@@ -23,6 +23,7 @@ from SAGisXPlanung.core.connection import verify_db_connection, establish_sessio
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, with_color_palette, apply_color
+from SAGisXPlanung.gui.widgets.commons import ValidationTrigger, ValidationManager, RegexValidator
 from .basepage import SettingsPage
 
 logger = logging.getLogger(__name__)
@@ -83,6 +84,8 @@ class DatabaseConfigPage(SettingsPage):
         self.check_icon_base = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                               color=ApplicationColor.Grey400))
 
+        self.validation = ValidationManager()
+
     def setup_ui(self, ui):
         self.ui = ui
 
@@ -93,6 +96,21 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.db_create.clicked.connect(self.on_database_create_clicked)
         for w in self.db_create_options:
             w.textChanged.connect(self.db_create_options_changed)
+
+        db_name_validator = RegexValidator(r"^[A-Za-z_][A-Za-z0-9_]*$")
+        numbers_only_validator = RegexValidator(r"^\d+$")
+        self.validation.register(
+            self.ui.db_name,
+            validator=db_name_validator,
+            error_message="Kein gültiger DB-Name (Nur alphanumerisch oder Unterstrich)",
+            trigger=ValidationTrigger.FOCUS_OUT
+        )
+        self.validation.register(
+            self.ui.db_port,
+            validator=numbers_only_validator,
+            error_message="Kein gültiger Port (Nur Ziffern erlaubt)",
+            trigger=ValidationTrigger.FOCUS_OUT
+        )
 
         self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
         # schedule asyncio task and return None, so that void return type of sip method is satisfied
@@ -125,7 +143,11 @@ class DatabaseConfigPage(SettingsPage):
 
     @qasync.asyncSlot()
     async def on_database_create_clicked(self):
+        if not self.validation.validate_all():
+            return
+
         async with loading_animation(self.ui.tab_database) as spinner:
+            database_created = False
             self.ui.db_create.setEnabled(False)
             db = self.ui.db_name.text()
             username = self.ui.db_username.text()
@@ -141,6 +163,7 @@ class DatabaseConfigPage(SettingsPage):
             try:
                 async with engine.connect() as conn:
                     await conn.execute(text(f'CREATE DATABASE {db}'))
+                database_created = True
 
                 self.ui.status_label.setText('XPlanung Schema erstellen...')
 
@@ -158,18 +181,15 @@ class DatabaseConfigPage(SettingsPage):
                 loop = asyncio.get_event_loop()
                 await loop.run_in_executor(None, create_schema)
 
-            except DBAPIError as e:
-                logger.exception(e)
-                # TODO: currently no way to access the original error message from asyncpg
-                # https://github.com/sqlalchemy/sqlalchemy/issues/8047
-                # if e.orig == asyncpg.exceptions.DuplicateDatabaseError:
-                #     self.status_label.setText(f'FEHLER:  Datenbank »{db}« existiert bereits')
-                #     return
-                self.ui.status_label.setText(str(e))
-                return
             except Exception as e:
                 logger.exception(e)
-                self.ui.status_label.setText(str(e))
+                self.ui.status_label.setText(f"Fehler bei Schema-Erstellung: {e}")
+
+                if database_created:
+                    try:
+                        await self.drop_database(username, password, host, port, db)
+                    except Exception as rollback_error:
+                        logger.exception(rollback_error)
                 return
             finally:
                 self.ui.db_create.setEnabled(True)
@@ -193,6 +213,24 @@ class DatabaseConfigPage(SettingsPage):
             self.ui.status_label.setText('Datenbank erstellt...')
             self.ui.status_action.setText('<a href="..link">Neue Konfiguration anwenden</a>')
             self.ui.status_action.mousePressEvent = functools.partial(self.status_action_apply_clicked, f"SAGis XPlanung: {db}")
+
+    async def drop_database(self, username, password, host, port, db):
+        engine = create_async_engine(
+            f"postgresql+asyncpg://{username}:{password}@{host}:{port}/postgres",
+            isolation_level='AUTOCOMMIT'
+        )
+
+        async with engine.begin() as conn:
+            await conn.execute(text(f"""
+                SELECT pg_terminate_backend(pid)
+                FROM pg_stat_activity
+                WHERE datname = '{db}'
+                AND pid <> pg_backend_pid()
+            """))
+
+            await conn.execute(text(f'DROP DATABASE IF EXISTS "{db}"'))
+
+        await engine.dispose()
 
     def db_create_options_changed(self, t):
         self.ui.db_create.setEnabled(not any(e.text() == '' for e in self.db_create_options))
