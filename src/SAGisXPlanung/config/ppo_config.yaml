@@ -1438,7 +1438,7 @@ Denkmalschutz_Bodendenkmal.svg:
 nutzungsform_privat:
   type:
     circle:
-      static-text: ö
+      static-text: p
       fill: transparent
       stroke: transparent
       stroke-width: 0.25
