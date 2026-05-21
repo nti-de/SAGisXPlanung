@@ -59,6 +59,7 @@ class QgsConfig:
     LAST_SELECTED_PLAN = 'plugins/xplanung/last_selected_plan'
     XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
     AUTO_REPLACE_ATTRIBUTE_FORM = 'plugins/xplanung/replace_attribute_form'
+    XPLAN_EXPORT_FILE_NAME_SCHEMA = 'plugins/xplanung/xplan_export_filename_schema'
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -214,4 +215,15 @@ class QgsConfig:
     def set_xplan_export_reference_path(path: str):
         qs = QSettings()
         qs.setValue(QgsConfig.XPLAN_EXPORT_REFERENCE_PATH, path)
+
+    @staticmethod
+    def xplan_export_filename_schema() -> str:
+        qs = QSettings()
+        return str(qs.value(QgsConfig.XPLAN_EXPORT_FILE_NAME_SCHEMA, ""))
+
+    @staticmethod
+    def set_xplan_export_filename_schema(path: str):
+        qs = QSettings()
+        qs.setValue(QgsConfig.XPLAN_EXPORT_FILE_NAME_SCHEMA, path)
+
 

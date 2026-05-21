@@ -2,10 +2,10 @@ import logging
 import os
 
 import qasync
-from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard
+from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard, QFontDatabase
 from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout,
-                                 QApplication)
+                                 QApplication, QAbstractButton)
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
@@ -20,6 +20,27 @@ from .basepage import SettingsPage
 
 logger = logging.getLogger(__name__)
 
+style = """
+QFrame#filename_preview {{	
+	background-color: {_bg_color_frame};
+    border-radius: 5px;
+}}
+QLabel#label_preview_name {{
+    color: {_label_color_muted}
+}}
+QPushButton[class="presetButton"] {{
+    background: white;
+    border: 1px solid #D8D8D8;
+    border-radius: 5px;
+    padding: 6px 14px;
+}}
+QPushButton[class="presetButton"]:hover {{
+    background: #F6F6F6;
+}}
+QPushButton[class="presetButton"]:pressed {{
+    background: #EBEBEB;
+}}
+"""
 
 class CommonConfigPage(SettingsPage):
     def __init__(self, parent=None):
@@ -35,6 +56,9 @@ class CommonConfigPage(SettingsPage):
         self.ui.cbXPlanVersion.addItems([e.value for e in XPlanVersion])
         self.ui.cbXPlanVersion.currentIndexChanged.connect(self.on_xplan_version_changed)
         self.set_xplan_version()
+
+        self.ui.export_name_preset_group.buttonClicked.connect(self.export_name_preset_toggled)
+        self.ui.export_name_schema_edit.editingFinished.connect(self.update_export_name_preview)
 
         info_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/info-outline.svg'),
                                    color=ApplicationColor.Grey600))
@@ -82,6 +106,13 @@ class CommonConfigPage(SettingsPage):
 
         self.ui.add_account_button.clicked.connect(self.on_add_xplan24account_clicked)
 
+        # ------------- STYLE -----------------
+        self.ui.label_preview_value.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
+        self.ui.setStyleSheet(style.format(
+            _bg_color_frame=ApplicationColor.Grey200,
+            _label_color_muted=ApplicationColor.Grey600
+        ))
+
     def setup_data(self):
         self.set_xplan_version()
         self.set_validation_options()
@@ -92,6 +123,9 @@ class CommonConfigPage(SettingsPage):
             self.ui.export_path_edit.setText('referenzen/')
         else:
             self.ui.export_path_edit.setText(export_ref_path)
+
+        self.ui.export_name_schema_edit.setText(QgsConfig.xplan_export_filename_schema())
+        self.update_export_name_preview()
 
     def closeEvent(self, event: QCloseEvent):
         self.ui.status_label.hide()
@@ -145,6 +179,7 @@ class CommonConfigPage(SettingsPage):
         )
         QgsConfig.set_geometry_validation_config(validation_config)
         QgsConfig.set_auto_replace_attribute_form(self.ui.checkbox_open_xplan_featureform.isChecked())
+        QgsConfig.set_xplan_export_filename_schema(self.ui.export_name_schema_edit.text())
 
     def edit_xplan24_item(self, index):
         account = index.data(Qt.ItemDataRole.DisplayRole)
@@ -177,6 +212,38 @@ class CommonConfigPage(SettingsPage):
 
         QgsConfig.set_xplan24_accounts(model._accounts)
         self.ui.xplan24_page_stack.setCurrentIndex(0)
+
+    def export_name_preset_toggled(self, clicked_button: QAbstractButton):
+        export_name_template = self.ui.export_name_schema_edit.text()
+        preset_prop = clicked_button.property("preset")
+        if preset_prop == 'default':
+            export_name_template = '{name}'
+        if preset_prop == 'xplanbox':
+            export_name_template = 'xplan'
+        elif preset_prop == 'by':
+            export_name_template = '{ags}_{planArt}_{nummer}_{name}'
+
+        self.ui.export_name_schema_edit.setText(export_name_template)
+        self.update_export_name_preview()
+
+    def update_export_name_preview(self):
+        schema = self.ui.export_name_schema_edit.text()
+
+        example_values = {
+            "name": "Wiesenstraße",
+            "nummer": "2026-001",
+            "ags": "09162000",
+            "datum": "2024-05-21",
+            "version": "5.3",
+            "planArt": "BP",
+        }
+
+        filename = schema
+
+        for key, value in example_values.items():
+            filename = filename.replace(f"{{{key}}}", value)
+
+        self.ui.label_preview_value.setText(f"{filename}.gml")
 
 
 # --- Custom XPlan24 View Widget ---

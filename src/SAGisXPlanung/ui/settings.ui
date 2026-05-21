@@ -74,7 +74,7 @@
             <x>0</x>
             <y>0</y>
             <width>441</width>
-            <height>499</height>
+            <height>664</height>
            </rect>
           </property>
           <property name="sizePolicy">
@@ -141,6 +141,145 @@
               </item>
               <item row="4" column="1">
                <widget class="QComboBox" name="cbXPlanVersion"/>
+              </item>
+              <item row="5" column="0" colspan="2">
+               <layout class="QVBoxLayout" name="verticalLayout_10">
+                <property name="topMargin">
+                 <number>10</number>
+                </property>
+                <item>
+                 <widget class="QLabel" name="label_16">
+                  <property name="text">
+                   <string>Schema für XPlanGML-Dateiname</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLineEdit" name="export_name_schema_edit"/>
+                </item>
+                <item>
+                 <widget class="QFrame" name="filename_preview">
+                  <property name="frameShape">
+                   <enum>QFrame::NoFrame</enum>
+                  </property>
+                  <property name="frameShadow">
+                   <enum>QFrame::Plain</enum>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_12">
+                   <item>
+                    <widget class="QLabel" name="label_preview_name">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="text">
+                      <string>Vorschau:</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="label_preview_value">
+                     <property name="text">
+                      <string>NameDesPlans.gml</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_18">
+                  <property name="text">
+                   <string>Vorlagen</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <item>
+                   <widget class="QPushButton" name="pushButton">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Standard</string>
+                    </property>
+                    <property name="class" stdset="0">
+                     <string>presetButton</string>
+                    </property>
+                    <property name="preset" stdset="0">
+                     <string>default</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">export_name_preset_group</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_2">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>XPlanBox/XPlanValidator</string>
+                    </property>
+                    <property name="class" stdset="0">
+                     <string>presetButton</string>
+                    </property>
+                    <property name="preset" stdset="0">
+                     <string>xplanbox</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">export_name_preset_group</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_3">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="text">
+                     <string>Bayern</string>
+                    </property>
+                    <property name="class" stdset="0">
+                     <string>presetButton</string>
+                    </property>
+                    <property name="preset" stdset="0">
+                     <string>by</string>
+                    </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">export_name_preset_group</string>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_6">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
               </item>
              </layout>
             </widget>
@@ -238,17 +377,17 @@
               <string>Objektformulare und Aktionen</string>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="0" column="0">
-               <widget class="QCheckBox" name="checkbox_open_xplan_featureform">
-                <property name="text">
-                 <string>Attributdialog durch SAGis XPlanung ersetzen</string>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="1">
                <widget class="QToolButton" name="info_open_featureform">
                 <property name="text">
                  <string>...</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="checkbox_open_xplan_featureform">
+                <property name="text">
+                 <string>Attributdialog durch SAGis XPlanung ersetzen</string>
                 </property>
                </widget>
               </item>
@@ -909,5 +1048,6 @@
  <connections/>
  <buttongroups>
   <buttongroup name="validation__option_buttongroup"/>
+  <buttongroup name="export_name_preset_group"/>
  </buttongroups>
 </ui>
