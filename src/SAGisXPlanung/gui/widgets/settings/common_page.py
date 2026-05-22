@@ -9,6 +9,7 @@ from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxL
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
 
 from SAGisXPlanung import BASE_DIR, XPlanVersion
+from SAGisXPlanung.core.export_filename_resolver import ExportFilenameResolver
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter, HighlightRowProxyStyle
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QStringInput
@@ -40,7 +41,12 @@ QPushButton[class="presetButton"]:hover {{
 QPushButton[class="presetButton"]:pressed {{
     background: #EBEBEB;
 }}
+
+QToolButton {{
+    border: 0px;
+}}
 """
+
 
 class CommonConfigPage(SettingsPage):
     def __init__(self, parent=None):
@@ -82,15 +88,6 @@ class CommonConfigPage(SettingsPage):
 
         self.set_validation_options()
         self.ui.checkbox_open_xplan_featureform.setChecked(QgsConfig.auto_replace_attribute_form())
-
-        button_style = '''
-            QToolButton {
-                border: 0px;
-            }
-        '''
-        self.ui.validation_options_group.setStyleSheet(button_style)
-        self.ui.xplan24_group.setStyleSheet(button_style)
-        self.ui.attribute_form_group.setStyleSheet(button_style)
 
         self.ui.xplan24_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
@@ -229,21 +226,17 @@ class CommonConfigPage(SettingsPage):
     def update_export_name_preview(self):
         schema = self.ui.export_name_schema_edit.text()
 
-        example_values = {
-            "name": "Wiesenstraße",
-            "nummer": "2026-001",
-            "ags": "09162000",
-            "datum": "2024-05-21",
-            "version": "5.3",
-            "planArt": "BP",
-        }
+        class PreviewGemeinde:
+            ags = "09162000"
+            gemeindeName = "München"
 
-        filename = schema
+        class BP_PreviewPlan:
+            name = "Wiesenstraße"
+            nummer = "2026-001"
+            gemeinde = [PreviewGemeinde()]
 
-        for key, value in example_values.items():
-            filename = filename.replace(f"{{{key}}}", value)
-
-        self.ui.label_preview_value.setText(f"{filename}.gml")
+        preview = ExportFilenameResolver.render(BP_PreviewPlan(), schema)
+        self.ui.label_preview_value.setText(f"{preview}.gml")
 
 
 # --- Custom XPlan24 View Widget ---

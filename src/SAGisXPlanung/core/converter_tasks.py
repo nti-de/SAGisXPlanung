@@ -15,6 +15,7 @@ from SAGisXPlanung.GML.GMLReader import GMLReader
 from SAGisXPlanung.GML.GMLWriter import GMLWriter
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.config import export_version, QgsConfig
+from SAGisXPlanung.core.export_filename_resolver import ExportFilenameResolver
 
 logger = logging.getLogger(__name__)
 
@@ -42,11 +43,9 @@ class ActionCanceledException(Exception):
 async def export_action(parent: QWidget, plan_xid: str, out_file_format: str = 'gml') -> str:
     default_dir = QgsConfig.last_export_directory()
 
-    with Session.begin() as session:
-        stmt = select(XP_Plan.name).where(XP_Plan.id == plan_xid)
-        plan_name = session.execute(stmt).scalar()
-
-    display_name = plan_name.replace("/", "-").replace('"', '\'')
+    with Session() as session:
+        plan = session.get(XP_Plan, plan_xid)
+        display_name = ExportFilenameResolver.render(plan)
     export_filename = QFileDialog.getSaveFileName(parent, 'Speicherort auswählen',
                                                   directory=f'{default_dir}{display_name}.{out_file_format}',
                                                   filter=f'*.{out_file_format}')
@@ -63,7 +62,7 @@ async def export_action(parent: QWidget, plan_xid: str, out_file_format: str = '
 
 
 def export_plan(out_file_format: str, export_filepath: str = None, plan_xid: str = None, raw=False):
-    with Session.begin() as session:
+    with Session() as session:
         plan = session.get(XP_Plan, plan_xid)
         writer = GMLWriter(plan, version=export_version())
 
