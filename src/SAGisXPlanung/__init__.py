@@ -12,7 +12,6 @@ from pathlib import Path
 from qgis.PyQt.QtCore import QCoreApplication, QT_VERSION_STR
 from qgis.core import Qgis, QgsApplication
 from qgis.PyQt.uic import compiler
-from sqlalchemy import MetaData
 
 import SAGisXPlanung
 from SAGisXPlanung.log_handler import setup_logger
@@ -113,6 +112,7 @@ SessionAsync = None
 
 def setup_sqlalchemy():
     try:
+        from sqlalchemy import MetaData
         from sqlalchemy.ext.asyncio import AsyncSession, AsyncAttrs
         from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
