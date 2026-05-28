@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 import re
@@ -12,17 +13,20 @@ from qgis.PyQt.QtSvg import QSvgRenderer
 from qgis.PyQt.QtCore import QAbstractTableModel, QModelIndex, Qt, QPointF, QRectF, pyqtSlot, pyqtSignal, QSize
 from qgis.PyQt.QtGui import QIcon, QColor, QPainter
 from qgis.PyQt.QtWidgets import (QTreeView, QAbstractItemView, QMenu, QAction, QLabel, QWidget, QVBoxLayout,
-                                 QHBoxLayout, QPushButton, QToolButton, QSpacerItem, QSizePolicy)
+                                 QHBoxLayout, QPushButton, QToolButton, QSpacerItem, QSizePolicy, QActionGroup,
+                                 QWidgetAction)
 from qgis.PyQt import sip
 
 from qgis.gui import QgsGeometryRubberBand
-from qgis.core import (QgsPolygon, QgsWkbTypes,  QgsLineString, QgsMultiLineString, QgsMultiPolygon, QgsGeometry,
-                       QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface)
+from qgis.core import (QgsPolygon, QgsWkbTypes, QgsPoint, QgsLineString, QgsMultiLineString, QgsMultiPolygon, QgsGeometry,
+                       QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface, QgsMultiPoint)
 from qgis.utils import iface
 
 from SAGisXPlanung import BASE_DIR, Session, PYQT5
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.core.geometry_validation import ValidationResult, VALIDATION_FUNCTIONS
+from SAGisXPlanung.config import QgsConfig
+from SAGisXPlanung.core.geometry_validation import ValidationResult, INTERNAL_VALIDATION_FUNCTIONS, \
+    validate_geometric_xplan_validator, XPlanValidationError
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import HighlightRowDelegate, HighlightRowProxyStyle, ApplicationColor, load_svg, \
     SVGButtonEventFilter
@@ -41,6 +45,12 @@ class ValidationState(Enum):
     PENDING = "Validierung..."
     ERROR = "Interner Fehler..."
     SUCCESS = "Keine Fehler gefunden"
+    VALIDATOR_ERROR = "Syntaktischer Fehler im XPlanGML. Keine Validierung möglich."
+
+
+class ValidationMethod(Enum):
+    INTERNAL = 1
+    XPLANVALIDATOR = 2
 
 
 def _error_detail_message(validation_result: ValidationResult) -> str:
@@ -76,6 +86,18 @@ class ValidationWidget(QWidget):
         color: {_label_color_foreground};
         background-color: {_bg_color_hover};
     }}
+    QToolButton::menu-indicator {{
+        image: none;
+    }}
+    QToolButton[objectName="menu_settings_button"] {{
+        border: none;
+        padding: 5px;
+        border-radius: 5px;
+    }}
+    QToolButton[objectName="menu_settings_button"]:hover {{
+        color: {_label_color_foreground};
+        background-color: {_bg_color_hover};
+    }}
     '''
 
     fill_geometric_completed = pyqtSignal(list)  # List[XPlanungItem]
@@ -86,6 +108,13 @@ class ValidationWidget(QWidget):
 
         self.plan_xid = None
         self.plan_type = None
+
+        validation_settings_str = QgsConfig.geometry_validation_settings()
+        if validation_settings_str is not None:
+            validation_settings = json.loads(validation_settings_str)
+            self.validation_method = ValidationMethod(validation_settings.get('validation_method'))
+        else:
+            self.validation_method = ValidationMethod.INTERNAL
 
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -104,7 +133,7 @@ class ValidationWidget(QWidget):
         self._menu_action_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self._menu_action_button.setArrowType(Qt.ArrowType.DownArrow)
         self._menu_action_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
-        self._menu_action_button.setStyleSheet('QToolButton::menu-indicator { image: none; }')
+        self._menu_action_button.setStyleSheet('')
         self._actions_menu = QMenu(self._menu_action_button)
         self._actions_menu.setToolTipsVisible(True)
         layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'), color=ApplicationColor.Tertiary)
@@ -117,10 +146,52 @@ class ValidationWidget(QWidget):
         self._actions_menu.addSeparator()
         self._actions_menu.addAction(refresh_icon, 'Zurücksetzen', self.reset_validation)
         self._menu_action_button.setMenu(self._actions_menu)
+
+        self._menu_settings_button = QToolButton()
+        self._menu_settings_button.setObjectName('menu_settings_button')
+        self._menu_settings_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self._menu_settings_button.setArrowType(Qt.ArrowType.NoArrow)
+        settings_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'), color=ApplicationColor.Tertiary)
+        self._menu_settings_button.setIcon(settings_icon)
+        self._settings_menu = QMenu(self._menu_settings_button)
+        self._settings_menu.setToolTipsVisible(True)
+        title_action = QWidgetAction(self._settings_menu)
+        label = QLabel("Validierungsmethode")
+        label.setStyleSheet("""
+            QLabel {
+                font-weight: bold;
+                padding: 4px 8px;
+            }
+        """)
+        title_action.setDefaultWidget(label)
+        self._settings_menu.addAction(title_action)
+        self._settings_menu.addSeparator()
+        self.validation_method_action_group = QActionGroup(self._settings_menu)
+        self.validation_method_action_group.setExclusive(True)
+        internal_validation_action = self.validation_method_action_group.addAction(
+            self._settings_menu.addAction("Intern")
+        )
+        internal_validation_action.setObjectName('internal_validation_action')
+        internal_validation_action.setCheckable(True)
+        xplan_validation_action = self.validation_method_action_group.addAction(
+            self._settings_menu.addAction("XPlanValidator")
+        )
+        xplan_validation_action.setCheckable(True)
+        xplan_validation_action.setObjectName('xplan_validation_action')
+        if self.validation_method == ValidationMethod.XPLANVALIDATOR:
+            xplan_validation_action.setChecked(True)
+        else:
+            internal_validation_action.setChecked(True)
+
+        self._settings_menu.addActions(self.validation_method_action_group.actions())
+        self.validation_method_action_group.triggered.connect(self.on_validation_method_changed)
+        self._menu_settings_button.setMenu(self._settings_menu)
+
         self._header_layout.addWidget(self._validation_result_label)
         self._header_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         self._header_layout.addWidget(self._menu_action_button)
         self._header_layout.addWidget(self._validation_start_button)
+        self._header_layout.addWidget(self._menu_settings_button)
         self._layout.addLayout(self._header_layout)
 
         self._validation_result_view = ValidationTreeView()
@@ -151,6 +222,15 @@ class ValidationWidget(QWidget):
             _bg_color_hover=ApplicationColor.Grey300
         ))
 
+    def on_validation_method_changed(self, action: QAction):
+        if action.objectName() == 'xplan_validation_action':
+            self.validation_method = ValidationMethod.XPLANVALIDATOR
+        else:
+            self.validation_method = ValidationMethod.INTERNAL
+        QgsConfig.set_geometry_validation_settings(json.dumps({
+            "validation_method": self.validation_method.value
+        }))
+
     def set_plan_info(self, plan_xid: str, plan_type: type):
         self.reset_validation()
 
@@ -165,16 +245,20 @@ class ValidationWidget(QWidget):
 
     @qasync.asyncSlot()
     async def start_validation(self):
-        async with loading_animation(self):
+        async with loading_animation(self) as load_animation:
 
             self._validation_start_button.setEnabled(False)
             self._validation_result_label.setText('')
             self._validation_result_view.clear()
 
             internal_error = False
+            validator_syntactic_error = False
 
             try:
-                await asyncio.to_thread(self.validate_plan_geometric)
+                await asyncio.to_thread(self.validate_plan_geometric, load_animation.update_text)
+            except XPlanValidationError as e:
+                validator_syntactic_error = True
+                logger.error(e)
             except Exception as e:
                 internal_error = True
                 logger.error(e)
@@ -183,6 +267,9 @@ class ValidationWidget(QWidget):
                 if internal_error:
                     self._validation_result_view.clear()
                     self._validation_result_view.set_validation_state(ValidationState.ERROR)
+                if validator_syntactic_error:
+                    self._validation_result_view.clear()
+                    self._validation_result_view.set_validation_state(ValidationState.VALIDATOR_ERROR)
                 elif error_count == 0:
                     self._validation_result_view.set_validation_state(ValidationState.SUCCESS)
                 else:
@@ -204,7 +291,7 @@ class ValidationWidget(QWidget):
                 xplan_items = await asyncio.to_thread(plan.enforceFlaechenschluss)
             self.fill_geometric_completed.emit(xplan_items)
 
-    def validate_plan_geometric(self):
+    def validate_plan_geometric(self, set_status):
         """
         Validate geometric correctness of the opened plan
         Tests for:
@@ -214,9 +301,13 @@ class ValidationWidget(QWidget):
         """
         short_plan_type = str(self.plan_type.__name__[:2]).lower()
 
-        for func in VALIDATION_FUNCTIONS:
-            validation_results = func(self.plan_xid, short_plan_type)
+        if self.validation_method == ValidationMethod.XPLANVALIDATOR:
+            validation_results = validate_geometric_xplan_validator(self.plan_xid, set_status)
             self._validation_result_view.add_result_items(validation_results)
+        else:
+            for func in INTERNAL_VALIDATION_FUNCTIONS:
+                validation_results = func(self.plan_xid, short_plan_type)
+                self._validation_result_view.add_result_items(validation_results)
 
     @qasync.asyncSlot()
     async def crop_plan_to_content(self):
@@ -227,7 +318,7 @@ class ValidationResultModel(QAbstractTableModel):
     def __init__(self, results: List[ValidationResult] = None, parent=None):
         super().__init__(parent)
         self.results = results or []
-        self.headers = ["Fläche", "Fehler"]  # Column headers
+        self.headers = ["Objekt", "Fehler"]  # Column headers
 
     def rowCount(self, parent=QModelIndex()):
         return len(self.results)
@@ -296,6 +387,7 @@ class ValidationTreeView(QTreeView):
 
         self.icon_paths = {
             ValidationState.ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
+            ValidationState.VALIDATOR_ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
             ValidationState.SUCCESS: os.path.join(BASE_DIR, 'gui/resources/valid.svg'),
         }
 
@@ -347,7 +439,11 @@ class ValidationTreeView(QTreeView):
         # QgsGeometry::fromWkt does not work here and crashes QGIS -> has something to do with the wkt cache
         # but currently not able to figure the exact problem.
         wkt = item.geom_wkt.strip()
-        if re.match('LineString', wkt, re.I):
+        if re.match('Point', wkt, re.I):
+            geometry = QgsPoint()
+        elif re.match('MultiPoint', wkt, re.I):
+            geometry = QgsMultiPoint()
+        elif re.match('LineString', wkt, re.I):
             geometry = QgsLineString()
         elif re.match('MultiLineString', wkt, re.I):
             geometry = QgsMultiLineString()

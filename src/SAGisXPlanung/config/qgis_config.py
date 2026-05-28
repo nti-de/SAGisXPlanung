@@ -54,6 +54,7 @@ class QgsConfig:
     CORRECT_GEOMETRIES = 'plugins/xplanung/correct_geometries'
     CORRECT_GEOMETRIES_METHOD = 'plugins/xplanung/correct_geometries_method'
     NEXUS_SETTINGS = 'plugins/xplanung/nexus/settings'
+    GEOMETRY_VALIDATION_SETTINGS = 'plugins/xplanung/validation/settings'
     LAST_EXPORT_PATH = 'plugins/xplanung/last_export_dir'
     XPLAN_EXPORT_REFERENCE_PATH = 'plugins/xplanung/xplan_export_reference_path'
     LAST_SELECTED_PLAN = 'plugins/xplanung/last_selected_plan'
@@ -156,6 +157,16 @@ class QgsConfig:
     def set_nexus_settings(config_json: str):
         qs = QSettings()
         qs.setValue(QgsConfig.NEXUS_SETTINGS, config_json)
+
+    @staticmethod
+    def geometry_validation_settings() -> str:
+        qs = QSettings()
+        return qs.value(QgsConfig.GEOMETRY_VALIDATION_SETTINGS, None)
+
+    @staticmethod
+    def set_geometry_validation_settings(config_json: str):
+        qs = QSettings()
+        qs.setValue(QgsConfig.GEOMETRY_VALIDATION_SETTINGS, config_json)
 
     @staticmethod
     def last_export_directory() -> str:

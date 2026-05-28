@@ -30,7 +30,7 @@ SOFTWARE.
 import math
 from contextlib import asynccontextmanager
 
-from qgis.PyQt.QtCore import QRect, QTimer, Qt
+from qgis.PyQt.QtCore import QRect, QTimer, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter, QPaintEvent, QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import QWidget
 
@@ -60,6 +60,7 @@ async def loading_animation(widget, **kwargs):
 
 
 class WaitingSpinner(QWidget):
+    textChanged = pyqtSignal(str)
 
     def __init__(self, parent, centerOnParent=True, disableParentWhenSpinning=False,
                  modality=Qt.WindowModality.NonModal, roundness=100., opacity=None, fade=80., lines=20,
@@ -96,6 +97,11 @@ class WaitingSpinner(QWidget):
 
         self.setWindowModality(modality)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+
+        self.textChanged.connect(self.setText)
+
+    def update_text(self, text):
+        self.textChanged.emit(text)
 
     def paintEvent(self, e: QPaintEvent):
         self.updatePosition()

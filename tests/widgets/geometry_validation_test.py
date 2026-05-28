@@ -132,11 +132,11 @@ def test_validate_plan_geometric(monkeypatch, qtbot, make_result):
         return [make_result]
 
     monkeypatch.setattr(
-        "SAGisXPlanung.gui.widgets.geometry_validation.VALIDATION_FUNCTIONS",
+        "SAGisXPlanung.gui.widgets.geometry_validation.INTERNAL_VALIDATION_FUNCTIONS",
         [fake_validation],
     )
 
-    widget.validate_plan_geometric()
+    widget.validate_plan_geometric(lambda: None)
 
     assert widget._validation_result_view.item_count() == 1
 

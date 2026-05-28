@@ -1,20 +1,23 @@
 import logging
+import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
+from typing import List, Callable
 
-from sqlalchemy import text
+import requests
+from sqlalchemy import text, select, func
 
 from SAGisXPlanung import Session
-from SAGisXPlanung.XPlan.feature_types import XP_Plan
+from SAGisXPlanung.XPlan.feature_types import XP_Plan, XP_Objekt, XP_Bereich
 from SAGisXPlanung.config import table_name_to_class
+from SAGisXPlanung.core.converter_tasks import export_plan
 
 logger = logging.getLogger(__name__)
 
 GRID_TOLERANCE = 0.001
 
 
-class GeometryIntersectionType(Enum):
+class GeometryViolationType(Enum):
     """ Gibt an, welcher Grund einen Überschneidungsfehler hevorgerufen hat. """
 
     Planinhalt = 'Flächenschlussobjekt weist Überschneidung auf'
@@ -30,12 +33,12 @@ class ValidationResult:
     xtype: type
     error_msg: str = None
     geom_wkt: str = None
-    intersection_type: GeometryIntersectionType = None
+    intersection_type: GeometryViolationType = None
     other_xid: str = None
     other_xtype: type = None
 
     def __post_init__(self):
-        if self.intersection_type is not None:
+        if self.intersection_type is not None and self.error_msg is None:
             self.error_msg = self.intersection_type.value
         elif self.error_msg is None:
             self.error_msg = 'Fehler in der Geometrievalidierung'
@@ -89,7 +92,7 @@ def _validate_overlaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
 
         res = session.execute(stmt, {"plan_id": plan_id}).all()
         for row in res:
-            error_type = GeometryIntersectionType.FullyWithin if row.is_within else GeometryIntersectionType.Planinhalt
+            error_type = GeometryViolationType.FullyWithin if row.is_within else GeometryViolationType.Planinhalt
             validation_result = ValidationResult(
                 xid=str(row.a_xid),
                 xtype=table_name_to_class(row.a_type),
@@ -135,7 +138,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 xid=str(row.bereich_id),
                 xtype=table_name_to_class(row.bereich_type),
                 geom_wkt=row.wkt,
-                intersection_type=GeometryIntersectionType.Plan,
+                intersection_type=GeometryViolationType.Plan,
                 other_xid=str(row.plan_id),
                 other_xtype=table_name_to_class(row.plan_type)
             )
@@ -179,7 +182,7 @@ def _validate_within_bounds(plan_id, short_plan_type: str) -> List[ValidationRes
                 xid=str(row.a_xid),
                 xtype=table_name_to_class(row.a_type),
                 geom_wkt=row.wkt,
-                intersection_type=GeometryIntersectionType.Bereich,
+                intersection_type=GeometryViolationType.Bereich,
                 other_xid=str(row.bereich_id),
                 other_xtype=table_name_to_class(f'{short_plan_type}_bereich')
             )
@@ -303,14 +306,223 @@ def _validate_gaps(plan_id, short_plan_type: str) -> List[ValidationResult]:
                 xid=str(row.id),
                 xtype=XP_Plan,
                 geom_wkt=row.wkt,
-                intersection_type=GeometryIntersectionType.NotCovered
+                intersection_type=GeometryViolationType.NotCovered
             )
             result.append(validation_result)
 
         return result
 
 
-VALIDATION_FUNCTIONS = [
+FULLY_WITHIN_RE = re.compile(
+    r"gml id (?P<obj1>GML_[^\s]+).*gml id (?P<obj2>GML_[^\s]+) vollständig",
+    re.IGNORECASE,
+)
+
+NOT_IN_PLAN_RE = re.compile(
+    r"Objekt mit der gml id (?P<obj>GML_[^\s]+) liegt nicht vollständig im Geltungsbereich "
+    r"des Plans mit der gml id (?P<plan>GML_[^\s]+)",
+    re.IGNORECASE,
+)
+
+POINT_RE = re.compile(
+    r"\((?P<x>-?\d+(?:\.\d+)?)\s*,\s*(?P<y>-?\d+(?:\.\d+)?)\)"
+)
+
+FLAECHENSCHLUSS_RE = re.compile(
+    r"Flächenschlussobjekt mit der gml id (?P<obj>GML_[^\s]+)",
+    re.IGNORECASE,
+)
+
+GML_ID_RE = re.compile(r"GML_([A-Za-z0-9\-]+)")
+
+
+class XPlanValidationError(Exception):
+    pass
+
+
+def collect_xids(messages: list[str]) -> set[str]:
+    xids: set[str] = set()
+
+    for message in messages:
+        xids.update(GML_ID_RE.findall(message))
+
+    return xids
+
+
+def _strip_gml_prefix(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    return value[4:] if value.startswith("GML_") else value
+
+
+def _points_to_wkt(message: str) -> str | None:
+    matches = list(POINT_RE.finditer(message))
+
+    if not matches:
+        return None
+
+    points = [(match.group("x"),match.group("y")) for match in matches]
+
+    if len(points) == 1:
+        x, y = points[0]
+        return f"POINT({x} {y})"
+
+    multipoint = ",".join(f"({x} {y})" for x, y in points)
+    return f"MULTIPOINT({multipoint})"
+
+
+def _collect_xids(messages: list[str]) -> set[str]:
+    xids: set[str] = set()
+
+    for message in messages:
+        xids.update(GML_ID_RE.findall(message))
+
+    return xids
+
+
+def _resolve_type(type_lookup: dict[str, type], xid: str | None) -> type | None:
+    if xid is None:
+        return None
+
+    return type_lookup.get(xid)
+
+
+def _parse_geometric_message(message: str, type_lookup: dict[str, type]) -> ValidationResult:
+    match = FULLY_WITHIN_RE.search(message)
+    if match:
+        xid = _strip_gml_prefix(match.group("obj1"))
+        other_xid = _strip_gml_prefix(match.group("obj2"))
+        other_xtype = _resolve_type(type_lookup, other_xid)
+        stmt = select(func.ST_AsText(getattr(other_xtype, other_xtype.__geometry_column_name__))).filter_by(id=other_xid)
+        with Session() as session:
+            covered_wkt = session.execute(stmt).scalar_one()
+        return ValidationResult(
+            xid=xid,
+            xtype=_resolve_type(type_lookup, xid),
+            other_xid=other_xid,
+            other_xtype=other_xtype,
+            intersection_type=GeometryViolationType.FullyWithin,
+            geom_wkt=covered_wkt,
+            error_msg=message,
+        )
+
+    match = NOT_IN_PLAN_RE.search(message)
+    if match:
+        xid = _strip_gml_prefix(match.group("obj"))
+        other_xid = _strip_gml_prefix(match.group("plan"))
+        return ValidationResult(
+            xid=xid,
+            xtype=_resolve_type(type_lookup, xid),
+            other_xid=other_xid,
+            other_xtype=_resolve_type(type_lookup, other_xid),
+            intersection_type=GeometryViolationType.Bereich,
+            geom_wkt=_points_to_wkt(message),
+            error_msg=message,
+        )
+
+    if "Lücke" in message:
+        match = FLAECHENSCHLUSS_RE.search(message)
+
+        xid = _strip_gml_prefix(match.group("obj")) if match else None
+
+        return ValidationResult(
+            xid=xid,
+            xtype=_resolve_type(type_lookup, xid),
+            intersection_type=GeometryViolationType.NotCovered,
+            geom_wkt=_points_to_wkt(message),
+            error_msg=message,
+        )
+
+    if "Flächenschlussbedingung" in message:
+        match = FLAECHENSCHLUSS_RE.search(message)
+
+        xid = _strip_gml_prefix(match.group("obj")) if match else None
+
+        return ValidationResult(
+            xid=xid,
+            xtype=_resolve_type(type_lookup, xid),
+            intersection_type=GeometryViolationType.Planinhalt,
+            geom_wkt=_points_to_wkt(message),
+            error_msg=message,
+        )
+
+    unknown_xid = None
+
+    ids = GML_ID_RE.findall(message)
+    if ids:
+        unknown_xid = ids[0]
+
+    return ValidationResult(
+        xid=unknown_xid,
+        xtype=_resolve_type(type_lookup, unknown_xid),
+        error_msg=message,
+    )
+
+
+def _build_type_lookup(session, xids: set[str]) -> dict[str, type]:
+    lookup: dict[str, type] = {}
+
+    for obj in session.scalars(select(XP_Objekt).where(XP_Objekt.id.in_(xids))):
+        lookup[str(obj.id)] = type(obj)
+
+    for bereich in session.scalars(select(XP_Bereich).where(XP_Bereich.id.in_(xids))):
+        lookup[str(bereich.id)] = type(bereich)
+
+    for plan in session.scalars(select(XP_Plan).where(XP_Plan.id.in_(xids))):
+        lookup[str(plan.id)] = type(plan)
+
+    return lookup
+
+
+def validate_geometric_xplan_validator(plan_id, set_status: Callable) -> List[ValidationResult]:
+    set_status('XPlanGML erstellen...')
+    gml_data = export_plan(out_file_format="gml", plan_xid=plan_id, raw=True)
+
+    headers = {"X-Filename": 'xplan.gml', 'Content-Type': 'application/gml+xml'}
+    query_params = {
+        "name": 'validation',
+        "skipSemantisch": 'true',
+        "skipGeometrisch": 'false',
+        "skipFlaechenschluss": 'false',
+        "skipGeltungsbereich": 'false',
+        "skipLaufrichtung": 'false',
+        "profiles": ''
+    }
+
+    set_status('XPlanGML hochladen und validieren...')
+    upload_url = "https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate"
+    r = requests.post(upload_url, headers=headers, data=gml_data.decode('utf-8'), params=query_params, timeout=10)
+    r.raise_for_status()
+
+    result_json = r.json()
+    syntactic = result_json.get("validationResult", {}).get("syntaktisch", {})
+
+    if not syntactic.get("valid", True):
+        messages = syntactic.get("messages", [])
+        raise XPlanValidationError("XPlan validator reported syntactic errors:\n"+ "\n".join(messages))
+
+    geometric = result_json.get("validationResult", {}).get("geometrisch", {})
+
+    messages = [
+        *geometric.get("errors", []),
+        *geometric.get("warnings", []),
+    ]
+
+    xids = _collect_xids(messages)
+
+    with Session() as session:
+        type_lookup = _build_type_lookup(session=session, xids=xids)
+
+    missing = xids - set(type_lookup.keys())
+    if missing:
+        logger.debug(f"Unknown XPlan object ids returned by validator {missing}")
+
+    return [_parse_geometric_message(message, type_lookup) for message in messages]
+
+
+
+INTERNAL_VALIDATION_FUNCTIONS = [
     _validate_geometry_valid,
     _validate_within_bounds,
     _validate_overlaps,

@@ -18,7 +18,7 @@ from SAGisXPlanung.XPlan.feature_types import XP_Plan
 
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
 from SAGisXPlanung.gui.XPPlanDetailsDialog import XPPlanDetailsDialog
-from SAGisXPlanung.core.geometry_validation import GeometryIntersectionType, ValidationResult
+from SAGisXPlanung.core.geometry_validation import GeometryViolationType, ValidationResult
 
 
 @pytest.fixture()
