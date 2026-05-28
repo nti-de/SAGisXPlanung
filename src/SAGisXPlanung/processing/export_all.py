@@ -5,6 +5,7 @@ from qgis.core import (QgsProcessingAlgorithm, QgsProcessingParameterFolderDesti
 
 from SAGisXPlanung import Session
 from SAGisXPlanung.GML.GMLWriter import GMLWriter
+from SAGisXPlanung.core.export_filename_resolver import ExportFilenameResolver
 from SAGisXPlanung.utils import CLASSES
 
 
@@ -131,9 +132,9 @@ class ExportAllAlgorithm(QgsProcessingAlgorithm):
             for i, plan in enumerate(all_plans):
                 try:
                     writer = GMLWriter(plan)
-                    file_name = plan.name.replace("/", "-").replace('"', '\'')
+                    file_name = ExportFilenameResolver.render(plan)
                     if export_format == 0:
-                        buffer = writer.toArchive()
+                        buffer = writer.toArchive(gml_file_name=file_name)
                         with open(f'{output_path}/{file_name}.zip', 'wb') as f:
                             f.write(buffer.getvalue())
                     elif export_format == 1:

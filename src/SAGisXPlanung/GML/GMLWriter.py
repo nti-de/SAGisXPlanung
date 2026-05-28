@@ -63,7 +63,7 @@ class GMLWriter:
         xml = etree.tostring(etree.ElementTree(self.root), pretty_print=True, xml_declaration=True, encoding='UTF-8', standalone=True)
         return xml
 
-    def toArchive(self) -> BytesIO:
+    def toArchive(self, gml_file_name: str = None) -> BytesIO:
         path_prefix = QgsConfig.xplan_export_reference_path()
 
         zip_buffer = BytesIO()
@@ -79,7 +79,7 @@ class GMLWriter:
                     elm.text = f'{path_prefix}{PurePath(elm.text).name}'
                     zip_file.writestr(elm.text, file)
 
-            file_name = self.plan_name.replace("/", "-").replace('"', '\'')
+            file_name = gml_file_name or self.plan_name.replace("/", "-").replace('"', '\'')
             zip_file.writestr(f"{file_name}.gml", self.toGML())
 
         return zip_buffer

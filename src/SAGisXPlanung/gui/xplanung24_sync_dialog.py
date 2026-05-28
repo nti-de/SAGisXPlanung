@@ -490,7 +490,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         headers = {"Authorization": api_key}
 
         for plan_id, plan_name in self.selected_plans.items():
-            gml_data = export_plan(out_file_format="gml", plan_xid=plan_id, raw=True)
+            gml_data = export_plan(out_file_format="gml", plan_xid=plan_id)
 
             files = {
                 "gml": (f"{plan_name}.gml", gml_data, "application/gml+xml")

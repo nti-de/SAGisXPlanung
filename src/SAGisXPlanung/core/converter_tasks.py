@@ -56,28 +56,30 @@ async def export_action(parent: QWidget, plan_xid: str, out_file_format: str = '
     QgsConfig.set_last_export_directory(f'{export_path.parent}\\')
 
     loop = asyncio.get_running_loop()
-    await loop.run_in_executor(None, export_plan, out_file_format, export_filename[0], plan_xid)
+    await loop.run_in_executor(None, export_plan, out_file_format, plan_xid, export_filename[0], display_name)
 
     return export_filename[0]
 
 
-def export_plan(out_file_format: str, export_filepath: str = None, plan_xid: str = None, raw=False):
+def export_plan(out_file_format: str, plan_xid: str, export_filepath: str = None, gml_file_name: str = None) -> bytes | None:
     with Session() as session:
         plan = session.get(XP_Plan, plan_xid)
         writer = GMLWriter(plan, version=export_version())
 
         if out_file_format == "gml":
             gml = writer.toGML()
-            if raw:
+            if export_filepath is None:
                 return gml
             with open(export_filepath, 'wb') as f:
                 f.write(gml)
         elif out_file_format == "zip":
-            archive = writer.toArchive()
-            if raw:
+            archive = writer.toArchive(gml_file_name=gml_file_name)
+            if export_filepath is None:
                 return archive.getvalue()
             with open(export_filepath, 'wb') as f:
                 f.write(archive.getvalue())
+        else:
+            raise ValueError(f'Unknown out_file_format {out_file_format}')
 
 
 def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int, int]], None], overwrite=False) -> ImportResult:
