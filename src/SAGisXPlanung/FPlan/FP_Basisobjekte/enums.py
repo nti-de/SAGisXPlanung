@@ -11,7 +11,7 @@ class FP_PlanArt(XPlanungEnumMixin, Enum):
     GemeinsamerFPlan = 2000
     RegFPlan = 3000
     FPlanRegPlan = 4000
-    SachlicherTeilplan = 8000
+    SachlicherTeilplan = 5000
     Sonstiges = 9999
 
 
