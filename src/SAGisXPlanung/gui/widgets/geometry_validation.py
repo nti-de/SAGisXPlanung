@@ -21,6 +21,8 @@ from qgis.gui import QgsGeometryRubberBand
 from qgis.core import (QgsPolygon, QgsWkbTypes, QgsPoint, QgsLineString, QgsMultiLineString, QgsMultiPolygon, QgsGeometry,
                        QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface, QgsMultiPoint)
 from qgis.utils import iface
+from requests import HTTPError
+from sqlalchemy.orm import load_only
 
 from SAGisXPlanung import BASE_DIR, Session, PYQT5
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
@@ -46,6 +48,7 @@ class ValidationState(Enum):
     ERROR = "Interner Fehler..."
     SUCCESS = "Keine Fehler gefunden"
     VALIDATOR_ERROR = "Syntaktischer Fehler im XPlanGML. Keine Validierung möglich."
+    HTTP_ERROR = "HTTP-Fehler beim Upload zum XPlanValidator"
 
 
 class ValidationMethod(Enum):
@@ -251,35 +254,28 @@ class ValidationWidget(QWidget):
             self._validation_result_label.setText('')
             self._validation_result_view.clear()
 
-            internal_error = False
-            validator_syntactic_error = False
+            validation_state = ValidationState.UNKNOWN
 
             try:
                 await asyncio.to_thread(self.validate_plan_geometric, load_animation.update_text)
             except XPlanValidationError as e:
-                validator_syntactic_error = True
+                validation_state = ValidationState.VALIDATOR_ERROR
+                logger.error(e)
+            except HTTPError as e:
+                validation_state = ValidationState.HTTP_ERROR
                 logger.error(e)
             except Exception as e:
-                internal_error = True
+                validation_state = ValidationState.ERROR
                 logger.error(e)
             finally:
                 error_count = self._validation_result_view.item_count()
-                if internal_error:
-                    self._validation_result_view.clear()
-                    self._validation_result_view.set_validation_state(ValidationState.ERROR)
-                if validator_syntactic_error:
-                    self._validation_result_view.clear()
-                    self._validation_result_view.set_validation_state(ValidationState.VALIDATOR_ERROR)
-                elif error_count == 0:
-                    self._validation_result_view.set_validation_state(ValidationState.SUCCESS)
-                else:
-                    self._validation_result_view.set_validation_state(ValidationState.UNKNOWN)
+                print(validation_state, error_count)
+                if validation_state == ValidationState.UNKNOWN and error_count == 0:
+                    validation_state = ValidationState.SUCCESS
+                self._validation_result_view.set_validation_state(validation_state)
 
                 self._validation_result_label.setText(f'{error_count} Fehler gefunden'
                                                       if error_count else 'Keine Fehler gefunden')
-                if error_count:
-                    pass
-                    # self.reset_label.setVisible(True)
                 self._validation_start_button.setEnabled(True)
                 self._footer_widget.show()
 
@@ -388,6 +384,7 @@ class ValidationTreeView(QTreeView):
         self.icon_paths = {
             ValidationState.ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
             ValidationState.VALIDATOR_ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
+            ValidationState.HTTP_ERROR: os.path.join(BASE_DIR, 'gui/resources/globe-x.svg'),
             ValidationState.SUCCESS: os.path.join(BASE_DIR, 'gui/resources/valid.svg'),
         }
 

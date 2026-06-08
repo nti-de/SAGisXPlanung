@@ -477,7 +477,7 @@ def _build_type_lookup(session, xids: set[str]) -> dict[str, type]:
 
 def validate_geometric_xplan_validator(plan_id, set_status: Callable) -> List[ValidationResult]:
     set_status('XPlanGML erstellen...')
-    gml_data = export_plan(out_file_format="gml", plan_xid=plan_id, raw=True)
+    gml_data = export_plan(out_file_format="gml", plan_xid=plan_id)
 
     headers = {"X-Filename": 'xplan.gml', 'Content-Type': 'application/gml+xml'}
     query_params = {
