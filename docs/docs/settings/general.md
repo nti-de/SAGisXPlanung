@@ -22,7 +22,63 @@ Auf der Startseite der Einstellungen lassen sich die folgenden allgemeinen Einst
             </div>
         </td>
     </tr>
+    <tr>
+        <th>Schema für XPlanGML-Dateiname</th>
+        <td markdown="span">
+            Definiert das Namensschema der beim Export erzeugten XPlanGML-Datei.
+            Der Dateiname kann aus festen Texten und Platzhaltern zusammengesetzt werden.
+            <div class="admonition example">
+                <p markdown="span"> 
+                    <b>Schema:</b>
+                    ```text
+                    {ags}_{planArt}_{nummer}_{name}
+                    ```
+                    <b>Aufgelöster Dateiname:</b>
+                    ```text
+                    09162000_BP_2026-001_Wiesenstraße.gml
+                    ```
+                </p>
+            </div>
 
+            <details markdown="span" class="note" open="open">
+                <summary>Verfügbare Platzhalter</summary>
+                <table>
+                    <tr>
+                        <th>Platzhalter</th>
+                        <th>Beschreibung</th>
+                    </tr>
+                    <tr>
+                        <td><code>{ags}</code></td>
+                        <td>Amtlicher Gemeindeschlüssel</td>
+                    </tr>
+                    <tr>
+                        <td><code>{gemeindeName}</code></td>
+                        <td>Name der Gemeinde</td>
+                    </tr>
+                    <tr>
+                        <td><code>{planArt}</code></td>
+                        <td>Art des Plans (z.&nbsp;B. BP, FP, RP)</td>
+                    </tr>
+                    <tr>
+                        <td><code>{nummer}</code></td>
+                        <td>Plannummer</td>
+                    </tr>
+                    <tr>
+                        <td><code>{name}</code></td>
+                        <td>Name des Plans</td>
+                    </tr>
+                    <tr>
+                        <td><code>{datum}</code></td>
+                        <td>Aktuelles Datum des Exports</td>
+                    </tr>
+                    <tr>
+                        <td><code>{version}</code></td>
+                        <td>XPlan-Version der XPlanGML-Datei</td>
+                    </tr>
+                </table>
+            </details>
+        </td>
+    </tr>
 </table>
 
 ## Validierung

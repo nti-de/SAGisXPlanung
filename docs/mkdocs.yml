@@ -89,11 +89,12 @@ nav:
   - Dokumentation:
     - Anwendungsfälle:
         - new-plan.md
+        - map-display.md
         - add-plancontent.md
         - plan-import.md
         - plan-export.md
         - multi-edit.md
-        - map-display.md
+        - text-contents.md
     - Elemente der Oberfläche:
         - elements/main-dialog.md
         - elements/plan-details.md

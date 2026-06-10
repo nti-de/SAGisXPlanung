@@ -54,6 +54,56 @@ Dies betrifft die folgenden Bedingungen:
     des Geltungsbereichs übereinstimmen. Es dürfen keine Überlappungen oder Lücken zwischen den Flächen auftreten und 
     keine Fläche darf den Umring des Geltungsbereichs übertreten.
 
+### Validierungsmethode
+
+Über das Zahnrad-Symbol kann die Methode für die Geometrieprüfung ausgewählt werden.
+
+<figure markdown="span">
+    ![Validierungsmethode auswählen](../assets/geometry-validation-method.png)
+</figure>
+
+<div class="grid cards" markdown>
+
+- **Interne Validierung**
+
+    ---
+
+    Die Standardmethode von SAGis XPlanung zur schnellen Prüfung von Geometriefehlern.
+
+    **Vorteile**
+
+    - Sehr schnelle Ausführung direkt im QGIS/PostGIS
+    - Fehler werden an gleicher Objekten zusammengefasst und dadurch übersichtlicher dargestellt
+    - Gut geeignet für die laufende Bearbeitung eines Plans
+
+    !!! warning "Hinweis"
+
+        Die Ergebnisse der internen Methode entstprechen den Vorgaben des Standards XPlanung, dennoch stimmen Ergebnisse 
+        nicht zwangsläufig mit dem offiziellen Ergebnis des XPlanValidators überein, da ein anderer Prüfalgorithmus verwendet wird.
+
+- **XPlanValidator**
+
+    ---
+
+    Offizielle Validierungsmethode der **XLeitstelle** durch Anbindung der Validator-API.
+
+    **Vorteile**
+
+    - Identische Fehlerergebnisse wie im offiziellen Validierungsprotokoll
+
+    **Einschränkungen**
+
+    - Langsamer als die interne Prüfung
+    - Fehlermeldungen sind teilweise schwerer räumlich zu interpretieren
+
+</div>
+
+!!! tip "Empfohlene Verwendung"
+
+    Verwenden Sie die **interne Validierung** während der Bearbeitung eines Plans für schnelle Rückmeldungen.
+    Vor der Abgabe oder Veröffentlichung eines Plans empfiehlt sich zusätzlich eine Prüfung mit dem
+    **XPlanValidator**, um die offiziellen Validierungsergebnisse zu erhalten.
+
 
 <div class="procedure">
     <h4>Ausführen der Geometrieprüfung</h4>
