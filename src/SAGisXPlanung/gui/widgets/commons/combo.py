@@ -96,22 +96,6 @@ class SearchableComboBox(QComboBox):
         self.completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
         self.setCompleter(self.completer)
 
-        icon_path = Path(BASE_DIR, 'gui', 'resources', 'arrow_drop_down.svg').as_posix()
-        self.setStyleSheet(f"""
-            QComboBox::drop-down {{
-                subcontrol-origin: padding;
-                subcontrol-position: top right;
-                width: 30px;      
-                border: none;        
-                background: transparent;
-            }}
-            QComboBox::down-arrow {{
-                image: url({icon_path});
-                width: 24px; 
-                height: 24px;
-            }}
-        """)
-
         view_sheet_style = """      
             QAbstractItemView { 
                 background-color: white;
@@ -167,8 +151,11 @@ class SearchableComboBox(QComboBox):
         # https://stackoverflow.com/questions/13308341/qcombobox-abstractitemviewitem
         self.setItemDelegate(QStyledItemDelegate())
 
+        self.setMinimumContentsLength(15)
+        self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+
         # connect signals
-        self.lineEdit().textEdited[str].connect(self.filter_model.setFilterFixedString)
+        self.lineEdit().textEdited[str].connect(self.on_text_edited)
         self.completer.activated.connect(self.on_completer_activated)
 
     def on_completer_activated(self, text):
@@ -176,6 +163,13 @@ class SearchableComboBox(QComboBox):
             index = self.findText(text)
             self.setCurrentIndex(index)
             self.activated[str].emit(self.itemText(index))
+
+    def on_text_edited(self, text):
+        self.filter_model.setFilterFixedString(text)
+
+        selected_text = self.itemText(self.currentIndex())
+        if self.currentIndex() > 0 and text != selected_text:
+            self.setCurrentIndex(-1)
 
     def setModel(self, model):
         super(SearchableComboBox, self).setModel(model)

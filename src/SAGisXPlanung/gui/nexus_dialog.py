@@ -14,10 +14,11 @@ from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 from qgis.PyQt.QtCore import QAbstractTableModel, Qt, QModelIndex, QItemSelection, pyqtSlot, pyqtSignal
 from qgis.core import Qgis
 from qgis.utils import iface
-from sqlalchemy import select, inspect, func, delete, text
+from sqlalchemy import select, inspect, func, delete, text, or_
 from sqlalchemy.orm import selectin_polymorphic, defer, load_only, with_polymorphic
 
 from SAGisXPlanung import Session, BASE_DIR, SessionAsync
+from SAGisXPlanung.XPlan.data_types import XP_Gemeinde
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.converter_tasks import export_action, ActionCanceledException
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
@@ -122,7 +123,7 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.nexus_search.setPlaceholderText('Suchen...')
         self.nexus_search.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.nexus_search.setMaximumWidth(360)
-        self.nexus_search.editingFinished.connect(self.on_search_entered)
+        self.nexus_search.textEdited.connect(self.on_search_entered)
 
         self.button_reload.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'),
                                             color=ApplicationColor.Tertiary))
@@ -172,8 +173,17 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.combo_plan_type.addItem("Alle Pläne", PLAN_BASE_TYPES)
         for plan_base_type in PLAN_BASE_TYPES:
             self.combo_plan_type.addItem(plan_base_type.__name__, [plan_base_type])
-
         self.combo_plan_type.currentIndexChanged.connect(self.on_plan_type_filter_changed)
+
+        with Session() as session:
+            stmt = select(XP_Gemeinde.id, XP_Gemeinde.gemeindeName).order_by(XP_Gemeinde.gemeindeName)
+            query_result = session.execute(stmt).all()
+            for row in query_result:
+                self.combo_gemeinde.addItem(row[1], row[0])
+
+        self.combo_gemeinde.lineEdit().setPlaceholderText("Gemeinde filtern...")
+        self.combo_gemeinde.setCurrentIndex(-1)
+        self.combo_gemeinde.currentIndexChanged.connect(self.on_plan_type_filter_changed)
 
         # ------------- LOGIC -----------------
         self.current_page_index = 0
@@ -255,6 +265,16 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         if len(filter_class) == 1:  # filter for specific plan type
             query = query.where(XP_Plan.type == str(filter_class[0].__name__).lower())
 
+        filter_gemeinde = self.combo_gemeinde.currentData()
+        if filter_gemeinde is not None:
+            conditions = [
+                cls.gemeinde.any(XP_Gemeinde.id == filter_gemeinde)
+                for cls in PLAN_BASE_TYPES
+                if hasattr(cls, "gemeinde")
+            ]
+            if conditions:
+                query = query.where(or_(*conditions))
+
         search_text = self.nexus_search.text()
         if search_text:
             query = query.where(text("_sa_search_col @@ to_tsquery('german', :s) ").bindparams(s=search_text))
@@ -270,14 +290,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                 pass
 
     def fetch_database(self, page: int = 0) -> (int, List[dict]):
-        with (Session.begin() as session):
-            count = session.execute(self._with_filter(select(func.count(XP_Plan.id)))).scalar_one()
-
-            max_per_page = self.table_settings.max_entries_per_page
+        with Session() as session:
             xp_plan_poly = with_polymorphic(XP_Plan, PLAN_BASE_TYPES)
+            count = session.execute(self._with_filter(select(func.count(xp_plan_poly.id)))).scalar_one()
+
             stmt = self._with_filter(select(xp_plan_poly).options(
                 defer(getattr(xp_plan_poly, 'raeumlicherGeltungsbereich'))
             ))
+            max_per_page = self.table_settings.max_entries_per_page
             sort_by, sort_dir = self.table_settings.sort_column, self.table_settings.sort_order
             sort_attr = self._sort_attr(xp_plan_poly, sort_by)
             _order_by = getattr(sort_attr, sort_dir)()
