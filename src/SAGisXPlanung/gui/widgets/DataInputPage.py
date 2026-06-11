@@ -166,6 +166,7 @@ class DataInputPage(QtWidgets.QScrollArea):
 
         if isinstance(mapper_property, RelationshipProperty):
             form_type = mapper_property.info.get('form-type')
+            link_type = mapper_property.info.get('link-type')
             label_display_name, tooltip = cls.relation_prop_display((attr_name, mapper_property))
             label = QtWidgets.QLabel(label_display_name)
             label.setObjectName(attr_name)
@@ -183,11 +184,32 @@ class DataInputPage(QtWidgets.QScrollArea):
 
             # one-to-many relation, one-to-one relation (defined by `uselist=False`)
             else:
-                widget = QtWidgets.QPushButton("Hinzufügen")
-                widget.clicked.connect(lambda state, c=mapper_property.mapper.class_,
-                                              u=mapper_property.uselist, a=attr_name:
-                                       self.onRelationButtonClicked(c, u, a))
-                return label, widget
+                if link_type != 'abstract':
+                    button = QtWidgets.QPushButton("Hinzufügen")
+                    button.clicked.connect(lambda state, c=mapper_property.mapper.class_,
+                                                  u=mapper_property.uselist, a=attr_name:
+                                           self.onRelationButtonClicked(c, u, a))
+                else:
+                    button = QtWidgets.QToolButton()
+                    button.setText("Hinzufügen")
+                    menu = QtWidgets.QMenu(button)
+
+                    # collect all concrete subclasses
+                    for subclass in mapper_property.mapper.class_.__subclasses__():
+                        action = menu.addAction(subclass.__name__)
+
+                        action.triggered.connect(
+                            lambda checked=False,
+                                   c=subclass,
+                                   u=mapper_property.uselist,
+                                   a=attr_name:
+                            self.onRelationButtonClicked(c, u, a)
+                        )
+
+                    button.setMenu(menu)
+                    button.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
+
+                return label, button
 
         # base_classes = [c for c in list(getmro(cls)) if issubclass(c, Base)]
         # cls = next(c for c in base_classes if
