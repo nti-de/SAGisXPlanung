@@ -3,6 +3,7 @@ import datetime
 import json
 import logging
 import os
+import re
 from operator import attrgetter
 from typing import List
 
@@ -277,9 +278,14 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
         search_text = self.nexus_search.text()
         if search_text:
-            query = query.where(text("_sa_search_col @@ to_tsquery('german', :s) ").bindparams(s=search_text))
+            tsquery = self._make_prefix_tsquery(search_text)
+            query = query.where(text("_sa_search_col @@ to_tsquery('german', :s) ").bindparams(s=tsquery))
 
         return query
+
+    def _make_prefix_tsquery(self, search_text: str) -> str:
+        terms = re.findall(r"\w+", search_text, flags=re.UNICODE)
+        return " & ".join(f"{term}:*" for term in terms)
 
     def _sort_attr(self, polymorphic, attr_name):
         for class_type in PLAN_BASE_TYPES:
