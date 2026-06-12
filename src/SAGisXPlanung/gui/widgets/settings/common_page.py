@@ -3,7 +3,7 @@ import os
 
 import qasync
 from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard, QFontDatabase
-from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent
+from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent, QSignalBlocker
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout,
                                  QApplication, QAbstractButton)
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
@@ -16,7 +16,7 @@ from SAGisXPlanung.gui.widgets.inputs.input_widgets import QStringInput
 from SAGisXPlanung.config import (QgsConfig, GeometryValidationConfig, GeometryCorrectionMethod, export_version,
                                   XPlanung24Account)
 
-from .basepage import SettingsPage
+from .basepage import SettingBinding, SettingsPage
 
 
 logger = logging.getLogger(__name__)
@@ -103,6 +103,8 @@ class CommonConfigPage(SettingsPage):
 
         self.ui.add_account_button.clicked.connect(self.on_add_xplan24account_clicked)
 
+        self.register_settings()
+
         # ------------- STYLE -----------------
         self.ui.label_preview_value.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
         self.ui.setStyleSheet(style.format(
@@ -124,19 +126,60 @@ class CommonConfigPage(SettingsPage):
         self.ui.export_name_schema_edit.setText(QgsConfig.xplan_export_filename_schema())
         self.update_export_name_preview()
 
-    def closeEvent(self, event: QCloseEvent):
+    def register_settings(self):
+        self.register_setting(
+            SettingBinding(
+                name='xplan_export_reference_path',
+                get_value=self.xplan_export_reference_path_value,
+                save_value=QgsConfig.set_xplan_export_reference_path
+            ),
+            self.ui.checkbox_ref_path.stateChanged,
+            self.ui.export_path_edit.textChanged
+        )
+        self.register_setting(
+            SettingBinding(
+                name='geometry_validation_config',
+                get_value=self.geometry_validation_config_value,
+                save_value=QgsConfig.set_geometry_validation_config
+            ),
+            self.ui.checkbox_clean_geometry.stateChanged,
+            self.ui.radiobutton_preserve_topology.toggled,
+            self.ui.radiobutton_repeated_points.toggled
+        )
+        self.register_setting(
+            SettingBinding(
+                name='auto_replace_attribute_form',
+                get_value=self.ui.checkbox_open_xplan_featureform.isChecked,
+                save_value=QgsConfig.set_auto_replace_attribute_form
+            ),
+            self.ui.checkbox_open_xplan_featureform.stateChanged
+        )
+        self.register_setting(
+            SettingBinding(
+                name='xplan_export_filename_schema',
+                get_value=self.ui.export_name_schema_edit.text,
+                save_value=QgsConfig.set_xplan_export_filename_schema
+            ),
+            self.ui.export_name_schema_edit.textChanged
+        )
+
+    def commit_changes(self):
         self.ui.status_label.hide()
         self.ui.status_label.setText('')
         self.ui.status_action.setText('')
 
-        self.save()
+        return super().commit_changes()
 
     @qasync.asyncSlot()
     async def on_xplan_version_changed(self):
-        QSettings().setValue(f"plugins/xplanung/export_version", self.ui.cbXPlanVersion.currentText())
+        QgsConfig.set_value_if_changed(f"plugins/xplanung/export_version", self.ui.cbXPlanVersion.currentText())
 
         # refresh attribute config when version changed
-        self.ui.tabs.widget(1).setup_data()
+        attribute_page = self.ui.tabs.widget(1)
+        if isinstance(attribute_page, SettingsPage):
+            attribute_page.load_settings_data()
+        else:
+            attribute_page.setup_data()
 
         # invalidate cache of export_version
         export_version.cache_clear()
@@ -154,7 +197,9 @@ class CommonConfigPage(SettingsPage):
         default_version = s.value(f"plugins/xplanung/export_version", '')
         index = self.ui.cbXPlanVersion.findText(str(default_version))
         if index >= 0:
+            blocker = QSignalBlocker(self.ui.cbXPlanVersion)
             self.ui.cbXPlanVersion.setCurrentIndex(index)
+            del blocker
 
     def set_validation_options(self):
         validation_config = QgsConfig.geometry_validation_config()
@@ -164,19 +209,22 @@ class CommonConfigPage(SettingsPage):
         else:
             self.ui.radiobutton_repeated_points.setChecked(True)
 
-    def save(self):
+    def xplan_export_reference_path_value(self):
         export_ref_path = ''
         if not self.ui.checkbox_ref_path.isChecked():
             export_ref_path = self.ui.export_path_edit.text()
-        QgsConfig.set_xplan_export_reference_path(export_ref_path)
+        return export_ref_path
 
-        validation_config = GeometryValidationConfig(
+    def geometry_validation_config_value(self):
+        return GeometryValidationConfig(
             correct_geometries=self.ui.checkbox_clean_geometry.isChecked(),
             correct_method=GeometryCorrectionMethod.PreserveTopology if self.ui.radiobutton_preserve_topology.isChecked() else GeometryCorrectionMethod.RigorousRemoval
         )
-        QgsConfig.set_geometry_validation_config(validation_config)
-        QgsConfig.set_auto_replace_attribute_form(self.ui.checkbox_open_xplan_featureform.isChecked())
-        QgsConfig.set_xplan_export_filename_schema(self.ui.export_name_schema_edit.text())
+
+    def save(self):
+        for binding in self._setting_bindings:
+            binding.dirty = True
+        return self.commit_changes()
 
     def edit_xplan24_item(self, index):
         account = index.data(Qt.ItemDataRole.DisplayRole)

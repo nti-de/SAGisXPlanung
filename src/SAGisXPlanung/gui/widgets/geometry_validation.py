@@ -269,7 +269,6 @@ class ValidationWidget(QWidget):
                 logger.error(e)
             finally:
                 error_count = self._validation_result_view.item_count()
-                print(validation_state, error_count)
                 if validation_state == ValidationState.UNKNOWN and error_count == 0:
                     validation_state = ValidationState.SUCCESS
                 self._validation_result_view.set_validation_state(validation_state)

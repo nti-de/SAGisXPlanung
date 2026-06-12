@@ -47,11 +47,14 @@ class Settings(QDialog, FORM_CLASS):
     def showEvent(self, e: QShowEvent):
         super(Settings, self).showEvent(e)
         for i in range(0, self.tabs.count()):
-            self.tabs.widget(i).setup_data()
+            tab = self.tabs.widget(i)
+            if isinstance(tab, SettingsPage):
+                tab.load_settings_data()
 
     def closeEvent(self, e: QCloseEvent):
-        super(Settings, self).closeEvent(e)
-
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
-            tab.closeEvent(e)
+            if isinstance(tab, SettingsPage):
+                tab.commit_changes()
+
+        super(Settings, self).closeEvent(e)

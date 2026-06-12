@@ -174,8 +174,7 @@ class XPlanung(QObject):
     @pyqtSlot()
     def run(self):
         if self.is_valid_db():
-            if self.first_start:
-                self.dockWidget.refresh_plans()
+            self.dockWidget.refresh_plans()
             self.dockWidget.show()
 
         # Only create GUI ONCE in callback, so that it will only load when the plugin is started

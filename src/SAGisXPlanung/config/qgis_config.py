@@ -18,6 +18,13 @@ def str2bool(v):
   return str(v).lower() in ("true", "1")
 
 
+def normalize_int(v):
+    try:
+        return int(v)
+    except (TypeError, ValueError):
+        return None
+
+
 class ConfigSaveException(Exception):
     """Exception for cases, where values could not be written to the config entry"""
     pass
@@ -61,6 +68,16 @@ class QgsConfig:
     XPLAN24_ACCOUNT = 'plugins/xplanung/xplan24_account'
     AUTO_REPLACE_ATTRIBUTE_FORM = 'plugins/xplanung/replace_attribute_form'
     XPLAN_EXPORT_FILE_NAME_SCHEMA = 'plugins/xplanung/xplan_export_filename_schema'
+
+    @staticmethod
+    def set_value_if_changed(settings_key: str, value, default=None, normalize=lambda v: v) -> bool:
+        qs = QSettings()
+        current = qs.value(settings_key, default)
+        if normalize(current) == normalize(value):
+            return False
+
+        qs.setValue(settings_key, value)
+        return True
 
     @staticmethod
     def remove_section(settings_key: str):
@@ -118,8 +135,11 @@ class QgsConfig:
         if not isinstance(xplan_class, str):
             xplan_class = xplan_class.__name__
 
-        qs = QSettings()
-        qs.setValue(f"{QgsConfig.STYLES}/{xplan_class}/{geometry_type}/layer_prio", layer_priority)
+        QgsConfig.set_value_if_changed(
+            f"{QgsConfig.STYLES}/{xplan_class}/{geometry_type}/layer_prio",
+            layer_priority,
+            normalize=normalize_int
+        )
 
     @staticmethod
     def connection_params() -> typing.Dict:
@@ -144,9 +164,16 @@ class QgsConfig:
 
     @staticmethod
     def set_geometry_validation_config(config: GeometryValidationConfig):
-        qs = QSettings()
-        qs.setValue(QgsConfig.CORRECT_GEOMETRIES, int(config.correct_geometries))
-        qs.setValue(QgsConfig.CORRECT_GEOMETRIES_METHOD, config.correct_method.value)
+        QgsConfig.set_value_if_changed(
+            QgsConfig.CORRECT_GEOMETRIES,
+            int(config.correct_geometries),
+            normalize=normalize_int
+        )
+        QgsConfig.set_value_if_changed(
+            QgsConfig.CORRECT_GEOMETRIES_METHOD,
+            config.correct_method.value,
+            normalize=normalize_int
+        )
 
     @staticmethod
     def nexus_settings() -> str:
@@ -155,8 +182,7 @@ class QgsConfig:
 
     @staticmethod
     def set_nexus_settings(config_json: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.NEXUS_SETTINGS, config_json)
+        QgsConfig.set_value_if_changed(QgsConfig.NEXUS_SETTINGS, config_json)
 
     @staticmethod
     def geometry_validation_settings() -> str:
@@ -165,8 +191,7 @@ class QgsConfig:
 
     @staticmethod
     def set_geometry_validation_settings(config_json: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.GEOMETRY_VALIDATION_SETTINGS, config_json)
+        QgsConfig.set_value_if_changed(QgsConfig.GEOMETRY_VALIDATION_SETTINGS, config_json)
 
     @staticmethod
     def last_export_directory() -> str:
@@ -175,8 +200,7 @@ class QgsConfig:
 
     @staticmethod
     def set_last_export_directory(directory: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.LAST_EXPORT_PATH, directory)
+        QgsConfig.set_value_if_changed(QgsConfig.LAST_EXPORT_PATH, directory, normalize=str)
 
     @staticmethod
     def last_selected_plan() -> str:
@@ -185,8 +209,7 @@ class QgsConfig:
 
     @staticmethod
     def set_last_selected_plan(plan_xid: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.LAST_SELECTED_PLAN, plan_xid)
+        QgsConfig.set_value_if_changed(QgsConfig.LAST_SELECTED_PLAN, plan_xid, normalize=str)
 
     @staticmethod
     def xplan24_accounts() -> typing.List[XPlanung24Account]:
@@ -203,9 +226,8 @@ class QgsConfig:
 
     @staticmethod
     def set_xplan24_accounts(account_data: typing.List[XPlanung24Account]):
-        qs = QSettings()
         data = [account.to_dict() for account in account_data]
-        qs.setValue(QgsConfig.XPLAN24_ACCOUNT, json.dumps(data))
+        QgsConfig.set_value_if_changed(QgsConfig.XPLAN24_ACCOUNT, json.dumps(data), normalize=str)
 
     @staticmethod
     def auto_replace_attribute_form() -> bool:
@@ -214,8 +236,11 @@ class QgsConfig:
 
     @staticmethod
     def set_auto_replace_attribute_form(replace: bool):
-        qs = QSettings()
-        qs.setValue(QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM, replace)
+        QgsConfig.set_value_if_changed(
+            QgsConfig.AUTO_REPLACE_ATTRIBUTE_FORM,
+            replace,
+            normalize=str2bool
+        )
 
     @staticmethod
     def xplan_export_reference_path() -> str:
@@ -224,8 +249,7 @@ class QgsConfig:
 
     @staticmethod
     def set_xplan_export_reference_path(path: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.XPLAN_EXPORT_REFERENCE_PATH, path)
+        QgsConfig.set_value_if_changed(QgsConfig.XPLAN_EXPORT_REFERENCE_PATH, path, normalize=str)
 
     @staticmethod
     def xplan_export_filename_schema() -> str:
@@ -234,7 +258,6 @@ class QgsConfig:
 
     @staticmethod
     def set_xplan_export_filename_schema(path: str):
-        qs = QSettings()
-        qs.setValue(QgsConfig.XPLAN_EXPORT_FILE_NAME_SCHEMA, path)
+        QgsConfig.set_value_if_changed(QgsConfig.XPLAN_EXPORT_FILE_NAME_SCHEMA, path, normalize=str)
 
 

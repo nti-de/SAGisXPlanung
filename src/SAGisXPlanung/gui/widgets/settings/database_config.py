@@ -19,12 +19,13 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from SAGisXPlanung import BASE_DIR, VERSION, Session, SessionAsync
+from SAGisXPlanung.config import QgsConfig
 from SAGisXPlanung.core.connection import verify_db_connection, establish_session, IncompatibleDatabaseVersion
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, with_color_palette, apply_color
 from SAGisXPlanung.gui.widgets.commons import ValidationTrigger, ValidationManager, RegexValidator
-from .basepage import SettingsPage
+from .basepage import SettingBinding, SettingsPage
 
 logger = logging.getLogger(__name__)
 
@@ -134,12 +135,23 @@ class DatabaseConfigPage(SettingsPage):
         with_color_palette(self.ui.tab_database_actions, [
             ApplicationColor.Primary, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
         ], class_='QLabel')
+        self.register_settings()
 
     def setup_data(self):
         self.fill_connections()
 
-    def closeEvent(self, event: QCloseEvent):
-        self.save_settings()
+    def register_settings(self):
+        self.register_setting(
+            SettingBinding(
+                name='database_connection',
+                get_value=self.connection_settings_value,
+                save_value=self.save_connection_settings_value,
+                normalize=lambda value: tuple(str(v) for v in value)
+            ),
+            self.ui.cbConnections.currentIndexChanged,
+            self.ui.tbUsername.textChanged,
+            self.ui.tbPassword.textChanged
+        )
 
     @qasync.asyncSlot()
     async def on_database_create_clicked(self):
@@ -236,7 +248,7 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.db_create.setEnabled(not any(e.text() == '' for e in self.db_create_options))
 
     def status_action_apply_clicked(self, new_connection_name: str, event):
-        QSettings().setValue(f"plugins/xplanung/connection", new_connection_name)
+        QgsConfig.set_value_if_changed(f"plugins/xplanung/connection", new_connection_name, normalize=str)
         self.fill_connections()
 
         self.ui.status_action.setText('')
@@ -247,6 +259,11 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.tab_database_actions.setCurrentIndex(0)
 
     def fill_connections(self):
+        try:
+            self.ui.cbConnections.currentIndexChanged.disconnect(self.on_connection_index_changed)
+        except TypeError:
+            pass
+
         self.ui.cbConnections.clear()
 
         qs = QSettings()
@@ -267,16 +284,36 @@ class DatabaseConfigPage(SettingsPage):
             self.ui.cbConnections.setCurrentIndex(index)
         elif conn_names:
             self.ui.cbConnections.setCurrentIndex(0)
+        self.ui.cbConnections.currentIndexChanged.connect(self.on_connection_index_changed)
         self.on_connection_index_changed()
 
     def save_settings(self):
-        qs = QSettings()
+        changed = self.save_connection_settings_value(self.connection_settings_value())
+        if changed:
+            self.refresh_settings_snapshot()
+
+    def connection_settings_value(self):
         conn_name = str(self.ui.cbConnections.currentText())
-        qs.setValue(f"plugins/xplanung/connection", conn_name)
-        qs.setValue(f"PostgreSQL/connections/{conn_name}/username", self.ui.tbUsername.text())
-        qs.setValue(f"PostgreSQL/connections/{conn_name}/password", self.ui.tbPassword.text())
-        establish_session(Session)
-        establish_session(SessionAsync)
+        return conn_name, self.ui.tbUsername.text(), self.ui.tbPassword.text()
+
+    def save_connection_settings_value(self, value):
+        conn_name, username, password = value
+        changed = QgsConfig.set_value_if_changed(f"plugins/xplanung/connection", conn_name, normalize=str)
+        changed = QgsConfig.set_value_if_changed(
+            f"PostgreSQL/connections/{conn_name}/username",
+            username,
+            normalize=str
+        ) or changed
+        changed = QgsConfig.set_value_if_changed(
+            f"PostgreSQL/connections/{conn_name}/password",
+            password,
+            normalize=str
+        ) or changed
+
+        if changed:
+            establish_session(Session)
+            establish_session(SessionAsync)
+        return changed
 
     @qasync.asyncSlot()
     async def on_connection_index_changed(self):
@@ -299,9 +336,8 @@ class DatabaseConfigPage(SettingsPage):
             t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Secondary};">{service}</span> angewendet...'
             self.ui.label_extra_info.setText(t)
 
-        qs.setValue(f"plugins/xplanung/connection", conn_name)
-        establish_session(Session)
-        establish_session(SessionAsync)
+        if not self._loading_settings:
+            self.save_settings()
 
     @qasync.asyncSlot()
     async def on_revision_update_clicked(self):

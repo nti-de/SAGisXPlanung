@@ -15,7 +15,7 @@ from SAGisXPlanung.config import xplan_tooltip
 from SAGisXPlanung.gui.style import TagStyledDelegate, HighlightRowProxyStyle
 from SAGisXPlanung.utils import CLASSES
 
-from .basepage import SettingsPage
+from .basepage import SettingBinding, SettingsPage
 
 logger = logging.getLogger(__name__)
 
@@ -32,12 +32,19 @@ class AttributeConfigPage(SettingsPage):
         self.ui.filter_edit.setPlaceholderText('Suchen...')
         self.ui.filter_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.ui.filter_edit.textChanged.connect(self.ui.attribute_view.onFilterTextChanged)
+        self.register_setting(
+            SettingBinding(
+                name='attribute_config',
+                get_value=self.ui.attribute_view.config_dict,
+                save_value=self.save_attribute_config
+            ),
+            self.ui.attribute_view.model().sourceModel().dataChanged
+        )
 
     def setup_data(self):
         self.ui.attribute_view.setupModelData()
 
-    def closeEvent(self, event: QCloseEvent):
-        conf = self.ui.attribute_view.config_dict()
+    def save_attribute_config(self, conf):
         s = QSettings()
         s.setValue(f"plugins/xplanung/attribute_config", yaml.dump(conf, default_flow_style=False))
 
