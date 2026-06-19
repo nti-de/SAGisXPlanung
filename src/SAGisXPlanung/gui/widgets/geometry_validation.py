@@ -129,7 +129,7 @@ class ValidationWidget(QWidget):
         self._validation_result_label.setObjectName('validation_result_label')
         self._validation_start_button = QPushButton('Prüfung starten')
         self._validation_start_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/play_arrow.svg'),
-                                            color=ApplicationColor.Tertiary))
+                                                       color=ApplicationColor.Secondary))
         self._validation_start_button.clicked.connect(self.start_validation)
 
         self._menu_action_button = QToolButton()
@@ -140,9 +140,9 @@ class ValidationWidget(QWidget):
         self._menu_action_button.setStyleSheet('')
         self._actions_menu = QMenu(self._menu_action_button)
         self._actions_menu.setToolTipsVisible(True)
-        layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'), color=ApplicationColor.Tertiary)
-        refresh_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Tertiary)
-        crop_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/crop_free.svg'), color=ApplicationColor.Tertiary)
+        layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'), color=ApplicationColor.Secondary)
+        refresh_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Secondary)
+        crop_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/crop_free.svg'), color=ApplicationColor.Secondary)
         fill_action = self._actions_menu.addAction(layers_icon, 'Flächenschluss erzwingen', self.fill_geometric)
         fill_action.setToolTip('<qt>Füllt alle Lücken in der Flächenschlussebene mit einem Platzhalter ohne Festsetzung auf</qt>')
         crop_action = self._actions_menu.addAction(crop_icon, 'Geltungsbereich aus Planinhalten berechnen', self.crop_plan_to_content)
@@ -155,7 +155,7 @@ class ValidationWidget(QWidget):
         self._menu_settings_button.setObjectName('menu_settings_button')
         self._menu_settings_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self._menu_settings_button.setArrowType(Qt.ArrowType.NoArrow)
-        settings_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'), color=ApplicationColor.Tertiary)
+        settings_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'), color=ApplicationColor.Secondary)
         self._menu_settings_button.setIcon(settings_icon)
         self._settings_menu = QMenu(self._menu_settings_button)
         self._settings_menu.setToolTipsVisible(True)
@@ -213,16 +213,16 @@ class ValidationWidget(QWidget):
         self._reset_validation_button = QPushButton('Zurücksetzen')
         self._reset_validation_button.setObjectName('reset_validation_button')
         self._reset_validation_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'),
-                                                       color=ApplicationColor.Tertiary))
+                                                       color=ApplicationColor.Secondary))
         self._reset_validation_button.clicked.connect(self.reset_validation)
-        self._hover_filter_reset_button = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Tertiary)
+        self._hover_filter_reset_button = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
         self._reset_validation_button.installEventFilter(self._hover_filter_reset_button)
         self._footer_layout.addWidget(self._reset_validation_button)
         self._layout.addWidget(self._footer_widget)
 
         self.setStyleSheet(self.style.format(
             _label_color_mute=ApplicationColor.Grey600,
-            _label_color_foreground=ApplicationColor.Tertiary,
+            _label_color_foreground=ApplicationColor.Secondary,
             _bg_color_hover=ApplicationColor.Grey300
         ))
 

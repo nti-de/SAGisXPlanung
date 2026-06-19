@@ -73,9 +73,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.bInfo.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/info.svg')))
         self.bInfo.clicked.connect(self.openDetails)
         self.button_cancel_import.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/cancel.svg'),
-                                                   color=ApplicationColor.Tertiary))
+                                                   color=ApplicationColor.Secondary))
         self.button_cancel_import.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.hover_filter = SVGButtonEventFilter(ApplicationColor.Tertiary, ApplicationColor.Primary)
+        self.hover_filter = SVGButtonEventFilter(ApplicationColor.Secondary, ApplicationColor.PrimaryText)
         self.button_cancel_import.installEventFilter(self.hover_filter)
         self.button_cancel_import.clicked.connect(self.on_cancel_import)
 
@@ -109,9 +109,9 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         ))
 
         with_color_palette(self, [
-            ApplicationColor.Secondary
+            ApplicationColor.Primary
         ], class_='QPushButton')
-        apply_color(self.button_show_all, ApplicationColor.Secondary)
+        apply_color(self.button_show_all, ApplicationColor.Primary)
 
         self.apply_preferred_plan_selection()
 

@@ -79,7 +79,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.lTitle.setElideMode(Qt.TextElideMode.ElideRight)
 
         self.menu_button_further.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/more_vert.svg'),
-                                         color=ApplicationColor.Tertiary))
+                                                  color=ApplicationColor.Secondary))
         self.menu_button_further.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.further_menu = QMenu(self.menu_button_further)
         self.action_combine_plan = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/merge.svg')),

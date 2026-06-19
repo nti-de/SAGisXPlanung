@@ -122,7 +122,7 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.button_alert_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/warning.svg'),
                                                    color=ApplicationColor.Grey600))
         self.ui.button_upgrade.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/upgrade.svg'),
-                                                color=ApplicationColor.Tertiary))
+                                                color=ApplicationColor.Secondary))
         self.ui.button_upgrade.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.ui.database_version_frame.hide()
@@ -134,7 +134,7 @@ class DatabaseConfigPage(SettingsPage):
             _label_color_mute=ApplicationColor.Grey600
         ))
         with_color_palette(self.ui.tab_database_actions, [
-            ApplicationColor.Primary, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
+            ApplicationColor.PrimaryText, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
         ], class_='QLabel')
         self.register_settings()
 
@@ -334,7 +334,7 @@ class DatabaseConfigPage(SettingsPage):
         self.ui.tbPassword.setText(password)
         self.ui.label_extra_info.setVisible(bool(service_text))
         if service_text:
-            t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Secondary};">{service}</span> angewendet...'
+            t = f'PG Service Konfiguration <span style="color: {ApplicationColor.Primary};">{service}</span> angewendet...'
             self.ui.label_extra_info.setText(t)
 
         if not self._loading_settings:
@@ -403,7 +403,7 @@ class DatabaseConfigPage(SettingsPage):
             result, meta = verify_db_connection(raise_exeptions=True)
 
             self.ui.connection_test_result_label.setText(f'XPlan-Datenbank: {meta.revision}')
-            apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)
+            apply_color(self.ui.connection_test_result_label, ApplicationColor.PrimaryText)
 
         spinner_args = {
             'radius': 4,
@@ -418,7 +418,7 @@ class DatabaseConfigPage(SettingsPage):
                 check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                             color=ApplicationColor.Success))
                 self.ui.connnection_test_status_icon.setIcon(check_icon)
-                apply_color(self.ui.connection_test_result_label, ApplicationColor.Primary)
+                apply_color(self.ui.connection_test_result_label, ApplicationColor.PrimaryText)
 
             except Exception as e:
                 error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),

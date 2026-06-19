@@ -68,7 +68,7 @@ class CommonConfigPage(SettingsPage):
 
         info_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/info-outline.svg'),
                                    color=ApplicationColor.Grey600))
-        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Tertiary)
+        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
         self.ui.info_clean_geometry.setIcon(info_icon)
         self.ui.info_preserve_topology.setIcon(info_icon)
         self.ui.info_repeated_points.setIcon(info_icon)
@@ -380,11 +380,11 @@ class AccountDelegate(QStyledItemDelegate):
 
         # Hover versions (darker icons)
         self.copy_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/copy.svg'),
-                                              color=ApplicationColor.Tertiary))
+                                              color=ApplicationColor.Secondary))
         self.edit_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
-                                              color=ApplicationColor.Tertiary))
+                                              color=ApplicationColor.Secondary))
         self.delete_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
-                                                color=ApplicationColor.Tertiary))
+                                                color=ApplicationColor.Secondary))
 
         self._hovered_icon = None
         self._hovered_index = None

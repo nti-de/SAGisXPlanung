@@ -7,7 +7,7 @@ from SAGisXPlanung.gui.style import ApplicationColor
 class ProgressBar(QProgressBar):
     def __init__(self,
                  progress_bg_color=ApplicationColor.Grey300,
-                 progress_chunk_bg_color=ApplicationColor.Secondary,
+                 progress_chunk_bg_color=ApplicationColor.Primary,
                  parent=None):
         super().__init__(parent)
 

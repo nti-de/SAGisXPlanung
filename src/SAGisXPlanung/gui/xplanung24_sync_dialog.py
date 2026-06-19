@@ -151,7 +151,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.download_progress.setMinimum(0)
         self.download_progress.setMaximum(100)
 
-        self.refresh_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Tertiary))
+        self.refresh_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Secondary))
         self.check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'), color=ApplicationColor.Success))
         self.error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'), color=ApplicationColor.Error))
         self.upload_status_icon.setIcon(self.check_icon)
@@ -176,14 +176,14 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.tab_widget.tabBar().setDocumentMode(True)
         self.tab_widget.tabBar().setExpanding(True)
 
-        upload_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/upload.svg'), color=ApplicationColor.Tertiary)
-        download_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/download.svg'), color=ApplicationColor.Tertiary)
+        upload_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/upload.svg'), color=ApplicationColor.Secondary)
+        download_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/download.svg'), color=ApplicationColor.Secondary)
         self.tab_widget.tabBar().setTabIcon(0, upload_icon)
         self.tab_widget.tabBar().setTabIcon(1, download_icon)
 
         qss = style.format(
             _progress_bg_color=ApplicationColor.Grey300,
-            _progress_chunk_bg_color=ApplicationColor.Secondary,
+            _progress_chunk_bg_color=ApplicationColor.Primary,
             _label_color_mute=ApplicationColor.Grey600,
         )
         self.setStyleSheet(qss)

@@ -127,21 +127,21 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.nexus_search.textEdited.connect(self.on_search_entered)
 
         self.button_reload.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'),
-                                            color=ApplicationColor.Tertiary))
+                                            color=ApplicationColor.Secondary))
         self.button_xplan_export.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/export_gml.svg'),
-                                                  color=ApplicationColor.Tertiary))
+                                                  color=ApplicationColor.Secondary))
         self.button_edit.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
-                                          color=ApplicationColor.Tertiary))
+                                          color=ApplicationColor.Secondary))
         self.button_map.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/map.svg'),
-                                         color=ApplicationColor.Tertiary))
+                                         color=ApplicationColor.Secondary))
         self.button_delete.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
-                                            color=ApplicationColor.Tertiary))
+                                            color=ApplicationColor.Secondary))
         self.button_settings.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'),
-                                              color=ApplicationColor.Tertiary))
+                                              color=ApplicationColor.Secondary))
         self.button_before.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/before.svg'),
-                                            color=ApplicationColor.Tertiary))
+                                            color=ApplicationColor.Secondary))
         self.button_next.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'),
-                                          color=ApplicationColor.Tertiary))
+                                          color=ApplicationColor.Secondary))
         self.button_xplan24.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
 
         self.button_reload.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -219,11 +219,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.setStyleSheet(style.format(
             _grid_color=ApplicationColor.Grey400,
             _color=ApplicationColor.Grey600,
-            _hover_color=ApplicationColor.Primary,
-            _selected_color=ApplicationColor.Primary,
-            _selected_bg_color=ApplicationColor.SecondaryLight,
+            _hover_color=ApplicationColor.PrimaryText,
+            _selected_color=ApplicationColor.PrimaryText,
+            _selected_bg_color=ApplicationColor.PrimaryLight,
             _button_hover_bg=ApplicationColor.Grey300,
-            _check_indicator_color=ApplicationColor.Tertiary
+            _check_indicator_color=ApplicationColor.Secondary
         ))
 
     def setup_model(self):

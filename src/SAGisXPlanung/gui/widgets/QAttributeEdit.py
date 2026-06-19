@@ -263,9 +263,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.button_flash.setToolTip("Objekt auf Karte aufleuchten lassen")
         self.button_zoom.setToolTip("Zu Objekt zoomen")
         self.button_flash.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/flare.svg'),
-                                            color=ApplicationColor.Tertiary))
+                                           color=ApplicationColor.Secondary))
         self.button_zoom.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/zoom-to.svg'),
-                                                  color=ApplicationColor.Tertiary))
+                                          color=ApplicationColor.Secondary))
         self.button_zoom.clicked.connect(self.on_button_zoom_clicked)
         self.button_flash.clicked.connect(self.on_button_flash_clicked)
 
@@ -274,8 +274,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.search_edit.textChanged.connect(self.onFilterTextChanged)
 
         # filter setup
-        self.filter_attribute.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary))
-        self.filter_relation.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary))
+        self.filter_attribute.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Secondary))
+        self.filter_relation.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Secondary))
         self.filter_all.setProperty('class', 'type_button')
         self.filter_attribute.setProperty('class', 'type_button')
         self.filter_relation.setProperty('class', 'type_button')
@@ -313,7 +313,7 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.treeView.doubleClicked.connect(self.on_double_clicked)
 
         # -------------- STYLE -------------
-        self.link_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'), color=ApplicationColor.Tertiary)
+        self.link_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'), color=ApplicationColor.Secondary)
         self.delegate = SeparatorDelegate(self.link_icon, self.treeView)
         self.delegate.link_clicked.connect(self.on_relation_clicked)
         self.treeView.setItemDelegate(self.delegate)
@@ -544,9 +544,9 @@ class EntityTreeModel(QAbstractItemModel):
         self._xplanung_item = xplan_item
         self._edit_allowed = issubclass(self._xplanung_item.xtype, (XP_Plan, XP_Bereich, XP_ExterneReferenz))
 
-        self.icon_relation = load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Tertiary)
-        self.icon_attribute = load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Tertiary)
-        self.icon_section = load_svg(os.path.join(BASE_DIR, 'gui/resources/data_array.svg'), color=ApplicationColor.Tertiary)
+        self.icon_relation = load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Secondary)
+        self.icon_attribute = load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Secondary)
+        self.icon_section = load_svg(os.path.join(BASE_DIR, 'gui/resources/data_array.svg'), color=ApplicationColor.Secondary)
 
     def set_source_data(self, root_node: TreeNode, xplan_item: XPlanungItem):
         self.beginResetModel()
@@ -1139,8 +1139,8 @@ class BreadcrumbBar(QWidget):
         self._back_button = QToolButton(self)
         self._back_button.setObjectName("back_button")
         self._back_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow_back.svg'),
-                                           color=ApplicationColor.Tertiary))
-        self._back_hover_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Tertiary)
+                                           color=ApplicationColor.Secondary))
+        self._back_hover_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
         self._back_button.installEventFilter(self._back_hover_filter)
         self._layout.addWidget(self._back_button)
 

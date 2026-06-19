@@ -243,11 +243,11 @@ class XPathItemDelegate(HighlightRowDelegate):
         self.hovered_button = {}  # {row: 'copy' | 'edit' | 'delete' | None}
 
         self.copy_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/copy.svg'),
-                                        color=ApplicationColor.Tertiary))
+                                        color=ApplicationColor.Secondary))
         self.edit_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
-                                        color=ApplicationColor.Tertiary))
+                                        color=ApplicationColor.Secondary))
         self.delete_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
-                                          color=ApplicationColor.Tertiary))
+                                          color=ApplicationColor.Secondary))
 
     def paint(self, painter, option, index):
         expression = index.data(Qt.ItemDataRole.UserRole)

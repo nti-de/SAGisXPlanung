@@ -14,11 +14,13 @@ else:
 
 
 class ApplicationColor(StrEnumCompat):
-    Primary = '#000000'
-    Secondary = '#1e3a8a'
-    SecondaryLight = '#a5b4fc'
-    SecondaryDark = '#172554'
-    Tertiary = '#111827'
+    PrimaryText = '#000000'
+    MutedText = '#4b5563'
+
+    Primary = '#1e3a8a'
+    PrimaryLight = '#a5b4fc'
+    PrimaryDark = '#172554'
+    Secondary = '#111827'
 
     Error = '#be123c'
     Success = '#15803d'

@@ -174,7 +174,6 @@ class RelatedObjectProxyModel(QSortFilterProxyModel):
 
 
 class RelatedObjectDelegate(QStyledItemDelegate):
-    """Debug version: paints all layout rects with bright red outlines"""
 
     CHECKBOX_SIZE = 18
     LEFT_MARGIN = 12
@@ -412,8 +411,8 @@ class SelectRelatedWidget(QWidget):
 
         self.tab_widget.insertTab(0, create_new_widget, "Neu erstellen")
         self.tab_widget.insertTab(1, self.search_existing_widget, "Vorhandene durchsuchen")
-        add_circle_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/add_circle.svg'), color=ApplicationColor.Tertiary)
-        manage_search_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/manage_search.svg'), color=ApplicationColor.Tertiary)
+        add_circle_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/add_circle.svg'), color=ApplicationColor.Secondary)
+        manage_search_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/manage_search.svg'), color=ApplicationColor.Secondary)
         self.tab_widget.tabBar().setTabIcon(0, add_circle_icon)
         self.tab_widget.tabBar().setTabIcon(1, manage_search_icon)
 
