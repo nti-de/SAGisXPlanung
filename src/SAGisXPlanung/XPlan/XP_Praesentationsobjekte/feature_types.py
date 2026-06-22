@@ -136,7 +136,7 @@ class XP_AbstraktesPraesentationsobjekt(FeatureType, RelationshipMixin, ElementO
         for feature in layer.getFeatures(fr):
             id_prop = layer.customProperties().value(f'xplanung/feat-{feature.id()}')
             if id_prop == str(self.id):
-                with safe_edit(layer):
+                with safe_edit(layer, block_signals=True):
                     res = layer.deleteFeature(feature.id())
                     if not res:
                         logger.warning(f'{self.displayName()}:{self.id} Feature wurde nicht von der Karte entfernt')

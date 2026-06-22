@@ -3,6 +3,7 @@ from typing import List, Any
 from contextlib import contextmanager
 
 from qgis.core import QgsFeatureRequest, QgsEditError, QgsGeometry
+from qgis.PyQt.QtCore import QSignalBlocker
 
 from SAGisXPlanung.MapLayerRegistry import MapLayerRegistry
 from SAGisXPlanung.XPlanungItem import XPlanungItem
@@ -91,26 +92,41 @@ def _coerce_to_table_representation(xtype: type, attr: str, value: Any) -> Any:
 
 
 @contextmanager
-def safe_edit(layer):
+def safe_edit(layer, block_signals=False):
     """
     context manager replacing the default edit() from QGIS (drop-in replacement)
     safe_edit will also work when the layer is already in edit mode, which fails with the default QGIS version
     """
     was_editing = layer.isEditable()
 
-    # If already editing, just yield and keep in edit mode on committing changes
-    if was_editing:
-        yield layer
-        if not layer.commitChanges(False):
-            raise QgsEditError(layer.commitErrors())
-    else:
-        if not layer.startEditing():
-            raise QgsEditError("Could not start editing the layer")
-        try:
+    blocker = None
+    if block_signals:
+        blocker = QSignalBlocker(layer)
+
+    try:
+        # If already editing, just yield and keep in edit mode on committing changes
+        if was_editing:
             yield layer
-            if not layer.commitChanges():
+            if not layer.commitChanges(False):
                 raise QgsEditError(layer.commitErrors())
-        except Exception as e:
-            logger.error(e)
-            layer.rollBack()
-            raise e
+        else:
+            if not layer.startEditing():
+                raise QgsEditError("Could not start editing the layer")
+
+            try:
+                yield layer
+
+                if not layer.commitChanges():
+                    raise QgsEditError(layer.commitErrors())
+
+            except Exception as e:
+                logger.error(e)
+                layer.rollBack()
+                raise e
+
+    finally:
+        # destroy blocker before leaving
+        blocker = None
+
+        if block_signals:
+            layer.triggerRepaint()
