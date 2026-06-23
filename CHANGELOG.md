@@ -1,5 +1,26 @@
 ## Changelog
 
+### [2.14.1] - 23.06.2026
+#### Neue Funktionen
+
+- Filter in der Planübersicht nach Gemeinde (70b5dc4f)
+- UI zur Konfiguration der Dateibenennung von XPlanGML-Export (aec771db)
+- Optionale Geometrievalidierung über den XPlanValidator (9e2ead01)
+
+#### Veränderungen
+
+- Architektur des Einstellungsdialogs modularisiert und für zukünftige Erweiterungen optimiert (1ed65eaa)
+- UX beim Einrichten der Datenbank verbessert; bessere Validierung (2f6d8a12)
+- Kleinere Verbesserung der Suchergebnisse in der Planübersicht (7d2a5da1)
+
+#### Fehlerbehebungen
+
+- Rekursion beim Löschen von Objekten aus dem Objektbaum behoben (abd92970)
+- Formular zum Hinzufügen von Relationen auf abstrakte Typen korrigiert (3771658d)
+- Fehlerhafte Enum-Ausprägung korrigiert (62b6d2ca)
+- Konfiguration für `nutzungsform` in PPO korrigiert (10af20b3)
+- Problem im Release mit Python-Packages behoben (6e4dc623)
+
 ### [2.14.0] - 19.05.2026
 #### Neue Funktionen
 

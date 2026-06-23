@@ -32,16 +32,18 @@ Die Seite für Datenbank-Einstellungen ist in die folgenden zwei Fenster unterte
     fehlschlagen wird im Dialog stattdessen eine Fehlermeldung angezeigt. 
 
     Mögliche Fehlermeldungen:
-    <table>
-        <tr>
+    <table markdown="span">
+        <tr markdown="span">
             <th>Inkompatible Datenbankversion</th>
-            <td>
+            <td markdown="span">
                 Die Version der installierten QGIS-Erweiterung benötigt eine andere Version der XPlan-Datenbank. 
                 Sollte eine veraltete Datenbankversion vorliegen, besteht die Möglichkeit mit dem Button <b>Upgrade</b>
                 die Datenbank auf den aktuellen Stand zu bringen.
                 <figure>
                     <img src="../assets/upgrade-db.png" alt="Datenbank-Upgrade"/>
-                </figure>
+                </figure> 
+                </br>
+                [:octicons-arrow-right-24: Mehr zum Update-Prozess ](../setup/update.md){ .md-button }
             </td>
         </tr>
         <tr>

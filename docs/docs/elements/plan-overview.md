@@ -25,9 +25,28 @@ Weitere Aktionen im Dialog der Planübersicht:
 
 ## Suchen, Sortieren und Filtern
 
-- **Suche**: Im Suchfeld einen Suchbegriff eingeben und mit ++enter++ bestätigen
-- **Filtern**: Zum Filtern kann in der Auswahlliste neben dem Suchfeld eine Auswahl der Planart getroffen werden.
-- **Sortieren**: Die Sortierung der Einträge in der Tabelle kann durch Klicken in den Tabellenkopf in einer beliebigen Spalte beeinflusst werden
+<table markdown="span">
+    <tr>
+        <th>Suche</th>
+        <td> Im Suchfeld einen Suchbegriff eingeben und mit ++enter++ bestätigen </td>
+    </tr>
+    <tr>
+        <th>Filtern</th>
+        <td>
+            Zum Filtern der Pläne in der Tabelle stehen die beiden folgenden Funktionen zur Verfügung:
+            <ul>
+                <li><i>Planart filtern</i>: In der Auswahlliste neben dem Suchfeld eine Auswahl der Planart getroffen werden</li>
+                <li><i>Gemeinde filtern</i>: Über die rechte Auswahlliste können die Pläne in der Übersicht auf eine ausgewählte Gemeinde eingeschränkt werden</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <th>Sortieren</th>
+        <td>
+            Die Sortierung der Einträge in der Tabelle kann durch Klicken in den Tabellenkopf in einer beliebigen Spalte beeinflusst werden
+        </td>
+    </tr>
+</table>
 
 ## Planwerk-Aktionen
 

@@ -109,6 +109,7 @@ nav:
   - Projekt:
       - Changelog:
           - changelog/index.md
+          - Version 2.14.1: changelog/v2141.md
           - Version 2.14.0: changelog/v214.md
       - Allgemeines:
           - Kontakt & Support: general/support.md
