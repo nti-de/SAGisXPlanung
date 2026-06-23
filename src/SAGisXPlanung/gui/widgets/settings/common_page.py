@@ -123,7 +123,10 @@ class CommonConfigPage(SettingsPage):
         else:
             self.ui.export_path_edit.setText(export_ref_path)
 
-        self.ui.export_name_schema_edit.setText(QgsConfig.xplan_export_filename_schema())
+        stored_filename_schema = QgsConfig.xplan_export_filename_schema()
+        if not stored_filename_schema:
+            stored_filename_schema = '{name}'
+        self.ui.export_name_schema_edit.setText(stored_filename_schema)
         self.update_export_name_preview()
 
     def register_settings(self):

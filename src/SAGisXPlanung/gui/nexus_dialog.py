@@ -177,10 +177,11 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.combo_plan_type.currentIndexChanged.connect(self.on_plan_type_filter_changed)
 
         with Session() as session:
-            stmt = select(XP_Gemeinde.id, XP_Gemeinde.gemeindeName).order_by(XP_Gemeinde.gemeindeName)
+            stmt = select(XP_Gemeinde.id, XP_Gemeinde.gemeindeName, XP_Gemeinde.ortsteilName).order_by(
+                XP_Gemeinde.gemeindeName).order_by(XP_Gemeinde.ortsteilName)
             query_result = session.execute(stmt).all()
             for row in query_result:
-                self.combo_gemeinde.addItem(row[1], row[0])
+                self.combo_gemeinde.addItem(row[1] + f"{f', OT {row[2]}' if row[2] else ''}", row[0])
 
         self.combo_gemeinde.lineEdit().setPlaceholderText("Gemeinde filtern...")
         self.combo_gemeinde.setCurrentIndex(-1)
