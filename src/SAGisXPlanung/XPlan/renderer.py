@@ -73,6 +73,7 @@ _renderer_expressions = {
         ('Waermeversorgung', '"zweckbestimmung" LIKE \'14%\'', 'Fernwaerme.svg'),
         ('Wasser', '"zweckbestimmung" LIKE \'16%\'', 'Wasser.svg'),
         ('Abwasser', '"zweckbestimmung" LIKE \'18%\'', 'Abwasser.svg'),
+        ('Regenwasser', '"zweckbestimmung" LIKE \'2000%\'', 'Abwasser.svg'),
         ('Abfallentsorgung', '"zweckbestimmung" LIKE \'22%\'', 'Abfall.svg'),
         ('Ablagerung', '"zweckbestimmung" LIKE \'24%\'', 'Ablagerung.svg'),
         ('Erneuerbare Energien', '"zweckbestimmung" LIKE \'2800\'', 'Erneuerbare_Energien.svg'),

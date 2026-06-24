@@ -1247,6 +1247,21 @@ Wasser.svg:
         - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
       type: XP_ZweckbestimmungVerEntsorgung
       value: 1600
+Regenwasser.svg:
+  type:
+    svg:
+      category: BP_Ver_und_Entsorgung
+  name: Regenwasser
+  attribute:
+    - xpath:
+        - zweckbestimmung
+        - zweckbestimmung/BP_KomplexeZweckbestVerEntsorgung/allgemein
+        - zweckbestimmung/FP_KomplexeZweckbestVerEntsorgung/allgemein
+      type: XP_ZweckbestimmungVerEntsorgung
+      value:
+       - 2000
+       - 20000
+       - 20001
 # endregion
 
 # region BP_Verkehr
