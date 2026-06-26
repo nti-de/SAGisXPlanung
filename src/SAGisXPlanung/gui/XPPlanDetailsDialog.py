@@ -31,7 +31,7 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
-from SAGisXPlanung.gui.combine_plan_dialog import CombinePlanDialog
+from SAGisXPlanung.gui.combine_plan_dialog import CombinePlanDialog, PlanCardItem
 from SAGisXPlanung.gui.commands import (ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand,
                                         StackChangeType, CommandType)
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg, ApplicationColor

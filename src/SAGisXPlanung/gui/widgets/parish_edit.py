@@ -63,6 +63,9 @@ class QParishLabel(QWidget):
     def setText(self, text):
         self.label.setText(text)
 
+    def text(self):
+        return self.label.text()
+
     @pyqtSlot(bool)
     def onLocationEdit(self, clicked):
         self.parishEditRequested.emit()

@@ -366,7 +366,7 @@ class SO_Strassenverkehr(MixedGeometry, SO_Objekt):
 
             default_rule = QgsRuleBasedRenderer.Rule(default_symbol)
             default_rule.setIsElse(True)
-            default_rule.setLabel('Default')
+            default_rule.setLabel('Sonstiges')
 
             root_rule.appendChild(default_rule)
             return QgsRuleBasedRenderer(root_rule)

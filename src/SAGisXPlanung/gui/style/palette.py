@@ -17,9 +17,10 @@ class ApplicationColor(StrEnumCompat):
     PrimaryText = '#000000'
     MutedText = '#4b5563'
 
-    Primary = '#1e3a8a'
-    PrimaryLight = '#a5b4fc'
-    PrimaryDark = '#172554'
+    Primary = '#1D4ED8'
+    PrimaryLight = '#3B82F6'
+    PrimaryLightest = '#EFF6FF'
+    PrimaryDark = '#1E3A8A'
     Secondary = '#111827'
 
     Error = '#be123c'
@@ -27,6 +28,7 @@ class ApplicationColor(StrEnumCompat):
 
     OnPrimary = '#ffffff'
 
+    Grey100 = '#f3f4f6'
     Grey200 = '#e5e7eb'
     Grey300 = '#d1d5db'
     Grey400 = '#9ca3af'
