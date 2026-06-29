@@ -1299,6 +1299,7 @@ Fussgaengerbereich.svg:
       value: 14002
     - xpath:
         - zweckbestimmung
+        - artDerFestlegung/SO_KomplexeZweckbestStrassenverkehr/allgemein
       type: SO_ZweckbestimmungStrassenverkehr
       value: 14002
 VerkehrsberuhigterBereich.svg:
@@ -1317,6 +1318,7 @@ VerkehrsberuhigterBereich.svg:
       value: 14000
     - xpath:
         - zweckbestimmung
+        - artDerFestlegung/SO_KomplexeZweckbestStrassenverkehr/allgemein
       type: SO_ZweckbestimmungStrassenverkehr
       value: 14000
 Radweg.svg:
@@ -1335,6 +1337,7 @@ Radweg.svg:
       value: 14004
     - xpath:
         - zweckbestimmung
+        - artDerFestlegung/SO_KomplexeZweckbestStrassenverkehr/allgemein
       type: SO_ZweckbestimmungStrassenverkehr
       value: 14004
 Fuss_Radweg.svg:
@@ -1353,6 +1356,7 @@ Fuss_Radweg.svg:
       value: 14003
     - xpath:
         - zweckbestimmung
+        - artDerFestlegung/SO_KomplexeZweckbestStrassenverkehr/allgemein
       type: SO_ZweckbestimmungStrassenverkehr
       value: 14003
 # endregion

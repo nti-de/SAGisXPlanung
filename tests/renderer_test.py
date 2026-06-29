@@ -83,7 +83,7 @@ class TestRenderer:
         r = BP_VerEntsorgung.renderer(geom_type=QgsWkbTypes.PolygonGeometry)
 
         assert isinstance(r, QgsRuleBasedRenderer)
-        assert len(r.rootRule().children()) == 10
+        assert len(r.rootRule().children()) == 11
         assert any(rule.isElse() for rule in r.rootRule().children())
 
     def test_pflanzung_renderer(self):
