@@ -46,7 +46,7 @@ class BuildingTemplateRenderer(QgsFeatureRenderer):
         super().__init__(_type)
 
     def usedAttributes(self, context):
-        return ["id", "skalierung", "drehwinkel", "rows", "cell_content"]
+        return ["id", "skalierung", "drehwinkel", "zeilenAnz", "cell_content"]
 
     def symbolForFeature(self, feature, context):
         return None
@@ -197,6 +197,8 @@ class BuildingTemplateItem:
 
     def cell_data(self, row: int, col: int) -> 'TableCell':
         index = row * self.columns + col % self.columns
+        if index >= len(self.data):
+            return ArtDerBaulNutzungCell({})
         return self.data[index]
 
     def set_cell_data(self, cell_index: int, new_cell: TableCell):
