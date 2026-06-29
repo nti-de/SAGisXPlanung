@@ -61,7 +61,7 @@ class GMLWriter:
 
     def toGML(self) -> bytes:
         xml = etree.tostring(etree.ElementTree(self.root), pretty_print=True, xml_declaration=True, encoding='UTF-8', standalone=True)
-        return xml
+        return xml.replace(b"\n", b"\r\n")
 
     def toArchive(self, gml_file_name: str = None) -> BytesIO:
         path_prefix = QgsConfig.xplan_export_reference_path()
