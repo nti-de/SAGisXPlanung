@@ -15,6 +15,7 @@ from shapely.geometry import Polygon, MultiPolygon, MultiLineString, Point
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.enums import BP_PlanArt, BP_Rechtscharakter
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Plan, BP_Bereich
+from SAGisXPlanung.XPlan.feature_types import XP_TextAbschnitt
 from SAGisXPlanung.BPlan.BP_Bebauung.data_types import BP_Dachgestaltung
 from SAGisXPlanung.BPlan.BP_Bebauung.enums import BP_Dachform
 from SAGisXPlanung.BPlan.BP_Bebauung.feature_types import BP_BaugebietsTeilFlaeche, BP_BauGrenze
@@ -395,3 +396,65 @@ class TestGMLWriter_export:
         assert len(zip_archive.namelist()) == 2
         assert any(PurePath(file_name).suffix == '.gml' for file_name in zip_archive.namelist())
         assert any(PurePath(file_name).suffix == '.tif' for file_name in zip_archive.namelist())
+
+    def test_textabschnitt_not_duplicated_when_shared(self, bplan_schema):
+        """XP_TextAbschnitt referenced by both plan.texte and BP_Objekt.refTextInhalt
+        must appear only once as a featureMember to avoid duplicate gml:id."""
+        plan = BP_Plan()
+        plan.raeumlicherGeltungsbereich = WKTElement(
+            'MULTIPOLYGON (((40 40, 20 45, 45 30, 40 40)))',
+            srid=4326
+        )
+        plan.name = 'test'
+        plan.traegerbeteiligungsStartDatum = [datetime.date(2000, 9, 10)]
+        plan.planArt = BP_PlanArt.BPlan
+
+        text_abschnitt = XP_TextAbschnitt()
+        text_abschnitt.id = uuid.uuid4()
+        text_abschnitt.text = 'shared text content'
+        plan.texte.append(text_abschnitt)
+
+        bereich = BP_Bereich()
+        bereich.id = uuid.uuid4()
+        bereich.nummer = 0
+        bereich.name = 'test'
+        bereich.geltungsbereich = plan.raeumlicherGeltungsbereich
+
+        bp_obj = BP_BaugebietsTeilFlaeche()
+        bp_obj.id = uuid.uuid4()
+        bp_obj.position = WKBElement(to_shape(bereich.geltungsbereich).wkb, srid=4326)
+        bp_obj.refTextInhalt_v6.append(text_abschnitt)
+        bereich.planinhalt.append(bp_obj)
+
+        plan.bereich.append(bereich)
+
+        writer = GMLWriter(plan, version=XPlanVersion.SIX)
+        bplan_schema.assertValid(writer.root[0])
+
+        nsmap = {
+            'gml': 'http://www.opengis.net/gml/3.2',
+            'xplan': 'http://www.xplanung.de/xplangml/6/0'
+        }
+        feature_members = writer.root.findall('.//gml:featureMember', nsmap)
+        text_abschnitt_members = [
+            fm for fm in feature_members
+            if fm.find('.//xplan:XP_TextAbschnitt', nsmap) is not None
+        ]
+
+        assert len(text_abschnitt_members) == 1, (
+            f"Expected 1 XP_TextAbschnitt featureMember, got {len(text_abschnitt_members)}. "
+            "TextAbschnitt was duplicated because it is referenced by both plan.texte and bp_obj.refTextInhalt."
+        )
+
+        gml_id = text_abschnitt_members[0].find('.//xplan:XP_TextAbschnitt', nsmap).attrib[
+            f'{{{nsmap["gml"]}}}id'
+        ]
+        assert gml_id.startswith('GML_')
+
+        all_gml_ids = [
+            el.attrib[f'{{{nsmap["gml"]}}}id']
+            for el in writer.root.findall('.//*[@{http://www.opengis.net/gml/3.2}id]', nsmap)
+        ]
+        assert len(all_gml_ids) == len(set(all_gml_ids)), (
+            f"Duplicate gml:id values found: {[id for id in all_gml_ids if all_gml_ids.count(id) > 1]}"
+        )

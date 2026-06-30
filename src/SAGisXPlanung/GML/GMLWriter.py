@@ -46,6 +46,7 @@ class GMLWriter:
     def __init__(self, plan: XP_Plan, version=XPlanVersion.FIVE_THREE, root_tag=None):
 
         self.files = {}
+        self._written_features = set()
         self.version = version
         self.nsmap['xplan'] = self.version_urls[version]
 
@@ -165,7 +166,8 @@ class GMLWriter:
                         if mapper_property.info.get('link') == 'xlink-only':
                             continue
 
-                        self.write_feature(o)
+                        if o.id not in self._written_features:
+                            self.write_feature(o)
                         continue
 
                     tag = f"{{{self.nsmap['xplan']}}}{xplan_name}"
@@ -181,6 +183,7 @@ class GMLWriter:
 
         if isinstance(xplan_object, FeatureType):
             self.root.append(feature)
+            self._written_features.add(xplan_object.id)
 
         return feature
 
