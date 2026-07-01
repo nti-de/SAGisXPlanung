@@ -102,6 +102,9 @@ class BP_VerEntsorgung(MixedGeometry, BP_Objekt):
         if geom_type == QgsWkbTypes.GeometryType.PolygonGeometry:
             return icon_renderer('Versorgung', cls.polygon_symbol(),
                                  'BP_Ver_und_Entsorgung', geometry_type=geom_type)
+        elif geom_type == QgsWkbTypes.GeometryType.PointGeometry:
+            return icon_renderer('Versorgung', QgsSymbol.defaultSymbol(geom_type),
+                                 'BP_Ver_und_Entsorgung', geometry_type=geom_type)
         elif geom_type is not None:
             return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
         raise Exception('parameter geometryType should not be None')

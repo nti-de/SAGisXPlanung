@@ -12,6 +12,7 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import BASE_DIR, XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
+from SAGisXPlanung.XPlan.core import LayerPriorityType
 from SAGisXPlanung.XPlan.renderer import fallback_renderer
 from SAGisXPlanung.XPlan.enums import XP_ABEMassnahmenTypen, XP_AnpflanzungBindungErhaltungsGegenstand, XP_SPEZiele
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, MixedGeometry, FlaechenschlussObjekt, UeberlagerungsObjekt
@@ -198,6 +199,7 @@ class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt,
     __mapper_args__ = {
         'polymorphic_identity': 'bp_schutzflaeche',
     }
+    __LAYER_PRIORITY__ = LayerPriorityType.CustomLayerOrder | LayerPriorityType.OutlineStyle
 
     id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
 
