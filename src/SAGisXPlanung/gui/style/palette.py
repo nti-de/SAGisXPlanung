@@ -25,6 +25,8 @@ class ApplicationColor(StrEnumCompat):
 
     Error = '#be123c'
     Success = '#15803d'
+    WarningText = '#D97706'
+    WarningBackground = '#FEF3C7'
 
     OnPrimary = '#ffffff'
 
