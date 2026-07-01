@@ -100,7 +100,7 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
         iface.statusBarIface().showMessage(f'Fehler beim Laden des Plans: {e}')
 
 
-def collect_layers(plan, plan_xid, session):
+def collect_layers(plan, plan_xid, session, load_external_refs=True):
     xp_bereich_poly = with_polymorphic(XP_Bereich, BEREICH_BASE_TYPES)
     stmt = select(xp_bereich_poly).where(
         or_(*[cls.gehoertZuPlan_id == plan_xid for cls in BEREICH_BASE_TYPES])
@@ -170,35 +170,36 @@ def collect_layers(plan, plan_xid, session):
             new_layers.append(layer)
 
     # load external references
-    ref_poly = with_polymorphic(XP_ExterneReferenz, [XP_SpezExterneReferenz])
-    stmt = select(ref_poly).where(
-        and_(
-            ref_poly.art == XP_ExterneReferenzArt.PlanMitGeoreferenz,
-            or_(
-                ref_poly.bereich_id.in_(bereich_ids),
-                ref_poly.XP_SpezExterneReferenz.plan_id == plan_xid,
-                exists(
-                    select(1)
-                    .where(
-                        and_(
-                            XP_Rasterdarstellung.id == ref_poly.xp_rasterdarstellung_scan_id,
-                            XP_Rasterdarstellung.bereich_id.in_(bereich_ids),
+    if load_external_refs:
+        ref_poly = with_polymorphic(XP_ExterneReferenz, [XP_SpezExterneReferenz])
+        stmt = select(ref_poly).where(
+            and_(
+                ref_poly.art == XP_ExterneReferenzArt.PlanMitGeoreferenz,
+                or_(
+                    ref_poly.bereich_id.in_(bereich_ids),
+                    ref_poly.XP_SpezExterneReferenz.plan_id == plan_xid,
+                    exists(
+                        select(1)
+                        .where(
+                            and_(
+                                XP_Rasterdarstellung.id == ref_poly.xp_rasterdarstellung_scan_id,
+                                XP_Rasterdarstellung.bereich_id.in_(bereich_ids),
+                            )
                         )
                     )
                 )
             )
         )
-    )
-    ref_objects = session.scalars(stmt).all()
-    for ref in ref_objects:
-        for filename, file_data in ref.get_file_data().items():
-            if file_data is not None:
-                vsi_path = f'/vsimem/{filename}'
-                gdal.FileFromMemBuffer(vsi_path, file_data)
+        ref_objects = session.scalars(stmt).all()
+        for ref in ref_objects:
+            for filename, file_data in ref.get_file_data().items():
+                if file_data is not None:
+                    vsi_path = f'/vsimem/{filename}'
+                    gdal.FileFromMemBuffer(vsi_path, file_data)
 
-        raster_layer = QgsRasterLayer(f'/vsimem/{ref.referenzURL}', ref.referenzName or ref.referenzURL, "gdal")
-        raster_layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
-        raster_layer.setCustomProperty('xplanung/feat_id', str(ref.id))
-        new_layers.append(raster_layer)
+            raster_layer = QgsRasterLayer(f'/vsimem/{ref.referenzURL}', ref.referenzName or ref.referenzURL, "gdal")
+            raster_layer.setCustomProperty('xplanung/type', 'XP_ExterneReferenz')
+            raster_layer.setCustomProperty('xplanung/feat_id', str(ref.id))
+            new_layers.append(raster_layer)
 
     return new_layers
