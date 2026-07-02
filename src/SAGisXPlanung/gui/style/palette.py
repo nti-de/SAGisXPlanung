@@ -24,7 +24,9 @@ class ApplicationColor(StrEnumCompat):
     Secondary = '#111827'
 
     Error = '#be123c'
+    ErrorBackground = '#FECACA'
     Success = '#15803d'
+    SuccessBackground = '#BBF7D0'
     WarningText = '#D97706'
     WarningBackground = '#FEF3C7'
 
@@ -54,7 +56,7 @@ def apply_color(widget, color: ApplicationColor):
     properties = widget.dynamicPropertyNames()
     for prop in properties:
         for enum in ApplicationColor:
-            if enum.name in prop.data().decode('utf-8'):
+            if enum.name == prop.data().decode('utf-8'):
                 widget.setProperty(prop, None)
 
     widget.setProperty(color.name, True)

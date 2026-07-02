@@ -38,7 +38,7 @@ def test_with_color_palette(mock_widget):
                 color: #000000;
             }
         [Secondary=true] {
-                color: #4b5563;
+                color: #111827;
             }
         '''
     )
