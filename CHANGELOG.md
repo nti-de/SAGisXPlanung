@@ -1,5 +1,19 @@
 ## Changelog
 
+### [2.14.2] - 02.07.2026
+#### Veränderungen
+
+- Neue Styles für BP_SchutzPflegeEntwicklungsFlaeche, BP_VerEntsorgung und FP_SchutzPflegeEntwicklung (8b679c8d)
+- Neues Symbol für Regenwasser in Versorgungsflächen (d7a4a9b9)
+- PPO-Konfiguration für Fußgängerbereich und weitere Verkehrsflächen ergänzt (f413780e)
+- XPlanGML-Export verwendet standardmäßig CRLF-Zeilenumbrüche (7ef475cc)
+
+#### Fehlerbehebungen
+
+- Doppelte XP_TextAbschnitte im XPlanGML-Export vermieden (0b29d17b)
+- Erstellung neuer Nutzungsschablonen korrigiert (3a59a5c4)
+- Defektes SVG für Fußgängerbereich behoben (f413780e)
+
 ### [2.14.1] - 23.06.2026
 #### Neue Funktionen
 

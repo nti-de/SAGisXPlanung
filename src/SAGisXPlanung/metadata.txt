@@ -7,7 +7,7 @@ name=SAGis XPlanung (Community Version)
 qgisMinimumVersion=3.28
 qgisMaximumVersion=4.99
 description=Plugin zur XPlanung-konformen Erfassung und Verwaltung von Bauleitplänen
-version=2.14.1
+version=2.14.2
 author=NTI Deutschland GmbH
 email=qgis-de@nti.biz
 
