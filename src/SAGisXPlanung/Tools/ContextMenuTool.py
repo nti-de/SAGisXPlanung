@@ -125,8 +125,8 @@ class ContextMenuTool(QgsMapToolIdentify):
         data_action.triggered.connect(lambda checked, xitem=xplan_item:
                                       self.menu_action_triggered(ActionType.AccessAttributes, xitem))
 
-        # if plan content is an area, add option to annotate with PO
-        if issubclass(xplan_item.xtype, (PolygonGeometry, MixedGeometry)) and issubclass(xplan_item.xtype, XP_Objekt):
+        # if it is a plan content, add option to annotate with PO
+        if issubclass(xplan_item.xtype, XP_Objekt):
             annotate_action = menu.addAction('Präsentationsobjekt hinzufügen')
             annotate_action.triggered.connect(lambda checked, xitem=xplan_item:
                 self.menu_action_triggered(ActionType.AddAnnotationItem, xitem, map_position)
