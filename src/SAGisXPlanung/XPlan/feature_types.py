@@ -149,7 +149,7 @@ class XP_Plan(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin, Re
     def geometry(self) -> QgsGeometry:
         return geometry_from_spatial_element(self.raeumlicherGeltungsbereich)
 
-    def setGeometry(self, geom: QgsGeometry):
+    def setGeometry(self, geom: QgsGeometry, srid: int = None):
         self.raeumlicherGeltungsbereich = WKTElement(geom.asWkt(), srid=self.raeumlicherGeltungsbereich.srid)
 
     def _flaechenschluss_config(self) -> "XP_Plan.FlaechenschlussConfig":
@@ -320,7 +320,7 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
     def geometry(self) -> QgsGeometry:
         return geometry_from_spatial_element(self.geltungsbereich)
 
-    def setGeometry(self, geom: QgsGeometry):
+    def setGeometry(self, geom: QgsGeometry, srid: int = None):
         self.geltungsbereich = WKTElement(geom.asWkt(), srid=self.geltungsbereich.srid)
 
     def toCanvas(self, layer_group, plan_xid=None):
