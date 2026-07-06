@@ -29,14 +29,14 @@ Planinhalten zugeordnet werden.
     </ol>
 
     <figure>
-        <img src="../assets/add-text-section.png" alt="Textabschnitt hinzufügen"/>
+        <img src="assets/add-text-section.png" alt="Textabschnitt hinzufügen"/>
     </figure>
 </div>
 
 Anschließend öffnet sich der Dialog zum Erstellen eines neuen Textabschnitts.
 
 <figure markdown="span">
-    ![Textabschnitt erstellen](../assets/create-text-section.png)
+    ![Textabschnitt erstellen](assets/create-text-section.png)
 </figure>
 
 Dabei können folgende Informationen erfasst werden:
@@ -84,7 +84,7 @@ identische Festsetzungen verschiedenen Planinhalten zuordnen, ohne den Text erne
     </ol>
 
     <figure>
-        <img src="../assets/select-text-section.png" alt="Vorhandene Textabschnitte auswählen"/>
+        <img src="assets/select-text-section.png" alt="Vorhandene Textabschnitte auswählen"/>
     </figure>
 </div>
 
