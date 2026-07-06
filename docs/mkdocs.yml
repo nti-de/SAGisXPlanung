@@ -1,7 +1,10 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 site_name: SAGis XPlanung Dokumentation
-site_url: https://mydomain.org/
+site_url: https://nti-de.github.io/SAGisXPlanung
+site_description: Dokumentation für Anwender des SAGis XPlanung, einer QGIS-Erweiterung zur Erfassung und Verwaltung von XPlanGML-Dokumenten.
+site_author: NTI Deutschland GmbH
+
 theme:
   name: material
   language: de
@@ -119,4 +122,5 @@ nav:
           - FAQ: general/FAQ.md
       - Integrationen:
           - XPlanung24: integrations/xplanung24.md
+
 copyright: Copyright &copy; 2026 NTI Deutschland GmbH
