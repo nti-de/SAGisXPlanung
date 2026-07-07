@@ -100,7 +100,7 @@ async def load_on_canvas(plan_xid: str, layer_group: QgsLayerTreeGroup=None):
         iface.statusBarIface().showMessage(f'Fehler beim Laden des Plans: {e}')
 
 
-def collect_layers(plan, plan_xid, session, load_external_refs=True):
+def collect_layers(plan, plan_xid, session, load_external_refs=True, force_new_layers=False):
     xp_bereich_poly = with_polymorphic(XP_Bereich, BEREICH_BASE_TYPES)
     stmt = select(xp_bereich_poly).where(
         or_(*[cls.gehoertZuPlan_id == plan_xid for cls in BEREICH_BASE_TYPES])
@@ -147,7 +147,9 @@ def collect_layers(plan, plan_xid, session, load_external_refs=True):
         for geom_dim, orm_features in features_by_dim.items():
 
             qgs_geom_type = QgsWkbTypes.GeometryType(geom_dim)
-            layer = MapLayerRegistry().layer_by_plan_orm_id(plan_xid=plan_xid, xtype=cls, geom_type=qgs_geom_type)
+            layer = None
+            if not force_new_layers:
+                layer = MapLayerRegistry().layer_by_plan_orm_id(plan_xid=plan_xid, xtype=cls, geom_type=qgs_geom_type)
             if not layer:
                 srid = plan.srs().postgisSrid()
                 layer = cls.asLayer(srid, plan_xid, name=cls.__name__, geom_type=qgs_geom_type)
