@@ -186,7 +186,6 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
         async with self._init_lock:
             async with loading_animation(self):
-                self.undo_stack.clear()
                 self.objectTree.clear()
 
                 if not keep_page:

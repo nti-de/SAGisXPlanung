@@ -277,7 +277,7 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
     rasterBasis = relationship("XP_Rasterdarstellung", back_populates="bereich", cascade="all, delete",
                                 passive_deletes=True, uselist=False, info={'xplan_version': XPlanVersion.FIVE_THREE})
     planinhalt = relationship("XP_Objekt", back_populates="gehoertZuBereich", cascade="all, delete",
-                              passive_deletes=True, info={
+                              info={
                                   'form-type': 'hidden'
                               })
     praesentationsobjekt = relationship("XP_AbstraktesPraesentationsobjekt", back_populates="gehoertZuBereich",
@@ -324,23 +324,15 @@ class XP_Bereich(FeatureType, RendererMixin, PolygonGeometry, ElementOrderMixin,
         self.geltungsbereich = WKTElement(geom.asWkt(), srid=self.geltungsbereich.srid)
 
     def toCanvas(self, layer_group, plan_xid=None):
-        """ Override custom toCanvas behaviour, because each XP_Bereich object should get its own layer
-            instead of merging geometries as features into one layer"""
-        if plan_xid is None:
-            raise ValueError("plan_xid cant be None when displaying XP_Bereich")
+        # display all plan contents
+        for plan_content in self.planinhalt:
+            try:
+                plan_content.toCanvas(layer_group, plan_xid)
+            except TypeError as e:
+                logger.error(e)
+                logger.error(traceback.format_exc())
 
-        try:
-            srs = self.srs().postgisSrid()
-        except:
-            # when srs fails, plan content can't be displayed, therefore return early
-            return
-        layer = MapLayerRegistry().layer_by_display_name(self.displayName(), str(plan_xid))
-        if not layer:
-            layer = self.asLayer(srs, plan_xid, name=self.displayName(), geom_type=self.__geometry_type__)
-
-        feat_id = self.addFeatureToLayer(layer, self.asFeature(layer.fields()))
-        layer.setCustomProperty(f'xplanung/feat-{feat_id}', str(self.id))
-        MapLayerRegistry().addLayer(layer, group=layer_group)
+        super(XP_Bereich, self).toCanvas(layer_group, plan_xid)
 
     @classmethod
     def avoid_export(cls):
@@ -390,7 +382,6 @@ class XP_Objekt(FeatureType, RendererMixin, RelationshipMixin, ElementOrderMixin
     wirdDargestelltDurch = relationship("XP_AbstraktesPraesentationsobjekt",
         back_populates="dientZurDarstellungVon",
         cascade="all, delete",
-        passive_deletes=True,
         info={
             'form-type': 'hidden'
         }
