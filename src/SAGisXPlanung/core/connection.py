@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from typing import Union, Tuple
+from urllib.parse import quote
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import DatabaseError
@@ -32,7 +33,7 @@ def establish_session(session_maker: sessionmaker):
         if conn["service"]:
             conn_arguments = f"/?service={conn['service']}"
         else:
-            conn_arguments = f"{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+            conn_arguments = f"{conn['username']}:{quote(conn['password'])}@{conn['host']}:{conn['port']}/{conn['db']}"
 
         if session_maker.class_._is_asyncio:
             async_db_str = f"postgresql+asyncpg://{conn_arguments}"
@@ -54,7 +55,7 @@ def attempt_connection():
     if conn["service"]:
         conn_arguments = f"/?service={conn['service']}"
     else:
-        conn_arguments = f"{conn['username']}:{conn['password']}@{conn['host']}:{conn['port']}/{conn['db']}"
+        conn_arguments = f"{conn['username']}:{quote(conn['password'])}@{conn['host']}:{conn['port']}/{conn['db']}"
     db_str = f"postgresql://{conn_arguments}"
     ngn = create_engine(db_str)
     ngn.connect()

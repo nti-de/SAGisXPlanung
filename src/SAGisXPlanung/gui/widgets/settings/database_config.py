@@ -5,6 +5,7 @@ import os
 import traceback
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import quote
 
 import qasync
 from qgis.core import QgsDataSourceUri, QgsProviderRegistry
@@ -163,7 +164,7 @@ class DatabaseConfigPage(SettingsPage):
             self.ui.db_create.setEnabled(False)
             db = self.ui.db_name.text()
             username = self.ui.db_username.text()
-            password = self.ui.db_password.text()
+            password = quote(self.ui.db_password.text())
             host = self.ui.db_host.text()
             port = self.ui.db_port.text()
 
