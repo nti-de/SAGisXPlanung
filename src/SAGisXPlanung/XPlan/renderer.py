@@ -5,6 +5,7 @@ from qgis.PyQt.QtGui import QColor
 from qgis.core import QgsSymbol, QgsWkbTypes, QgsUnitTypes, QgsSingleSymbolRenderer
 
 from SAGisXPlanung.RuleBasedSymbolRenderer import RuleBasedSymbolRenderer
+from SAGisXPlanung.XPlan.core import SchemaSection
 from SAGisXPlanung.XPlan.types import GeometryType
 
 
@@ -26,7 +27,7 @@ def fallback_renderer(renderer_function):
     return wrapper
 
 
-def generic_objects_renderer(geom_type: GeometryType):
+def generic_objects_renderer(geom_type: GeometryType, schema_section = SchemaSection.FP):
     if geom_type is None:
         raise Exception('parameter geom_type should not be None')
 
@@ -38,8 +39,14 @@ def generic_objects_renderer(geom_type: GeometryType):
         point.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
     elif geom_type == QgsWkbTypes.GeometryType.LineGeometry:
         line = symbol.symbolLayer(0)
-        line.setColor(QColor('#cbcbcb'))
-        line.setWidth(0.75)
+        if schema_section == SchemaSection.BP:
+            line.setColor(QColor('black'))
+            line.setWidth(0.05)
+            line.setPenStyle(Qt.PenStyle.DashLine)
+        else:
+            line.setColor(QColor('#cbcbcb'))
+            line.setWidth(0.75)
+        line.setPenCapStyle(Qt.PenCapStyle.FlatCap)
         line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
     else:
         fill = symbol.symbolLayer(0)

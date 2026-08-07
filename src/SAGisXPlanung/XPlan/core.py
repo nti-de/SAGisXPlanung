@@ -1,6 +1,8 @@
 import logging
+from _operator import or_
 from dataclasses import dataclass
 from enum import Flag, auto
+from functools import reduce
 from typing import List
 
 from sqlalchemy import Column
@@ -25,3 +27,32 @@ def xp_version(versions: List[XPlanVersion]):
         setattr(cls, 'xp_versions', versions)
         return cls
     return decorator_versions
+
+
+def with_limits(enumeration):
+    """ add NONE and ALL psuedo-members to enumeration """
+    none_mbr = enumeration(0)
+    all_mbr = enumeration(reduce(or_, enumeration))
+    enumeration.NONE = none_mbr
+    enumeration.ALL = all_mbr
+    enumeration._member_map_['NONE'] = none_mbr
+    enumeration._member_map_['ALL'] = all_mbr
+    return enumeration
+
+
+@with_limits
+class SchemaSection(Flag):
+    BP = auto()
+    FP = auto()
+    LP = auto()
+    RP = auto()
+    SO = auto()
+
+    @classmethod
+    def from_plan_string(cls, string_list: List[str]):
+        result = cls(0)  # Start with an empty flag
+        for string in string_list:
+            base_name = string.replace("_Plan", "")
+            if hasattr(cls, base_name):
+                result |= getattr(cls, base_name)
+        return result

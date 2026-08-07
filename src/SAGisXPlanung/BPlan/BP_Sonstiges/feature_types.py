@@ -13,6 +13,7 @@ from sqlalchemy.orm import relationship
 from SAGisXPlanung import XPlanVersion
 from SAGisXPlanung.BPlan.BP_Basisobjekte.feature_types import BP_Objekt
 from SAGisXPlanung.BPlan.BP_Sonstiges.enums import BP_WegerechtTypen, BP_AbgrenzungenTypen, BP_AbstandsMassTypen
+from SAGisXPlanung.XPlan.core import SchemaSection
 from SAGisXPlanung.XPlan.renderer import fallback_renderer, generic_objects_renderer
 from SAGisXPlanung.XPlan.enums import XP_ZweckbestimmungKennzeichnung, XP_VerlaengerungVeraenderungssperre
 from SAGisXPlanung.core.mixins.mixins import PolygonGeometry, FlaechenschlussObjekt, LineGeometry, MixedGeometry, \
@@ -345,7 +346,7 @@ class BP_FestsetzungNachLandesrecht(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return generic_objects_renderer(geom_type)
+        return generic_objects_renderer(geom_type, schema_section=SchemaSection.BP)
 
 
 class BP_UnverbindlicheVormerkung(MixedGeometry, BP_Objekt):
@@ -363,7 +364,7 @@ class BP_UnverbindlicheVormerkung(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return generic_objects_renderer(geom_type)
+        return generic_objects_renderer(geom_type, schema_section=SchemaSection.BP)
 
 
 class BP_Veraenderungssperre(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
@@ -450,7 +451,7 @@ class BP_GenerischesObjekt(MixedGeometry, BP_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return generic_objects_renderer(geom_type)
+        return generic_objects_renderer(geom_type, schema_section=SchemaSection.BP)
 
 
 class BP_HoehenMass(MixedGeometry, BP_Objekt):
