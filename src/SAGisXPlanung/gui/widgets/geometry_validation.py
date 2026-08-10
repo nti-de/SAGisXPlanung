@@ -21,7 +21,7 @@ from qgis.gui import QgsGeometryRubberBand
 from qgis.core import (QgsPolygon, QgsWkbTypes, QgsPoint, QgsLineString, QgsMultiLineString, QgsMultiPolygon, QgsGeometry,
                        QgsCircularString, QgsCompoundCurve, QgsCurvePolygon, QgsMultiCurve, QgsMultiSurface, QgsMultiPoint)
 from qgis.utils import iface
-from requests import HTTPError
+from requests import HTTPError, ReadTimeout
 from sqlalchemy.orm import load_only
 
 from SAGisXPlanung import BASE_DIR, Session, PYQT5
@@ -49,6 +49,7 @@ class ValidationState(Enum):
     SUCCESS = "Keine Fehler gefunden"
     VALIDATOR_ERROR = "Syntaktischer Fehler im XPlanGML. Keine Validierung möglich."
     HTTP_ERROR = "HTTP-Fehler beim Upload zum XPlanValidator"
+    HTTP_TIMEOUT = "Timeout bei Anfrage an XPlanValidator-Server"
 
 
 class ValidationMethod(Enum):
@@ -261,6 +262,9 @@ class ValidationWidget(QWidget):
             except XPlanValidationError as e:
                 validation_state = ValidationState.VALIDATOR_ERROR
                 logger.error(e)
+            except ReadTimeout as e:
+                validation_state = ValidationState.HTTP_TIMEOUT
+                logger.error(e)
             except HTTPError as e:
                 validation_state = ValidationState.HTTP_ERROR
                 logger.error(e)
@@ -384,6 +388,7 @@ class ValidationTreeView(QTreeView):
             ValidationState.ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
             ValidationState.VALIDATOR_ERROR: os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
             ValidationState.HTTP_ERROR: os.path.join(BASE_DIR, 'gui/resources/globe-x.svg'),
+            ValidationState.HTTP_TIMEOUT: os.path.join(BASE_DIR, 'gui/resources/globe-x.svg'),
             ValidationState.SUCCESS: os.path.join(BASE_DIR, 'gui/resources/valid.svg'),
         }
 
