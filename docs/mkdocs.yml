@@ -42,6 +42,7 @@ theme:
 
 extra_css:
   - stylesheets/nti.css
+  - stylesheets/admonitions.css
 extra:
   homepage: https://nti-group.com/de
   tags:
@@ -52,7 +53,7 @@ extra:
     - icon: material/github
       link: https://github.com/nti-de/SAGisXPlanung
     - icon: simple/qgis
-      link: https://github.com/nti-de/SAGisXPlanung
+      link: https://plugins.qgis.org/plugins/SAGisXPlanung/
 
 markdown_extensions:
   - abbr
@@ -98,6 +99,7 @@ nav:
         - add-plancontent.md
         - plan-import.md
         - plan-export.md
+        - plan-combine.md
         - multi-edit.md
         - text-contents.md
     - Elemente der Oberfläche:

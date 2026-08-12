@@ -17,7 +17,7 @@ enthält. Dies kann ein Layer aus beliebiger Datenquelle oder auch ein Temporär
 
     Um vektorielle Planinhalte einem Planwerk zuordnen zu können, muss bei der [Erfassung eines Planwerks](new-plan.md) mindestens ein Bereich angelegt werden. 
     Ein Bereich dient zur logischen Gruppierung von Planinhalten. Bereiche nachträglich hinzufügen, ist über die
-    Funktion [Datenobjekte hinzufügen](#) möglich.
+    Funktion [Datenobjekte hinzufügen](#datenobjekte) möglich.
 
 
 1. Das Werkzeug **Planinhalte konfigurieren / abfragen** aus der XPlanung-Werkzeugleiste wählen. ++alt+q++
@@ -83,7 +83,7 @@ enthält. Dies kann ein Layer aus beliebiger Datenquelle oder auch ein Temporär
 Nach Bestätigen des Dialogs werden die neuen Objekte in der Datenbank angelegt und mit dem gewählten Plan verknüpft.
 Neue Objekte erscheinen im Anschluss im Objektbaum.
 
-## Datenobjekte hinzufügen
+## Datenobjekte hinzufügen {id="datenobjekte"}
 
 Datenobjekte sind Objektarten, die zusätzliche Sachdaten enthalten. Sie sind besitzen grundsätzliche keinen Raumbezug (Geometrie).
 !!! warning 

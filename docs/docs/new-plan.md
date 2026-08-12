@@ -60,5 +60,5 @@ zusätzlich ein georeferenziertes Rasterbild der Planzeichnung benötigt.
 
 Weitere Schritte:
 
-- [Planwerk-Details abfragen](#)
+- [Bearbeiten von Sachdaten](elements/plan-details.md#bearbeiten-von-sachdaten)
 - [Vektorielle Planinhalte hinzufügen](add-plancontent.md#planinhalte-mit-raumbezug-hinzufugen)

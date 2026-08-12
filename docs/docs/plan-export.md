@@ -2,7 +2,7 @@
 
 SAGis XPlanung ermöglicht den Export aller erfassten Planwerke in das Austauschformat XPlanGML. 
 Die Anwendung erzeugt dabei XPlanGML-Dateien in der Version 5.3 oder 6.0 
-(Anpassung der Version in den [Einstellungen](#) möglich).
+(Anpassung der Version in den [Einstellungen](settings/general.md#exportoptionen) möglich).
 
 1. Planwerk im Dropdown-Menü im untersten Abschnitt des Hauptdialogs auswählen
     ![Plan als XPlanGML exportieren](assets/xplan-export.png)

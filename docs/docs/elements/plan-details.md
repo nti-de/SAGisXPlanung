@@ -48,11 +48,12 @@ Dies betrifft die folgenden Bedingungen:
 - Geometrien enthalten keine doppelten Stützpunkte
 - Einhaltung des Flächenschlusskonzepts
 
-!!! info
+!!! info "Was ist der Flächenschluss?"
 
-    Flächenschluss: Bei der vollvektoriellen Erfassung muss der Zusammenschluss aller erfassten Flächen mit der Fläche 
+    Bei der vollvektoriellen Erfassung muss der Zusammenschluss aller erfassten Flächen mit der Fläche 
     des Geltungsbereichs übereinstimmen. Es dürfen keine Überlappungen oder Lücken zwischen den Flächen auftreten und 
-    keine Fläche darf den Umring des Geltungsbereichs übertreten.
+    keine Fläche darf den Umring des Geltungsbereichs übertreten. Angrenzende Objekte müssen sich an den Stützpunkten 
+    ihrer gemeinsamen Grenzen exakt berühren.
 
 ### Validierungsmethode
 
@@ -165,7 +166,7 @@ zugeordnet. Dabei können einzelne Planinhalte wiederum anderen Inhalte zugeordn
 
 - <a href="#filtern-und-sortieren"> Filtern und Sortieren der Planinhalte</a>
 - <a href="#bearbeiten-von-sachdaten" summary="">Bearbeiten von Sachdaten</a>
-- [Hinzufügen neuer Datenobjekte](../add-plancontent.md#datenobjekte-hinzufugen)
+- [Hinzufügen neuer Datenobjekte](../add-plancontent.md#datenobjekte)
 - <a href="#loschen-von-inhalten">Löschen von einzelnen Inhalten</a>
 
 
