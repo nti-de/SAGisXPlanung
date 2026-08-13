@@ -3,7 +3,7 @@ import functools
 import logging
 import os
 import uuid
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import qasync
 
@@ -70,7 +70,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bMap.clicked.connect(lambda _: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
         self.bDelete.clicked.connect(self.deletePlanContent)
-        self.bEdit.clicked.connect(self.show_attribute_page)
+        self.bEdit.clicked.connect(lambda _: self.show_attribute_page())
         # self.bEdit.setDisabled(True)
         self.bPrev.clicked.connect(self.prevPage)
         self.bSave = self.bActions.button(QtWidgets.QDialogButtonBox.StandardButton.Save)
@@ -104,7 +104,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         # self.objectTree.selectionModel().currentChanged.connect(lambda: self.bEdit.setDisabled(False))
         self.objectTree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.objectTree.customContextMenuRequested.connect(self.showObjectTreeContextMenu)
-        self.objectTree.doubleClicked.connect(self.show_attribute_page)
+        self.objectTree.doubleClicked.connect(self._show_attribute_page_for_index)
         self.objectTree.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         self.stackedWidget.currentChanged.connect(self.updateButtons)
 
@@ -365,7 +365,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
     @pyqtSlot()
     def highlightPlanContent(self):
-        item = self.objectTree.selectedItems()[0]
+        selected_items = self.objectTree.selectedItems()
+        if not selected_items:
+            return
+        item = selected_items[0]
         with Session.begin() as session:
             plan_content = session.get(item._data.xtype, item._data.xid)
             iface.mapCanvas().flashGeometries([plan_content.geometry()], plan_content.srs())
@@ -498,17 +501,29 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         except Exception as e:
             logger.exception(f"Exception on filling object explorer: {e}")
 
-    @pyqtSlot()
-    def show_attribute_page(self):
-        """ Zeigt ein QTreeWidget mit den Attributen und Werten des aktuell im Objektbaum gewählten Objekts an """
-        item = self.objectTree.selectedItems()[0]
+    def _show_attribute_page_for_index(self, index: QModelIndex):
+        node = self.objectTree.proxy.itemAtIndex(index)
+        if not isinstance(node, ClassNode):
+            return
+        xplan_item = node.xplanItem()
+        xplan_item.plan_xid = self.plan_xid
+        self.show_attribute_page(xplan_item)
 
-        xplanung_item = XPlanungItem(xid=item._data.xid, xtype=item._data.xtype, plan_xid=self.plan_xid)
-        attribute_edit_widget = QAttributeEdit.create(xplanung_item, self, self.undo_stack)
+    def show_attribute_page(self, xplan_item: Optional[XPlanungItem] = None):
+        """ Zeigt ein QTreeWidget mit den Attributen und Werten eines Objekts an. Falls kein Objekt
+        übergeben wird, wird das aktuell im Objektbaum gewählte Objekt verwendet. """
+        if xplan_item is None:
+            selected_item = next((node for node in self.objectTree.selectedItems() if isinstance(node, ClassNode)), None)
+            if selected_item is None:
+                return
+            xplan_item = selected_item.xplanItem()
+            xplan_item.plan_xid = self.plan_xid
+
+        attribute_edit_widget = QAttributeEdit.create(xplan_item, self, self.undo_stack)
         attribute_edit_widget.nameChanged.connect(self.onPlanNameChanged)
 
         for undo_command in self.undo_stack.iterate(_type=AttributeChangedCommand):
-            if undo_command.xplan_item.xid == xplanung_item.xid:
+            if undo_command.xplan_item.xid == xplan_item.xid:
                 new_index = attribute_edit_widget.model_index(undo_command.attribute)
                 undo_command.setModelIndex(new_index)
                 undo_command.signal_proxy.changeApplied.connect(attribute_edit_widget.apply_field_change)

@@ -351,7 +351,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
         # open attributes page
         self.details_dialog.stackedWidget.setCurrentIndex(0)
-        self.details_dialog.show_attribute_page()
+        self.details_dialog.show_attribute_page(xplan_item)
         self.openDetails()
 
     @qasync.asyncSlot(XPlanungItem)
