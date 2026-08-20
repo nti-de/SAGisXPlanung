@@ -17,7 +17,7 @@ from sqlalchemy.orm import load_only
 
 from SAGisXPlanung import PYQT5, BASE_DIR, Session
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
-from SAGisXPlanung.gui.style import load_svg, ApplicationColor
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor, EmptyStateFilter
 
 
 @dataclass
@@ -440,6 +440,7 @@ class CategoryChipView(QListView):
             self.chipClicked.emit(category_id)
             checked = index.data(CategoryChipModel.CheckedRole)
             self.model().setData(index, not checked, CategoryChipModel.CheckedRole)
+            self.updateGeometry()
 
         event.accept()
 
@@ -463,22 +464,22 @@ class CategoryChipView(QListView):
         option = self.viewOptions()
 
         item_height = delegate.sizeHint(option, self.model().index(0, 0)).height()
+        row_count = self.model().rowCount()
 
         rows = 1
         current_width = 0
 
-        for row in range(self.model().rowCount()):
+        for row in range(row_count):
             index = self.model().index(row, 0)
             item_width = delegate.sizeHint(option, index).width()
-
-            if current_width > 0 and current_width + 2 * self.spacing() + item_width > width:
+            # print(width, current_width, item_width, 'rows', rows)
+            if current_width > 0 and current_width + self.spacing() + item_width > width:
                 rows += 1
-                current_width = item_width + 2 * self.spacing()
+                current_width = item_width + self.spacing()
             else:
-                current_width += 2 * self.spacing()
-                current_width += item_width
+                current_width += item_width + self.spacing()
 
-        print(QSize(width, rows * item_height + (self.spacing() * rows * 2)))
+        print(QSize(width, rows * item_height + (self.spacing() * rows * 2)), 'rows', rows)
         return QSize(width, rows * item_height + (self.spacing() * rows * 2))
 
     def minimumSizeHint(self):
@@ -563,7 +564,7 @@ class PickerModel(QAbstractListModel):
         return None
 
     def rowCount(self, parent=QModelIndex()) -> int:
-        if parent.isValid():
+        if parent.isValid() or not self._items:
             return 0
 
         favorites_count = sum(item.is_favorite for item in self._items)
@@ -832,7 +833,10 @@ class PickerListView(QListView):
     
 
 class PickerPopup(QWidget):
-    def __init__(self, parent=None):
+    itemSelected = pyqtSignal(PickerItem)
+    EMPTY_STATE_FILTER_HINT = "Suchbegriff oder Filter entfernen um alle Objekte zu finden..."
+
+    def __init__(self, empty_state_title="Keine Inhalte gefunden", parent=None):
         super().__init__(parent, Qt.WindowType.Popup | Qt.WindowType.FramelessWindowHint | Qt.WindowType.NoDropShadowWindowHint)
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -856,12 +860,18 @@ class PickerPopup(QWidget):
         # self.category_list_view.removeRequested.connect( self.removeCategory)
 
         self.item_list_view = PickerListView()
-        self.picker_model = PickerModel(self)
+        self.picker_model = PickerModel(parent=self)
         self.item_list_view.setModel(self.picker_model)
+        self.item_list_view.clicked.connect(self._on_clicked)
+        self.item_list_empty_state = EmptyStateFilter(self.item_list_view)
+        self.item_list_empty_state.set_icon(':/images/themes/default/search.svg') \
+            .set_icon_size(24) \
+            .set_title(empty_state_title) \
+            .set_subtitle(self.EMPTY_STATE_FILTER_HINT)
 
         layout.addWidget(self.search_bar)
         layout.addWidget(self.category_list_view)
-        layout.addWidget(self.item_list_view)
+        layout.addWidget(self.item_list_view, stretch=1)
 
         self.setLayout(layout)
         
@@ -873,6 +883,18 @@ class PickerPopup(QWidget):
         painter.setBrush(self.palette().color(QPalette.Base))
         rect = self.rect().adjusted(1, 1, -1, -1)
         painter.drawRoundedRect(rect, 10, 10)
+
+    def _on_clicked(self, index):
+        row = index.row()
+
+        if self.picker_model._is_section(row):
+            return
+
+        item = self.picker_model._item_at_row(row)
+        if item is None:
+            return
+
+        self.itemSelected.emit(item)
 
     def add_category(self, category_id: str, label: str, checked: bool = False):
         self.category_model.addCategory(
@@ -892,8 +914,10 @@ class GenericPicker(QComboBox):
         print('init')
         super().__init__(parent)
 
-        self._popup = PickerPopup(self)
+        self._popup = PickerPopup(parent=self)
         self._popup.hide()
+
+        self._popup.itemSelected.connect(self._on_popup_item_selected)
 
     def paintEvent(self, event):
         print('paintEvent')
@@ -908,19 +932,30 @@ class GenericPicker(QComboBox):
         opt.currentText = painter.fontMetrics().elidedText(self.currentText(), Qt.TextElideMode.ElideRight, text_rect.width())
         painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 
+    def _on_popup_item_selected(self, item: PickerItem):
+        self.setCurrentText(item.text)
+        self.hidePopup()
+
     def showPopup(self):
         print('showPopup')
         position = self.mapToGlobal(self.rect().bottomLeft())
-        print(position)
+
+        self._popup.resize(288, 426)
         self._popup.move(position)
         self._popup.search_bar.setFocus()
         self._popup.show()
+        self._popup.update()
+
+    def hidePopup(self):
+        self._popup.hide()
 
     def add_category(self, category_id: str, label: str, checked: bool = False):
         self._popup.add_category(category_id, label, checked)
 
     def set_picker_items(self, items: list[PickerItem]):
         self._popup.set_picker_items(items)
+        for item in items:
+            self.addItem(item.text, item.id)
 
 
 p = GenericPicker()
