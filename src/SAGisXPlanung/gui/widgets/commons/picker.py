@@ -48,6 +48,159 @@ class Category:
     checked: bool = False
 
 
+class ModernScrollBarStyle(QProxyStyle):
+    SCROLLBAR_WIDTH = 8
+    HANDLE_MARGIN = 2
+    HANDLE_MIN_HEIGHT = 30
+
+    TRACK_COLOR = QColor(0, 0, 0, 0)
+    HANDLE_COLOR = QColor("#C4C4C4")
+    HANDLE_HOVER_COLOR = QColor("#A8A8A8")
+
+    def pixelMetric(self, metric, option=None, widget=None):
+        if metric in (
+            QStyle.PixelMetric.PM_ScrollBarExtent,
+            QStyle.PixelMetric.PM_ScrollBarSliderMin,
+        ):
+            if metric == QStyle.PixelMetric.PM_ScrollBarExtent:
+                return self.SCROLLBAR_WIDTH
+            return self.HANDLE_MIN_HEIGHT
+
+        return super().pixelMetric(metric, option, widget)
+
+    def subControlRect(self, control, option, sub_control, widget=None):
+        if control == QStyle.ComplexControl.CC_ScrollBar:
+            if sub_control == QStyle.SubControl.SC_ScrollBarAddLine:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSubLine:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarAddPage:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSubPage:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarGroove:
+                return option.rect
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSlider:
+                return self._slider_rect(option)
+
+        return super().subControlRect(control, option, sub_control, widget)
+
+    def drawComplexControl(self, control, option, painter, widget=None):
+        if control != QStyle.ComplexControl.CC_ScrollBar:
+            return super().drawComplexControl(control, option, painter, widget)
+
+        scrollbar = option
+        rect = scrollbar.rect
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Track
+        painter.fillRect(rect, self.TRACK_COLOR)
+
+        # Handle
+        handle = self._slider_rect(scrollbar)
+
+        if scrollbar.state & QStyle.StateFlag.State_MouseOver:
+            color = self.HANDLE_HOVER_COLOR
+        else:
+            color = self.HANDLE_COLOR
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(color)
+
+        radius = handle.width() / 2
+        painter.drawRoundedRect(handle, radius, radius)
+
+        painter.restore()
+
+    def _slider_rect(self, option):
+        rect = option.rect
+
+        if option.orientation == Qt.Orientation.Vertical:
+            margin = self.HANDLE_MARGIN
+
+            available = rect.height() - 2 * margin
+
+            minimum = option.minimum
+            maximum = option.maximum
+            page_step = option.pageStep
+
+            if maximum <= minimum:
+                height = available
+                y = margin
+            else:
+                total = maximum - minimum + page_step
+                height = max(
+                    self.HANDLE_MIN_HEIGHT,
+                    int(available * page_step / total),
+                )
+
+                height = min(height, available)
+
+                span = available - height
+                value_range = maximum - minimum
+
+                if value_range:
+                    y = margin + int(
+                        span * (option.sliderPosition - minimum)
+                        / value_range
+                    )
+                else:
+                    y = margin
+
+            return QRect(
+                rect.left() + margin,
+                rect.top() + y,
+                rect.width() - 2 * margin,
+                height,
+            )
+
+        else:
+            margin = self.HANDLE_MARGIN
+
+            available = rect.width() - 2 * margin
+
+            minimum = option.minimum
+            maximum = option.maximum
+            page_step = option.pageStep
+
+            if maximum <= minimum:
+                width = available
+                x = margin
+            else:
+                total = maximum - minimum + page_step
+                width = max(
+                    self.HANDLE_MIN_HEIGHT,
+                    int(available * page_step / total),
+                )
+
+                width = min(width, available)
+
+                span = available - width
+                value_range = maximum - minimum
+
+                if value_range:
+                    x = margin + int(
+                        span * (option.sliderPosition - minimum)
+                        / value_range
+                    )
+                else:
+                    x = margin
+
+            return QRect(
+                rect.left() + x,
+                rect.top() + margin,
+                width,
+                rect.height() - 2 * margin,
+            )
+
+
 class CategoryChipModel(QAbstractListModel):
     IdRole = Qt.ItemDataRole.UserRole + 1
     LabelRole = Qt.ItemDataRole.UserRole + 2
@@ -337,9 +490,6 @@ class SearchEditStyle(QProxyStyle):
     def __init__(self, base_style=None):
         super().__init__(base_style)
 
-        self.radius = 7
-        self.border_width = 1
-
     def drawPrimitive(self,element,option, painter, widget=None):
         if element == QStyle.PrimitiveElement.PE_FrameLineEdit and isinstance(widget, QLineEdit):
             return
@@ -405,6 +555,13 @@ class PickerModel(QAbstractListModel):
 
         return None
 
+    def _find_item(self, item_id: str) -> PickerItem | None:
+        for item in self._items:
+            if item.id == item_id:
+                return item
+
+        return None
+
     def rowCount(self, parent=QModelIndex()) -> int:
         if parent.isValid():
             return 0
@@ -458,7 +615,9 @@ class PickerModel(QAbstractListModel):
         if item is None:
             return
 
+        self.beginResetModel()
         item.is_favorite = not item.is_favorite
+        self.endResetModel()
 
 
 class PickerListDelegate(QStyledItemDelegate):
@@ -469,15 +628,15 @@ class PickerListDelegate(QStyledItemDelegate):
     PADDING = 12
     GAP = 12
 
-    STAR_SIZE = 16
+    STAR_SIZE = 14
 
-    TEXT_COLOR = QColor("#202020")
-    SECTION_COLOR = QColor("#707070")
-    HOVER_COLOR = QColor("#F4F4F4")
-    SELECTED_COLOR = QColor("#EDEDED")
+    TEXT_COLOR = QColor(ApplicationColor.PrimaryText)
+    SECTION_COLOR = QColor(ApplicationColor.MutedText)
+    HOVER_COLOR = QColor(ApplicationColor.Grey200)
+    SELECTED_COLOR = QColor(ApplicationColor.Grey300)
 
-    DOT_COLOR = QColor("#00B887")
-    STAR_COLOR = QColor("#707070")
+    STAR_COLOR = QColor(ApplicationColor.MutedText)
+    CHIP_FG, CHIP_BG = QColor(ApplicationColor.PrimaryText), QColor(ApplicationColor.Grey200)
 
     CATEGORY_COLORS = {
         "BP_PLAN": (QColor("#D7F3EB"), QColor("#008F70")),
@@ -497,7 +656,7 @@ class PickerListDelegate(QStyledItemDelegate):
 
         model = index.model()
         row = index.row()
-
+        # painter.drawRect(option.rect)
         if model._is_section(row):
             self._paint_section(painter, option, model._section_title(row))
         else:
@@ -516,37 +675,22 @@ class PickerListDelegate(QStyledItemDelegate):
 
         painter.setFont(font)
         painter.setPen(self.SECTION_COLOR)
-        painter.drawText(rect.adjusted(self.GAP, 0, -self.GAP, 0), Qt.AlignmentFlag.AlignVCenter, title)
+        painter.drawText(rect.adjusted(self.GAP // 2, 0, -self.GAP // 2, 0), Qt.AlignmentFlag.AlignVCenter, title)
 
     def _paint_item(self, painter, option, index, item):
+        text_rect, chip_rect, star_rect = self._item_geometry(option, item)
+
         self._paint_background(painter, option)
-
-        rect = option.rect
-        center_y = rect.top() + rect.height() / 2
-
-        star_rect = self._star_rect(rect)
-
-        chip_width = self._chip_width(painter, item.category, option.font)
-        chip_rect = QRectF(
-            star_rect.left() - self.GAP - chip_width,
-            center_y - self.CHIP_HEIGHT / 2,
-            chip_width,
-            self.CHIP_HEIGHT,
-        )
-
-        text_rect = QRectF(
-            rect.left() + self.GAP,
-            rect.top(),
-            chip_rect.left() - 2 * self.GAP,
-            rect.height(),
-        )
-
         self._paint_text(painter, text_rect, item.text, option.font)
 
         if item.category:
             self._paint_chip(painter, chip_rect, item.category, option.font)
 
-        if option.state & QStyle.StateFlag.State_Selected or option.state & QStyle.StateFlag.State_MouseOver:
+        if (
+            option.state & QStyle.StateFlag.State_Selected or
+            option.state & QStyle.StateFlag.State_MouseOver or
+            item.is_favorite
+        ):
             self._paint_star(painter, star_rect, item.is_favorite)
 
     def _paint_background(self, painter, option):
@@ -557,7 +701,7 @@ class PickerListDelegate(QStyledItemDelegate):
         else:
             return
 
-        rect = option.rect.adjusted(6, 2, -6, -2)
+        rect = option.rect.adjusted(2, 2, -2, -2)
 
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(color)
@@ -572,7 +716,7 @@ class PickerListDelegate(QStyledItemDelegate):
         text = QFontMetrics(font).elidedText(text, Qt.TextElideMode.ElideRight, int(rect.width()))
         painter.drawText(rect, Qt.AlignmentFlag.AlignVCenter, text)
 
-    def _chip_width(self, painter, category, font):
+    def _chip_width(self, category, font):
         if not category:
             return 0
 
@@ -583,7 +727,7 @@ class PickerListDelegate(QStyledItemDelegate):
 
     def _paint_chip(self, painter, rect, category, font):
         background, foreground = self.CATEGORY_COLORS.get(
-            category, (QColor("#EAEAEA"), QColor("#555555"))
+            category, (self.CHIP_BG, self.CHIP_FG)
         )
 
         painter.setPen(Qt.PenStyle.NoPen)
@@ -596,14 +740,31 @@ class PickerListDelegate(QStyledItemDelegate):
         painter.setPen(foreground)
         painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, category)
 
-    def _star_rect(self, rect):
+    def _item_geometry(self, option, item):
+        rect = option.rect
         center_y = rect.top() + rect.height() / 2
-        return QRectF(
+
+        chip_width = self._chip_width(item.category, option.font)
+
+        star_rect = QRectF(
             rect.right() - self.GAP - self.STAR_SIZE,
             center_y - self.STAR_SIZE / 2,
             self.STAR_SIZE,
             self.STAR_SIZE,
         )
+
+        chip_rect = QRectF(
+            star_rect.left() - self.GAP - chip_width,
+            center_y - self.CHIP_HEIGHT / 2,
+            chip_width,
+            self.CHIP_HEIGHT,
+        )
+
+        text_left = rect.left() + self.GAP
+        text_right = chip_rect.left() - self.GAP
+        text_rect = QRectF(text_left, rect.top(), text_right - text_left, rect.height())
+
+        return text_rect, chip_rect, star_rect
 
     def _paint_star(self, painter, rect, favorite):
         painter.save()
@@ -644,9 +805,11 @@ class PickerListDelegate(QStyledItemDelegate):
         if item is None:
             return False
 
+        _, _, star_rect = self._item_geometry(option, item)
+
         if event.type() == QEvent.Type.MouseButtonRelease:
             if event.button() == Qt.MouseButton.LeftButton:
-                if self._star_rect(option.rect).contains(event.pos()):
+                if star_rect.contains(event.pos()):
                     model.toggle_favorite(item.id)
                     return True
 
@@ -665,6 +828,7 @@ class PickerListView(QListView):
         self.setMouseTracking(True)
 
         self.setItemDelegate(PickerListDelegate(self))
+        self.setStyle(ModernScrollBarStyle('Fusion'))
     
 
 class PickerPopup(QWidget):
@@ -682,7 +846,7 @@ class PickerPopup(QWidget):
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Suchen...')
         self.search_bar.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
-        self.search_bar.setStyle(SearchEditStyle(self.search_bar.style()))
+        self.search_bar.setStyle(SearchEditStyle('Fusion'))
 
         self.category_model = CategoryChipModel(self)
 
@@ -771,7 +935,7 @@ with Session.begin() as session:
     ).all()
     picker_items = []
     for plan in plans:
-        picker_item = PickerItem(id=str(plan.id), text=plan.name, category='BP_Plan')
+        picker_item = PickerItem(id=str(plan.id), text=plan.name, category=plan.__class__.__name__)
         picker_items.append(picker_item)
     p.set_picker_items(picker_items)
 
