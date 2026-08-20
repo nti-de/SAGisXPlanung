@@ -6,9 +6,10 @@ from typing import Any
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF
 from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
+from plotly.validators.treemap.marker.pattern import _bgcolor
 from qgis.PyQt.QtGui import QPalette
 from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
-    QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem
+    QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QStylePainter, QStyleOptionComboBox, QStyle
 from qgis.PyQt.QtWidgets import QWidget, QDialog, QComboBox
@@ -859,6 +860,44 @@ class PickerPopup(QWidget):
         # self.category_model.categoriesChanged.connect(self._categoriesChanged)
         # self.category_list_view.removeRequested.connect( self.removeCategory)
 
+        self.sort_widget = QWidget(self)
+        self.sort_widget.setObjectName('sort_widget')
+        self.sort_button_group = QButtonGroup(self.sort_widget)
+        self.sort_widget.setLayout(QHBoxLayout())
+        self.sort_widget.layout().setContentsMargins(8, 5, 8, 5)
+        self.sort_widget.layout().addWidget(QLabel('Sortieren nach'), stretch=1)
+        self.button_sort_name = QPushButton('Name')
+        self.button_sort_name.setCheckable(True)
+        self.button_sort_name.setChecked(True)
+        self.button_sort_name.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow-down-a-z.svg')))
+        self.button_sort_last_used = QPushButton('Letzte')
+        self.button_sort_last_used.setCheckable(True)
+        self.button_sort_last_used.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/clock-arrow-down.svg')))
+        self.sort_button_group.addButton(self.button_sort_name)
+        self.sort_button_group.addButton(self.button_sort_last_used)
+        self.sort_widget.layout().addWidget(self.button_sort_name)
+        self.sort_widget.layout().addWidget(self.button_sort_last_used)
+        sort_widget_style = """
+            QWidget[objectName="sort_widget"] {{
+                border-top: 1px solid {_border_color};
+                border-bottom: 1px solid {_border_color};
+            }}
+            QPushButton {{
+                border: none;
+                padding: 5px;
+            }}
+            QPushButton:checked {{
+                border: 1px solid {_border_color};
+                border-radius: 5px;
+                padding: 5px;
+                background-color: {_bg_color_checked};
+            }}
+        """
+        self.sort_widget.setStyleSheet(sort_widget_style.format(
+            _bg_color_checked=ApplicationColor.Grey200,
+            _border_color=ApplicationColor.Grey300
+        ))
+
         self.item_list_view = PickerListView()
         self.picker_model = PickerModel(parent=self)
         self.item_list_view.setModel(self.picker_model)
@@ -871,6 +910,7 @@ class PickerPopup(QWidget):
 
         layout.addWidget(self.search_bar)
         layout.addWidget(self.category_list_view)
+        layout.addWidget(self.sort_widget)
         layout.addWidget(self.item_list_view, stretch=1)
 
         self.setLayout(layout)
