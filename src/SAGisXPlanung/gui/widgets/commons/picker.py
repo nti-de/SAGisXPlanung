@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from enum import auto, Enum
 from typing import Any
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF
+from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF, \
+    QSortFilterProxyModel
 from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
 from plotly.validators.treemap.marker.pattern import _bgcolor
 from qgis.PyQt.QtGui import QPalette
@@ -622,6 +623,84 @@ class PickerModel(QAbstractListModel):
         self.endResetModel()
 
 
+class PickerFilterProxyModel(QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self._search_text = ""
+        self._categories: set[str] = set()
+
+        self.setDynamicSortFilter(True)
+        self.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+
+    def set_search_text(self, text: str):
+        text = (text or "").strip()
+
+        if text == self._search_text:
+            return
+
+        self._search_text = text
+        self.invalidateFilter()
+
+    def set_categories(self, categories: set[str]):
+        categories = set(categories)
+
+        if categories == self._categories:
+            return
+
+        self._categories = categories
+        self.invalidateFilter()
+
+    def _source_index(self, proxy_row: int) -> QModelIndex:
+        return self.mapToSource(self.index(proxy_row, 0))
+
+    def _is_section(self, row: int) -> bool:
+        source_index = self._source_index(row)
+
+        if not source_index.isValid():
+            return False
+
+        return self.sourceModel()._is_section(source_index.row())
+
+    def _item_at_row(self, row: int) -> PickerItem | None:
+        source_index = self._source_index(row)
+
+        if not source_index.isValid():
+            return None
+
+        return self.sourceModel()._item_at_row(source_index.row())
+
+    def toggle_favorite(self, item_id: str):
+        self.sourceModel().toggle_favorite(item_id)
+
+    def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
+        source = self.sourceModel()
+        if source is None or source_parent.isValid():
+            return False
+
+        index = self.sourceModel().index(source_row, 0, source_parent)
+
+        if source._is_section(source_row):
+            sibling_row = source_row + 1
+            matches = False
+            while sibling_row != source.rowCount():
+                item = source._item_at_row(sibling_row)
+                if item is not None:
+                    matches = self._search_text.casefold() in item.text.casefold()
+
+                if matches or source._is_section(sibling_row):
+                    break
+                sibling_row += 1
+            return matches
+
+        item = source._item_at_row(source_row)
+        if item is not None:
+            matches = self._search_text.casefold() in item.text.casefold()
+            return matches
+
+        return False
+
+
 class PickerListDelegate(QStyledItemDelegate):
     ROW_HEIGHT = 32
     SECTION_HEIGHT = 28
@@ -648,7 +727,7 @@ class PickerListDelegate(QStyledItemDelegate):
     }
 
     def sizeHint(self, option, index):
-        if index.model()._is_section(index.row()):
+        if index.model().sourceModel()._is_section(index.row()):
             return QSize(0, self.SECTION_HEIGHT)
         return QSize(0, self.ROW_HEIGHT)
 
@@ -656,9 +735,10 @@ class PickerListDelegate(QStyledItemDelegate):
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        model = index.model()
-        row = index.row()
-        # painter.drawRect(option.rect)
+        model = index.model().sourceModel()
+        source_index = index.model().mapToSource(index)
+        row = source_index.row()
+
         if model._is_section(row):
             self._paint_section(painter, option, model._section_title(row))
         else:
@@ -857,8 +937,6 @@ class PickerPopup(QWidget):
 
         self.category_list_view = CategoryChipView()
         self.category_list_view.setModel(self.category_model)
-        # self.category_model.categoriesChanged.connect(self._categoriesChanged)
-        # self.category_list_view.removeRequested.connect( self.removeCategory)
 
         self.sort_widget = QWidget(self)
         self.sort_widget.setObjectName('sort_widget')
@@ -900,7 +978,9 @@ class PickerPopup(QWidget):
 
         self.item_list_view = PickerListView()
         self.picker_model = PickerModel(parent=self)
-        self.item_list_view.setModel(self.picker_model)
+        self.picker_proxy_model = PickerFilterProxyModel(parent=self)
+        self.picker_proxy_model.setSourceModel(self.picker_model)
+        self.item_list_view.setModel(self.picker_proxy_model)
         self.item_list_view.clicked.connect(self._on_clicked)
         self.item_list_empty_state = EmptyStateFilter(self.item_list_view)
         self.item_list_empty_state.set_icon(':/images/themes/default/search.svg') \
@@ -914,6 +994,9 @@ class PickerPopup(QWidget):
         layout.addWidget(self.item_list_view, stretch=1)
 
         self.setLayout(layout)
+
+        self.search_bar.textChanged.connect(self.picker_proxy_model.set_search_text)
+        # self.category_model.dataChanged.connect(self._categories_changed)
         
     def paintEvent(self, event):
         painter = QStylePainter(self)
@@ -927,10 +1010,10 @@ class PickerPopup(QWidget):
     def _on_clicked(self, index):
         row = index.row()
 
-        if self.picker_model._is_section(row):
+        if self.picker_proxy_model._is_section(row):
             return
 
-        item = self.picker_model._item_at_row(row)
+        item = self.picker_proxy_model._item_at_row(row)
         if item is None:
             return
 
