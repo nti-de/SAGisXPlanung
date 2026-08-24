@@ -7,7 +7,6 @@ from typing import Any
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF, \
     QSortFilterProxyModel
 from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
-from plotly.validators.treemap.marker.pattern import _bgcolor
 from qgis.PyQt.QtGui import QPalette
 from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
     QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup
@@ -29,18 +28,6 @@ class PickerItem:
     category: str | None = None
     is_favorite: bool = False
     data: Any = None
-
-
-class RowType(Enum):
-    SECTION = auto()
-    ITEM = auto()
-
-
-@dataclass
-class PickerRow:
-    type: RowType
-    item: PickerItem | None = None
-    title: str | None = None
 
 
 @dataclass
@@ -243,7 +230,8 @@ class CategoryChipModel(QAbstractListModel):
         if role == self.CheckedRole:
             category = self._categories[index.row()]
             category.checked = value
-            self.dataChanged.emit(index, index)
+            self.dataChanged.emit(index, index, [self.CheckedRole])
+            self.categoriesChanged.emit()
 
     def addCategory(self, category: Category):
         if self.contains(category.id):
@@ -505,17 +493,13 @@ class PickerModel(QAbstractListModel):
         super().__init__(parent)
 
         self._items: list[PickerItem] = items or []
-        self._rows: list[PickerRow] = []
-
         self._search_text = ""
-        self._categories: set[str] = set()
 
     def _favorite_items(self) -> list[PickerItem]:
         return [item for item in self._items if item.is_favorite]
 
     def _has_favorites(self) -> bool:
         return bool(self._favorite_items())
-
 
     def _is_section(self, row: int) -> bool:
         favorites = self._favorite_items()
@@ -606,12 +590,6 @@ class PickerModel(QAbstractListModel):
         self._items = items
         self.endResetModel()
 
-    def set_search_text(self, text: str):
-        self._search_text = text
-
-    def set_categories(self, categories: set[str]):
-        self._categories = categories
-
     def toggle_favorite(self, item_id: str):
         item = self._find_item(item_id)
 
@@ -675,28 +653,44 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
 
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
         source = self.sourceModel()
+
         if source is None or source_parent.isValid():
             return False
 
-        index = self.sourceModel().index(source_row, 0, source_parent)
-
         if source._is_section(source_row):
-            sibling_row = source_row + 1
-            matches = False
-            while sibling_row != source.rowCount():
-                item = source._item_at_row(sibling_row)
-                if item is not None:
-                    matches = self._search_text.casefold() in item.text.casefold()
-
-                if matches or source._is_section(sibling_row):
-                    break
-                sibling_row += 1
-            return matches
+            return self._section_has_matching_items(source_row)
 
         item = source._item_at_row(source_row)
-        if item is not None:
-            matches = self._search_text.casefold() in item.text.casefold()
-            return matches
+        if item is None:
+            return False
+
+        return self._item_matches(item)
+
+    def _item_matches(self, item: PickerItem) -> bool:
+        if self._categories:
+            if item.category not in self._categories:
+                return False
+
+        search = self._search_text.casefold()
+        if search and search not in item.text.casefold():
+            return False
+
+        return True
+
+    def _section_has_matching_items(self, section_row: int) -> bool:
+        source = self.sourceModel()
+
+        row = section_row + 1
+        while row < source.rowCount():
+            # Stop when we reach the next section.
+            if source._is_section(row):
+                break
+
+            item = source._item_at_row(row)
+            if item is not None and self._item_matches(item):
+                return True
+
+            row += 1
 
         return False
 
@@ -718,13 +712,6 @@ class PickerListDelegate(QStyledItemDelegate):
 
     STAR_COLOR = QColor(ApplicationColor.MutedText)
     CHIP_FG, CHIP_BG = QColor(ApplicationColor.PrimaryText), QColor(ApplicationColor.Grey200)
-
-    CATEGORY_COLORS = {
-        "BP_PLAN": (QColor("#D7F3EB"), QColor("#008F70")),
-        "RP_PLAN": (QColor("#DCE9FF"), QColor("#2455D6")),
-        "LP_PLAN": (QColor("#FFF0D8"), QColor("#C75A00")),
-        "FP_PLAN": (QColor("#EEDCFF"), QColor("#8A12D6")),
-    }
 
     def sizeHint(self, option, index):
         if index.model().sourceModel()._is_section(index.row()):
@@ -808,9 +795,7 @@ class PickerListDelegate(QStyledItemDelegate):
         return QFontMetrics(font).horizontalAdvance(category) + self.PADDING * 2
 
     def _paint_chip(self, painter, rect, category, font):
-        background, foreground = self.CATEGORY_COLORS.get(
-            category, (self.CHIP_BG, self.CHIP_FG)
-        )
+        background, foreground = self.CHIP_BG, self.CHIP_FG
 
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(background)
@@ -996,7 +981,7 @@ class PickerPopup(QWidget):
         self.setLayout(layout)
 
         self.search_bar.textChanged.connect(self.picker_proxy_model.set_search_text)
-        # self.category_model.dataChanged.connect(self._categories_changed)
+        self.category_model.categoriesChanged.connect(self._categories_changed)
         
     def paintEvent(self, event):
         painter = QStylePainter(self)
@@ -1018,6 +1003,15 @@ class PickerPopup(QWidget):
             return
 
         self.itemSelected.emit(item)
+
+    def _categories_changed(self):
+        categories = {
+            category.id
+            for category in self.category_model.categories()
+            if category.checked
+        }
+
+        self.picker_proxy_model.set_categories(categories)
 
     def add_category(self, category_id: str, label: str, checked: bool = False):
         self.category_model.addCategory(
@@ -1082,10 +1076,10 @@ class GenericPicker(QComboBox):
 
 
 p = GenericPicker()
-p.add_category("bp", "BP_Plan")
-p.add_category("fp", "FP_Plan")
-p.add_category("lp", "LP_Plan")
-p.add_category("rp", "RP_Plan")
+p.add_category("BP_Plan", "BP_Plan")
+p.add_category("FP_Plan", "FP_Plan")
+p.add_category("LP_Plan", "LP_Plan")
+p.add_category("RP_Plan", "RP_Plan")
 
 with Session.begin() as session:
     plans = session.query(XP_Plan).options(
