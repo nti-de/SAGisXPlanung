@@ -5,7 +5,7 @@ from enum import auto, Enum
 from typing import Any
 
 from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF, \
-    QSortFilterProxyModel
+    QSortFilterProxyModel, QSettings, QDateTime
 from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
 from qgis.PyQt.QtGui import QPalette
 from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
@@ -35,6 +35,39 @@ class Category:
     id: str
     label: str
     checked: bool = False
+
+
+class PickerSortMode(Enum):
+    NAME = auto()
+    LAST_USED = auto()
+
+
+class PickerUsageStore:
+    def __init__(self, settings_key='plugins/xplanung/picker/last_used'):
+        self._settings = QSettings()
+        self._settings_key = settings_key
+
+    def _data(self) -> dict:
+        data = self._settings.value(self._settings_key, {})
+        return data if isinstance(data, dict) else {}
+
+    def last_used(self, item_id: str) -> int | None:
+        return self._data().get(item_id)
+
+    def mark_used(self, item_id: str):
+        data = self._data()
+        data[item_id] = QDateTime.currentDateTimeUtc().toSecsSinceEpoch()
+        self._settings.setValue(self._settings_key, data)
+
+    def forget(self, item_id: str):
+        data = self._data()
+
+        if item_id in data:
+            del data[item_id]
+            self._settings.setValue(self._settings_key, data)
+
+    def clear(self):
+        self._settings.remove(self._settings_key)
 
 
 class ModernScrollBarStyle(QProxyStyle):
@@ -462,14 +495,12 @@ class CategoryChipView(QListView):
         for row in range(row_count):
             index = self.model().index(row, 0)
             item_width = delegate.sizeHint(option, index).width()
-            # print(width, current_width, item_width, 'rows', rows)
             if current_width > 0 and current_width + self.spacing() + item_width > width:
                 rows += 1
                 current_width = item_width + self.spacing()
             else:
                 current_width += item_width + self.spacing()
 
-        print(QSize(width, rows * item_height + (self.spacing() * rows * 2)), 'rows', rows)
         return QSize(width, rows * item_height + (self.spacing() * rows * 2))
 
     def minimumSizeHint(self):
@@ -602,14 +633,34 @@ class PickerModel(QAbstractListModel):
 
 
 class PickerFilterProxyModel(QSortFilterProxyModel):
+    sortChanged = pyqtSignal(PickerSortMode, Qt.SortOrder)
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self._search_text = ""
         self._categories: set[str] = set()
+        self._sort_mode = PickerSortMode.NAME
+        self._sort_order = Qt.SortOrder.AscendingOrder
+        self._usage_store = PickerUsageStore()
 
-        self.setDynamicSortFilter(True)
+        self.setDynamicSortFilter(False)
+        self.sort(0, self._sort_order)
         self.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+
+    def set_sort_mode(self, mode: PickerSortMode):
+        if mode == self._sort_mode:
+            self._sort_order = (
+                Qt.SortOrder.DescendingOrder
+                if self._sort_order == Qt.SortOrder.AscendingOrder
+                else Qt.SortOrder.AscendingOrder
+            )
+        else:
+            self._sort_mode = mode
+            self._sort_order = Qt.SortOrder.AscendingOrder
+
+        self.sortChanged.emit(self._sort_mode, self._sort_order)
+        self.sort(0, self._sort_order)
 
     def set_search_text(self, text: str):
         text = (text or "").strip()
@@ -618,7 +669,7 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
             return
 
         self._search_text = text
-        self.invalidateFilter()
+        self.invalidate()
 
     def set_categories(self, categories: set[str]):
         categories = set(categories)
@@ -627,7 +678,7 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
             return
 
         self._categories = categories
-        self.invalidateFilter()
+        self.invalidate()
 
     def _source_index(self, proxy_row: int) -> QModelIndex:
         return self.mapToSource(self.index(proxy_row, 0))
@@ -693,6 +744,39 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
             row += 1
 
         return False
+
+    def lessThan(self, source_left, source_right):
+        left_item = self.sourceModel()._item_at_row(source_left.row())
+        right_item = self.sourceModel()._item_at_row(source_right.row())
+
+        if left_item is None or right_item is None:
+            return False
+
+        if self._sort_mode == PickerSortMode.LAST_USED:
+            return self._less_than_last_used(left_item, right_item)
+
+        return left_item.text.casefold() < right_item.text.casefold()
+
+    def _less_than_last_used(self, left, right):
+        left_used = self._usage_store.last_used(left.id)
+        right_used = self._usage_store.last_used(right.id)
+
+        # Never-used items go last.
+        if left_used is None and right_used is None:
+            return left.text.casefold() < right.text.casefold()
+
+        if left_used is None:
+            return False
+
+        if right_used is None:
+            return True
+
+        # Most recently used first.
+        if left_used != right_used:
+            return left_used > right_used
+
+        # Stable deterministic tie-breaker.
+        return left.text.casefold() < right.text.casefold()
 
 
 class PickerListDelegate(QStyledItemDelegate):
@@ -932,10 +1016,14 @@ class PickerPopup(QWidget):
         self.button_sort_name = QPushButton('Name')
         self.button_sort_name.setCheckable(True)
         self.button_sort_name.setChecked(True)
-        self.button_sort_name.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow-down-a-z.svg')))
+        self.icon_sort_name_ascending = load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow-down-a-z.svg'))
+        self.icon_sort_name_descending = load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow-up-z-a.svg'))
+        self.icon_sort_last_used_ascending = load_svg(os.path.join(BASE_DIR, 'gui/resources/clock-arrow-down.svg'))
+        self.icon_sort_last_used_descending = load_svg(os.path.join(BASE_DIR, 'gui/resources/clock-arrow-up.svg'))
+        self.button_sort_name.setIcon(self.icon_sort_name_ascending)
         self.button_sort_last_used = QPushButton('Letzte')
         self.button_sort_last_used.setCheckable(True)
-        self.button_sort_last_used.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/clock-arrow-down.svg')))
+        self.button_sort_last_used.setIcon(self.icon_sort_last_used_ascending)
         self.sort_button_group.addButton(self.button_sort_name)
         self.sort_button_group.addButton(self.button_sort_last_used)
         self.sort_widget.layout().addWidget(self.button_sort_name)
@@ -965,6 +1053,7 @@ class PickerPopup(QWidget):
         self.picker_model = PickerModel(parent=self)
         self.picker_proxy_model = PickerFilterProxyModel(parent=self)
         self.picker_proxy_model.setSourceModel(self.picker_model)
+        self.picker_proxy_model.sortChanged.connect(self._on_sort_changed)
         self.item_list_view.setModel(self.picker_proxy_model)
         self.item_list_view.clicked.connect(self._on_clicked)
         self.item_list_empty_state = EmptyStateFilter(self.item_list_view)
@@ -980,6 +1069,13 @@ class PickerPopup(QWidget):
 
         self.setLayout(layout)
 
+        self.usage_store = PickerUsageStore()
+        self.button_sort_name.clicked.connect(
+            lambda: self.picker_proxy_model.set_sort_mode(PickerSortMode.NAME)
+        )
+        self.button_sort_last_used.clicked.connect(
+            lambda: self.picker_proxy_model.set_sort_mode(PickerSortMode.LAST_USED)
+        )
         self.search_bar.textChanged.connect(self.picker_proxy_model.set_search_text)
         self.category_model.categoriesChanged.connect(self._categories_changed)
         
@@ -992,6 +1088,20 @@ class PickerPopup(QWidget):
         rect = self.rect().adjusted(1, 1, -1, -1)
         painter.drawRoundedRect(rect, 10, 10)
 
+    def _on_sort_changed(self, sort_mode: PickerSortMode, sort_order: Qt.SortOrder):
+        if sort_mode == PickerSortMode.NAME:
+            if sort_order == Qt.SortOrder.AscendingOrder:
+                sort_icon = self.icon_sort_name_ascending
+            else:
+                sort_icon = self.icon_sort_name_descending
+            self.button_sort_name.setIcon(sort_icon)
+        else:
+            if sort_order == Qt.SortOrder.AscendingOrder:
+                sort_icon = self.icon_sort_last_used_ascending
+            else:
+                sort_icon = self.icon_sort_last_used_descending
+            self.button_sort_last_used.setIcon(sort_icon)
+
     def _on_clicked(self, index):
         row = index.row()
 
@@ -1002,7 +1112,10 @@ class PickerPopup(QWidget):
         if item is None:
             return
 
+        self.usage_store.mark_used(item.id)
         self.itemSelected.emit(item)
+
+        self.picker_proxy_model.sort(0, self.picker_proxy_model.sortOrder())
 
     def _categories_changed(self):
         categories = {
