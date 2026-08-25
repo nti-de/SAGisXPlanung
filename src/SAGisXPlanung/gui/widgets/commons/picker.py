@@ -9,7 +9,8 @@ from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRe
 from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
 from qgis.PyQt.QtGui import QPalette
 from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
-    QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup
+    QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup, QApplication, \
+    QToolTip
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QStylePainter, QStyleOptionComboBox, QStyle
 from qgis.PyQt.QtWidgets import QWidget, QDialog, QComboBox
@@ -604,6 +605,8 @@ class PickerModel(QAbstractListModel):
         item = self._item_at_row(row)
         if item is not None and role == Qt.ItemDataRole.DisplayRole:
             return item.text
+        if item is not None and role == Qt.ItemDataRole.ToolTipRole:
+            return item.text
 
         return None
 
@@ -966,6 +969,29 @@ class PickerListDelegate(QStyledItemDelegate):
 
         return super().editorEvent(event, model, option, index)
 
+    def helpEvent(self, event, view, option, index):
+        if not index.isValid():
+            return False
+
+        if event.type() == QEvent.Type.ToolTip:
+            item = view.model()._item_at_row(index.row())
+            if item is None:
+                return False
+
+            text_rect, _, _ = self._item_geometry(option, item)
+            tooltip_text = view.model().data(index, Qt.ItemDataRole.ToolTipRole)
+            elided = option.fontMetrics.elidedText(item.text, Qt.TextElideMode.ElideRight, int(text_rect.width()))
+
+            is_elided = elided != item.text
+            if is_elided:
+                QToolTip.showText(event.globalPos(), tooltip_text, view, view.visualRect(index))
+            else:
+                QToolTip.hideText()
+            return True
+
+        return super().helpEvent(event, view, option, index)
+
+
 
 class PickerListView(QListView):
 
@@ -1140,14 +1166,19 @@ class PickerPopup(QWidget):
 
 
 class GenericPicker(QComboBox):
-    def __init__(self, parent=None):
+    def __init__(self, default_size=(288, 426), parent=None):
         print('init')
         super().__init__(parent)
+
+        self.default_size = default_size
 
         self._popup = PickerPopup(parent=self)
         self._popup.hide()
 
         self._popup.itemSelected.connect(self._on_popup_item_selected)
+
+        self.setMinimumContentsLength(20)
+        self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
 
     def paintEvent(self, event):
         print('paintEvent')
@@ -1158,8 +1189,14 @@ class GenericPicker(QComboBox):
         painter.setPen(self.palette().color(QPalette.Text))
         painter.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
 
+        if self.count() == 0:
+            text = self.placeholderText()
+            painter.setPen(self.palette().color(QPalette.PlaceholderText))
+        else:
+            text = self.currentText()
+        print(text)
         text_rect = self.style().subControlRect(QStyle.ComplexControl.CC_ComboBox, opt, QStyle.SubControl.SC_ComboBoxEditField)
-        opt.currentText = painter.fontMetrics().elidedText(self.currentText(), Qt.TextElideMode.ElideRight, text_rect.width())
+        opt.currentText = painter.fontMetrics().elidedText(text, Qt.TextElideMode.ElideRight, text_rect.width())
         painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 
     def _on_popup_item_selected(self, item: PickerItem):
@@ -1168,13 +1205,48 @@ class GenericPicker(QComboBox):
 
     def showPopup(self):
         print('showPopup')
-        position = self.mapToGlobal(self.rect().bottomLeft())
-
-        self._popup.resize(288, 426)
-        self._popup.move(position)
+        self._position_popup()
         self._popup.search_bar.setFocus()
         self._popup.show()
         self._popup.update()
+
+    def _position_popup(self):
+        desired_width = self.default_size[0]
+        desired_height = self.default_size[1]
+
+        combo_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.size())
+
+        screen = QApplication.screenAt(combo_rect.center())
+        if screen is None:
+            screen = QApplication.primaryScreen()
+
+        available = screen.availableGeometry()
+        space_below = available.bottom() - combo_rect.bottom()
+        space_above = combo_rect.top() - available.top()
+
+        # Prefer below unless there is substantially more room above.
+        if space_below >= desired_height or space_below >= space_above:
+            direction = "below"
+            available_height = space_below
+        else:
+            direction = "above"
+            available_height = space_above
+
+        height = min(desired_height, available_height)
+        width = min(desired_width, available.width())
+
+        if direction == "below":
+            y = combo_rect.bottom()
+        else:
+            y = combo_rect.top() - height
+
+        x = combo_rect.left()
+
+        # Keep horizontally inside the available screen.
+        x = max(available.left(), min(x, available.right() - width))
+
+        self._popup.setFixedSize(width, height)
+        self._popup.move(x, y)
 
     def hidePopup(self):
         self._popup.hide()
@@ -1189,6 +1261,7 @@ class GenericPicker(QComboBox):
 
 
 p = GenericPicker()
+p.setPlaceholderText('Keine Pläne verfügbar...')
 p.add_category("BP_Plan", "BP_Plan")
 p.add_category("FP_Plan", "FP_Plan")
 p.add_category("LP_Plan", "LP_Plan")
