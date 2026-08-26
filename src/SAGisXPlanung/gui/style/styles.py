@@ -205,6 +205,7 @@ class EmptyStateFilter(QObject):
                 result = super().eventFilter(obj, event)
 
                 painter = QPainter(self._view.viewport())
+                print('paint')
                 self._draw_empty_state(painter, self._view.viewport().rect())
                 painter.end()
 
@@ -218,7 +219,6 @@ class EmptyStateFilter(QObject):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-        # painter.setBrush(Qt.NoBrush)
 
         # Calculate total height needed
         total_height = 0
@@ -235,13 +235,19 @@ class EmptyStateFilter(QObject):
         total_height += title_height
 
         # Subtitle height
-        subtitle_height = 0
         if self._subtitle:
             total_height += self._subtitle_spacing
             subtitle_font = self._subtitle_font if self._subtitle_font else painter.font()
             painter.setFont(subtitle_font)
             subtitle_metrics = painter.fontMetrics()
-            subtitle_height = subtitle_metrics.height()
+
+            # Limit subtitle to the available width so it can wrap
+            subtitle_rect = subtitle_metrics.boundingRect(
+                viewport_rect,
+                Qt.TextFlag.TextWordWrap | Qt.AlignmentFlag.AlignCenter,
+                self._subtitle,
+            )
+            subtitle_height = subtitle_rect.height()
             total_height += subtitle_height
 
         # Starting Y position (centered vertically)
@@ -270,12 +276,20 @@ class EmptyStateFilter(QObject):
         # Draw subtitle
         if self._subtitle:
             current_y += self._subtitle_spacing
-            subtitle_font = self._subtitle_font if self._subtitle_font else painter.font()
             painter.setFont(subtitle_font)
             painter.setPen(self._subtitle_color)
-            subtitle_rect = subtitle_metrics.boundingRect(self._subtitle)
-            subtitle_rect.moveCenter(viewport_rect.center())
-            subtitle_rect.moveTop(int(current_y))
-            painter.drawText(subtitle_rect, Qt.AlignmentFlag.AlignCenter, self._subtitle)
+
+            subtitle_draw_rect = QRect(
+                viewport_rect.left(),
+                int(current_y),
+                viewport_rect.width(),
+                subtitle_height,
+            )
+
+            painter.drawText(
+                subtitle_draw_rect,
+                Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
+                self._subtitle,
+            )
 
         painter.restore()

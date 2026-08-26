@@ -10,7 +10,7 @@ from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFo
 from qgis.PyQt.QtGui import QPalette
 from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
     QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup, QApplication, \
-    QToolTip
+    QToolTip, QToolButton
 from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtWidgets import QStylePainter, QStyleOptionComboBox, QStyle
 from qgis.PyQt.QtWidgets import QWidget, QDialog, QComboBox
@@ -1025,6 +1025,9 @@ class PickerPopup(QWidget):
 
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Suchen...')
+        self.search_bar.setClearButtonEnabled(True)
+        close_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/close.svg'))
+        self.search_bar.findChild(QToolButton).setIcon(close_icon)
         self.search_bar.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.search_bar.setStyle(SearchEditStyle('Fusion'))
 
