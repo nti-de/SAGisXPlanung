@@ -1,6 +1,7 @@
 import logging
 import os
 
+from qgis.PyQt.QtWidgets import QStyle
 from qgis.PyQt import QtWidgets, uic, QtCore
 from sqlalchemy.orm.exc import DetachedInstanceError
 
@@ -72,11 +73,11 @@ class XPEditAttributeDialog(QtWidgets.QDialog, FORM_CLASS):
         super(XPEditAttributeDialog, self).accept()
 
     def eventFilter(self, source, event):
-        if event.type() == QtCore.QEvent.ToolTip and isinstance(source, QtWidgets.QGroupBox):
+        if event.type() == QtCore.QEvent.Type.ToolTip and isinstance(source, QtWidgets.QGroupBox):
             options = QtWidgets.QStyleOptionGroupBox()
             source.initStyleOption(options)
-            control = source.style().hitTestComplexControl(QtWidgets.QStyle.CC_GroupBox, options, event.pos())
-            if control != QtWidgets.QStyle.SC_GroupBoxLabel and control != QtWidgets.QStyle.SC_GroupBoxCheckBox:
+            control = source.style().hitTestComplexControl(QStyle.ComplexControl.CC_GroupBox, options, event.pos())
+            if control != QStyle.SubControl.SC_GroupBoxLabel and control != QStyle.SubControl.SC_GroupBoxCheckBox:
                 QtWidgets.QToolTip.hideText()
                 return True
         return super().eventFilter(source, event)

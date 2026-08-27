@@ -212,63 +212,65 @@ class BP_BaugebietsTeilFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
         return cell_data
 
     def validate(self):
-        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kleinsiedlungsgebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.ReinesWohngebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.AllgWohngebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.BesonderesWohngebiet.name) and (
-                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.WohnBauflaeche.name):
+        print(type(self.besondereArtDerBaulNutzung), type(self.allgArtDerBaulNutzung))
+        print(self.allgArtDerBaulNutzung == XP_AllgArtDerBaulNutzung.WohnBauflaeche)
+        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kleinsiedlungsgebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.ReinesWohngebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.AllgWohngebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.BesonderesWohngebiet) and (
+                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.WohnBauflaeche):
             raise ConformityException(f'Wenn <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{self.besondereArtDerBaulNutzung}</b> hat, '
                                       f'muss <code>allgArtDerBaulNutzung</code> den Wert <b>'
                                       f'{XP_AllgArtDerBaulNutzung(1000)}</b> haben',
                                       '4.5.1.2', self.__class__.__name__)
 
-        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Dorfgebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Mischgebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.UrbanesGebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kerngebiet.name) and (
-                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.GemischteBauflaeche.name):
+        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Dorfgebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Mischgebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.UrbanesGebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Kerngebiet) and (
+                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.GemischteBauflaeche):
             raise ConformityException(f'Wenn <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{self.besondereArtDerBaulNutzung}</b> hat, '
                                       f'muss <code>allgArtDerBaulNutzung</code> den Wert <b>'
                                       f'{XP_AllgArtDerBaulNutzung(2000)}</b> haben',
                                       '4.5.1.2', self.__class__.__name__)
 
-        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Gewerbegebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Industriegebiet.name) and (
-                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.GewerblicheBauflaeche.name):
+        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Gewerbegebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Industriegebiet) and (
+                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.GewerblicheBauflaeche):
             raise ConformityException(f'Wenn <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{self.besondereArtDerBaulNutzung}</b> hat, '
                                       f'muss <code>allgArtDerBaulNutzung</code> den Wert <b>'
                                       f'{XP_AllgArtDerBaulNutzung(3000)}</b> haben',
                                       '4.5.1.2', self.__class__.__name__)
 
-        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Sondergebiet.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.SondergebietErholung.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.SondergebietSonst.name or
-            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Wochenendhausgebiet.name) and (
-                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.SonderBauflaeche.name):
+        if (self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Sondergebiet or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.SondergebietErholung or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.SondergebietSonst or
+            self.besondereArtDerBaulNutzung == XP_BesondereArtDerBaulNutzung.Wochenendhausgebiet) and (
+                self.allgArtDerBaulNutzung != XP_AllgArtDerBaulNutzung.SonderBauflaeche):
             raise ConformityException(f'Wenn <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{self.besondereArtDerBaulNutzung}</b> hat, '
                                       f'muss <code>allgArtDerBaulNutzung</code> den Wert <b>'
                                       f'{XP_AllgArtDerBaulNutzung(4000)}</b> haben',
                                       '4.5.1.2', self.__class__.__name__)
 
-        erholung_sondernutzungen = [XP_Sondernutzungen.Wochendhausgebiet.name, XP_Sondernutzungen.Ferienhausgebiet.name,
-                                    XP_Sondernutzungen.Campingplatzgebiet.name, XP_Sondernutzungen.Kurgebiet.name,
-                                    XP_Sondernutzungen.SonstSondergebietErholung.name]
+        erholung_sondernutzungen = [XP_Sondernutzungen.Wochendhausgebiet, XP_Sondernutzungen.Ferienhausgebiet,
+                                    XP_Sondernutzungen.Campingplatzgebiet, XP_Sondernutzungen.Kurgebiet,
+                                    XP_Sondernutzungen.SonstSondergebietErholung]
         if (self.sondernutzung and not set(self.sondernutzung).isdisjoint(set(erholung_sondernutzungen))) and \
-                self.besondereArtDerBaulNutzung != XP_BesondereArtDerBaulNutzung.SondergebietErholung.name:
-            raise ConformityException(f'Wenn <code>sonderNutzung</code> den Wert <b>{self.sondernutzung}</b> hat, '
+                self.besondereArtDerBaulNutzung != XP_BesondereArtDerBaulNutzung.SondergebietErholung:
+            raise ConformityException(f'Wenn <code>sonderNutzung</code> den Wert <b>{",".join(map(str, self.sondernutzung))}</b> hat, '
                                       f'muss <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{XP_BesondereArtDerBaulNutzung(2000)}</b> haben',
-                                      '4.5.1.2', self.__class__.__name__)
+                                      '4.5.1.3', self.__class__.__name__)
         if (self.sondernutzung and set(self.sondernutzung).isdisjoint(set(erholung_sondernutzungen))) and \
-                self.besondereArtDerBaulNutzung != XP_BesondereArtDerBaulNutzung.SondergebietSonst.name:
-            raise ConformityException(f'Wenn <code>sonderNutzung</code> den Wert <b>{self.sondernutzung}</b> hat, '
+                self.besondereArtDerBaulNutzung != XP_BesondereArtDerBaulNutzung.SondergebietSonst:
+            raise ConformityException(f'Wenn <code>sonderNutzung</code> den Wert <b>{",".join(map(str, self.sondernutzung))}</b> hat, '
                                       f'muss <code>besondereArtDerBaulNutzung</code> den Wert '
                                       f'<b>{XP_BesondereArtDerBaulNutzung(2100)}</b> haben',
-                                      '4.5.1.2', self.__class__.__name__)
+                                      '4.5.1.3', self.__class__.__name__)
 
 
 @event.listens_for(BP_BaugebietsTeilFlaeche, 'load')

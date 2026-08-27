@@ -3,12 +3,12 @@ import os
 
 import qasync
 from qgis.PyQt.QtGui import QCloseEvent, QIcon, QPen, QColor, QFontMetrics, QClipboard, QFontDatabase
-from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent, QSignalBlocker
+from qgis.PyQt.QtCore import QSettings, QSize, pyqtSignal, QEvent, QSignalBlocker, QRectF
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QListView, QWidget, QVBoxLayout, QPushButton, QLabel, QHBoxLayout,
-                                 QApplication, QAbstractButton)
+                                 QApplication, QAbstractButton, QStyle)
 from qgis.PyQt.QtCore import QModelIndex, QAbstractListModel, Qt, QRect
 
-from SAGisXPlanung import BASE_DIR, XPlanVersion
+from SAGisXPlanung import BASE_DIR, XPlanVersion, PYQT5
 from SAGisXPlanung.core.export_filename_resolver import ExportFilenameResolver
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter, HighlightRowProxyStyle
@@ -390,6 +390,8 @@ class AccountDelegate(QStyledItemDelegate):
         self._hovered_index = None
 
     def paint(self, painter, option, index):
+        self.initStyleOption(option, index)
+
         account = index.data(Qt.ItemDataRole.DisplayRole)
         if not account:
             return
@@ -443,9 +445,9 @@ class AccountDelegate(QStyledItemDelegate):
         painter.drawText(subtitle_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, api_text)
 
         # --- Draw Icon ---
-        self.get_hover_icon("copy").paint(painter, icon_rects["copy"])
-        self.get_hover_icon("edit").paint(painter, icon_rects["edit"])
-        self.get_hover_icon("delete").paint(painter, icon_rects["delete"])
+        self.get_hover_icon("copy").paint(painter, icon_rects["copy"].toRect())
+        self.get_hover_icon("edit").paint(painter, icon_rects["edit"].toRect())
+        self.get_hover_icon("delete").paint(painter, icon_rects["delete"].toRect())
 
         painter.restore()
 
@@ -469,12 +471,16 @@ class AccountDelegate(QStyledItemDelegate):
 
     def editorEvent(self, event, model, option, index):
         icon_rects = self.get_icon_rects(option, index)
-        pos = event.pos()
+
+        if PYQT5:
+            mouse_pos = event.pos()
+        else:
+            mouse_pos = event.position()
 
         if event.type() == QEvent.Type.MouseMove:
             hovered_icon = None
             for name, rect in icon_rects.items():
-                if rect.contains(pos):
+                if rect.contains(mouse_pos):
                     hovered_icon = name
                     break
 
@@ -485,20 +491,20 @@ class AccountDelegate(QStyledItemDelegate):
                 self.parent().viewport().update(option.rect)
             return True
 
-        if event.type() == event.Leave:
+        if event.type() == QEvent.Type.Leave:
             self._hovered_icon = None
             self._hovered_index = None
             self.parent().viewport().update(option.rect)
             return True
 
-        if event.type() == event.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
-            if icon_rects["copy"].contains(pos):
+        if event.type() == QEvent.Type.MouseButtonRelease and event.button() == Qt.MouseButton.LeftButton:
+            if icon_rects["copy"].contains(mouse_pos):
                 self.copyClicked.emit(index)
                 return True
-            elif icon_rects["edit"].contains(pos):
+            elif icon_rects["edit"].contains(mouse_pos):
                 self.editClicked.emit(index)
                 return True
-            elif icon_rects["delete"].contains(pos):
+            elif icon_rects["delete"].contains(mouse_pos):
                 self.deleteClicked.emit(index)
                 return True
 
@@ -519,15 +525,15 @@ class AccountDelegate(QStyledItemDelegate):
         subtitle_top = option.rect.top() + padding + text_metrics.height() + spacing
         subtitle_baseline = subtitle_top + text_metrics.ascent()
 
-        copy_icon_rect = QRect(option.rect.left() + padding + api_text_width + icon_gap,
+        copy_icon_rect = QRectF(option.rect.left() + padding + api_text_width + icon_gap,
                                subtitle_baseline - icon_size,
                                icon_size, icon_size)
 
-        delete_icon_rect = QRect(option.rect.right() - padding - icon_size,
+        delete_icon_rect = QRectF(option.rect.right() - padding - icon_size,
                                  option.rect.top() + (option.rect.height() - icon_size) // 2,
                                  icon_size, icon_size)
 
-        edit_icon_rect = QRect(delete_icon_rect.left() - icon_gap - icon_size,
+        edit_icon_rect = QRectF(delete_icon_rect.left() - icon_gap - icon_size,
                                delete_icon_rect.top(),
                                icon_size, icon_size)
 

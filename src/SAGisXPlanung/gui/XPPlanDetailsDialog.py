@@ -591,9 +591,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 items_to_delete.append(session.get(class_type, uid))
 
             msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Warning)
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
             msg.setWindowTitle("Löschvorgang bestätigen")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.Cancel)
+            msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.Cancel)
 
             if len(items_to_delete) <= 1:
                 msg.setText(f"Wollen Sie den Planinhalt unwiderruflich löschen? (id: {items_to_delete[0].id})")
@@ -604,7 +604,7 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
                 t += '</ul>'
                 msg.setText(t)
             ret = msg.exec()
-            if ret == QtWidgets.QMessageBox.Cancel:
+            if ret == QtWidgets.QMessageBox.StandardButton.Cancel:
                 return False, []
 
             for d in items_to_delete:

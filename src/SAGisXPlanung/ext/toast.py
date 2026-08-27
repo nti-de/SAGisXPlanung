@@ -1,6 +1,6 @@
 from qgis.PyQt.QtWidgets import (QFrame, QHBoxLayout, QSizePolicy, QGraphicsDropShadowEffect, QGraphicsOpacityEffect,
                                  QStyle, QApplication, QLabel, QToolButton)
-from qgis.PyQt.QtCore import QTimer, QPropertyAnimation, Qt, QPoint, QEvent, QRectF, QRect, QSize
+from qgis.PyQt.QtCore import QTimer, QPropertyAnimation, Qt, QPoint, QEvent, QRectF, QRect, QSize, QAbstractAnimation
 from qgis.PyQt.QtGui import QColor, QPainterPath, QTransform, QRegion, QCursor
 
 
@@ -50,7 +50,7 @@ class Toaster(QFrame):
 
     def checkClosed(self):
         # if we have been fading out, we're closing the notification
-        if self.opacityAni.direction() == self.opacityAni.Backward:
+        if self.opacityAni.direction() == QAbstractAnimation.Direction.Backward:
             self.close()
 
     def restore(self):
@@ -68,7 +68,7 @@ class Toaster(QFrame):
 
     def hide(self):
         # start hiding
-        self.opacityAni.setDirection(self.opacityAni.Backward)
+        self.opacityAni.setDirection(QAbstractAnimation.Direction.Backward)
         self.opacityAni.setDuration(500)
         self.opacityAni.start()
 

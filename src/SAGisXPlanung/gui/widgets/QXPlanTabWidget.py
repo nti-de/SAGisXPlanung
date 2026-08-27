@@ -108,11 +108,11 @@ class QXPlanTabWidget(QtWidgets.QTabWidget):
             return obj
         except ConformityException as e:
             msg = QtWidgets.QMessageBox()
-            msg.setIcon(QtWidgets.QMessageBox.Warning)
+            msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
 
             msg.setText(e.message)
             msg.setWindowTitle(f"Konformitätsbedingung {e.code} für das Objekt {e.object_type} verletzt")
-            msg.setStandardButtons(QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel)
+            msg.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok | QtWidgets.QMessageBox.StandardButton.Cancel)
             ret = msg.exec()
         except InvalidFormException:
             pass
