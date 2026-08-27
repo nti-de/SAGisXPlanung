@@ -4,22 +4,20 @@ from dataclasses import dataclass
 from enum import auto, Enum
 from typing import Any
 
-from PyQt5.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF, \
-    QSortFilterProxyModel, QSettings, QDateTime
-from PyQt5.QtGui import QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
-from qgis.PyQt.QtGui import QPalette
-from PyQt5.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QGraphicsDropShadowEffect, QProxyStyle, \
-    QStyledItemDelegate, QSizePolicy, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup, QApplication, \
-    QToolTip, QToolButton
-from qgis.PyQt.QtCore import Qt
-from qgis.PyQt.QtWidgets import QStylePainter, QStyleOptionComboBox, QStyle
-from qgis.PyQt.QtWidgets import QWidget, QDialog, QComboBox
+from qgis.PyQt.QtCore import QAbstractListModel, QModelIndex, pyqtSignal, QSize, QRect, QPoint, QEvent, QRectF, \
+    QSortFilterProxyModel, QSettings, QDateTime, Qt
+from qgis.PyQt.QtGui import QPalette, QPainter, QColor, QIcon, QFontMetrics, QPen, QBrush, QFont, QPainterPath
+from qgis.PyQt.QtWidgets import QVBoxLayout, QFrame, QLabel, QListView, QLineEdit, QProxyStyle, \
+    QStyledItemDelegate, QStyleOptionViewItem, QHBoxLayout, QPushButton, QButtonGroup, QApplication, \
+    QToolTip, QToolButton, QStylePainter, QStyleOptionComboBox, QStyle, QWidget, QDialog, QComboBox
+
 from qgis.utils import iface
 from sqlalchemy.orm import load_only
 
 from SAGisXPlanung import PYQT5, BASE_DIR, Session
 from SAGisXPlanung.XPlan.feature_types import XP_Plan
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, EmptyStateFilter
+from SAGisXPlanung.gui.style.palette import is_dark_mode
 
 
 @dataclass
@@ -332,8 +330,8 @@ class CategoryChipDelegate(QStyledItemDelegate):
     CHIP_HEIGHT = 20
 
     # Unselected
-    BG_COLOR = QColor(ApplicationColor.Grey200)
-    BORDER_COLOR = QColor(ApplicationColor.Grey300)
+    BG_COLOR = QColor(ApplicationColor.SurfaceStrong)
+    BORDER_COLOR = QColor(ApplicationColor.Border)
     TEXT_COLOR = QColor(ApplicationColor.PrimaryText)
 
     # Selected
@@ -342,7 +340,7 @@ class CategoryChipDelegate(QStyledItemDelegate):
     SELECTED_TEXT_COLOR = QColor(ApplicationColor.OnPrimary)
 
     # Hover
-    HOVER_BG_COLOR = QColor(ApplicationColor.Grey300)
+    HOVER_BG_COLOR = QColor(ApplicationColor.SurfaceSelected)
     SELECTED_HOVER_BG_COLOR = QColor(ApplicationColor.Primary)
 
 
@@ -402,8 +400,8 @@ class CategoryChipDelegate(QStyledItemDelegate):
         fm = QFontMetrics(option.font)
 
         text_left = rect.left() + self.HORIZONTAL_PADDING
-        text_rect = QRect(text_left, rect.top(), fm.horizontalAdvance(label) ,rect.height())
-        painter.drawText(text_rect, Qt.AlignmentFlag.AlignVCenter, label)
+        text_rect = QRect(text_left, rect.top(), fm.horizontalAdvance(label), rect.height())
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignCenter, label)
 
         if checked and not self.close_icon.isNull():
             close_rect = self.closeRect(option, index)
@@ -431,7 +429,7 @@ class CategoryChipView(QListView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        print('init chip view')
         self.setFlow(QListView.Flow.LeftToRight)
         self.setWrapping(True)
         self.setResizeMode(QListView.ResizeMode.Adjust)
@@ -445,6 +443,7 @@ class CategoryChipView(QListView):
         self.setMouseTracking(True)
 
         self.setItemDelegate(CategoryChipDelegate(self))
+        print('completed setup chip view')
 
     def mousePressEvent(self, event):
         if event.button() != Qt.MouseButton.LeftButton:
@@ -485,7 +484,7 @@ class CategoryChipView(QListView):
             return QSize(0, 0)
 
         delegate = self.itemDelegate()
-        option = self.viewOptions()
+        option = self.view_options()
 
         item_height = delegate.sizeHint(option, self.model().index(0, 0)).height()
         row_count = self.model().rowCount()
@@ -748,16 +747,45 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
 
         return False
 
-    def lessThan(self, source_left, source_right):
-        left_item = self.sourceModel()._item_at_row(source_left.row())
-        right_item = self.sourceModel()._item_at_row(source_right.row())
+    def _row_group(self, row: int) -> int:
+        """0 = Favoriten section (header + favorite items), 1 = Alle Pläne section."""
+        favorites = self.sourceModel()._favorite_items()
+        if favorites and row <= len(favorites):
+            return 0
+        return 1
 
+    def lessThan(self, source_left, source_right):
+        left_row, right_row = source_left.row(), source_right.row()
+
+        # Qt calls lessThan with arguments swapped when sortOrder() is
+        # Descending (it sorts using lessThan(right, left) internally, so it
+        # gets a reversed order "for free" from a single comparator). That's
+        # exactly what we want for item-vs-item comparisons below, but
+        # structural placement (headers first, favorites group first) must
+        # stay pinned to the top regardless of direction, so we detect the
+        # swap here and cancel it out only for the structural checks.
+        descending = self.sortOrder() == Qt.SortOrder.DescendingOrder
+
+        left_group = self._row_group(left_row)
+        right_group = self._row_group(right_row)
+        if left_group != right_group:
+            result = left_group < right_group
+            return not result if descending else result
+
+        source = self.sourceModel()
+        left_is_header = source._is_section(left_row)
+        right_is_header = source._is_section(right_row)
+        if left_is_header or right_is_header:
+            result = left_is_header and not right_is_header
+            return not result if descending else result
+
+        left_item = source._item_at_row(left_row)
+        right_item = source._item_at_row(right_row)
         if left_item is None or right_item is None:
             return False
 
         if self._sort_mode == PickerSortMode.LAST_USED:
             return self._less_than_last_used(left_item, right_item)
-
         return left_item.text.casefold() < right_item.text.casefold()
 
     def _less_than_last_used(self, left, right):
@@ -794,11 +822,11 @@ class PickerListDelegate(QStyledItemDelegate):
 
     TEXT_COLOR = QColor(ApplicationColor.PrimaryText)
     SECTION_COLOR = QColor(ApplicationColor.MutedText)
-    HOVER_COLOR = QColor(ApplicationColor.Grey200)
-    SELECTED_COLOR = QColor(ApplicationColor.Grey300)
+    HOVER_COLOR = QColor(ApplicationColor.BackgroundHover)
+    SELECTED_COLOR = QColor(ApplicationColor.SurfaceSelected)
 
     STAR_COLOR = QColor(ApplicationColor.MutedText)
-    CHIP_FG, CHIP_BG = QColor(ApplicationColor.PrimaryText), QColor(ApplicationColor.Grey200)
+    CHIP_FG, CHIP_BG = QColor(ApplicationColor.PrimaryText), QColor(ApplicationColor.SurfaceStrong)
 
     def sizeHint(self, option, index):
         if index.model().sourceModel()._is_section(index.row()):
@@ -877,7 +905,7 @@ class PickerListDelegate(QStyledItemDelegate):
             return 0
 
         font = QFont(font)
-        font.setPointSize(9)
+        font.setPointSize(8)
 
         return QFontMetrics(font).horizontalAdvance(category) + self.PADDING * 2
 
@@ -889,7 +917,7 @@ class PickerListDelegate(QStyledItemDelegate):
         painter.drawRoundedRect(rect, rect.height() / 2, rect.height() / 2)
 
         font = QFont(font)
-        font.setPointSize(9)
+        font.setPointSize(8)
         painter.setFont(font)
         painter.setPen(foreground)
         painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, category)
@@ -960,10 +988,13 @@ class PickerListDelegate(QStyledItemDelegate):
             return False
 
         _, _, star_rect = self._item_geometry(option, item)
-
         if event.type() == QEvent.Type.MouseButtonRelease:
             if event.button() == Qt.MouseButton.LeftButton:
-                if star_rect.contains(event.pos()):
+                if PYQT5:
+                    mouse_position = event.pos()
+                else:
+                    mouse_position = event.position()
+                if star_rect.contains(mouse_position):
                     model.toggle_favorite(item.id)
                     return True
 
@@ -1026,7 +1057,7 @@ class PickerPopup(QWidget):
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText('Suchen...')
         self.search_bar.setClearButtonEnabled(True)
-        close_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/close.svg'))
+        close_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/close.svg'), color=ApplicationColor.PrimaryText)
         self.search_bar.findChild(QToolButton).setIcon(close_icon)
         self.search_bar.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.search_bar.setStyle(SearchEditStyle('Fusion'))
@@ -1074,8 +1105,8 @@ class PickerPopup(QWidget):
             }}
         """
         self.sort_widget.setStyleSheet(sort_widget_style.format(
-            _bg_color_checked=ApplicationColor.Grey200,
-            _border_color=ApplicationColor.Grey300
+            _bg_color_checked=ApplicationColor.SurfaceStrong,
+            _border_color=ApplicationColor.SurfaceSelected
         ))
 
         self.item_list_view = PickerListView()
@@ -1112,8 +1143,8 @@ class PickerPopup(QWidget):
         painter = QStylePainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        painter.setPen(self.palette().color(QPalette.Mid))
-        painter.setBrush(self.palette().color(QPalette.Base))
+        painter.setPen(self.palette().color(QPalette.ColorRole.Mid))
+        painter.setBrush(self.palette().color(QPalette.ColorRole.Base))
         rect = self.rect().adjusted(1, 1, -1, -1)
         painter.drawRoundedRect(rect, 10, 10)
 
@@ -1189,15 +1220,15 @@ class GenericPicker(QComboBox):
         self.initStyleOption(opt)
 
         painter = QStylePainter(self)
-        painter.setPen(self.palette().color(QPalette.Text))
+        painter.setPen(self.palette().color(QPalette.ColorRole.Text))
         painter.drawComplexControl(QStyle.ComplexControl.CC_ComboBox, opt)
 
         if self.count() == 0:
             text = self.placeholderText()
-            painter.setPen(self.palette().color(QPalette.PlaceholderText))
+            painter.setPen(self.palette().color(QPalette.ColorRole.PlaceholderText))
         else:
             text = self.currentText()
-        print(text)
+
         text_rect = self.style().subControlRect(QStyle.ComplexControl.CC_ComboBox, opt, QStyle.SubControl.SC_ComboBoxEditField)
         opt.currentText = painter.fontMetrics().elidedText(text, Qt.TextElideMode.ElideRight, text_rect.width())
         painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
@@ -1263,6 +1294,7 @@ class GenericPicker(QComboBox):
             self.addItem(item.text, item.id)
 
 
+print('darkmode', is_dark_mode())
 p = GenericPicker()
 p.setPlaceholderText('Keine Pläne verfügbar...')
 p.add_category("BP_Plan", "BP_Plan")

@@ -2,6 +2,10 @@ import logging
 import sys
 from typing import List
 
+from qgis.PyQt.QtCore import Qt
+
+from SAGisXPlanung import PYQT5
+
 logger = logging.getLogger(__name__)
 
 if sys.version_info >= (3, 11):
@@ -13,15 +17,30 @@ else:
         pass
 
 
+def is_dark_mode() -> bool:
+    if PYQT5:
+        return False
+    else:
+        from qgis.PyQt.QtGui import QGuiApplication
+
+        style_hints = QGuiApplication.styleHints()
+        color_mode = style_hints.colorScheme()
+
+        return color_mode == Qt.ColorScheme.Dark
+
+
 class ApplicationColor(StrEnumCompat):
-    PrimaryText = '#000000'
-    MutedText = '#4b5563'
+    PrimaryText = '#ffffff' if is_dark_mode() else '#000000'
+    MutedText = '#cbd5e1' if is_dark_mode() else '#4b5563'
 
     Primary = '#1D4ED8'
     PrimaryLight = '#3B82F6'
     PrimaryLightest = '#EFF6FF'
     PrimaryDark = '#1E3A8A'
     Secondary = '#111827'
+
+    Background = '#2d2d2d' if is_dark_mode() else '#FFFFFF'
+    BackgroundHover = '#383838' if is_dark_mode() else '#F3F4F6'
 
     Error = '#be123c'
     ErrorBackground = '#FECACA'
@@ -37,6 +56,13 @@ class ApplicationColor(StrEnumCompat):
     Grey300 = '#d1d5db'
     Grey400 = '#9ca3af'
     Grey600 = '#4b5563'
+
+    Surface = '#3a3a3a' if is_dark_mode() else Grey100          # subtle panel/section tints
+    SurfaceStrong = '#454545' if is_dark_mode() else Grey200    # actionable items, chips, rows, buttons
+    SurfaceSelected = '#565656' if is_dark_mode() else Grey300  # selected rows, items
+    Border = '#565656' if is_dark_mode() else Grey300           # dividers, outlines, borders
+    IconMuted = '#8a8a8a' if is_dark_mode() else Grey400        # secondary icons
+    TextStrong = '#d1d5db' if is_dark_mode() else Grey600       # highest-contrast neutral text
 
 
 def with_color_palette(widget, colors: List[ApplicationColor], class_=''):

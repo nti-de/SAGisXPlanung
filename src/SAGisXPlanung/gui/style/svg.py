@@ -1,14 +1,18 @@
 from qgis.PyQt.QtGui import QPixmap, QPainter, QColor, QIcon
 from qgis.PyQt.QtCore import QObject, QEvent, QSize
 
+from .palette import ApplicationColor
+
 
 def load_svg(svg, color=None):
     img = QPixmap(svg)
-    if color:
-        qp = QPainter(img)
-        qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
-        qp.fillRect(img.rect(), QColor(color))
-        qp.end()
+    if not color:
+        color = ApplicationColor.PrimaryText
+
+    qp = QPainter(img)
+    qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
+    qp.fillRect(img.rect(), QColor(color))
+    qp.end()
     return QIcon(img)
 
 

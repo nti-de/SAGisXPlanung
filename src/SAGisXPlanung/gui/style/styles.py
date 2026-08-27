@@ -7,6 +7,8 @@ from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QPro
                                  QAbstractItemView, QToolTip)
 from qgis.PyQt.QtSvg import QSvgRenderer
 
+from .palette import ApplicationColor
+
 logger = logging.getLogger(__name__)
 
 FlagNewRole = Qt.ItemDataRole.UserRole + 1
@@ -125,11 +127,11 @@ class EmptyStateFilter(QObject):
         # Default settings
         self._icon_path = None
         self._icon_size = 48
-        self._icon_color = QColor(100, 100, 100)
+        self._icon_color = QColor(ApplicationColor.IconMuted)
         self._title = "No items to display"
         self._subtitle = None
-        self._title_color = QColor(100, 100, 100)
-        self._subtitle_color = QColor(150, 150, 150)
+        self._title_color = QColor(ApplicationColor.PrimaryText)
+        self._subtitle_color = QColor(ApplicationColor.MutedText)
         self._spacing = 10
         self._subtitle_spacing = 8
         self._title_font = None
