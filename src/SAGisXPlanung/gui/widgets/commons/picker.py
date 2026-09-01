@@ -1272,7 +1272,6 @@ class PickerPopup(QWidget):
         if item is None:
             return
 
-        self.metadata_store.mark_used(item.id)
         self.itemSelected.emit(item)
 
         self.picker_proxy_model.sort(0, self.picker_proxy_model.sortOrder())
@@ -1285,6 +1284,9 @@ class PickerPopup(QWidget):
         }
 
         self.picker_proxy_model.set_categories(categories)
+
+    def mark_used(self, item_id: str):
+        self.metadata_store.mark_used(item_id)
 
     def add_category(self, category_id: str, label: str, checked: bool = False):
         self.category_model.addCategory(
@@ -1310,11 +1312,13 @@ class GenericPicker(QComboBox):
         super().__init__(parent)
 
         self.default_size = default_size
+        self._suppress_usage_tracking = False
 
         self._popup = PickerPopup(parent=self)
         self._popup.hide()
 
         self._popup.itemSelected.connect(self._on_popup_item_selected)
+        self.currentIndexChanged.connect(self._on_current_index_changed)
 
         self.setMinimumContentsLength(20)
         self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
@@ -1339,7 +1343,16 @@ class GenericPicker(QComboBox):
 
     def _on_popup_item_selected(self, item: PickerItem):
         self.setCurrentText(item.text)
+        self._popup.search_bar.clear()
         self.hidePopup()
+
+    def _on_current_index_changed(self, index: int):
+        if self._suppress_usage_tracking or index < 0:
+            return
+
+        item_id = self.itemData(index)
+        if item_id:
+            self._popup.mark_used(item_id)
 
     def showPopup(self):
         self._position_popup()
@@ -1392,9 +1405,14 @@ class GenericPicker(QComboBox):
         self._popup.add_category(category_id, label, checked)
 
     def set_picker_items(self, items: list[PickerItem]):
-        self._popup.set_picker_items(items)
-        for item in items:
-            self.addItem(item.text, item.id)
+        self._suppress_usage_tracking = True
+        try:
+            self.clear()
+            self._popup.set_picker_items(items)
+            for item in items:
+                self.addItem(item.text, item.id)
+        finally:
+            self._suppress_usage_tracking = False
 
     def remove_item(self, item_id: str) -> bool:
         removed = self._popup.remove_item(item_id)
@@ -1402,9 +1420,13 @@ class GenericPicker(QComboBox):
         index = self.findData(item_id)
         if index >= 0:
             was_current = self.currentData() == item_id
-            self.removeItem(index)
-            if was_current:
-                self.setCurrentIndex(0)
+            self._suppress_usage_tracking = True
+            try:
+                self.removeItem(index)
+                if was_current:
+                    self.setCurrentIndex(-1)
+            finally:
+                self._suppress_usage_tracking = False
 
         return removed
 
