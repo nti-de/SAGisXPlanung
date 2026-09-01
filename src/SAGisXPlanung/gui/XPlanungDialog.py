@@ -177,7 +177,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
 
     @qasync.asyncSlot(str, str)
     async def onPlanNameChanged(self, xid: str, updated_name: str):
-        self.cbPlaene.setPlanName(xid, updated_name)
+        self.cbPlaene.update_item(xid, updated_name)
 
     def onIdentifyClicked(self, checked: bool):
         if checked:

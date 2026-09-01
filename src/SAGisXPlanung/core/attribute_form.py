@@ -7,6 +7,9 @@ from SAGisXPlanung.utils import CLASSES
 
 def on_sagis_xplan_attribute_form_open(dialog, layer, feature):
     """Python form init function called when the feature form opens."""
+    if not feature.isValid():
+        return
+
     if not QgsConfig.auto_replace_attribute_form():
         return
 

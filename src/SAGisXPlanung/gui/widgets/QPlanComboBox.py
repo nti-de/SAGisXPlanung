@@ -53,10 +53,5 @@ class QPlanComboBox(GenericPicker):
         if index >= 0:
             self.setCurrentIndex(index)
 
-    def setPlanName(self, xid: str, name: str):
-        index = self.findData(xid)
-        if index >= 0:
-            self.setItemText(index, f'{name}')
-
     def current_plan_id(self):
         return self.currentData()

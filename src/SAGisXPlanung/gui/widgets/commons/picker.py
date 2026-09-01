@@ -36,8 +36,19 @@ class PickerItem:
     _search_stack: str = ""
 
     def __post_init__(self):
+        self._recompute_search_stack()
+
+    def _recompute_search_stack(self):
         parts = (self.text, *self.search_terms)
         self._search_stack = " ".join(p for p in parts if p).casefold()
+
+    def update_text(self, text: str):
+        self.text = text
+        self._recompute_search_stack()
+
+    def update_search_terms(self, search_terms: tuple[str, ...]):
+        self.search_terms = tuple(search_terms)
+        self._recompute_search_stack()
 
 
 @dataclass
@@ -701,6 +712,21 @@ class PickerModel(QAbstractListModel):
         self._metadata_store.forget_item(item_id)
         return True
 
+    def update_item(self, item_id: str, text: str | None = None, search_terms: tuple[str, ...] | None = None) -> bool:
+        item = self._find_item(item_id)
+
+        if item is None:
+            return False
+
+        self.beginResetModel()
+        if text is not None:
+            item.update_text(text)
+        if search_terms is not None:
+            item.update_search_terms(search_terms)
+        self.endResetModel()
+
+        return True
+
 
 class PickerFilterProxyModel(QSortFilterProxyModel):
     sortChanged = pyqtSignal(PickerSortMode, Qt.SortOrder)
@@ -774,6 +800,9 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
 
     def remove_item(self, item_id: str) -> bool:
         return self.sourceModel().remove_item(item_id)
+
+    def update_item(self, item_id: str, text: str | None = None, search_terms: tuple[str, ...] | None = None) -> bool:
+        return self.sourceModel().update_item(item_id, text=text, search_terms=search_terms)
 
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
         source = self.sourceModel()
@@ -1272,6 +1301,9 @@ class PickerPopup(QWidget):
     def remove_item(self, item_id: str) -> bool:
         return self.picker_proxy_model.remove_item(item_id)
 
+    def update_item(self, item_id: str, text: str | None = None, search_terms: tuple[str, ...] | None = None) -> bool:
+        return self.picker_proxy_model.update_item(item_id, text=text, search_terms=search_terms)
+
 
 class GenericPicker(QComboBox):
     def __init__(self, parent=None, *, default_size=(288, 426)):
@@ -1376,26 +1408,14 @@ class GenericPicker(QComboBox):
 
         return removed
 
+    def update_item(self, item_id: str, text: str | None = None, search_terms: tuple[str, ...] | None = None) -> bool:
+        updated = self._popup.update_item(item_id, text=text, search_terms=search_terms)
 
-# print('darkmode', is_dark_mode())
-# p = GenericPicker()
-# p.setPlaceholderText('Keine Pläne verfügbar...')
-# p.add_category("BP_Plan", "BP_Plan")
-# p.add_category("FP_Plan", "FP_Plan")
-# p.add_category("LP_Plan", "LP_Plan")
-# p.add_category("RP_Plan", "RP_Plan")
-#
-# with Session.begin() as session:
-#     plans = session.query(XP_Plan).options(
-#         load_only(XP_Plan.id, XP_Plan.name, XP_Plan.type)
-#     ).all()
-#     picker_items = []
-#     for plan in plans:
-#         picker_item = PickerItem(id=str(plan.id), text=plan.name, category=plan.__class__.__name__)
-#         picker_items.append(picker_item)
-#     p.set_picker_items(picker_items)
-#
-# d = QDialog(iface.mainWindow())
-# d.setLayout(QVBoxLayout())
-# d.layout().addWidget(p)
-# d.show()
+        index = self.findData(item_id)
+        if index >= 0:
+            was_current = self.currentIndex() == index
+            self.setItemText(index, text)
+            if was_current:
+                self.update()
+
+        return updated
