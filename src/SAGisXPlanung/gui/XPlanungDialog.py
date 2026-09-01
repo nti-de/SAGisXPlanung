@@ -125,7 +125,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             pass
 
     def selectedPlan(self):
-        return self.cbPlaene.currentPlanId()
+        return self.cbPlaene.current_plan_id()
 
     def _try_select_plan(self, plan_xid: str) -> bool:
         if not plan_xid:
@@ -137,7 +137,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         return True
 
     def _persist_current_plan_selection(self):
-        plan_xid = self.cbPlaene.currentPlanId()
+        plan_xid = self.cbPlaene.current_plan_id()
         if plan_xid:
             QgsConfig.set_last_selected_plan(str(plan_xid))
 
@@ -166,7 +166,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     async def onIndexChanged(self, i):
         self.bExport.setEnabled(False)
         if i != -1:
-            xid = self.cbPlaene.currentPlanId()
+            xid = self.cbPlaene.current_plan_id()
             self._persist_current_plan_selection()
             await self.details_dialog.initialize_data(xid)
         else:
@@ -238,7 +238,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
         self.bExport.repaint()
 
         try:
-            plan_xid = str(self.cbPlaene.currentPlanId())
+            plan_xid = str(self.cbPlaene.current_plan_id())
             out_file_format = "gml" if self.rbGML.isChecked() else "zip"
 
             file_name = await export_action(self, plan_xid, out_file_format)

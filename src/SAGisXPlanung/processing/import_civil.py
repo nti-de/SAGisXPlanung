@@ -255,9 +255,9 @@ class ImportCivil3DAlgorithm(QgsProcessingAlgorithm):
         if cb is None:
             return {}
 
-        prev_id = cb.currentPlanId()
+        prev_id = cb.current_plan_id()
         cb.refresh()
-        cb.setCurrentPlan(prev_id)
+        cb.set_current_plan(prev_id)
 
         return {}
 

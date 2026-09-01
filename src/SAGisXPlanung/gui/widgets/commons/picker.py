@@ -1,5 +1,6 @@
 import math
 import os
+import re
 from dataclasses import dataclass
 from enum import auto, Enum
 from typing import Any
@@ -20,6 +21,10 @@ from SAGisXPlanung.gui.style import load_svg, ApplicationColor, EmptyStateFilter
 from SAGisXPlanung.gui.style.palette import is_dark_mode
 
 
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+
+
 @dataclass
 class PickerItem:
     id: str
@@ -27,6 +32,12 @@ class PickerItem:
     category: str | None = None
     is_favorite: bool = False
     data: Any = None
+    search_terms: tuple[str, ...] = ()
+    _search_stack: str = ""
+
+    def __post_init__(self):
+        parts = (self.text, *self.search_terms)
+        self._search_stack = " ".join(p for p in parts if p).casefold()
 
 
 @dataclass
@@ -41,8 +52,8 @@ class PickerSortMode(Enum):
     LAST_USED = auto()
 
 
-class PickerUsageStore:
-    def __init__(self, settings_key='plugins/xplanung/picker/last_used'):
+class ItemMetadataStore:
+    def __init__(self, settings_key='plugins/xplanung/picker/item_metadata'):
         self._settings = QSettings()
         self._settings_key = settings_key
 
@@ -50,23 +61,60 @@ class PickerUsageStore:
         data = self._settings.value(self._settings_key, {})
         return data if isinstance(data, dict) else {}
 
-    def last_used(self, item_id: str) -> int | None:
-        return self._data().get(item_id)
-
-    def mark_used(self, item_id: str):
-        data = self._data()
-        data[item_id] = QDateTime.currentDateTimeUtc().toSecsSinceEpoch()
+    def _save(self, data: dict):
         self._settings.setValue(self._settings_key, data)
 
-    def forget(self, item_id: str):
-        data = self._data()
+    def get(self, item_id: str, field: str, default=None):
+        return self._data().get(item_id, {}).get(field, default)
 
+    def set(self, item_id: str, field: str, value):
+        data = self._data()
+        data.setdefault(item_id, {})[field] = value
+        self._save(data)
+
+    def unset(self, item_id: str, field: str):
+        data = self._data()
+        entry = data.get(item_id)
+        if entry and field in entry:
+            del entry[field]
+            if not entry:
+                del data[item_id]
+            self._save(data)
+
+    def forget_item(self, item_id: str):
+        """Drop all metadata for an item, e.g. when it's removed from the picker."""
+        data = self._data()
         if item_id in data:
             del data[item_id]
-            self._settings.setValue(self._settings_key, data)
+            self._save(data)
+
+    def prune(self, valid_ids: set):
+        """Drop metadata for any item id not in valid_ids (call after set_items)."""
+        data = self._data()
+        stale = [item_id for item_id in data if item_id not in valid_ids]
+        if not stale:
+            return
+        for item_id in stale:
+            del data[item_id]
+        self._save(data)
 
     def clear(self):
         self._settings.remove(self._settings_key)
+
+    def is_favorite(self, item_id: str) -> bool:
+        return bool(self.get(item_id, 'favorite', False))
+
+    def set_favorite(self, item_id: str, favorite: bool):
+        if favorite:
+            self.set(item_id, 'favorite', True)
+        else:
+            self.unset(item_id, 'favorite')
+
+    def last_used(self, item_id: str) -> int | None:
+        return self.get(item_id, 'last_used')
+
+    def mark_used(self, item_id: str):
+        self.set(item_id, 'last_used', QDateTime.currentDateTimeUtc().toSecsSinceEpoch())
 
 
 class ModernScrollBarStyle(QProxyStyle):
@@ -429,7 +477,6 @@ class CategoryChipView(QListView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        print('init chip view')
         self.setFlow(QListView.Flow.LeftToRight)
         self.setWrapping(True)
         self.setResizeMode(QListView.ResizeMode.Adjust)
@@ -443,7 +490,6 @@ class CategoryChipView(QListView):
         self.setMouseTracking(True)
 
         self.setItemDelegate(CategoryChipDelegate(self))
-        print('completed setup chip view')
 
     def mousePressEvent(self, event):
         if event.button() != Qt.MouseButton.LeftButton:
@@ -520,9 +566,10 @@ class SearchEditStyle(QProxyStyle):
 
 
 class PickerModel(QAbstractListModel):
-    def __init__(self, items: list[PickerItem] | None = None, parent=None):
+    def __init__(self, items: list[PickerItem] | None = None, metadata_store: ItemMetadataStore | None = None, parent=None):
         super().__init__(parent)
 
+        self._metadata_store = metadata_store or ItemMetadataStore()
         self._items: list[PickerItem] = items or []
         self._search_text = ""
 
@@ -618,10 +665,17 @@ class PickerModel(QAbstractListModel):
 
         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable
 
+    def _apply_stored_favorites(self):
+        for item in self._items:
+            item.is_favorite = self._metadata_store.is_favorite(item.id)
+
     def set_items(self, items: list[PickerItem]):
         self.beginResetModel()
         self._items = items
+        self._apply_stored_favorites()
         self.endResetModel()
+
+        self._metadata_store.prune({item.id for item in self._items})
 
     def toggle_favorite(self, item_id: str):
         item = self._find_item(item_id)
@@ -631,20 +685,34 @@ class PickerModel(QAbstractListModel):
 
         self.beginResetModel()
         item.is_favorite = not item.is_favorite
+        self._metadata_store.set_favorite(item_id, item.is_favorite)
         self.endResetModel()
+
+    def remove_item(self, item_id: str) -> bool:
+        item = self._find_item(item_id)
+
+        if item is None:
+            return False
+
+        self.beginResetModel()
+        self._items.remove(item)
+        self.endResetModel()
+
+        self._metadata_store.forget_item(item_id)
+        return True
 
 
 class PickerFilterProxyModel(QSortFilterProxyModel):
     sortChanged = pyqtSignal(PickerSortMode, Qt.SortOrder)
 
-    def __init__(self, parent=None):
+    def __init__(self, metadata_store: ItemMetadataStore | None = None, parent=None):
         super().__init__(parent)
 
         self._search_text = ""
         self._categories: set[str] = set()
         self._sort_mode = PickerSortMode.NAME
         self._sort_order = Qt.SortOrder.AscendingOrder
-        self._usage_store = PickerUsageStore()
+        self._metadata_store = metadata_store or ItemMetadataStore()
 
         self.setDynamicSortFilter(False)
         self.sort(0, self._sort_order)
@@ -704,6 +772,9 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
     def toggle_favorite(self, item_id: str):
         self.sourceModel().toggle_favorite(item_id)
 
+    def remove_item(self, item_id: str) -> bool:
+        return self.sourceModel().remove_item(item_id)
+
     def filterAcceptsRow(self, source_row: int, source_parent: QModelIndex):
         source = self.sourceModel()
 
@@ -725,7 +796,7 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
                 return False
 
         search = self._search_text.casefold()
-        if search and search not in item.text.casefold():
+        if search and search not in item._search_stack:
             return False
 
         return True
@@ -786,15 +857,15 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
 
         if self._sort_mode == PickerSortMode.LAST_USED:
             return self._less_than_last_used(left_item, right_item)
-        return left_item.text.casefold() < right_item.text.casefold()
+        return natural_sort_key(left_item.text) < natural_sort_key(right_item.text)
 
     def _less_than_last_used(self, left, right):
-        left_used = self._usage_store.last_used(left.id)
-        right_used = self._usage_store.last_used(right.id)
+        left_used = self._metadata_store.last_used(left.id)
+        right_used = self._metadata_store.last_used(right.id)
 
         # Never-used items go last.
         if left_used is None and right_used is None:
-            return left.text.casefold() < right.text.casefold()
+            return natural_sort_key(left.text) < natural_sort_key(right.text)
 
         if left_used is None:
             return False
@@ -807,7 +878,7 @@ class PickerFilterProxyModel(QSortFilterProxyModel):
             return left_used > right_used
 
         # Stable deterministic tie-breaker.
-        return left.text.casefold() < right.text.casefold()
+        return natural_sort_key(left.text) < natural_sort_key(right.text)
 
 
 class PickerListDelegate(QStyledItemDelegate):
@@ -1048,6 +1119,7 @@ class PickerPopup(QWidget):
 
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAutoFillBackground(False)
+        self.metadata_store = ItemMetadataStore()
 
         layout = QVBoxLayout(self)
 
@@ -1110,8 +1182,8 @@ class PickerPopup(QWidget):
         ))
 
         self.item_list_view = PickerListView()
-        self.picker_model = PickerModel(parent=self)
-        self.picker_proxy_model = PickerFilterProxyModel(parent=self)
+        self.picker_model = PickerModel(metadata_store=self.metadata_store, parent=self)
+        self.picker_proxy_model = PickerFilterProxyModel(metadata_store=self.metadata_store, parent=self)
         self.picker_proxy_model.setSourceModel(self.picker_model)
         self.picker_proxy_model.sortChanged.connect(self._on_sort_changed)
         self.item_list_view.setModel(self.picker_proxy_model)
@@ -1129,7 +1201,6 @@ class PickerPopup(QWidget):
 
         self.setLayout(layout)
 
-        self.usage_store = PickerUsageStore()
         self.button_sort_name.clicked.connect(
             lambda: self.picker_proxy_model.set_sort_mode(PickerSortMode.NAME)
         )
@@ -1172,7 +1243,7 @@ class PickerPopup(QWidget):
         if item is None:
             return
 
-        self.usage_store.mark_used(item.id)
+        self.metadata_store.mark_used(item.id)
         self.itemSelected.emit(item)
 
         self.picker_proxy_model.sort(0, self.picker_proxy_model.sortOrder())
@@ -1198,10 +1269,12 @@ class PickerPopup(QWidget):
     def set_picker_items(self, items: list[PickerItem]):
         self.picker_model.set_items(items)
 
+    def remove_item(self, item_id: str) -> bool:
+        return self.picker_proxy_model.remove_item(item_id)
+
 
 class GenericPicker(QComboBox):
-    def __init__(self, default_size=(288, 426), parent=None):
-        print('init')
+    def __init__(self, parent=None, *, default_size=(288, 426)):
         super().__init__(parent)
 
         self.default_size = default_size
@@ -1215,7 +1288,6 @@ class GenericPicker(QComboBox):
         self.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
 
     def paintEvent(self, event):
-        print('paintEvent')
         opt = QStyleOptionComboBox()
         self.initStyleOption(opt)
 
@@ -1238,14 +1310,13 @@ class GenericPicker(QComboBox):
         self.hidePopup()
 
     def showPopup(self):
-        print('showPopup')
         self._position_popup()
         self._popup.search_bar.setFocus()
         self._popup.show()
         self._popup.update()
 
     def _position_popup(self):
-        desired_width = self.default_size[0]
+        desired_width = max(self.default_size[0], self.width())
         desired_height = self.default_size[1]
 
         combo_rect = QRect(self.mapToGlobal(QPoint(0, 0)), self.size())
@@ -1293,26 +1364,38 @@ class GenericPicker(QComboBox):
         for item in items:
             self.addItem(item.text, item.id)
 
+    def remove_item(self, item_id: str) -> bool:
+        removed = self._popup.remove_item(item_id)
 
-print('darkmode', is_dark_mode())
-p = GenericPicker()
-p.setPlaceholderText('Keine Pläne verfügbar...')
-p.add_category("BP_Plan", "BP_Plan")
-p.add_category("FP_Plan", "FP_Plan")
-p.add_category("LP_Plan", "LP_Plan")
-p.add_category("RP_Plan", "RP_Plan")
+        index = self.findData(item_id)
+        if index >= 0:
+            was_current = self.currentData() == item_id
+            self.removeItem(index)
+            if was_current:
+                self.setCurrentIndex(0)
 
-with Session.begin() as session:
-    plans = session.query(XP_Plan).options(
-        load_only(XP_Plan.id, XP_Plan.name, XP_Plan.type)
-    ).all()
-    picker_items = []
-    for plan in plans:
-        picker_item = PickerItem(id=str(plan.id), text=plan.name, category=plan.__class__.__name__)
-        picker_items.append(picker_item)
-    p.set_picker_items(picker_items)
+        return removed
 
-d = QDialog(iface.mainWindow())
-d.setLayout(QVBoxLayout())
-d.layout().addWidget(p)
-d.show()
+
+# print('darkmode', is_dark_mode())
+# p = GenericPicker()
+# p.setPlaceholderText('Keine Pläne verfügbar...')
+# p.add_category("BP_Plan", "BP_Plan")
+# p.add_category("FP_Plan", "FP_Plan")
+# p.add_category("LP_Plan", "LP_Plan")
+# p.add_category("RP_Plan", "RP_Plan")
+#
+# with Session.begin() as session:
+#     plans = session.query(XP_Plan).options(
+#         load_only(XP_Plan.id, XP_Plan.name, XP_Plan.type)
+#     ).all()
+#     picker_items = []
+#     for plan in plans:
+#         picker_item = PickerItem(id=str(plan.id), text=plan.name, category=plan.__class__.__name__)
+#         picker_items.append(picker_item)
+#     p.set_picker_items(picker_items)
+#
+# d = QDialog(iface.mainWindow())
+# d.setLayout(QVBoxLayout())
+# d.layout().addWidget(p)
+# d.show()
