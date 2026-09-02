@@ -345,6 +345,14 @@ class CategoryChipView(QListView):
 
         self.setItemDelegate(CategoryChipDelegate(self))
 
+        # Tell the layout system that our preferred height depends on the
+        # width we're given, so it re-queries heightForWidth() on resize
+        # instead of caching a stale sizeHint().
+        size_policy = self.sizePolicy()
+        size_policy.setHeightForWidth(True)
+        self.setSizePolicy(size_policy)
+
+
     def mousePressEvent(self, event):
         if event.button() != Qt.MouseButton.LeftButton:
             return super().mousePressEvent(event)
@@ -376,17 +384,12 @@ class CategoryChipView(QListView):
 
         return option
 
-    def sizeHint(self):
-        size = super().sizeHint()
-        width = size.width()
-
+    def _rows_for_width(self, width: int) -> int:
         if width <= 0 or not self.model() or self.model().rowCount() == 0:
-            return QSize(0, 0)
+            return 0
 
         delegate = self.itemDelegate()
         option = self.view_options()
-
-        item_height = delegate.sizeHint(option, self.model().index(0, 0)).height()
         row_count = self.model().rowCount()
 
         rows = 1
@@ -395,18 +398,36 @@ class CategoryChipView(QListView):
         for row in range(row_count):
             index = self.model().index(row, 0)
             item_width = delegate.sizeHint(option, index).width()
-            if current_width > 0 and current_width + self.spacing() + item_width > width:
+            if current_width > 0 and current_width + 2 * self.spacing() + item_width > width:
                 rows += 1
-                current_width = item_width + self.spacing()
+                current_width = item_width + 2 * self.spacing()
             else:
-                current_width += item_width + self.spacing()
+                current_width += item_width + 2 * self.spacing()
 
-        return QSize(width, rows * item_height + (self.spacing() * rows * 2))
+        return rows
+
+    def heightForWidth(self, width: int) -> int:
+        if width <= 0 or not self.model() or self.model().rowCount() == 0:
+            return 0
+
+        delegate = self.itemDelegate()
+        option = self.view_options()
+        item_height = delegate.sizeHint(option, self.model().index(0, 0)).height()
+        rows = self._rows_for_width(width)
+
+        return rows * item_height + (self.spacing() * rows * 2)
+
+    def sizeHint(self):
+        width = self.viewport().width()
+        if width <= 0 or not self.model() or self.model().rowCount() == 0:
+            return QSize(0, 0)
+
+        return QSize(width, self.heightForWidth(width))
 
     def minimumSizeHint(self):
         return self.sizeHint()
 
-    
+
 class SearchEditStyle(QProxyStyle):
 
     def __init__(self, base_style=None):
