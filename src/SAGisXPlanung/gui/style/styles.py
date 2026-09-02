@@ -295,3 +295,156 @@ class EmptyStateFilter(QObject):
             )
 
         painter.restore()
+
+
+class ModernScrollBarStyle(QProxyStyle):
+    SCROLLBAR_WIDTH = 8
+    HANDLE_MARGIN = 2
+    HANDLE_MIN_HEIGHT = 30
+
+    TRACK_COLOR = QColor(0, 0, 0, 0)
+    HANDLE_COLOR = QColor("#C4C4C4")
+    HANDLE_HOVER_COLOR = QColor("#A8A8A8")
+
+    def pixelMetric(self, metric, option=None, widget=None):
+        if metric in (
+            QStyle.PixelMetric.PM_ScrollBarExtent,
+            QStyle.PixelMetric.PM_ScrollBarSliderMin,
+        ):
+            if metric == QStyle.PixelMetric.PM_ScrollBarExtent:
+                return self.SCROLLBAR_WIDTH
+            return self.HANDLE_MIN_HEIGHT
+
+        return super().pixelMetric(metric, option, widget)
+
+    def subControlRect(self, control, option, sub_control, widget=None):
+        if control == QStyle.ComplexControl.CC_ScrollBar:
+            if sub_control == QStyle.SubControl.SC_ScrollBarAddLine:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSubLine:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarAddPage:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSubPage:
+                return QRect()
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarGroove:
+                return option.rect
+
+            if sub_control == QStyle.SubControl.SC_ScrollBarSlider:
+                return self._slider_rect(option)
+
+        return super().subControlRect(control, option, sub_control, widget)
+
+    def drawComplexControl(self, control, option, painter, widget=None):
+        if control != QStyle.ComplexControl.CC_ScrollBar:
+            return super().drawComplexControl(control, option, painter, widget)
+
+        scrollbar = option
+        rect = scrollbar.rect
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Track
+        painter.fillRect(rect, self.TRACK_COLOR)
+
+        # Handle
+        handle = self._slider_rect(scrollbar)
+
+        if scrollbar.state & QStyle.StateFlag.State_MouseOver:
+            color = self.HANDLE_HOVER_COLOR
+        else:
+            color = self.HANDLE_COLOR
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(color)
+
+        radius = handle.width() / 2
+        painter.drawRoundedRect(handle, radius, radius)
+
+        painter.restore()
+
+    def _slider_rect(self, option):
+        rect = option.rect
+
+        if option.orientation == Qt.Orientation.Vertical:
+            margin = self.HANDLE_MARGIN
+
+            available = rect.height() - 2 * margin
+
+            minimum = option.minimum
+            maximum = option.maximum
+            page_step = option.pageStep
+
+            if maximum <= minimum:
+                height = available
+                y = margin
+            else:
+                total = maximum - minimum + page_step
+                height = max(
+                    self.HANDLE_MIN_HEIGHT,
+                    int(available * page_step / total),
+                )
+
+                height = min(height, available)
+
+                span = available - height
+                value_range = maximum - minimum
+
+                if value_range:
+                    y = margin + int(
+                        span * (option.sliderPosition - minimum)
+                        / value_range
+                    )
+                else:
+                    y = margin
+
+            return QRect(
+                rect.left() + margin,
+                rect.top() + y,
+                rect.width() - 2 * margin,
+                height,
+            )
+
+        else:
+            margin = self.HANDLE_MARGIN
+
+            available = rect.width() - 2 * margin
+
+            minimum = option.minimum
+            maximum = option.maximum
+            page_step = option.pageStep
+
+            if maximum <= minimum:
+                width = available
+                x = margin
+            else:
+                total = maximum - minimum + page_step
+                width = max(
+                    self.HANDLE_MIN_HEIGHT,
+                    int(available * page_step / total),
+                )
+
+                width = min(width, available)
+
+                span = available - width
+                value_range = maximum - minimum
+
+                if value_range:
+                    x = margin + int(
+                        span * (option.sliderPosition - minimum)
+                        / value_range
+                    )
+                else:
+                    x = margin
+
+            return QRect(
+                rect.left() + x,
+                rect.top() + margin,
+                width,
+                rect.height() - 2 * margin,
+            )
