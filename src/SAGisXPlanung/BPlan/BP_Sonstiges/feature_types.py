@@ -77,17 +77,22 @@ class BP_FreiFlaeche(PolygonGeometry, BP_Objekt):
         symbol.deleteSymbolLayer(0)
 
         jagged_strip = QgsGeometryGeneratorSymbolLayer.create({})
-        jagged_strip.setSymbolType(Qgis.SymbolType.Fill)
-        jagged_strip.setColor(QColor('transparent'))
+        jagged_strip.setSymbolType(Qgis.SymbolType.Line)
+        jagged_strip.setColor(QColor('black'))
         jagged_strip.setStrokeColor(QColor('black'))
         jagged_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
-        jagged_strip.setGeometryExpression("difference($geometry, triangular_wave(buffer($geometry, -1), 5, 1))")
+        jagged_strip.setGeometryExpression("intersection(triangular_wave(boundary(buffer($geometry, -1)), 5, 1), $geometry)")
         sub_symbol = jagged_strip.subSymbol()
         fill_layer = sub_symbol.symbolLayer(0)
-        fill_layer.setStrokeWidth(0.2)
+        fill_layer.setWidth(0.2)
         fill_layer.setStrokeColor(QColor('black'))
         fill_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         symbol.appendSymbolLayer(jagged_strip)
+
+        line = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
+        line.setWidth(0.2)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        symbol.appendSymbolLayer(line)
 
         return symbol
 
