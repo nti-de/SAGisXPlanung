@@ -24,6 +24,7 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.nexus_dialog import NexusDialog
 from SAGisXPlanung.gui.style import with_color_palette, ApplicationColor, apply_color, load_svg, SVGButtonEventFilter
+from SAGisXPlanung.gui.style.styles import ModernToolButtonStyle, set_button_variant, ButtonVariant
 from SAGisXPlanung.gui.widgets import QBuildingTemplateEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import XID_ROLE
 from SAGisXPlanung.utils import CLASSES
@@ -108,14 +109,11 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             _button_hover_bg=ApplicationColor.Grey300
         ))
 
-        with_color_palette(self, [
-            ApplicationColor.Primary
-        ], class_='QPushButton')
-        apply_color(self.button_show_all, ApplicationColor.Primary)
+        self._button_style = ModernToolButtonStyle('Fusion')
+        set_button_variant(self.button_show_all, ButtonVariant.PRIMARY)
+        self.button_show_all.setStyle(self._button_style)
 
         self.apply_preferred_plan_selection()
-
-        logger.debug('setup init completed')
 
     def __del__(self):
         try:

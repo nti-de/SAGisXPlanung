@@ -1,10 +1,10 @@
 
-from qgis.PyQt.QtGui import QIcon, QPixmap, QPainter, QColor, QFocusEvent, QKeyEvent
-from qgis.PyQt.QtWidgets import QLineEdit, QToolButton, QProxyStyle, QStyle, QApplication
+from qgis.PyQt.QtGui import QFocusEvent
+from qgis.PyQt.QtWidgets import QLineEdit, QToolButton
 from qgis.PyQt.QtCore import QEvent, QSize, Qt, pyqtSlot
 
 from SAGisXPlanung import PYQT5
-from SAGisXPlanung.gui.style import ClearIconProxyStyle
+from SAGisXPlanung.gui.style import ClearIconProxyStyle, ApplicationColor, load_svg
 
 
 class QCollapsibleSearch(QLineEdit):
@@ -12,7 +12,7 @@ class QCollapsibleSearch(QLineEdit):
     def __init__(self, parent=None):
         super(QCollapsibleSearch, self).__init__(parent)
 
-        self.search_icon_action = self.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
+        self.search_icon_action = self.addAction(load_svg(':/images/themes/default/search.svg', color=ApplicationColor.IconMuted), QLineEdit.ActionPosition.LeadingPosition)
         self.search_icon_action.triggered.connect(self.onSearchActionTriggered)
         if PYQT5:
             self.search_widget = [w for w in self.search_icon_action.associatedWidgets() if isinstance(w, QToolButton)][0]
@@ -66,21 +66,11 @@ class QCollapsibleSearch(QLineEdit):
         self.style().polish(self)
         self.setCursor(Qt.CursorShape.ArrowCursor)
         self.search_widget.installEventFilter(self)
-        self.search_widget.setIcon(self.loadSvg(
-            self.search_widget.icon().pixmap(self.search_widget.icon().actualSize(QSize(32, 32))), color='#6B7280'))
+        self.search_widget.setIcon(load_svg(self.search_widget.icon().pixmap(self.search_widget.icon().actualSize(QSize(32, 32))), color=ApplicationColor.IconMuted))
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Type.HoverEnter:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#1F2937'))
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color=ApplicationColor.PrimaryText))
         elif event.type() == QEvent.Type.HoverLeave:
-            obj.setIcon(self.loadSvg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color='#6B7280'))
+            obj.setIcon(load_svg(obj.icon().pixmap(obj.icon().actualSize(QSize(32, 32))), color=ApplicationColor.IconMuted))
         return False
-
-    def loadSvg(self, svg, color=None):
-        img = QPixmap(svg)
-        if color:
-            qp = QPainter(img)
-            qp.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
-            qp.fillRect(img.rect(), QColor(color))
-            qp.end()
-        return QIcon(img)

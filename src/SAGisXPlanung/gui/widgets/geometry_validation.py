@@ -32,6 +32,7 @@ from SAGisXPlanung.core.geometry_validation import ValidationResult, INTERNAL_VA
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import HighlightRowDelegate, HighlightRowProxyStyle, ApplicationColor, load_svg, \
     SVGButtonEventFilter
+from SAGisXPlanung.gui.style.styles import ModernToolButtonStyle
 from SAGisXPlanung.utils import full_version_required_warning
 
 if PYQT5:
@@ -71,36 +72,15 @@ def _error_detail_message(validation_result: ValidationResult) -> str:
 
 class ValidationWidget(QWidget):
 
-    style = '''   
+    stylesheet = '''   
     QLabel[objectName="validation_result_label"], 
     QLabel[objectName="validation_completed_label"]
     {{
         color: {_label_color_mute};
     }}
     
-    QPushButton[objectName="reset_validation_button"]
-    {{
-        border: none;
-        padding: 5px;
-        border-radius: 5px;
-        color: {_label_color_mute};
-    }}
-    QPushButton[objectName="reset_validation_button"]:hover
-    {{
-        color: {_label_color_foreground};
-        background-color: {_bg_color_hover};
-    }}
     QToolButton::menu-indicator {{
         image: none;
-    }}
-    QToolButton[objectName="menu_settings_button"] {{
-        border: none;
-        padding: 5px;
-        border-radius: 5px;
-    }}
-    QToolButton[objectName="menu_settings_button"]:hover {{
-        color: {_label_color_foreground};
-        background-color: {_bg_color_hover};
     }}
     '''
 
@@ -112,6 +92,7 @@ class ValidationWidget(QWidget):
 
         self.plan_xid = None
         self.plan_type = None
+        self._button_style = ModernToolButtonStyle('Fusion')
 
         validation_settings_str = QgsConfig.geometry_validation_settings()
         if validation_settings_str is not None:
@@ -123,13 +104,13 @@ class ValidationWidget(QWidget):
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
         self._header_layout = QHBoxLayout()
+        self._header_layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         self._layout.addLayout(self._header_layout)
 
         self._validation_result_label = QLabel('')
         self._validation_result_label.setObjectName('validation_result_label')
         self._validation_start_button = QPushButton('Prüfung starten')
-        self._validation_start_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/play_arrow.svg'),
-                                                       color=ApplicationColor.Secondary))
+        self._validation_start_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/play_arrow.svg')))
         self._validation_start_button.clicked.connect(self.start_validation)
 
         self._menu_action_button = QToolButton()
@@ -137,12 +118,11 @@ class ValidationWidget(QWidget):
         self._menu_action_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self._menu_action_button.setArrowType(Qt.ArrowType.DownArrow)
         self._menu_action_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
-        self._menu_action_button.setStyleSheet('')
         self._actions_menu = QMenu(self._menu_action_button)
         self._actions_menu.setToolTipsVisible(True)
-        layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'), color=ApplicationColor.Secondary)
-        refresh_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Secondary)
-        crop_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/crop_free.svg'), color=ApplicationColor.Secondary)
+        layers_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/layers.svg'))
+        refresh_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'))
+        crop_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/crop_free.svg'))
         fill_action = self._actions_menu.addAction(layers_icon, 'Flächenschluss erzwingen', self.fill_geometric)
         fill_action.setToolTip('<qt>Füllt alle Lücken in der Flächenschlussebene mit einem Platzhalter ohne Festsetzung auf</qt>')
         crop_action = self._actions_menu.addAction(crop_icon, 'Geltungsbereich aus Planinhalten berechnen', self.crop_plan_to_content)
@@ -155,7 +135,8 @@ class ValidationWidget(QWidget):
         self._menu_settings_button.setObjectName('menu_settings_button')
         self._menu_settings_button.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self._menu_settings_button.setArrowType(Qt.ArrowType.NoArrow)
-        settings_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'), color=ApplicationColor.Secondary)
+        self._menu_settings_button.setStyle(self._button_style)
+        settings_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/settings.svg'))
         self._menu_settings_button.setIcon(settings_icon)
         self._settings_menu = QMenu(self._menu_settings_button)
         self._settings_menu.setToolTipsVisible(True)
@@ -212,18 +193,18 @@ class ValidationWidget(QWidget):
         self._footer_layout.addItem(QSpacerItem(10, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         self._reset_validation_button = QPushButton('Zurücksetzen')
         self._reset_validation_button.setObjectName('reset_validation_button')
-        self._reset_validation_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'),
-                                                       color=ApplicationColor.Secondary))
+        self._reset_validation_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg')))
+        self._reset_validation_button.setStyle(self._button_style)
         self._reset_validation_button.clicked.connect(self.reset_validation)
         self._hover_filter_reset_button = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
-        self._reset_validation_button.installEventFilter(self._hover_filter_reset_button)
+        # self._reset_validation_button.installEventFilter(self._hover_filter_reset_button)
         self._footer_layout.addWidget(self._reset_validation_button)
         self._layout.addWidget(self._footer_widget)
 
-        self.setStyleSheet(self.style.format(
-            _label_color_mute=ApplicationColor.Grey600,
+        self.setStyleSheet(self.stylesheet.format(
+            _label_color_mute=ApplicationColor.MutedText,
             _label_color_foreground=ApplicationColor.Secondary,
-            _bg_color_hover=ApplicationColor.Grey300
+            _bg_color_hover=ApplicationColor.SurfaceStrong
         ))
 
     def on_validation_method_changed(self, action: QAction):
@@ -497,7 +478,7 @@ class ValidationTreeView(QTreeView):
 
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform)
-        painter.setPen(QColor(ApplicationColor.Grey600))
+        painter.setPen(QColor(ApplicationColor.IconMuted))
 
         renderer = QSvgRenderer(icon_path)
         view_rect = self.viewport().rect()
@@ -508,6 +489,7 @@ class ValidationTreeView(QTreeView):
 
         renderer.render(painter, icon_rect)
 
+        painter.setPen(QColor(ApplicationColor.MutedText))
         text = self.validation_state.value
         text_rect = painter.fontMetrics().boundingRect(text)
         text_rect.moveCenter(view_rect.center())

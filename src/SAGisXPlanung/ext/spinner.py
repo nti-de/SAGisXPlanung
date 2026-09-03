@@ -34,6 +34,8 @@ from qgis.PyQt.QtCore import QRect, QTimer, Qt, pyqtSignal
 from qgis.PyQt.QtGui import QColor, QPainter, QPaintEvent, QFont, QFontMetrics
 from qgis.PyQt.QtWidgets import QWidget
 
+from SAGisXPlanung.gui.style import ApplicationColor
+
 
 @asynccontextmanager
 async def loading_animation(widget, **kwargs):
@@ -44,7 +46,7 @@ async def loading_animation(widget, **kwargs):
         'lines': 20,
         'line_length': 5,
         'line_width': 1,
-        'color': (0, 6, 128),
+        'color': ApplicationColor.Primary,
         'modality': Qt.WindowModality.WindowModal
     }
 
@@ -71,7 +73,7 @@ class WaitingSpinner(QWidget):
         self._centerOnParent = centerOnParent
         self._disableParentWhenSpinning = disableParentWhenSpinning
 
-        self._color = QColor(*color)
+        self._color = _make_color(color)
         self._roundness = roundness
         self._minimumTrailOpacity = math.pi
         self._trailFadePercentage = fade
@@ -85,7 +87,7 @@ class WaitingSpinner(QWidget):
 
         # Text properties
         self._text = text
-        self._textColor = QColor(*text_color) if text_color else QColor(*color)
+        self._textColor = _make_color(text_color) if text_color else self._color
         self._fontSize = font_size
         self._textMargin = 8
 
@@ -322,3 +324,9 @@ class WaitingSpinner(QWidget):
             resultAlpha = min(1.0, max(0.0, resultAlpha))
             color.setAlphaF(resultAlpha)
         return color
+
+def _make_color(color):
+    if isinstance(color, (tuple, list)):
+        return QColor(*color)
+    else:
+        return QColor(color)

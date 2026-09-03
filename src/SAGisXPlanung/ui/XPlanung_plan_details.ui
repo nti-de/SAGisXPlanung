@@ -245,22 +245,7 @@
 	padding: 0px;
 	margin:0px;
 }
-
-QToolButton {
-	background: palette(window); 
- 	border:0px;
-    border-radius: 3px;
-}
-
-QToolButton:hover {
-	background: #E5E7EB; 
-	border: 1px solid #BFDBFE ;
-}
-
-QToolButton:checked {
-	background-color:#93C5FD;
-	border: none; 
- }</string>
+</string>
                </property>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <property name="spacing">

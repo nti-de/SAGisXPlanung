@@ -55,14 +55,15 @@ class ApplicationColor(StrEnumCompat):
     Grey200 = '#e5e7eb'
     Grey300 = '#d1d5db'
     Grey400 = '#9ca3af'
+    Grey500 = '#6a7282'
     Grey600 = '#4b5563'
 
     Surface = '#3a3a3a' if is_dark_mode() else Grey100          # subtle panel/section tints
     SurfaceStrong = '#454545' if is_dark_mode() else Grey200    # actionable items, chips, rows, buttons
     SurfaceSelected = '#565656' if is_dark_mode() else Grey300  # selected rows, items
     Border = '#565656' if is_dark_mode() else Grey300           # dividers, outlines, borders
-    IconMuted = '#8a8a8a' if is_dark_mode() else Grey400        # secondary icons
-    TextStrong = '#d1d5db' if is_dark_mode() else Grey600       # highest-contrast neutral text
+    IconMuted = Grey300 if is_dark_mode() else Grey500        # secondary icons
+    TextStrong = Grey300 if is_dark_mode() else Grey600       # highest-contrast neutral text
 
 
 def with_color_palette(widget, colors: List[ApplicationColor], class_=''):

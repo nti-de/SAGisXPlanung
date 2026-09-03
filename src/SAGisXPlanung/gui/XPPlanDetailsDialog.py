@@ -35,6 +35,7 @@ from SAGisXPlanung.gui.combine_plan_dialog import CombinePlanDialog, PlanCardIte
 from SAGisXPlanung.gui.commands import (ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand,
                                         StackChangeType, CommandType)
 from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg, ApplicationColor
+from SAGisXPlanung.gui.style.styles import ModernToolButtonStyle
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -65,8 +66,10 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.setAllowedAreas(self.allowedAreas() | Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
         self.setObjectName('xplanung-details')
 
-        self.deleteIcon = QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/delete.svg')))
-        self.bMap.setIcon(QIcon(os.path.abspath(os.path.join(os.path.dirname(__file__), 'resources/map.svg'))))
+        self._style_ref = ModernToolButtonStyle('Fusion')
+
+        self.deleteIcon = load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'))
+        self.bMap.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/map.svg')))
 
         self.bMap.clicked.connect(lambda _: plan_to_map(self.plan_xid))
         self.bDelete.setIcon(self.deleteIcon)
@@ -78,9 +81,9 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bSave.setVisible(False)
         self.lTitle.setElideMode(Qt.TextElideMode.ElideRight)
 
-        self.menu_button_further.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/more_vert.svg'),
-                                                  color=ApplicationColor.Secondary))
+        self.menu_button_further.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/more_vert.svg')))
         self.menu_button_further.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.menu_button_further.setStyle(self._style_ref)
         self.further_menu = QMenu(self.menu_button_further)
         self.action_combine_plan = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/merge.svg')),
                                            'Plan in Zusammenzeichnung integrieren')
@@ -88,17 +91,18 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.further_menu.addAction(self.action_combine_plan)
         self.menu_button_further.setMenu(self.further_menu)
         self.menu_button_further.setStyleSheet("""
-            QToolButton {
-                border: none;
-                padding: 5px;
-                border-radius: 5px;
-            }
             QToolButton::menu-indicator { image: none; }
         """)
 
-        self.bSortHierarchy.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
-        self.bSortCategory.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/category.svg')))
-        self.bSortName.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_alpha.svg')))
+        self.bSortHierarchy.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
+        self.bSortCategory.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/category.svg')))
+        self.bSortName.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/sort_alpha.svg')))
+        self.bSortHierarchy.setAutoRaise(True)
+        self.bSortCategory.setAutoRaise(True)
+        self.bSortName.setAutoRaise(True)
+        self.bSortHierarchy.setStyle(self._style_ref)
+        self.bSortCategory.setStyle(self._style_ref)
+        self.bSortName.setStyle(self._style_ref)
         self.sortButtons.setId(self.bSortCategory, 2)
         self.sortButtons.setId(self.bSortName, 1)
         self.sortButtons.setId(self.bSortHierarchy, 0)
@@ -131,28 +135,16 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.undo_stack.undoTextChanged.connect(lambda u: self.bUndo.setToolTip(f'Rückgängig: {u}' if u else ''))
         self.undo_stack.redoTextChanged.connect(lambda r: self.bRedo.setToolTip(f'Vorwärts: {r}' if r else ''))
         self.undo_stack.stack_changed.connect(self.on_undo_stack_changed)
-        self.bUndo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/undo.svg'), color='#1F2937'))
-        self.bRedo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/redo.svg'), color='#1F2937'))
+        self.bUndo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/undo.svg')))
+        self.bRedo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/redo.svg')))
         self.bUndo.setCursor(Qt.CursorShape.PointingHandCursor)
         self.bRedo.setCursor(Qt.CursorShape.PointingHandCursor)
         self.bUndo.setDisabled(True)
         self.bRedo.setDisabled(True)
-        button_styling = '''
-            QToolButton {
-                border: 0px;
-                cursor: pointer;
-            }
-            QToolButton:hover {
-                background: #E5E7EB; 
-            }
-        '''
-        self.bUndo.setStyleSheet(button_styling)
-        self.bRedo.setStyleSheet(button_styling)
-        self.button_highlight_filter = SVGButtonEventFilter(color='#1F2937', hover_color='black')
-        self.bUndo.installEventFilter(self.button_highlight_filter)
-        self.bRedo.installEventFilter(self.button_highlight_filter)
-        self.bUndo.clicked.connect(self.undo_stack.undo)
-        self.bRedo.clicked.connect(self.undo_stack.redo)
+        self.bUndo.setAutoRaise(True)
+        self.bRedo.setAutoRaise(True)
+        self.bUndo.setStyle(self._style_ref)
+        self.bRedo.setStyle(self._style_ref)
 
         MapLayerRegistry().features_deleted.connect(self._on_features_deleted)
         MapLayerRegistry().committed_features_removed.connect(self._on_committed_features_removed)
