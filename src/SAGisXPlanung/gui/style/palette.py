@@ -37,7 +37,7 @@ class ApplicationColor(StrEnumCompat):
     PrimaryLight = '#3B82F6'
     PrimaryLightest = '#EFF6FF'
     PrimaryDark = '#1E3A8A'
-    Secondary = '#111827'
+    Secondary = '#bedbff' if is_dark_mode() else '#111827'
 
     Background = '#2d2d2d' if is_dark_mode() else '#FFFFFF'
     BackgroundHover = '#383838' if is_dark_mode() else '#F3F4F6'
@@ -60,7 +60,7 @@ class ApplicationColor(StrEnumCompat):
 
     Surface = '#3a3a3a' if is_dark_mode() else Grey100          # subtle panel/section tints
     SurfaceStrong = '#454545' if is_dark_mode() else Grey200    # actionable items, chips, rows, buttons
-    SurfaceSelected = '#565656' if is_dark_mode() else Grey300  # selected rows, items
+    SurfaceHighlighted = '#565656' if is_dark_mode() else Grey300  # selected rows, items
     Border = '#565656' if is_dark_mode() else Grey300           # dividers, outlines, borders
     IconMuted = Grey300 if is_dark_mode() else Grey500        # secondary icons
     TextStrong = Grey300 if is_dark_mode() else Grey600       # highest-contrast neutral text

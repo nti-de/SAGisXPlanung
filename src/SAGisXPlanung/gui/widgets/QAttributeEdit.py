@@ -36,7 +36,7 @@ from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand, ObjectsDeletedCommand, CommandType, StackChangeType
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
-from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle
+from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle, ModernToolButtonStyle
 from SAGisXPlanung.gui.widgets.commons.tooltip import ToolTip
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
@@ -47,15 +47,6 @@ ObjectRole = Qt.ItemDataRole.UserRole + 1
 NodeRole = Qt.ItemDataRole.UserRole + 2
 
 style = """
-QToolButton[objectName="button_flash"], QToolButton[objectName="button_zoom"] {{
-    background: transparent; 
-    border: 0px;
-    padding: 5px;
-    border-radius: 5px;
-}}
-QToolButton:hover[objectName="button_flash"], QToolButton:hover[objectName="button_zoom"] {{
-    background-color: {_button_hover_bg};
-}}
 QToolButton[objectName="back_button"] {{
     background-color: transparent; 
     border: 0px;
@@ -80,26 +71,11 @@ QToolButton[objectName="back_button"] {{
 
 QLineEdit[objectName="search_edit"] {{
     padding: 8px 8px 8px 8px;
-    border: 1px solid #d1d5db;
+    border: 1px solid {_border_color};
     border-radius: 3px;
-    background-color: white;
 }}
 QLineEdit:focus[objectName="search_edit"] {{
     border-color: #3b82f6;
-}}
-
-QToolButton[class=type_button] {{
-    border: none;
-    border-radius: 5px;
-    background-color: palette(window);
-    padding: 5px;
-}}
-QToolButton:checked[class=type_button] {{
-    border: 1px solid #d1d5db;
-    background-color: white;
-}}
-QToolButton[class=type_button]:hover:!checked {{
-    background-color: #e5e7eb;
 }}
 """
 
@@ -248,6 +224,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.setupUi(self)
         self.parent = parent
         self._xplanung_item = xplanung_item
+        self._button_style = ModernToolButtonStyle('Fusion')
+
         self.undo_stack = undo_stack
         self.undo_stack.stack_changed.connect(self.on_undo_stack_changed)
 
@@ -259,6 +237,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
         enabled = issubclass(self._xplanung_item.xtype, FeatureType)
         self.button_flash.setEnabled(enabled)
         self.button_zoom.setEnabled(enabled)
+        self.button_flash.setStyle(self._button_style)
+        self.button_zoom.setStyle(self._button_style)
 
         self.button_flash.setToolTip("Objekt auf Karte aufleuchten lassen")
         self.button_zoom.setToolTip("Zu Objekt zoomen")
@@ -276,12 +256,12 @@ class QAttributeEdit(CLS, FORM_CLASS):
         # filter setup
         self.filter_attribute.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Secondary))
         self.filter_relation.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/link.svg'), color=ApplicationColor.Secondary))
-        self.filter_all.setProperty('class', 'type_button')
-        self.filter_attribute.setProperty('class', 'type_button')
-        self.filter_relation.setProperty('class', 'type_button')
         self.filter_all.clicked.connect(lambda: self.proxyModel.set_node_type_filter(None))
         self.filter_attribute.clicked.connect(lambda: self.proxyModel.set_node_type_filter("attribute"))
         self.filter_relation.clicked.connect(lambda: self.proxyModel.set_node_type_filter("relation"))
+        self.filter_all.setStyle(self._button_style)
+        self.filter_attribute.setStyle(self._button_style)
+        self.filter_relation.setStyle(self._button_style)
 
         # model
         root_node = QAttributeEdit._load_tree_node(self._xplanung_item)
@@ -323,10 +303,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
         self.treeView.setMouseTracking(True)
 
         self.setStyleSheet(style.format(
-            _button_hover_bg=ApplicationColor.Grey300,
-            _label_color_mute=ApplicationColor.Grey600
+            _label_color_mute=ApplicationColor.MutedText,
+            _border_color=ApplicationColor.Border,
         ))
-        self.treeView.setStyleSheet("QTreeView::item { padding: 10px;}")
 
     def _update_view(self):
         def _object_category_name(xtype: type) -> str:
@@ -602,7 +581,7 @@ class EntityTreeModel(QAbstractItemModel):
         elif role == Qt.ItemDataRole.ForegroundRole:
             # Blue color for links/relations
             if node.node_type == "relation" and index.column() == 1:
-                return QColor(100, 150, 255)
+                return QColor(ApplicationColor.PrimaryLight)
 
         elif role == Qt.ItemDataRole.ToolTipRole:
             # show tooltips for first column, which are the xplanung attributes
@@ -985,10 +964,10 @@ class BreadcrumbDelegate(QStyledItemDelegate):
         is_active = index.data(BreadcrumbModel.IsActiveRole)
         text = index.data(Qt.ItemDataRole.DisplayRole)
 
-        normal_color = QColor("#6b7280")
-        hover_color = QColor("#111827")
-        active_color = QColor("#111827")
-        hover_bg = QColor("#f3f4f6")
+        normal_color = QColor(ApplicationColor.MutedText)
+        hover_color = QColor(ApplicationColor.Secondary)
+        active_color = QColor(ApplicationColor.Secondary)
+        hover_bg = QColor(ApplicationColor.SurfaceStrong)
 
         rect = option.rect
 
@@ -997,11 +976,13 @@ class BreadcrumbDelegate(QStyledItemDelegate):
             painter.drawText(rect, Qt.AlignmentFlag.AlignCenter, text)
         else:
             # draw clickable breadcrumb
-            is_hovered = self._hover_row == index.row()
+            is_hovered = option.state & QStyle.StateFlag.State_MouseOver
 
             # Background for hover
             if is_hovered and not is_active:
-                painter.fillRect(rect, hover_bg)
+                painter.setBrush(hover_bg)
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.drawRoundedRect(rect, 5, 5)
 
             # Text color
             if is_active:
@@ -1021,7 +1002,7 @@ class BreadcrumbDelegate(QStyledItemDelegate):
 
         fm = QFontMetrics(option.font)
         width = fm.horizontalAdvance(text)
-        height = fm.height()
+        height = fm.height() + 5
 
         return QSize(width + 8, height)
 
@@ -1232,26 +1213,33 @@ class SeparatorDelegate(QStyledItemDelegate):
 
     link_clicked = pyqtSignal(QModelIndex, QEvent)  # index, event
 
+    ROW_VERTICAL_PADDING = 20
+
     def __init__(self, link_icon: QIcon, parent=None):
         super().__init__(parent)
-        self.separator_color = QColor(200, 200, 200)  # Light gray
+        self.separator_color = QColor(ApplicationColor.Border)
         self.separator_thickness = 1
 
         self.link_icon = link_icon
 
         # Badge styling
-        self.badge_bg_color = QColor(220, 220, 220)  # Light gray background
-        self.badge_text_color = QColor(80, 80, 80)   # Dark gray text
+        self.badge_bg_color = QColor(ApplicationColor.SurfaceStrong)
+        self.badge_text_color = QColor(ApplicationColor.PrimaryText)
         self.badge_padding = 6
         self.badge_height = 20
         self.badge_radius = 10
+
+    def sizeHint(self, option: QStyleOptionViewItem, index: QModelIndex) -> QSize:
+        size = super().sizeHint(option, index)
+        size.setHeight(size.height() + self.ROW_VERTICAL_PADDING)
+        return size
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
         if not index.isValid():
             return super().paint(painter, option, index)
 
-        option.palette.setBrush(QPalette.ColorRole.HighlightedText, QBrush(Qt.GlobalColor.black))
-        option.palette.setBrush(QPalette.ColorRole.Highlight, QColor('#CBD5E1'))
+        option.palette.setBrush(QPalette.ColorRole.HighlightedText, QColor(ApplicationColor.PrimaryText))
+        option.palette.setBrush(QPalette.ColorRole.Highlight, QColor(ApplicationColor.SurfaceStrong))
 
         is_last_column = index.column() == index.model().columnCount(index.parent()) - 1
         node = index.data(Qt.ItemDataRole.UserRole + 2)
@@ -1293,7 +1281,7 @@ class SeparatorDelegate(QStyledItemDelegate):
         elif is_last_column and node and node.node_type == "relation" and node.value:
             # Custom rendering for relation links with chevron
             painter.save()
-            option.palette.setBrush(QPalette.ColorRole.HighlightedText, QColor(100, 150, 255))
+            option.palette.setBrush(QPalette.ColorRole.HighlightedText, QColor(ApplicationColor.PrimaryLight))
             if option.state & QStyle.StateFlag.State_MouseOver:
                 font = option.font
                 font.setUnderline(True)
@@ -1302,20 +1290,13 @@ class SeparatorDelegate(QStyledItemDelegate):
 
             if self.link_icon:
                 icon_size = 12
-                # Position icon at the right side of the text
-                font_metrics = painter.fontMetrics()
-                text_width = font_metrics.horizontalAdvance(index_text)
 
-                icon_x = option.rect.left() + text_width + 8
+                font_metrics = painter.fontMetrics()
+                text_rect = font_metrics.boundingRect(index_text)
+                icon_x = option.rect.left() + text_rect.right() + 8
                 icon_y = option.rect.top() + (option.rect.height() - icon_size) // 2
 
-                icon_rect = option.rect.adjusted(
-                    icon_x - option.rect.left(),
-                    icon_y - option.rect.top(),
-                    -(option.rect.width() - icon_size - (icon_x - option.rect.left())),
-                    -(option.rect.bottom() - icon_y - icon_size)
-                )
-
+                icon_rect = QRect(icon_x, icon_y, icon_size,icon_size)
                 self.link_icon.paint(painter, icon_rect)
 
             painter.restore()

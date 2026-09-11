@@ -242,7 +242,7 @@ class CategoryChipDelegate(QStyledItemDelegate):
     SELECTED_TEXT_COLOR = QColor(ApplicationColor.OnPrimary)
 
     # Hover
-    HOVER_BG_COLOR = QColor(ApplicationColor.SurfaceSelected)
+    HOVER_BG_COLOR = QColor(ApplicationColor.SurfaceHighlighted)
     SELECTED_HOVER_BG_COLOR = QColor(ApplicationColor.Primary)
 
 
@@ -787,7 +787,7 @@ class PickerListDelegate(QStyledItemDelegate):
     TEXT_COLOR = QColor(ApplicationColor.PrimaryText)
     SECTION_COLOR = QColor(ApplicationColor.MutedText)
     HOVER_COLOR = QColor(ApplicationColor.BackgroundHover)
-    SELECTED_COLOR = QColor(ApplicationColor.SurfaceSelected)
+    SELECTED_COLOR = QColor(ApplicationColor.SurfaceHighlighted)
 
     STAR_COLOR = QColor(ApplicationColor.MutedText)
     CHIP_FG, CHIP_BG = QColor(ApplicationColor.PrimaryText), QColor(ApplicationColor.SurfaceStrong)
@@ -1071,7 +1071,7 @@ class PickerPopup(QWidget):
         """
         self.sort_widget.setStyleSheet(sort_widget_style.format(
             _bg_color_checked=ApplicationColor.SurfaceStrong,
-            _border_color=ApplicationColor.SurfaceSelected
+            _border_color=ApplicationColor.SurfaceHighlighted
         ))
 
         self.item_list_view = PickerListView()

@@ -36,7 +36,7 @@ class FixComboStyleDelegate(QStyledItemDelegate):
 class HighlightRowDelegate(QStyledItemDelegate):
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        option.palette.setBrush(QPalette.ColorRole.Highlight, QBrush(QColor(ApplicationColor.SurfaceSelected)))
+        option.palette.setBrush(QPalette.ColorRole.Highlight, QBrush(QColor(ApplicationColor.SurfaceHighlighted)))
         option.palette.setBrush(QPalette.ColorRole.HighlightedText, QBrush(QColor(ApplicationColor.PrimaryText)))
 
         super(HighlightRowDelegate, self).paint(painter, option, index)
@@ -88,7 +88,7 @@ class HighlightRowProxyStyle(QProxyStyle):
             painter.save()
 
             if opt.state & QStyle.StateFlag.State_Selected:
-                painter.fillRect(opt.rect, QColor(ApplicationColor.SurfaceSelected))
+                painter.fillRect(opt.rect, QColor(ApplicationColor.SurfaceHighlighted))
             elif opt.state & QStyle.StateFlag.State_MouseOver:
                 painter.fillRect(opt.rect, QColor(ApplicationColor.SurfaceStrong))
 
@@ -495,8 +495,8 @@ class ModernToolButtonStyle(QProxyStyle):
                 "bg": None,
                 "bg_hover": QColor(ApplicationColor.SurfaceStrong),
                 "bg_pressed": _darker(QColor(ApplicationColor.SurfaceStrong), 110),
-                "bg_checked": QColor(ApplicationColor.SurfaceSelected),
-                "bg_checked_hover": _lighter(QColor(ApplicationColor.SurfaceSelected), 106),
+                "bg_checked": QColor(ApplicationColor.SurfaceHighlighted),
+                "bg_checked_hover": _lighter(QColor(ApplicationColor.SurfaceHighlighted), 106),
                 "text": QColor(ApplicationColor.Primary),
                 "border": None,
                 "border_checked": QColor(ApplicationColor.Border),
@@ -507,10 +507,10 @@ class ModernToolButtonStyle(QProxyStyle):
             bg = QColor(ApplicationColor.Background)
             bg_pressed = _darker(bg, 110)
             return {
-                "bg": bg,
-                "bg_hover": _lighter(bg, 130),
-                "bg_pressed": bg_pressed,
-                "bg_checked": bg_pressed,
+                "bg": None,
+                "bg_hover": QColor(ApplicationColor.SurfaceStrong),
+                "bg_pressed": _darker(QColor(ApplicationColor.SurfaceStrong), 110),
+                "bg_checked": QColor(ApplicationColor.SurfaceHighlighted),
                 "bg_checked_hover": _lighter(bg_pressed, 112),
                 "text": QColor(ApplicationColor.OnPrimary),
                 "border": QColor(ApplicationColor.Border),
@@ -521,8 +521,8 @@ class ModernToolButtonStyle(QProxyStyle):
             "bg": None,
             "bg_hover": QColor(ApplicationColor.SurfaceStrong),
             "bg_pressed": _darker(QColor(ApplicationColor.SurfaceStrong), 110),
-            "bg_checked": QColor(ApplicationColor.SurfaceSelected),
-            "bg_checked_hover": _lighter(QColor(ApplicationColor.SurfaceSelected), 106),
+            "bg_checked": QColor(ApplicationColor.Background),
+            "bg_checked_hover": _lighter(QColor(ApplicationColor.Background), 106),
             "text": None,
             "border": None,
             "border_checked": QColor(ApplicationColor.Border),
