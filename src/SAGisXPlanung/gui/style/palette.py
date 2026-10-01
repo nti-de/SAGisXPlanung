@@ -35,7 +35,7 @@ class ApplicationColor(StrEnumCompat):
 
     Primary = '#1D4ED8'
     PrimaryLight = '#3B82F6'
-    PrimaryLightest = '#EFF6FF'
+    PrimaryLightest = '#162456' if is_dark_mode() else '#EFF6FF'
     PrimaryDark = '#1E3A8A'
     Secondary = '#bedbff' if is_dark_mode() else '#111827'
 

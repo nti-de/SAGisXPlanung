@@ -6,7 +6,10 @@ from .palette import ApplicationColor
 
 def load_svg(svg, color=None):
     img = QPixmap(svg)
-    if not color:
+    if color is False:
+        return QIcon(img)
+
+    if color is None:
         color = ApplicationColor.PrimaryText
 
     qp = QPainter(img)

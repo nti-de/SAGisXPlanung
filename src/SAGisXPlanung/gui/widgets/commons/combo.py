@@ -96,12 +96,7 @@ class SearchableComboBox(QComboBox):
         self.completer.setCompletionMode(QCompleter.CompletionMode.UnfilteredPopupCompletion)
         self.setCompleter(self.completer)
 
-        view_sheet_style = """      
-            QAbstractItemView { 
-                background-color: white;
-                selection-background-color: #d1d5db;
-                selection-color: black;
-            }    
+        view_sheet_style = """
             QAbstractItemView::item { 
                 border: none;
                 padding: 5px; 

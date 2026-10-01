@@ -29,7 +29,7 @@ from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg, HighlightRowProxyStyle, \
     HighlightRowDelegate
-from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle
+from SAGisXPlanung.gui.style.styles import RemoveFrameFocusProxyStyle, ModernToolButtonStyle
 from SAGisXPlanung.gui.xplanung24_sync_dialog import XPlanung24SyncDialog
 from SAGisXPlanung.utils import PLAN_BASE_TYPES
 
@@ -55,7 +55,7 @@ def object_as_dict(obj, exclude_patterns=None):
 
 style = """
 QTableView {{	
-	background-color: white;
+	background-color: palette(base);
 	gridline-color: {_grid_color};
 	color: {_color};
 }}
@@ -71,16 +71,6 @@ QTableView::item:selected {{
 }}
 QTableView::item:hover {{
 	color: {_hover_color};
-}}
-
-QToolButton {{
-    background: palette(window); 
-    border: 0px;
-    padding: 5px;
-    border-radius: 5px;
-}}
-QToolButton:hover {{
-    background-color: {_button_hover_bg};
 }}
 
 QCheckBox {{
@@ -142,7 +132,8 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
                                             color=ApplicationColor.Secondary))
         self.button_next.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/next.svg'),
                                           color=ApplicationColor.Secondary))
-        self.button_xplan24.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
+        self.button_xplan24.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg'),
+                                             color=False))
 
         self.button_reload.setCursor(Qt.CursorShape.PointingHandCursor)
         self.button_xplan_export.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -152,6 +143,19 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
         self.button_settings.setCursor(Qt.CursorShape.PointingHandCursor)
         self.button_before.setCursor(Qt.CursorShape.PointingHandCursor)
         self.button_next.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.button_xplan24.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self._button_style = ModernToolButtonStyle('Fusion')
+        self.button_reload.setStyle(self._button_style)
+        self.button_xplan_export.setStyle(self._button_style)
+        self.button_edit.setStyle(self._button_style)
+        self.button_map.setStyle(self._button_style)
+        self.button_delete.setStyle(self._button_style)
+        self.button_settings.setStyle(self._button_style)
+        self.button_before.setStyle(self._button_style)
+        self.button_next.setStyle(self._button_style)
+        self.button_excel_import.setStyle(self._button_style)
+        self.button_xplan24.setStyle(self._button_style)
 
         self.button_before.setDisabled(True)
         self.button_next.setDisabled(True)
@@ -217,12 +221,12 @@ class NexusDialog(QDialog, FORM_CLASS_NEXUS):
 
         # ------------- STYLESHEET -----------------
         self.setStyleSheet(style.format(
-            _grid_color=ApplicationColor.Grey400,
-            _color=ApplicationColor.Grey600,
+            _grid_color=ApplicationColor.Border,
+            _color=ApplicationColor.TextStrong,
             _hover_color=ApplicationColor.PrimaryText,
             _selected_color=ApplicationColor.PrimaryText,
-            _selected_bg_color=ApplicationColor.PrimaryLight,
-            _button_hover_bg=ApplicationColor.Grey300,
+            _selected_bg_color=ApplicationColor.PrimaryLightest,
+            _button_hover_bg=ApplicationColor.SurfaceStrong,
             _check_indicator_color=ApplicationColor.Secondary
         ))
 

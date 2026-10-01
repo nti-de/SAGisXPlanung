@@ -2,12 +2,12 @@ import logging
 from enum import Enum
 
 from qgis.PyQt import sip
-from qgis.PyQt.QtCore import QSize, QModelIndex, Qt, QRectF, QRect, QObject, QEvent, QVariant, QPointF
+from qgis.PyQt.QtCore import QSize, QModelIndex, Qt, QRectF, QRect, QObject, QEvent, QVariant, QPoint
 from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush, QIcon, QPainterPath, QPixmap
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QProxyStyle, QStyleOption, QStyle,
-                                 QAbstractItemView, QWidget, QAbstractButton, QStyleOptionButton)
-from qgis.PyQt.QtSvg import QSvgRenderer
+                                 QAbstractItemView, QWidget, QAbstractButton, QStyleOptionButton, QStyleOptionTab)
 
+from .svg import load_svg
 from .palette import ApplicationColor
 
 logger = logging.getLogger(__name__)
@@ -129,6 +129,7 @@ class EmptyStateFilter(QObject):
         self._icon_path = None
         self._icon_size = 48
         self._icon_color = QColor(ApplicationColor.IconMuted)
+        self._icon = None
         self._title = "No items to display"
         self._subtitle = None
         self._title_color = QColor(ApplicationColor.PrimaryText)
@@ -150,6 +151,7 @@ class EmptyStateFilter(QObject):
     def set_icon(self, icon_path: str):
         """Set the path to the SVG icon."""
         self._icon_path = icon_path
+        self._load_icon()
         return self
 
     def set_icon_size(self, size: int):
@@ -216,6 +218,9 @@ class EmptyStateFilter(QObject):
 
         return super().eventFilter(obj, event)
 
+    def _load_icon(self):
+        self._icon = load_svg(self._icon_path, color=self._icon_color)
+
     def _draw_empty_state(self, painter: QPainter, viewport_rect: QRect):
         """Draw the empty state in the center of the viewport."""
         painter.save()
@@ -257,14 +262,12 @@ class EmptyStateFilter(QObject):
         current_y = viewport_rect.center().y() - (total_height / 2)
 
         # Draw icon
-        if self._icon_path:
-            painter.setPen(self._icon_color)
-            painter.setBrush(self._icon_color)
-            renderer = QSvgRenderer(self._icon_path)
-            icon_rect = QRectF(0, 0, self._icon_size, self._icon_size)
-            icon_rect.moveCenter(QPointF(viewport_rect.center()))
-            icon_rect.moveTop(current_y)
-            renderer.render(painter, icon_rect)
+        if self._icon:
+            icon_rect = QRect(0, 0, self._icon_size, self._icon_size)
+            icon_rect.moveCenter(QPoint(viewport_rect.center()))
+            icon_rect.moveTop(int(current_y))
+
+            self._icon.paint(painter, icon_rect)
             current_y += self._icon_size + self._spacing
 
         # Draw title
@@ -623,3 +626,60 @@ class ModernToolButtonStyle(QProxyStyle):
         if metric == QStyle.PixelMetric.PM_ButtonMargin and isinstance(widget, QAbstractButton):
             return self.PADDING
         return super().pixelMetric(metric, option, widget)
+
+
+class TabBarStyle(QProxyStyle):
+    BORDER_RADIUS = 5
+    HORIZONTAL_PADDING = 10
+    VERTICAL_PADDING = 5
+    MIN_WIDTH_EX = 20
+
+    def drawControl(self, element, option, painter, widget=None):
+        if element != QStyle.ControlElement.CE_TabBarTab:
+            return super().drawControl(element, option, painter, widget)
+
+        if not isinstance(option, QStyleOptionTab):
+            return super().drawControl(element, option, painter, widget)
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        palette = option.palette
+        selected = bool(option.state & QStyle.StateFlag.State_Selected)
+        hovered = bool(option.state & QStyle.StateFlag.State_MouseOver)
+
+        if selected:
+            background = QColor(ApplicationColor.Background)
+        elif hovered:
+            # TODO: this hover state is not working as expected, its never set ????
+            background = QColor(ApplicationColor.BackgroundHover)
+        else:
+            background = palette.color(QPalette.ColorRole.Window)
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(background)
+        painter.drawRoundedRect(option.rect, self.BORDER_RADIUS, self.BORDER_RADIUS)
+
+        if selected:
+            painter.setPen(QColor(ApplicationColor.Border))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+
+            painter.drawRoundedRect(option.rect, self.BORDER_RADIUS, self.BORDER_RADIUS)
+
+        painter.restore()
+        self.baseStyle().drawControl(QStyle.ControlElement.CE_TabBarTabLabel, option, painter, widget)
+
+    def sizeFromContents(self, contents_type, option, contents_size, widget=None):
+        if contents_type == QStyle.ContentsType.CT_TabBarTab and isinstance(option, QStyleOptionTab):
+            # Start with whatever the platform style considers necessary
+            # for the label/icon.
+            size = self.baseStyle().sizeFromContents(contents_type, option, contents_size, widget)
+            size += QSize(self.HORIZONTAL_PADDING * 2, self.VERTICAL_PADDING * 2)
+
+            font_metrics = option.fontMetrics
+            min_width = font_metrics.horizontalAdvance("x") * self.MIN_WIDTH_EX
+            size.setWidth(max(size.width(), min_width))
+
+            return size
+
+        return super().sizeFromContents(contents_type, option, contents_size, widget)

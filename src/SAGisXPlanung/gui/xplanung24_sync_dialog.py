@@ -20,6 +20,7 @@ from SAGisXPlanung.core.converter_tasks import export_plan, GMLInputData, import
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import (HighlightRowDelegate, HighlightRowProxyStyle, load_svg, ApplicationColor,
                                      EmptyStateFilter, RemoveFrameFocusProxyStyle, DateTimeDisplayDelegate)
+from SAGisXPlanung.gui.style.styles import ModernToolButtonStyle, TabBarStyle
 
 logger = logging.getLogger(__name__)
 FORM_CLASS_XPLAN24, _ = uic.loadUiType(os.path.join(os.path.dirname(__file__), '../ui/xplan24-sync-dialog.ui'))
@@ -41,24 +42,6 @@ QToolButton[objectName="upload_status_icon"], QToolButton[objectName="download_s
 }}
 QToolButton:hover[objectName="upload_status_icon"], QToolButton[objectName="download_status_icon"] {{
     background-color: palette(window); 
-}}
-
-QTabBar::tab {{
-    border: none;
-    border-radius: 5px;
-    min-width: 20ex;
-    background-color: palette(window);
-    padding: 10px;
-    cursor: pointer;
-}}
-
-QTabBar::tab:hover {{
-    background-color: #e5e7eb;
-}}
-
-QTabBar::tab:selected {{
-    border: 1px solid #d1d5db;
-    background-color: palette(base);
 }}
 
 QProgressBar {{
@@ -151,6 +134,9 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.download_progress.setMinimum(0)
         self.download_progress.setMaximum(100)
 
+        self._button_style = ModernToolButtonStyle('Fusion')
+        self._tab_bar_style = TabBarStyle('Fusion')
+
         self.refresh_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/refresh.svg'), color=ApplicationColor.Secondary))
         self.check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'), color=ApplicationColor.Success))
         self.error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'), color=ApplicationColor.Error))
@@ -159,6 +145,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.download_status_icon.setIcon(self.check_icon)
         self.download_status_icon.setVisible(False)
         self.refresh_remote_button.setIcon(self.refresh_icon)
+        self.refresh_remote_button.setStyle(self._button_style)
         self.refresh_remote_button.setDisabled(True)
         self.refresh_remote_button.setToolTip("Pläne aus XPlanung24 abrufen...")
         self.refresh_remote_button.clicked.connect(self.on_account_changed)
@@ -173,8 +160,11 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         self.button_cancel.clicked.connect(self.reject)
         self.button_cancel_download.clicked.connect(self.reject)
 
+        self.tab_widget.setMouseTracking(True)
+        self.tab_widget.tabBar().setMouseTracking(True)
         self.tab_widget.tabBar().setDocumentMode(True)
         self.tab_widget.tabBar().setExpanding(True)
+        self.tab_widget.tabBar().setStyle(self._tab_bar_style)
 
         upload_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/upload.svg'), color=ApplicationColor.Secondary)
         download_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/download.svg'), color=ApplicationColor.Secondary)
@@ -184,7 +174,7 @@ class XPlanung24SyncDialog(QDialog, FORM_CLASS_XPLAN24):
         qss = style.format(
             _progress_bg_color=ApplicationColor.Grey300,
             _progress_chunk_bg_color=ApplicationColor.Primary,
-            _label_color_mute=ApplicationColor.Grey600,
+            _label_color_mute=ApplicationColor.MutedText,
         )
         self.setStyleSheet(qss)
         self.tab_upload.setStyleSheet(qss)
