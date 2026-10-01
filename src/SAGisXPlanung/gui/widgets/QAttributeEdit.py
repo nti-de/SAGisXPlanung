@@ -1121,7 +1121,7 @@ class BreadcrumbBar(QWidget):
         self._back_button.setObjectName("back_button")
         self._back_button.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/arrow_back.svg'),
                                            color=ApplicationColor.Secondary))
-        self._back_hover_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
+        self._back_hover_filter = SVGButtonEventFilter(ApplicationColor.TextStrong, ApplicationColor.Secondary)
         self._back_button.installEventFilter(self._back_hover_filter)
         self._layout.addWidget(self._back_button)
 
