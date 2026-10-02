@@ -7,6 +7,7 @@ from qgis.PyQt.QtGui import QIcon, QMouseEvent
 
 from SAGisXPlanung import BASE_DIR
 from SAGisXPlanung.core.buildingtemplate.template_item import BuildingTemplateCellDataType
+from SAGisXPlanung.gui.style import load_svg, ApplicationColor
 
 
 class QBuildingTemplateEdit(QWidget):
@@ -93,9 +94,12 @@ class SelectTemplateFormWidget(QGroupBox):
 
         self._layout = QHBoxLayout()
 
-        self.button_small = LabeledButton(QIcon(os.path.join(BASE_DIR, 'gui/resources/grid2x2.svg')), '2 x 2', 2)
-        self.button_medium = LabeledButton(QIcon(os.path.join(BASE_DIR, 'gui/resources/grid2x3.svg')), '2 x 3', 3)
-        self.button_large = LabeledButton(QIcon(os.path.join(BASE_DIR, 'gui/resources/grid2x4.svg')), '2 x 4', 4)
+        grid2x2_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/grid2x2.svg'), color=ApplicationColor.Secondary)
+        grid2x3_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/grid2x3.svg'), color=ApplicationColor.Secondary)
+        grid2x4_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/grid2x4.svg'), color=ApplicationColor.Secondary)
+        self.button_small = LabeledButton(grid2x2_icon, '2 x 2', 2)
+        self.button_medium = LabeledButton(grid2x3_icon, '2 x 3', 3)
+        self.button_large = LabeledButton(grid2x4_icon, '2 x 4', 4)
         self.button_small.buttonToggled.connect(self.onButtonToggled)
         self.button_medium.buttonToggled.connect(self.onButtonToggled)
         self.button_large.buttonToggled.connect(self.onButtonToggled)
@@ -157,16 +161,20 @@ class LabeledButton(QWidget):
         self.layout().addWidget(QLabel(label_text), 0, Qt.AlignmentFlag.AlignCenter)
 
         self.setStyleSheet('''
-        #back:hover {
-            background-color: #E5E7EB;
-            border: none; 
-            border-radius: 3px;
-        }
-        #back[checked=true] {
-            border: 1px solid #1D4ED8;
-            border-radius: 3px;
-        }
-        ''')
+            #back:hover {{
+                background-color: {_bg_hover};
+                border: none; 
+                border-radius: 3px;
+            }}
+            #back[checked=true] {{
+                border: 1px solid {_border_primary};
+                border-radius: 3px;
+            }}
+            '''.format(
+                _bg_hover=ApplicationColor.BackgroundHover,
+                _border_primary=ApplicationColor.Primary,
+            )
+        )
 
     def toggleButton(self, checked: bool):
         self.setProperty('checked', checked)

@@ -20,7 +20,8 @@ from sqlalchemy.orm import load_only
 from SAGisXPlanung import BASE_DIR, Session
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper.xpath import XPathExpression, PathSegment
-from SAGisXPlanung.gui.style import HighlightRowProxyStyle, HighlightRowDelegate, ApplicationColor, load_svg
+from SAGisXPlanung.gui.style import HighlightRowProxyStyle, HighlightRowDelegate, ApplicationColor, load_svg, \
+    EmptyStateFilter
 from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement, XPlanungInputMeta
 from SAGisXPlanung.utils import full_version_required_warning
 
@@ -98,7 +99,6 @@ class XPathListView(QListView):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._empty_message = "Kein XPath-Ausdruck konfiguriert.\nKlicken Sie auf \"XPath hinzufügen\" um zu starten."
 
         self.setMouseTracking(True)
         self.setSelectionMode(QListView.SelectionMode.SingleSelection)
@@ -107,44 +107,17 @@ class XPathListView(QListView):
         self.delegate = XPathItemDelegate(self)
         self.setItemDelegate(self.delegate)
 
-    def paintEvent(self, event):
-        super().paintEvent(event)
+        self.empty_state_display = EmptyStateFilter(self)
+        self.empty_state_display.set_title("Kein XPath-Ausdruck konfiguriert.")
+        self.empty_state_display.set_subtitle("Klicken Sie auf \"XPath hinzufügen\" um zu starten.")
 
-        if self.model() and self.model().is_empty():
-            self._paint_empty_message(event)
-
-    def _paint_empty_message(self, event):
-        """Paint the empty state message."""
-        painter = QPainter(self.viewport())
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Set up font and color
-        font = QFont()
-        font.setPointSize(10)
-        painter.setFont(font)
-        painter.setPen(QColor(ApplicationColor.Grey400))
-
-        # Calculate text rect
-        rect = self.viewport().rect()
-        text_rect = QRect(
-            rect.x() + 20,
-            rect.y() + 20,
-            rect.width() - 40,
-            rect.height() - 40
-        )
-
-        # Draw the message
-        painter.drawText(
-            text_rect,
-            Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap,
-            self._empty_message
-        )
 
     def leaveEvent(self, event):
         self.delegate.hovered_button = {}
         self.viewport().update()
         QApplication.restoreOverrideCursor()
         super().leaveEvent(event)
+
 
 class XPathModel(QAbstractListModel):
     def __init__(self, parent=None):
@@ -293,7 +266,7 @@ class XPathItemDelegate(HighlightRowDelegate):
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         if hovered:
-            painter.setBrush(QBrush(QColor(ApplicationColor.Grey200)))
+            painter.setBrush(QBrush(QColor(ApplicationColor.SurfaceStrong)))
             painter.setPen(Qt.PenStyle.NoPen)
             painter.drawRoundedRect(rect, 3, 3)
 

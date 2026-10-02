@@ -16,6 +16,7 @@ from SAGisXPlanung import Session
 from SAGisXPlanung.XPlan.types import InvalidFormException
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.core.helper.sqlalchemy import is_mapped
+from SAGisXPlanung.gui.style import ApplicationColor
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 from SAGisXPlanung.gui.widgets.inputs.input_widgets import QFileInput, QMultiInputWidget
 from SAGisXPlanung.gui.widgets.inputs.base_input_element import BaseInputElement
@@ -76,18 +77,22 @@ class DataInputPage(QtWidgets.QScrollArea):
     def createHeader(self):
         widget = QtWidgets.QWidget(self)
         widget.setStyleSheet("""
-            QLabel#lParentAttribute {
-                color: #64748b;
-            }
-            QPushButton#lParentClass{
-                color: #1e293b;
+            QLabel#lParentAttribute {{
+                color: {_muted_text};
+            }}
+            QPushButton#lParentClass {{
+                color: {_primary_text};
                 background: palette(window);
                 border: 0px;
-            }
-            QPushButton#lParentClass:hover {
-                color: #0ea5e9;
-            }
-        """)
+            }}
+            QPushButton#lParentClass:hover {{
+                color: {_primary_text_hover};
+            }}
+        """.format(
+            _primary_text=ApplicationColor.PrimaryLight,
+            _muted_text=ApplicationColor.MutedText,
+            _primary_text_hover=ApplicationColor.Primary
+        ))
         h_layout = QtWidgets.QHBoxLayout(widget)
         h_layout.setContentsMargins(0, 10, 0, 10)
         l1 = QtWidgets.QLabel('Objekt gehört zu:')

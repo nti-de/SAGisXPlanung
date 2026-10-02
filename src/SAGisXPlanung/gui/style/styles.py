@@ -458,6 +458,7 @@ class ButtonVariant(str, Enum):
     DEFAULT = "default"
     PRIMARY = "primary"
     SECONDARY = "secondary"
+    SIMPLE = "simple"
 
 
 _VARIANT_PROPERTY = "buttonVariant"
@@ -485,10 +486,19 @@ class ModernToolButtonStyle(QProxyStyle):
     """A flat, rounded, stylesheet-free look for QAbstractButton."""
 
     RADIUS = 5
-    PADDING = 5
 
     def __init__(self, base_style: QStyle | str | None = None):
         super().__init__(base_style)
+        self._padding_horizontal = 0
+        self._padding_vertical = 0
+
+    def set_padding(self, padding: int | tuple[int, int]):
+        if isinstance(padding, int):
+            self._padding_horizontal = padding
+            self._padding_vertical = padding
+        else:
+            self._padding_horizontal = padding[0]
+            self._padding_vertical = padding[1]
 
     def _palette_for(self, widget: QWidget | None) -> dict:
         variant = widget.property(_VARIANT_PROPERTY) if widget else None
@@ -506,17 +516,17 @@ class ModernToolButtonStyle(QProxyStyle):
                 "border_width": 1,
             }
 
-        if variant == ButtonVariant.SECONDARY.value:
-            bg = QColor(ApplicationColor.Background)
-            bg_pressed = _darker(bg, 110)
+        if variant == ButtonVariant.SIMPLE.value:
+            bg = QColor(ApplicationColor.Surface)
             return {
-                "bg": None,
+                "bg": bg,
                 "bg_hover": QColor(ApplicationColor.SurfaceStrong),
                 "bg_pressed": _darker(QColor(ApplicationColor.SurfaceStrong), 110),
                 "bg_checked": QColor(ApplicationColor.SurfaceHighlighted),
-                "bg_checked_hover": _lighter(bg_pressed, 112),
-                "text": QColor(ApplicationColor.OnPrimary),
+                "bg_checked_hover": _lighter(QColor(ApplicationColor.SurfaceHighlighted), 112),
+                "text": QColor(ApplicationColor.PrimaryText),
                 "border": QColor(ApplicationColor.Border),
+                "border_checked": QColor(ApplicationColor.Border),
                 "border_width": 1,
             }
 
@@ -622,10 +632,18 @@ class ModernToolButtonStyle(QProxyStyle):
 
         super().drawControl(element, option, painter, widget)
 
-    def pixelMetric(self, metric, option=None, widget: QWidget | None = None) -> int:
-        if metric == QStyle.PixelMetric.PM_ButtonMargin and isinstance(widget, QAbstractButton):
-            return self.PADDING
-        return super().pixelMetric(metric, option, widget)
+    def sizeFromContents(self, contents_type, option, contents_size, widget: QWidget | None = None):
+        is_button = contents_type == QStyle.ContentsType.CT_ToolButton or contents_type == QStyle.ContentsType.CT_PushButton
+        if is_button:
+            size = super().sizeFromContents(contents_type, option, contents_size,widget)
+            if widget.property(_VARIANT_PROPERTY) == ButtonVariant.SIMPLE.value:
+                size += QSize(8, 4)
+            elif self._padding_horizontal > 0 or self._padding_vertical > 0:
+                size += QSize(self._padding_horizontal, self._padding_vertical)
+
+            return size
+
+        return super().sizeFromContents(contents_type, option, contents_size,widget)
 
 
 class TabBarStyle(QProxyStyle):
