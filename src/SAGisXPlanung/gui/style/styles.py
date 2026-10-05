@@ -6,7 +6,7 @@ from qgis.PyQt.QtCore import QSize, QModelIndex, Qt, QRectF, QRect, QObject, QEv
 from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush, QIcon, QPainterPath, QPixmap
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QProxyStyle, QStyleOption, QStyle,
                                  QAbstractItemView, QWidget, QAbstractButton, QStyleOptionButton, QStyleOptionTab,
-                                 QLineEdit)
+                                 QLineEdit, QTabBar)
 
 from .svg import load_svg
 from .palette import ApplicationColor
@@ -800,6 +800,26 @@ class TabBarStyle(QProxyStyle):
     VERTICAL_PADDING = 5
     MIN_WIDTH_EX = 20
 
+    def drawPrimitive(self, element, option, painter, widget=None):
+        if element == QStyle.PrimitiveElement.PE_FrameTabBarBase:
+            # QTabBar paints this square fill behind the tabs (drawBase is on
+            # by default). With rounded tabs its color shines through the
+            # corners, so leave the background transparent and let the dialog
+            # show through instead.
+            return
+        super().drawPrimitive(element, option, painter, widget)
+
+    def polish(self, widget):
+        super().polish(widget)
+        if isinstance(widget, QTabBar):
+            # QTabBar derives State_MouseOver from its internal hoverRect,
+            # which is only maintained from HoverMove/HoverEnter events. Those
+            # are only delivered with WA_Hover (stylesheets enable it
+            # automatically for :hover rules, proxy styles must do it here).
+            # Mouse tracking alone is not enough.
+            widget.setAttribute(Qt.WidgetAttribute.WA_Hover, True)
+            widget.setMouseTracking(True)
+
     def drawControl(self, element, option, painter, widget=None):
         if element != QStyle.ControlElement.CE_TabBarTab:
             return super().drawControl(element, option, painter, widget)
@@ -817,7 +837,6 @@ class TabBarStyle(QProxyStyle):
         if selected:
             background = QColor(ApplicationColor.Background)
         elif hovered:
-            # TODO: this hover state is not working as expected, its never set ????
             background = QColor(ApplicationColor.BackgroundHover)
         else:
             background = palette.color(QPalette.ColorRole.Window)
