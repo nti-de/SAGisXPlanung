@@ -31,6 +31,7 @@ def is_dark_mode() -> bool:
 
 class ApplicationColor(StrEnumCompat):
     PrimaryText = '#ffffff' if is_dark_mode() else '#000000'
+    SecondaryText = '#93c5fd' if is_dark_mode() else '#1e40af'
     MutedText = '#cbd5e1' if is_dark_mode() else '#4b5563'
 
     Primary = '#1D4ED8'

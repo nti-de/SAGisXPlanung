@@ -36,7 +36,7 @@ from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
 from SAGisXPlanung.gui.commands import AttributeChangedCommand, ObjectsDeletedCommand, CommandType, StackChangeType
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
-from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle, ModernToolButtonStyle
+from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle, ModernToolButtonStyle, ModernLineEditStyle
 from SAGisXPlanung.gui.widgets.commons.tooltip import ToolTip
 from SAGisXPlanung.gui.widgets.inputs.QRelationDropdowns import QAddRelationDropdown
 
@@ -69,14 +69,6 @@ QToolButton[objectName="back_button"] {{
     padding: 0px;
 }}
 
-QLineEdit[objectName="search_edit"] {{
-    padding: 8px 8px 8px 8px;
-    border: 1px solid {_border_color};
-    border-radius: 3px;
-}}
-QLineEdit:focus[objectName="search_edit"] {{
-    border-color: #3b82f6;
-}}
 """
 
 
@@ -252,6 +244,9 @@ class QAttributeEdit(CLS, FORM_CLASS):
         # search setup
         self.search_edit.addAction(QIcon(':/images/themes/default/search.svg'), QLineEdit.ActionPosition.LeadingPosition)
         self.search_edit.textChanged.connect(self.onFilterTextChanged)
+        self._search_style = ModernLineEditStyle('Fusion', radius=3)
+        self._search_style.setParent(self)
+        self.search_edit.setStyle(self._search_style)
 
         # filter setup
         self.filter_attribute.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/short_text.svg'), color=ApplicationColor.Secondary))
@@ -304,7 +299,6 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
         self.setStyleSheet(style.format(
             _label_color_mute=ApplicationColor.MutedText,
-            _border_color=ApplicationColor.Border,
         ))
 
     def _update_view(self):

@@ -5,7 +5,8 @@ from qgis.PyQt import sip
 from qgis.PyQt.QtCore import QSize, QModelIndex, Qt, QRectF, QRect, QObject, QEvent, QVariant, QPoint
 from qgis.PyQt.QtGui import QPainter, QFontMetrics, QPen, QColor, QFont, QPalette, QBrush, QIcon, QPainterPath, QPixmap
 from qgis.PyQt.QtWidgets import (QStyledItemDelegate, QStyleOptionViewItem, QProxyStyle, QStyleOption, QStyle,
-                                 QAbstractItemView, QWidget, QAbstractButton, QStyleOptionButton, QStyleOptionTab)
+                                 QAbstractItemView, QWidget, QAbstractButton, QStyleOptionButton, QStyleOptionTab,
+                                 QLineEdit)
 
 from .svg import load_svg
 from .palette import ApplicationColor
@@ -112,7 +113,154 @@ class RemoveFrameFocusProxyStyle(QProxyStyle):
     def drawPrimitive(self, element, option: QStyleOption, painter: QPainter, widget=None):
         if element == QStyle.PrimitiveElement.PE_FrameFocusRect:
             return
-        super(RemoveFrameFocusProxyStyle, self).drawPrimitive(element, option, painter)
+        super(RemoveFrameFocusProxyStyle, self).drawPrimitive(element, option, painter, widget)
+
+
+class ModernLineEditStyle(QProxyStyle):
+
+    RADIUS = 5
+    PADDING = 8
+    MIN_CONTENT_HEIGHT = 16
+    BORDER_WIDTH = 1
+
+    def __init__(self, base_style: QStyle | str | None = None, radius: int = 5, padding: int = 8,
+                 background=None, border=None, focus_border=None):
+        super().__init__(base_style)
+        self._radius = radius
+        self._padding = padding
+        self._background = QColor(background) if background is not None else QColor(ApplicationColor.Background)
+        self._border = QColor(border) if border is not None else QColor(ApplicationColor.Border)
+        self._focus_border = QColor(focus_border) if focus_border is not None else QColor(ApplicationColor.PrimaryLight)
+
+    def drawPrimitive(self, element, option: QStyleOption, painter: QPainter, widget: QWidget | None = None):
+        if element == QStyle.PrimitiveElement.PE_FrameFocusRect and isinstance(widget, QLineEdit):
+            return
+        if element in (QStyle.PrimitiveElement.PE_PanelLineEdit,
+                       QStyle.PrimitiveElement.PE_FrameLineEdit) and isinstance(widget, QLineEdit):
+            if widget.hasFrame():
+                self._draw_frame(option, painter, widget)
+                return
+        super().drawPrimitive(element, option, painter, widget)
+
+    def _draw_frame(self, option: QStyleOption, painter: QPainter, widget: QLineEdit) -> None:
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        rect = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5)
+        has_focus = bool(option.state & QStyle.StateFlag.State_HasFocus) or widget.hasFocus()
+        is_enabled = bool(option.state & QStyle.StateFlag.State_Enabled)
+
+        if not is_enabled:
+            border_color = self._border
+            background = QColor(ApplicationColor.SurfaceStrong)
+        elif has_focus and not widget.isReadOnly():
+            border_color = self._focus_border
+            background = self._background
+        else:
+            border_color = self._border
+            background = self._background
+
+        pen = painter.pen()
+        pen.setColor(border_color)
+        pen.setWidthF(self.BORDER_WIDTH)
+        painter.setPen(pen)
+        painter.setBrush(background)
+        painter.drawRoundedRect(rect, self._radius, self._radius)
+        painter.restore()
+
+    def subElementRect(self, element, option, widget: QWidget | None = None):
+        rect = super().subElementRect(element, option, widget)
+        if element == QStyle.SubElement.SE_LineEditContents and isinstance(widget, QLineEdit):
+            # emulate horizontal `padding: 8px`; vertical padding is realized
+            # via sizeFromContents/minimum height plus vertical centering
+            return rect.adjusted(self._padding, 0, -self._padding, 0)
+        return rect
+
+    def sizeFromContents(self, contents_type, option, contents_size, widget: QWidget | None = None):
+        size = super().sizeFromContents(contents_type, option, contents_size, widget)
+        if contents_type == QStyle.ContentsType.CT_LineEdit and isinstance(widget, QLineEdit):
+            min_height = self.MIN_CONTENT_HEIGHT + 2 * self._padding + 2 * self.BORDER_WIDTH
+            size.setWidth(size.width() + 2 * self._padding)
+            size.setHeight(max(size.height() + self._padding, min_height))
+        return size
+
+    def standardIcon(self, standard_icon, option=None, widget=None):
+        if standard_icon == QStyle.StandardPixmap.SP_LineEditClearButton:
+            return QIcon(':/images/themes/default/mIconClearText.svg')
+        return super().standardIcon(standard_icon, option, widget)
+
+
+class ModernListViewStyle(QProxyStyle):
+
+    RADIUS = 6
+
+    def __init__(self, base_style: QStyle | str | None = None, radius: int = 6,
+                 background=None, border=None,
+                 hover_background=None, hover_border=None,
+                 selected_background=None, selected_border=None):
+        super().__init__(base_style)
+        self._radius = radius
+        self._background = QColor(background) if background is not None else QColor(ApplicationColor.Background)
+        self._border = QColor(border) if border is not None else QColor(ApplicationColor.SurfaceStrong)
+        self._hover_background = QColor(hover_background) if hover_background is not None \
+            else QColor(ApplicationColor.BackgroundHover)
+        self._hover_border = QColor(hover_border) if hover_border is not None \
+            else QColor(ApplicationColor.Border)
+        self._selected_background = QColor(selected_background) if selected_background is not None \
+            else QColor(ApplicationColor.PrimaryLightest)
+        self._selected_border = QColor(selected_border) if selected_border is not None \
+            else QColor(ApplicationColor.PrimaryLight)
+
+    def drawPrimitive(self, element, option: QStyleOption, painter: QPainter, widget: QWidget | None = None):
+        if element == QStyle.PrimitiveElement.PE_FrameFocusRect:
+            return
+        if element in (QStyle.PrimitiveElement.PE_PanelItemViewItem,
+                       QStyle.PrimitiveElement.PE_PanelItemViewRow):
+            self._draw_item(option, painter)
+            return
+        super().drawPrimitive(element, option, painter, widget)
+
+    def drawControl(self, element, option, painter: QPainter, widget: QWidget | None = None):
+        if element == QStyle.ControlElement.CE_ShapedFrame and isinstance(widget, QAbstractItemView):
+            # QListView { border: none; }
+            return
+        super().drawControl(element, option, painter, widget)
+
+    def _draw_item(self, option: QStyleOption, painter: QPainter) -> None:
+        state = option.state
+        if state & QStyle.StateFlag.State_Selected:
+            background = self._selected_background
+            border_color = self._selected_border
+        elif state & QStyle.StateFlag.State_MouseOver:
+            background = self._hover_background
+            border_color = self._hover_border
+        else:
+            background = self._background
+            border_color = self._border
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        rect = QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5)
+        pen = painter.pen()
+        pen.setColor(border_color)
+        pen.setWidthF(1)
+        painter.setPen(pen)
+        painter.setBrush(background)
+        painter.drawRoundedRect(rect, self._radius, self._radius)
+        painter.restore()
+
+    def polish(self, widget):
+        super().polish(widget)
+        if isinstance(widget, QAbstractItemView):
+            # QStyleSheetStyle enabled hover tracking automatically for
+            # ::item:hover; without QSS we have to do it ourselves.
+            widget.setMouseTracking(True)
+            widget.viewport().setMouseTracking(True)
+            # QListView { background-color: palette(window); }
+            palette = widget.palette()
+            palette.setColor(QPalette.ColorRole.Base, palette.color(QPalette.ColorRole.Window))
+            widget.setPalette(palette)
 
 
 class EmptyStateFilter(QObject):

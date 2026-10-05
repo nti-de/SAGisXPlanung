@@ -4,7 +4,7 @@ import os
 from dataclasses import dataclass
 
 from qgis.PyQt.QtCore import Qt, QAbstractListModel, QModelIndex, QSortFilterProxyModel, QSize, QItemSelectionModel, QRect
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit, QStyleOptionButton, QStyle, QApplication,
                              QListView, QLabel, QStyledItemDelegate, QHBoxLayout, QStyleOptionViewItem, QCheckBox)
 from sqlalchemy import select, inspect
@@ -15,6 +15,7 @@ from SAGisXPlanung.core.helper import find_true_class
 from SAGisXPlanung.core.mixins.mixins import PlanLinkedMixin
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg, EmptyStateFilter
+from SAGisXPlanung.gui.style.styles import TabBarStyle, ModernLineEditStyle, ModernListViewStyle, ModernScrollBarStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
 
 logger = logging.getLogger(__name__)
@@ -24,58 +25,6 @@ EMPTY_STATE_FILTER_HINT = "Suchbegriff oder Filter entfernen um alle Objekte zu 
 style = """
 QLabel[objectName="description_label"] {{
     color: {_label_color_mute};
-}}
-
-QTabBar::tab[objectName="styled_tab_bar"] {{
-    border: none;
-    border-radius: 5px;
-    min-width: 20ex;
-    background-color: palette(window);
-    padding: 10px;
-    cursor: pointer;
-}}
-
-QTabBar::tab:hover[objectName="styled_tab_bar"] {{
-    background-color: #e5e7eb;
-}}
-
-QTabBar::tab:selected[objectName="styled_tab_bar"] {{
-    border: 1px solid #d1d5db;
-    background-color: palette(base);
-}}
-
-QListView {{
-    border: none;
-    background-color: palette(window);
-    outline: none;
-}}
-
-QListView::item {{
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background-color: white;
-}}
-
-QListView::item:hover {{
-    background-color: #f9fafb;
-    border-color: #d1d5db;
-}}
-
-QListView::item:selected {{
-    background-color: #eff6ff;
-    border-color: #3b82f6;
-}}
-
-QLineEdit[objectName="search_edit"] {{
-    padding: 8px 8px 8px 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: white;
-    margin-right: 10px;
-}}
-
-QLineEdit:focus[objectName="search_edit"] {{
-    border-color: #3b82f6;
 }}
 
 QLabel[objectName="selected_count"] {{
@@ -262,7 +211,7 @@ class RelatedObjectDelegate(QStyledItemDelegate):
         fm = painter.fontMetrics()
         elided_code_text = fm.elidedText(code,  Qt.TextElideMode.ElideRight, code_rect.width())
 
-        painter.setPen(Qt.GlobalColor.black)
+        painter.setPen(QColor(ApplicationColor.PrimaryText))
         painter.drawText(code_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop, elided_code_text)
         # -------------------------
         # Title (is subtitle)
@@ -281,7 +230,7 @@ class RelatedObjectDelegate(QStyledItemDelegate):
             title_height
         )
 
-        painter.setPen(Qt.GlobalColor.darkRed)
+        painter.setPen(QColor(ApplicationColor.SecondaryText))
         painter.drawText(
             title_rect,
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop,
@@ -305,7 +254,7 @@ class RelatedObjectDelegate(QStyledItemDelegate):
         fm = painter.fontMetrics()
         elided_text = fm.elidedText(description, Qt.TextElideMode.ElideRight, desc_rect.width())
 
-        painter.setPen(Qt.GlobalColor.gray)
+        painter.setPen(QColor(ApplicationColor.MutedText))
         painter.drawText(
             desc_rect,
             Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop | Qt.TextFlag.TextWordWrap,
@@ -364,6 +313,10 @@ class SelectRelatedWidget(QWidget):
                                    QLineEdit.ActionPosition.LeadingPosition)
         self.search_edit.setPlaceholderText('Suchen...')
         self.search_edit.textChanged.connect(self.on_search_filter_changed)
+        self._search_style = ModernLineEditStyle('Fusion', radius=6)
+        self._search_style.setParent(self)
+        self.search_edit.setStyle(self._search_style)
+        header_layout.setSpacing(10)
         header_layout.addWidget(self.search_edit)
         header_layout.addWidget(QLabel("Ausgewählt:"))
         self.selected_count = QLabel("0")
@@ -400,12 +353,16 @@ class SelectRelatedWidget(QWidget):
         # Setup custom delegate and event filters
         self.delegate = RelatedObjectDelegate(self)
         self.list_view.setItemDelegate(self.delegate)
+        self._list_scroll_style = ModernScrollBarStyle('Fusion')
+        self._list_scroll_style.setParent(self)
+        self._list_style = ModernListViewStyle(self._list_scroll_style)
+        self._list_style.setParent(self)
+        self.list_view.setStyle(self._list_style)
         self.list_empty_state = EmptyStateFilter(self.list_view)
         self.list_empty_state.set_icon(os.path.join(BASE_DIR, 'gui/resources/warning.svg')) \
             .set_icon_size(16) \
             .set_title("Keine Objekte gefunden") \
             .set_subtitle(EMPTY_STATE_FILTER_HINT)
-
 
         search_layout.addWidget(self.list_view)
 
@@ -415,11 +372,13 @@ class SelectRelatedWidget(QWidget):
         manage_search_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/manage_search.svg'), color=ApplicationColor.Secondary)
         self.tab_widget.tabBar().setTabIcon(0, add_circle_icon)
         self.tab_widget.tabBar().setTabIcon(1, manage_search_icon)
+        self._tab_bar_style = TabBarStyle('Fusion')
+        self.tab_widget.tabBar().setStyle(self._tab_bar_style)
 
         main_layout.addWidget(self.tab_widget)
 
         # Apply styles
-        qss = style.format(_label_color_mute=ApplicationColor.Grey600)
+        qss = style.format(_label_color_mute=ApplicationColor.MutedText)
         self.setStyleSheet(qss)
 
         self._selected_ids: set[str] = set()

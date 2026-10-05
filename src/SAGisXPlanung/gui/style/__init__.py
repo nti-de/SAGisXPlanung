@@ -6,6 +6,8 @@ from .styles import (
     ClearIconProxyStyle,
     EmptyStateFilter,
     RemoveFrameFocusProxyStyle,
+    ModernLineEditStyle,
+    ModernListViewStyle,
     DateTimeDisplayDelegate,
     FixComboStyleDelegate
 )
