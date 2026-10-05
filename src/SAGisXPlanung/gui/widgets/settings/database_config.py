@@ -13,10 +13,9 @@ from qgis.utils import iface
 
 from qgis.PyQt.QtCore import QSettings, Qt, QTimer
 from qgis.PyQt.QtWidgets import QLineEdit
-from qgis.PyQt.QtGui import QIcon, QCloseEvent
+from qgis.PyQt.QtGui import QIcon
 
 from sqlalchemy import create_engine, text
-from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from SAGisXPlanung import BASE_DIR, VERSION, Session, SessionAsync
@@ -25,6 +24,7 @@ from SAGisXPlanung.core.connection import verify_db_connection, establish_sessio
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.ext.toast import Toaster
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, with_color_palette, apply_color
+from SAGisXPlanung.gui.style.styles import TabBarStyle, ModernToolButtonStyle
 from SAGisXPlanung.gui.widgets.commons import ValidationTrigger, ValidationManager, RegexValidator
 from .basepage import SettingBinding, SettingsPage
 
@@ -41,34 +41,8 @@ class RevisionMeta:
 
 
 style = '''
-QToolButton[objectName="connnection_test_status_icon"], 
-QToolButton[objectName="button_alert_icon"] {{
-    border: 0px;
-}}
 QTabWidget::pane {{
     border: none;
-    border-top: 1px solid #e5e7eb;
-    position: absolute;
-}}
-/* Style the tab using the tab sub-control. Note that
-    it reads QTabBar _not_ QTabWidget */
-QTabBar::tab {{
-    border: none;
-    min-width: 20ex;
-    padding: 15px;
-    color: #4b5563;
-    cursor: pointer;
-}}
-
-QTabBar::tab:hover {{
-    background-color: #e5e7eb;
-    color: #111827;
-}}
-
-QTabBar::tab:selected {{
-    border-bottom: 2px solid #93C5FD;
-    background-color: #eff6ff;
-    color: #111827;
 }}
 
 QLabel[objectName="label_upgrade"] {{
@@ -90,9 +64,24 @@ class DatabaseConfigPage(SettingsPage):
 
     def setup_ui(self, ui):
         self.ui = ui
+        self.setAutoFillBackground(True)
 
         self.ui.tab_database_actions.tabBar().setCursor(Qt.CursorShape.PointingHandCursor)
+        self._tab_bar_style = TabBarStyle('Fusion')
+        self._tab_bar_style.setParent(self)
+        self._button_style = ModernToolButtonStyle('Fusion')
+        self._button_style.setParent(self)
+        self.ui.tab_database_actions.tabBar().setStyle(self._tab_bar_style)
+        # Status icons are display-only: keep them out of tab focus.
+        self.ui.connection_test_status_icon.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.ui.button_alert_icon.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.ui.tab_database_actions.setCurrentIndex(0)
+        connection_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/chevrons-left-right-ellipsis.svg'),
+                                   color=ApplicationColor.Secondary)
+        creation_icon = load_svg(os.path.join(BASE_DIR, 'gui/resources/database-plus.svg'),
+                                 color=ApplicationColor.Secondary)
+        self.ui.tab_database_actions.tabBar().setTabIcon(0, connection_icon)
+        self.ui.tab_database_actions.tabBar().setTabIcon(1, creation_icon)
         self.db_create_options = [w for w in self.ui.db_create_group.children() if isinstance(w, QLineEdit)]
         self.ui.db_create.setEnabled(False)
         self.ui.db_create.clicked.connect(self.on_database_create_clicked)
@@ -114,27 +103,29 @@ class DatabaseConfigPage(SettingsPage):
             trigger=ValidationTrigger.FOCUS_OUT
         )
 
-        self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
+        self.ui.connection_test_status_icon.setIcon(self.check_icon_base)
         # schedule asyncio task and return None, so that void return type of sip method is satisfied
         # otherwise throws a lot of TypeError: invalid argument to sipBadCatcherResult()
         self.ui.connection_test_label.mousePressEvent = lambda e: asyncio.create_task(self.test_connection()) and None
 
         self.ui.button_alert_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/warning.svg'),
-                                                   color=ApplicationColor.Grey600))
+                                                   color=ApplicationColor.MutedText))
         self.ui.button_upgrade.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/upgrade.svg'),
                                                 color=ApplicationColor.Secondary))
         self.ui.button_upgrade.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.ui.button_upgrade.setStyle(self._button_style)
 
         self.ui.database_version_frame.hide()
         self.ui.button_upgrade.clicked.connect(self.on_revision_update_clicked)
 
         self.ui.label_extra_info.hide()
+        self.ui.label_extra_info.setStyleSheet(f"color: {ApplicationColor.MutedText};")
 
         self.ui.tab_database_actions.setStyleSheet(style.format(
-            _label_color_mute=ApplicationColor.Grey600
+            _label_color_mute=ApplicationColor.MutedText
         ))
         with_color_palette(self.ui.tab_database_actions, [
-            ApplicationColor.PrimaryText, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.Grey600
+            ApplicationColor.PrimaryText, ApplicationColor.Error, ApplicationColor.Success, ApplicationColor.MutedText
         ], class_='QLabel')
         self.register_settings()
 
@@ -318,9 +309,9 @@ class DatabaseConfigPage(SettingsPage):
 
     @qasync.asyncSlot()
     async def on_connection_index_changed(self):
-        self.ui.connnection_test_status_icon.setIcon(self.check_icon_base)
+        self.ui.connection_test_status_icon.setIcon(self.check_icon_base)
         self.ui.connection_test_result_label.setText(f'Verbindungstatus unbekannt')
-        apply_color(self.ui.connection_test_result_label, ApplicationColor.Grey600)
+        apply_color(self.ui.connection_test_result_label, ApplicationColor.MutedText)
         self.ui.database_version_frame.hide()
 
         conn_name = str(self.ui.cbConnections.currentText())
@@ -410,20 +401,20 @@ class DatabaseConfigPage(SettingsPage):
             'lines': 16,
             'line_length': 4,
         }
-        async with loading_animation(self.ui.connnection_test_status_icon, **spinner_args) as spinner:
+        async with loading_animation(self.ui.connection_test_status_icon, **spinner_args) as spinner:
             try:
                 loop = asyncio.get_running_loop()
                 await loop.run_in_executor(None, _test_connection)
 
                 check_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/check.svg'),
                                             color=ApplicationColor.Success))
-                self.ui.connnection_test_status_icon.setIcon(check_icon)
+                self.ui.connection_test_status_icon.setIcon(check_icon)
                 apply_color(self.ui.connection_test_result_label, ApplicationColor.PrimaryText)
 
             except Exception as e:
                 error_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/error-outline.svg'),
                                             color=ApplicationColor.Error))
-                self.ui.connnection_test_status_icon.setIcon(error_icon)
+                self.ui.connection_test_status_icon.setIcon(error_icon)
                 apply_color(self.ui.connection_test_result_label, ApplicationColor.Error)
                 self.ui.connection_test_result_label.setText(str(e))
                 logger.error(e)

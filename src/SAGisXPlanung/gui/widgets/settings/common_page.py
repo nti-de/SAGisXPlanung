@@ -30,19 +30,26 @@ QLabel#label_preview_name {{
     color: {_label_color_muted}
 }}
 QPushButton[class="presetButton"] {{
-    background: white;
-    border: 1px solid #D8D8D8;
+    background: {_btn_bg};
+    color: {_btn_text};
+    border: 1px solid {_btn_border};
     border-radius: 5px;
     padding: 6px 14px;
 }}
 QPushButton[class="presetButton"]:hover {{
-    background: #F6F6F6;
+    background: {_btn_hover};
 }}
 QPushButton[class="presetButton"]:pressed {{
-    background: #EBEBEB;
+    background: {_btn_pressed};
 }}
 
-QToolButton {{
+QToolButton[objectName="info_clean_geometry"],
+QToolButton[objectName="info_preserve_topology"],
+QToolButton[objectName="info_repeated_points"],
+QToolButton[objectName="info_open_featureform"],
+QToolButton[objectName="xplan24_icon"], 
+QToolButton[objectName="connection_test_status_icon"],
+QToolButton[objectName="button_alert_icon"] {{
     border: 0px;
 }}
 """
@@ -67,8 +74,8 @@ class CommonConfigPage(SettingsPage):
         self.ui.export_name_schema_edit.editingFinished.connect(self.update_export_name_preview)
 
         info_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/info-outline.svg'),
-                                   color=ApplicationColor.Grey600))
-        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.Grey600, ApplicationColor.Secondary)
+                                   color=ApplicationColor.MutedText))
+        self.info_button_highlight_filter = SVGButtonEventFilter(ApplicationColor.MutedText, ApplicationColor.Secondary)
         self.ui.info_clean_geometry.setIcon(info_icon)
         self.ui.info_preserve_topology.setIcon(info_icon)
         self.ui.info_repeated_points.setIcon(info_icon)
@@ -89,7 +96,7 @@ class CommonConfigPage(SettingsPage):
         self.set_validation_options()
         self.ui.checkbox_open_xplan_featureform.setChecked(QgsConfig.auto_replace_attribute_form())
 
-        self.ui.xplan24_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg')))
+        self.ui.xplan24_icon.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/xplanung24-logo.svg'), color=False))
 
         accounts = QgsConfig.xplan24_accounts()
         self.list_page = AccountListView(accounts, self)
@@ -108,9 +115,15 @@ class CommonConfigPage(SettingsPage):
         # ------------- STYLE -----------------
         self.ui.label_preview_value.setFont(QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont))
         self.ui.setStyleSheet(style.format(
-            _bg_color_frame=ApplicationColor.Grey200,
-            _label_color_muted=ApplicationColor.Grey600
+            _bg_color_frame=ApplicationColor.SurfaceStrong,
+            _label_color_muted=ApplicationColor.MutedText,
+            _btn_bg=ApplicationColor.Background,
+            _btn_text=ApplicationColor.PrimaryText,
+            _btn_border=ApplicationColor.Border,
+            _btn_hover=ApplicationColor.BackgroundHover,
+            _btn_pressed=ApplicationColor.SurfaceStrong
         ))
+        self.ui.label_17.setStyleSheet(f"color: {ApplicationColor.MutedText};")
 
     def setup_data(self):
         self.set_xplan_version()
@@ -372,11 +385,11 @@ class AccountDelegate(QStyledItemDelegate):
     def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
         self.copy_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/copy.svg'),
-                               color=ApplicationColor.Grey600))
+                               color=ApplicationColor.MutedText))
         self.edit_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/edit.svg'),
-                                        color=ApplicationColor.Grey600))
+                                        color=ApplicationColor.MutedText))
         self.delete_icon = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/delete.svg'),
-                                        color=ApplicationColor.Grey600))
+                                        color=ApplicationColor.MutedText))
 
         # Hover versions (darker icons)
         self.copy_icon_hover = QIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/copy.svg'),
@@ -435,7 +448,7 @@ class AccountDelegate(QStyledItemDelegate):
 
         # --- Draw Title ---
         painter.setFont(title_font)
-        painter.setPen(Qt.GlobalColor.black)
+        painter.setPen(QColor(ApplicationColor.PrimaryText))
         painter.drawText(title_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, account.name)
 
         # --- Draw Subtitle (API Key) ---

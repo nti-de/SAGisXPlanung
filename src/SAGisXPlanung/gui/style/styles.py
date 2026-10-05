@@ -648,6 +648,16 @@ class ModernToolButtonStyle(QProxyStyle):
             self._padding_horizontal = padding[0]
             self._padding_vertical = padding[1]
 
+    def polish(self, widget):
+        super().polish(widget)
+        if isinstance(widget, QAbstractButton):
+            # State_MouseOver comes from an internal hovering flag that Qt
+            # only maintains with WA_Hover (and only transfers to the style
+            # option with mouse tracking on). Stylesheets enable WA_Hover
+            # automatically for :hover rules; proxy styles must do it here.
+            widget.setAttribute(Qt.WidgetAttribute.WA_Hover, True)
+            widget.setMouseTracking(True)
+
     def _palette_for(self, widget: QWidget | None) -> dict:
         variant = widget.property(_VARIANT_PROPERTY) if widget else None
 
