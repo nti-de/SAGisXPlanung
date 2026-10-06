@@ -1,5 +1,25 @@
 ## Changelog
 
+### [2.14.3] - 06.10.2026
+#### Neue Funktionen
+
+- Plan in Zusammenzeichnung integrieren: Inhalte eines Quellplans vollständig in einen Zielplan übernehmen (3180ee2d)
+- Neue Planwerk-Auswahl: Suche, Filter nach Planart, Sortierung und Favoriten (a4ef9897)
+- QGIS Dark Mode-Unterstützung im default theme (7a708417)
+
+#### Veränderungen
+
+- Überarbeitung Styles für `BP_Immissionsschutz`, `BP_Freiflaeche`, `BP_AbstandsMass` und `BP_GebaeudeStellung` und generische Objekte (92118663)
+
+#### Fehlerbehebungen
+
+- `BP_KennzeichnungsFlaeche` ohne `zweckbestimmung` wird wieder korrekt dargestellt (1d474f64)
+- Objektabfrage funktioniert auch bei aktiver Suche in der Planübersicht (e87dfd8e)
+- Datenbankpasswörter mit Sonderzeichen werden URL-quoted (64bd296e)
+- XPlanValidator-Validierung meldet Timeout-Fehler statt still zu scheitern (f537f41c)
+- Validierungs-Check und Qt6-Fehler im Plan-Picker behoben (baceeea8)
+
+
 ### [2.14.2] - 06.07.2026
 #### Veränderungen
 

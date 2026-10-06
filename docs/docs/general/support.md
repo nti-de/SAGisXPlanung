@@ -19,6 +19,19 @@ Um eine schnelle Bearbeitung Ihrer Anfrage zu ermöglichen, fügen Sie nach Mög
 * Beschreibung des Problems
 * Fehlermeldungen oder Screenshots
 
+??? tip "Protokoll-Datei beifügen"
+
+    Fügen Sie Ihrer Anfrage gerne die Protokoll-Datei `XPlanung.log` bei.
+    Sie befindet sich im Verzeichnis des installierten Plugins (sofern nicht anders konfiguriert):
+    === "Windows"
+        ```
+        %APPDATA%\QGIS\QGIS3\profiles\default\python\plugins\SAGisXPlanung
+        ```
+    === "Linux"
+        ```
+        ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/SAGisXPlanung
+        ```
+
 ---
 
 ## Allgemeine Anfragen

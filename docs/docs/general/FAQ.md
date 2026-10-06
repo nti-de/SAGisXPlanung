@@ -32,5 +32,5 @@ Die externen Pakete übernehmen folgende Aufgaben innerhalb der Anwendung:
 
 !!! note "Hinweis für Kunden der Vollversion"
     Für Kunden der Vollversion stellen wir auf Wunsch auch eine vollständig gebündelte Installationsversion mit  
-    sämtlichen benötigten Python-Abhängigkeiten bereit. Diese Variante eignet sich insbesondere für IT-Umgebungen mit  
+    sämtlichen benötigten Python-Abhängigkeiten bereit. Diese Variante eignet sich insbesondere für IT-Umgebungen mit 
     eingeschränkten Benutzerrechten, in denen keine eigenständige Installation externer Python-Pakete möglich ist.
