@@ -17,6 +17,7 @@ strategy:
 
 container:
   image: $[ variables['containerImage'] ]
+  mapDockerSocket: true
   options: "--user 0:0 --name ci-container -v /usr/bin/docker:/tmp/docker:ro"
 
 steps:
