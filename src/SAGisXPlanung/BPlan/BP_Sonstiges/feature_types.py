@@ -425,7 +425,7 @@ class BP_KennzeichnungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt
 
     def layer_fields(self):
         return {
-            'zweckbestimmung': ','.join(str(e.value) for e in self.zweckbestimmung),
+            'zweckbestimmung': ', '.join(str(z.value) for z in self.zweckbestimmung) if self.zweckbestimmung else '',
             'skalierung': self.skalierung if self.skalierung else '',
             'drehwinkel': self.drehwinkel if self.drehwinkel else ''
         }
