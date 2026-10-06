@@ -64,6 +64,7 @@ if ($Out) {
 }
 else {
     $Out = "$env:APPDATA\QGIS\QGIS3\profiles\default\python\plugins\"
+    $OutQGIS4 = "$env:APPDATA\QGIS\QGIS4\profiles\default\python\plugins\"
     if ($Clean.IsPresent) {
         Write-Host "= Delete existing plugin" -ForegroundColor Yellow
         Remove-Item "$Out\$PluginName" -Recurse -Force -ErrorAction Ignore
@@ -72,6 +73,7 @@ else {
     Write-Host "Copy from: $plugin_src_path\$SrcDir"
     Write-Host "Copy to: $Out\$PluginName"
     Copy-Item "$plugin_src_path\$SrcDir\*" "$Out\$PluginName" -Exclude @("dependencies") -Recurse -Container -Force
+    Copy-Item "$plugin_src_path\$SrcDir\*" "$OutQGIS4\$PluginName" -Exclude @("dependencies") -Recurse -Container -Force
 }
 
 # ---------------------------------------------------------------------
