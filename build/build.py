@@ -164,14 +164,12 @@ text = re.sub(r'(?m)^\s*name\s*=.*$', 'name=SAGis XPlanung', text)
 text = re.sub(r'(?m)^\s*icon\s*=.*$', 'icon=gui/resources/sagis_icon.png', text)
 metadata.write_text(text, encoding="utf-8")
 
-
 def rewrite_ui_text(path, src, target):
     text = path.read_text(encoding="utf-8")
     if src not in text:
         return False
     path.write_text(text.replace(src, target), encoding="utf-8")
     return True
-
 
 with progress_context() as progress:
     ui_files = list(DST.rglob("*.ui"))
