@@ -140,7 +140,7 @@ class Sound(types.TypeDecorator, XPlanungMeasureType):
     python_type = float
     cache_ok = True
 
-    UOM = 'dB'
+    UOM = 'db'
     MIN_VALUE = 0
     MAX_VALUE = sys.float_info.max
 

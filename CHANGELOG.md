@@ -18,6 +18,7 @@
 - Datenbankpasswörter mit Sonderzeichen werden URL-quoted (64bd296e)
 - XPlanValidator-Validierung meldet Timeout-Fehler statt still zu scheitern (f537f41c)
 - Validierungs-Check und Qt6-Fehler im Plan-Picker behoben (baceeea8)
+- Korrektur der Einheit für MeasureType `Sound`
 
 
 ### [2.14.2] - 06.07.2026
