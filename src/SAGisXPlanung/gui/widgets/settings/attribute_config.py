@@ -29,7 +29,7 @@ class AttributeConfigPage(SettingsPage):
         self.ui = ui
         # Opaque Window background like the other pages (the tab pane paints Base)
         self.setAutoFillBackground(True)
-        self.ui.label_9.setStyleSheet(f"color: {ApplicationColor.MutedText};")
+
         self.ui.attribute_view = QAttributeConfigView()
         self.ui.tab_attributes.layout().addWidget(self.ui.attribute_view)
         self.ui.filter_edit.setPlaceholderText('Suchen...')
