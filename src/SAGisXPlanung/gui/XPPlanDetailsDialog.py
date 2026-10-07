@@ -9,7 +9,7 @@ import qasync
 
 from qgis.PyQt import QtWidgets
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction, QVBoxLayout, QMessageBox
+from qgis.PyQt.QtWidgets import QAbstractItemView, QMenu, QAction, QVBoxLayout, QMessageBox, QToolButton
 from qgis.PyQt.QtCore import Qt, pyqtSignal, pyqtSlot, QEvent, QModelIndex
 from qgis.core import QgsVectorLayer
 from qgis.gui import QgsDockWidget
@@ -31,9 +31,10 @@ from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import export_version
 from SAGisXPlanung.core.canvas_display import plan_to_map
 from SAGisXPlanung.ext.spinner import WaitingSpinner, loading_animation
+from SAGisXPlanung.gui.combine_plan_dialog import CombinePlanDialog
 from SAGisXPlanung.gui.commands import (ObjectsDeletedCommand, XPUndoStack, AttributeChangedCommand,
                                         StackChangeType, CommandType)
-from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg
+from SAGisXPlanung.gui.style import SVGButtonEventFilter, load_svg, ApplicationColor
 from SAGisXPlanung.gui.widgets.QAttributeEdit import QAttributeEdit
 from SAGisXPlanung.gui.widgets.QExplorerView import ClassNode, XID_ROLE
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
@@ -77,8 +78,23 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.bSave.setVisible(False)
         self.lTitle.setElideMode(Qt.TextElideMode.ElideRight)
 
-        self.bEditMain.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/edit.svg')))
-        self.bEditMain.clicked.connect(self.onEditMainClicked)
+        self.menu_button_further.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/more_vert.svg'),
+                                         color=ApplicationColor.Tertiary))
+        self.menu_button_further.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.further_menu = QMenu(self.menu_button_further)
+        self.action_combine_plan = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/merge.svg')),
+                                           'Plan in Zusammenzeichnung integrieren')
+        self.action_combine_plan.triggered.connect(self.on_combine_plan_action)
+        self.further_menu.addAction(self.action_combine_plan)
+        self.menu_button_further.setMenu(self.further_menu)
+        self.menu_button_further.setStyleSheet("""
+            QToolButton {
+                border: none;
+                padding: 5px;
+                border-radius: 5px;
+            }
+            QToolButton::menu-indicator { image: none; }
+        """)
 
         self.bSortHierarchy.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/sort_hierarchy.svg')))
         self.bSortCategory.setIcon(QIcon(os.path.join(BASE_DIR, 'gui/resources/category.svg')))
@@ -233,14 +249,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
 
 
     @pyqtSlot(bool)
-    def onEditMainClicked(self, clicked: bool):
-        with Session.begin() as session:
-            plan: XP_Plan = session.get(self.plan_type, self.plan_xid, options=[selectinload('*')])
-
-            edit_widget = plan.edit_widget()
-            self.insertWidgetIntoNewPage(edit_widget)
-            self.bSave.setVisible(True)
-            self.bSave.clicked.connect(self.onEditSaveClicked)
+    def on_combine_plan_action(self, clicked: bool):
+        full_version_required_warning()
 
     @qasync.asyncSlot(dict)
     async def onParishChanged(self, parish: dict):
