@@ -26,7 +26,7 @@ class RuleBasedSymbolRenderer(QgsRuleBasedRenderer):
                 path = os.path.abspath(os.path.join(os.path.dirname(__file__), f'symbole/{category}/{svg_file}'))
                 svg_symbol_layer = QgsSvgMarkerSymbolLayer(path)
                 size_prop = QgsProperty.fromExpression(f'coalesce("skalierung", 1) * {self.symbol_size} * {scale_factor}')
-                angle_prop = QgsProperty.fromField("drehwinkel")
+                angle_prop = QgsProperty.fromExpression('360 -"drehwinkel"')
                 svg_symbol_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertySize, size_prop)
                 svg_symbol_layer.setDataDefinedProperty(QgsSymbolLayer.Property.PropertyAngle, angle_prop)
                 svg_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)

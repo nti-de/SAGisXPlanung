@@ -4,7 +4,7 @@ from qgis.core import (QgsSymbol, QgsWkbTypes, QgsSingleSymbolRenderer, QgsSimpl
                        QgsMarkerLineSymbolLayer, QgsMarkerSymbol, QgsSimpleMarkerSymbolLayer, QgsProperty,
                        QgsMarkerSymbolLayer)
 from qgis.PyQt.QtGui import QColor
-from qgis.PyQt.QtCore import QSize
+from qgis.PyQt.QtCore import QSize, Qt
 
 from sqlalchemy import Integer, Column, ForeignKey, Float, Enum, String, ARRAY
 
@@ -112,9 +112,13 @@ class BP_StrassenbegrenzungsLinie(LineGeometry, BP_Objekt):
         symbol = QgsSymbol.defaultSymbol(QgsWkbTypes.GeometryType.LineGeometry)
         symbol.deleteSymbolLayer(0)
 
-        colored_strip = QgsSimpleLineSymbolLayer(QColor('#57e158'))
-        colored_strip.setWidth(0.7)
-        colored_strip.setOffset(0.3)
+        colored_strip = QgsSimpleLineSymbolLayer.create({})
+        colored_strip.setColor(QColor('#57e158'))
+        colored_strip.setWidth(0.3)
+        colored_strip.setOffset(-0.15)
+        colored_strip.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
+        colored_strip.setPenJoinStyle(Qt.PenJoinStyle.MiterJoin)
+        colored_strip.setPenCapStyle(Qt.PenCapStyle.FlatCap)
 
         border = QgsSimpleLineSymbolLayer(QColor(0, 0, 0))
         border.setWidth(0.3)

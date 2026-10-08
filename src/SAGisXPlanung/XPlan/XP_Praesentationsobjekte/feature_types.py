@@ -476,7 +476,7 @@ class XP_PPO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
         text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         exp = f"if(\"form\" = 'SVG', \"skalierung\" * \"symbol_size\", \"skalierung\" * \"text_size\")"
         size_prop = QgsProperty.fromExpression(exp)
-        angle_prop = QgsProperty.fromField("drehwinkel")
+        angle_prop = QgsProperty.fromExpression('360 -"drehwinkel"')
         prop_collection = QgsPropertyCollection()
         prop_collection.setProperty(QgsPalLayerSettings.Property.Size, size_prop)
         prop_collection.setProperty(QgsPalLayerSettings.Property.LabelRotation, angle_prop)
@@ -592,7 +592,7 @@ class XP_PTO(PointGeometry, XP_AbstraktesPraesentationsobjekt):
         text_format = QgsTextFormat()
         text_format.setSizeUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
         size_prop = QgsProperty.fromExpression('"skalierung" * "text_size"')
-        angle_prop = QgsProperty.fromField("drehwinkel")
+        angle_prop = QgsProperty.fromExpression('360 -"drehwinkel"')
         prop_collection = QgsPropertyCollection()
         prop_collection.setProperty(QgsPalLayerSettings.Property.Size, size_prop)
         prop_collection.setProperty(QgsPalLayerSettings.Property.LabelRotation, angle_prop)
