@@ -134,6 +134,8 @@ class XPPlanDetailsDialog(QgsDockWidget, FORM_CLASS):
         self.undo_stack.undoTextChanged.connect(lambda u: self.bUndo.setToolTip(f'Rückgängig: {u}' if u else ''))
         self.undo_stack.redoTextChanged.connect(lambda r: self.bRedo.setToolTip(f'Vorwärts: {r}' if r else ''))
         self.undo_stack.stack_changed.connect(self.on_undo_stack_changed)
+        self.bUndo.clicked.connect(self.undo_stack.undo)
+        self.bRedo.clicked.connect(self.undo_stack.redo)
         self.bUndo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/undo.svg')))
         self.bRedo.setIcon(load_svg(os.path.join(BASE_DIR, 'gui/resources/redo.svg')))
         self.bUndo.setCursor(Qt.CursorShape.PointingHandCursor)

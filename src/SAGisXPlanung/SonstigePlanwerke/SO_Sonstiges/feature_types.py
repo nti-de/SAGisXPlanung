@@ -1,12 +1,11 @@
-from PyQt5.QtCore import Qt
-from qgis._core import QgsRuleBasedRenderer
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from qgis.core import (QgsWkbTypes, QgsSingleSymbolRenderer, QgsSymbol, QgsPointPatternFillSymbolLayer, QgsMarkerSymbol,
-                       QgsSimpleMarkerSymbolLayer, QgsUnitTypes)
+                       QgsSimpleMarkerSymbolLayer, QgsUnitTypes, QgsRuleBasedRenderer)
 from qgis.PyQt.QtGui import QColor
+from qgis.PyQt.QtCore import Qt
 
 from SAGisXPlanung.SonstigePlanwerke.SO_Basisobjekte import SO_Objekt
 from SAGisXPlanung.SonstigePlanwerke.SO_Sonstiges.enums import SO_KlassifizGelaendemorphologie
