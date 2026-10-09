@@ -1,3 +1,5 @@
+from PyQt5.QtCore import Qt
+from qgis._core import QgsRuleBasedRenderer
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -87,4 +89,25 @@ class SO_Grenze(LineGeometry, SO_Objekt):
     @classmethod
     @fallback_renderer
     def renderer(cls, geom_type: GeometryType = None):
-        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry))
+        root_rule = QgsRuleBasedRenderer.Rule(None)
+
+        symbol_2000 = QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry)
+        line = symbol_2000.symbolLayer(0)
+        line.setColor(QColor('black'))
+        line.setWidth(0.05)
+        line.setPenStyle(Qt.PenStyle.DashLine)
+        line.setPenCapStyle(Qt.PenCapStyle.FlatCap)
+        line.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
+
+        rule_2000 = QgsRuleBasedRenderer.Rule(symbol_2000)
+        rule_2000.setFilterExpression('"typ" = \'VorgeschlageneGrundstuecksgrenze\'')
+        rule_2000.setLabel('Vorgeschlagene Grundstücksgrenze')
+        root_rule.appendChild(rule_2000)
+
+        default_symbol = QgsSymbol.defaultSymbol(geom_type or QgsWkbTypes.GeometryType.LineGeometry)
+        default_rule = QgsRuleBasedRenderer.Rule(default_symbol)
+        default_rule.setIsElse(True)
+        default_rule.setLabel('Sonstiges')
+        root_rule.appendChild(default_rule)
+
+        return QgsRuleBasedRenderer(root_rule)
