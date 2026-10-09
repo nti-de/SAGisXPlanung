@@ -168,9 +168,7 @@ class BP_Wegerecht(MixedGeometry, UeberlagerungsObjekt, BP_Objekt):
             collect_geometries(
                 array_foreach(
                     geometries_to_array(
-                        segments_to_lines(
-                            exterior_ring($geometry)
-                        )
+                        segments_to_lines(boundary($geometry))
                     ),
                     if(
                         length(@element) >= 3,
