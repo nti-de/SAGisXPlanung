@@ -86,6 +86,7 @@ class QExplorerView(QTreeView):
 
     def filter(self, filter_text):
         self.proxy.setFilterRegularExpression(filter_text)
+        self.expandAll()
 
     def selectionChanged(self, selected: QItemSelection, deselected: QItemSelection):
         if not deselected.indexes():
