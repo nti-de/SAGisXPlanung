@@ -1,5 +1,22 @@
 ## Changelog
 
+### [2.15.0] - 14.10.2026
+
+#### Veränderungen
+
+- Neuer Style für `SO_Grenze` vom Typ VorgeschlageneGrundstücksgrenze (f5d59558)
+- Style für `BP_Wegerecht` berücksichtigt auch interior rings (86f864d7)
+- Explorer-Ansicht klappt bei aktiver Filterung automatisch alle Einträge auf (0e35be05)
+
+#### Fehlerbehebungen
+
+- Ausrichtung von Punktobjekten mit `drehwinkel` korrigiert (1e78083d)
+- Korrektur der Einheit für MeasureType `Sound` (3122befd)
+- Import-Fehler in `SO_Sonstiges` behoben; Undo/Redo-Schaltflächen in der Plan-Detailansicht wieder funktionsfähig (1ffc5eb1)
+- fehlende Ausprägungen für `BP_WegerechtTypen` hinzugefügt (dab2a161)
+- fehlende Objektklasse `BP_SchutzPflegeEntwicklungsMassnahme` hinzugefügt(748b340c)
+
+
 ### [2.14.3] - 06.10.2026
 #### Neue Funktionen
 
@@ -18,8 +35,6 @@
 - Datenbankpasswörter mit Sonderzeichen werden URL-quoted (64bd296e)
 - XPlanValidator-Validierung meldet Timeout-Fehler statt still zu scheitern (f537f41c)
 - Validierungs-Check und Qt6-Fehler im Plan-Picker behoben (baceeea8)
-- Korrektur der Einheit für MeasureType `Sound`
-- Korrektur der Ausrichtung von Punktobjekten mit `drehwinkel`
 
 
 ### [2.14.2] - 06.07.2026

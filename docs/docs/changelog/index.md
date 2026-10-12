@@ -6,6 +6,7 @@ sowie relevanten Verbesserungen im Arbeitsablauf.
 
 Letzte Versionen:
 
+- [Version 2.15.0](v2150.md)
 - [Version 2.14.3](v2143.md)
 - [Version 2.14.2](v2142.md)
 - [Version 2.14.1](v2141.md)
