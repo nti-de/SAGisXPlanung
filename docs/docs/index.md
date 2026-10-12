@@ -24,10 +24,6 @@ SAGis XPlanung unterstützt die standardkonforme Erstellung, Bearbeitung, Validi
     src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fplugins.qgis.org%2Fplugins%2Fplugins.xml%3Fqgis%3D3.34&query=%2F%2Fpyqgis_plugin%5B%40name%3D'SAGis%20XPlanung'%5D%2F%40version&logo=qgis&logoColor=%23589632&label=QGIS%20Plugin%20Version&color=589632"
     alt="Version"
   /></a>
-  <a href="https://plugins.qgis.org/plugins/SAGisXPlanung/"><img
-    src="https://img.shields.io/badge/dynamic/xml?url=https%3A%2F%2Fplugins.qgis.org%2Fplugins%2Fplugins.xml%3Fqgis%3D3.34&query=round(%2F%2Fpyqgis_plugin%5B%40name%3D'SAGis%20XPlanung'%5D%2Faverage_vote%20*%20100)%20div%20100&suffix=%20%2F%205&logo=qgis&logoColor=%23589632&label=QGIS%20Stars&color=589632"
-    alt="Rating"
-  /></a>
 </p>
 
 [Jetzt starten](setup/index.md){ .md-button .md-button--primary }

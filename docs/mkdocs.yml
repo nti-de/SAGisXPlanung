@@ -83,6 +83,30 @@ plugins:
   - tags
   - search
   - offline
+  - llmstxt:
+      markdown_description: SAGis XPlanung ist eine QGIS-Erweiterung zur standardkonformen Erfassung, Bearbeitung, Validierung und Verwaltung von Bauleitplänen (Bebauungsplan, Flächennutzungsplan, Landschaftsplan, Raumordnungsplan) nach dem deutschen Standard XPlanung (XPlanGML) mit PlanZV-konformer Darstellung.
+      full_output: llms-full.txt
+      sections:
+        Überblick:
+          - index.md: Startseite und Funktionsübersicht (Community- vs. Vollversion)
+        Installation und Einrichtung:
+          - setup/*.md
+        Anwendungsfälle:
+          - new-*.md
+          - map-*.md
+          - add-*.md
+          - plan-*.md
+          - multi-*.md
+          - text-*.md
+        Elemente der Oberfläche:
+          - elements/*.md
+        Einstellungen:
+          - settings/*.md
+        Projekt und Support:
+          - general/*.md
+          - integrations/*.md
+        Changelog:
+          - changelog/*.md
 
 nav:
   - Start: index.md
