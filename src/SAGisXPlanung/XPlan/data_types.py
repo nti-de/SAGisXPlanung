@@ -94,6 +94,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
         CheckConstraint(sqltext='NOT("referenzName" IS NULL AND "referenzURL" IS NULL)', name='referenz_name_or_url_not_null'),
     )
     __avoidRelation__ = ['bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+                         'bp_schutzmassnahme_massnahme', 'bp_schutzmassnahme_plan',
                          'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
                          'fp_ausgleichsflaeche_massnahme', 'fp_ausgleichsflaeche_plan',
                          'bp_ausgleichsmassnahme_massnahme', 'bp_ausgleichsmassnahme_plan',
@@ -136,6 +137,16 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     bp_schutzflaeche_plan_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche_plan = relationship("BP_SchutzPflegeEntwicklungsFlaeche", foreign_keys=[bp_schutzflaeche_plan_id],
                                          back_populates="refLandschaftsplan")
+
+    bp_schutzmassnahme_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzmassnahme.id', ondelete='CASCADE'))
+    bp_schutzmassnahme_massnahme = relationship("BP_SchutzPflegeEntwicklungsMassnahme",
+                                                foreign_keys=[bp_schutzmassnahme_massnahme_id],
+                                                back_populates="refMassnahmenText")
+
+    bp_schutzmassnahme_plan_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzmassnahme.id', ondelete='CASCADE'))
+    bp_schutzmassnahme_plan = relationship("BP_SchutzPflegeEntwicklungsMassnahme",
+                                           foreign_keys=[bp_schutzmassnahme_plan_id],
+                                           back_populates="refLandschaftsplan")
 
     bp_ausgleichsflaeche_massnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
     bp_ausgleichsflaeche_massnahme = relationship("BP_AusgleichsFlaeche",
@@ -227,6 +238,7 @@ class XP_ExterneReferenz(RelationshipMixin, ElementOrderMixin, Base):
     @classmethod
     def avoid_export(cls):
         return ['file', 'georef_file', 'bereich', 'baugebiet', 'bp_schutzflaeche_massnahme', 'bp_schutzflaeche_plan',
+                'bp_schutzmassnahme_massnahme', 'bp_schutzmassnahme_plan',
                 'bp_ausgleichsflaeche_massnahme', 'bp_ausgleichsflaeche_plan',
                 'fp_ausgleichsflaeche_massnahme', 'fp_ausgleichsflaeche_plan',
                 'bp_ausgleichsmassnahme_massnahme', 'bp_ausgleichsmassnahme_plan',
@@ -334,7 +346,7 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
     """ Spezifikation der Attribute für einer Schutz-, Pflege- oder Entwicklungsmaßnahme """
 
     __tablename__ = 'xp_spe_daten'
-    __avoidRelation__ = ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
+    __avoidRelation__ = ['bp_schutzflaeche', 'bp_schutzmassnahme', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
                          'fp_schutzflaeche', 'fp_ausgleichsflaeche']
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
@@ -345,6 +357,9 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
 
     bp_schutzflaeche_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzflaeche.id', ondelete='CASCADE'))
     bp_schutzflaeche = relationship('BP_SchutzPflegeEntwicklungsFlaeche', back_populates='massnahme')
+
+    bp_schutzmassnahme_id = Column(UUID(as_uuid=True), ForeignKey('bp_schutzmassnahme.id', ondelete='CASCADE'))
+    bp_schutzmassnahme = relationship('BP_SchutzPflegeEntwicklungsMassnahme', back_populates='massnahme')
 
     bp_ausgleichsflaeche_id = Column(UUID(as_uuid=True), ForeignKey('bp_ausgleich.id', ondelete='CASCADE'))
     bp_ausgleichsflaeche = relationship('BP_AusgleichsFlaeche', back_populates='massnahme')
@@ -360,7 +375,7 @@ class XP_SPEMassnahmenDaten(RelationshipMixin, ElementOrderMixin, Base):
 
     @classmethod
     def avoid_export(cls):
-        return ['bp_schutzflaeche', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
+        return ['bp_schutzflaeche', 'bp_schutzmassnahme', 'bp_ausgleichsflaeche', 'bp_ausgleichsmassnahme',
                 'fp_schutzflaeche', 'fp_ausgleichsflaeche']
 
 

@@ -42,7 +42,8 @@ from SAGisXPlanung.BPlan.BP_Laerm.data_types import BP_EmissionskontingentLaerm,
 from SAGisXPlanung.BPlan.BP_Laerm.feature_types import BP_RichtungssektorGrenze, BP_ZusatzkontingentLaerm, \
     BP_ZusatzkontingentLaermFlaeche
 from SAGisXPlanung.BPlan.BP_Naturschutz_Landschaftsbild_Naturhaushalt.feature_types import BP_AnpflanzungBindungErhaltung, \
-    BP_SchutzPflegeEntwicklungsFlaeche, BP_AusgleichsFlaeche, BP_AusgleichsMassnahme, BP_EingriffsBereich
+    BP_SchutzPflegeEntwicklungsFlaeche, BP_SchutzPflegeEntwicklungsMassnahme, BP_AusgleichsFlaeche, \
+    BP_AusgleichsMassnahme, BP_EingriffsBereich
 from SAGisXPlanung.BPlan.BP_Sonstiges.feature_types import BP_FlaecheOhneFestsetzung, BP_Wegerecht, \
     BP_NutzungsartenGrenze, BP_GenerischesObjekt, BP_KennzeichnungsFlaeche, BP_HoehenMass, BP_AbstandsMass, \
     BP_FestsetzungNachLandesrecht, BP_FreiFlaeche, BP_Veraenderungssperre, BP_UnverbindlicheVormerkung
@@ -192,6 +193,7 @@ CLASSES = {
     'BP_AusgleichsMassnahme': BP_AusgleichsMassnahme,
     'BP_EingriffsBereich': BP_EingriffsBereich,
     'BP_SchutzPflegeEntwicklungsFlaeche': BP_SchutzPflegeEntwicklungsFlaeche,
+    'BP_SchutzPflegeEntwicklungsMassnahme': BP_SchutzPflegeEntwicklungsMassnahme,
     'BP_Wegerecht': BP_Wegerecht,
     'BP_BaugebietsTeilFlaeche': BP_BaugebietsTeilFlaeche,
     'BP_BauGrenze': BP_BauGrenze,

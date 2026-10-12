@@ -191,6 +191,35 @@ class BP_EingriffsBereich(PolygonGeometry, UeberlagerungsObjekt, BP_Objekt):
         return QgsSymbolLayerUtils.symbolPreviewIcon(cls.symbol(), QSize(48, 48))
 
 
+class BP_SchutzPflegeEntwicklungsMassnahme(MixedGeometry, BP_Objekt):
+    """ Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
+        (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB) """
+
+    __tablename__ = 'bp_schutzmassnahme'
+    __mapper_args__ = {
+        'polymorphic_identity': 'bp_schutzmassnahme',
+    }
+
+    id = Column(ForeignKey("bp_objekt.id", ondelete='CASCADE'), primary_key=True)
+
+    ziel = Column(Enum(XP_SPEZiele))
+    sonstZiel = Column(String)
+    massnahme = relationship("XP_SPEMassnahmenDaten", back_populates="bp_schutzmassnahme", cascade="all, delete",
+                             passive_deletes=True)
+    istAusgleich = Column(Boolean)
+    refMassnahmenText = relationship("XP_ExterneReferenz", back_populates="bp_schutzmassnahme_massnahme",
+                                     cascade="all, delete", passive_deletes=True, uselist=False,
+                                     foreign_keys='XP_ExterneReferenz.bp_schutzmassnahme_massnahme_id')
+    refLandschaftsplan = relationship("XP_ExterneReferenz", back_populates="bp_schutzmassnahme_plan",
+                                      cascade="all, delete", passive_deletes=True, uselist=False,
+                                      foreign_keys='XP_ExterneReferenz.bp_schutzmassnahme_plan_id')
+
+    @classmethod
+    @fallback_renderer
+    def renderer(cls, geom_type: GeometryType = None):
+        return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
+
+
 class BP_SchutzPflegeEntwicklungsFlaeche(PolygonGeometry, FlaechenschlussObjekt, BP_Objekt):
     """ Umgrenzung von Flächen für Maßnahmen zum Schutz, zur Pflege und zur Entwicklung von Natur und Landschaft
         (§9 Abs. 1 Nr. 20 und Abs. 4 BauGB) """
