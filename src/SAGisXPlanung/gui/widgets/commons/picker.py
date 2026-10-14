@@ -1206,7 +1206,11 @@ class GenericPicker(QComboBox):
         painter.drawControl(QStyle.ControlElement.CE_ComboBoxLabel, opt)
 
     def _on_popup_item_selected(self, item: PickerItem):
-        self.setCurrentText(item.text)
+        index = self.findData(item.id)
+        if index >= 0:
+            self.setCurrentIndex(index)
+        else:
+            self.setCurrentText(item.text)
         self._popup.search_bar.clear()
         self.hidePopup()
 

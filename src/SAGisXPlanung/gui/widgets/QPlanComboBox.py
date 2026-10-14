@@ -26,7 +26,6 @@ class QPlanComboBox(GenericPicker):
 
     def refresh(self):
         try:
-            self.clear()
             with Session.begin() as session:
                 plans = session.query(XP_Plan).options(
                     load_only(XP_Plan.id, XP_Plan.name, XP_Plan.type)
@@ -44,12 +43,16 @@ class QPlanComboBox(GenericPicker):
                         )
                     )
                     picker_items.append(picker_item)
-                self.set_picker_items(picker_items)
+            # only replace combo items after the query succeeded, so a failing
+            # refresh keeps the previous items/selection instead of an empty combo
+            self.set_picker_items(picker_items)
         except Exception as e:
             logger.exception(e)
 
     def set_current_plan(self, xid: str):
-        index = self.findData(xid)
+        if not xid:
+            return
+        index = self.findData(str(xid))
         if index >= 0:
             self.setCurrentIndex(index)
 

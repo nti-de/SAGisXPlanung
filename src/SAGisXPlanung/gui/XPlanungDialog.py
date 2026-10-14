@@ -128,10 +128,20 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
     def _try_select_plan(self, plan_xid: str) -> bool:
         if not plan_xid:
             return False
-        index = self.cbPlaene.findData(str(plan_xid))
+        target = str(plan_xid)
+        index = self.cbPlaene.findData(target)
+        if index < 0:
+            # fall back to case-insensitive match (UUIDs from GML may differ in case
+            # from the canonical lowercase form stored in the database)
+            target_lower = target.lower()
+            for i in range(self.cbPlaene.count()):
+                if str(self.cbPlaene.itemData(i)).lower() == target_lower:
+                    index = i
+                    break
         if index < 0:
             return False
-        self.cbPlaene.setCurrentIndex(index)
+        if self.cbPlaene.currentIndex() != index:
+            self.cbPlaene.setCurrentIndex(index)
         return True
 
     def _persist_current_plan_selection(self):
@@ -300,7 +310,7 @@ class XPlanungDialog(QgsDockWidget, FORM_CLASS):
             import_result = await self.import_task
 
             self.fwImportPath.setFilePath("")
-            self.refresh_plans()
+            self.cbPlaene.refresh()
             plan_xid, plan_name = import_result.plan_xid, import_result.plan_name
             if import_result.warnings:
                 warn_info_text = '\n\n '.join(w for w in import_result.warnings)

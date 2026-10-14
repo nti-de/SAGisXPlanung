@@ -90,12 +90,16 @@ def import_plan(input_data: GMLInputData, progress_callback: Callable[[Tuple[int
             progress_callback=progress_callback,
             session=session
         )
-        result = ImportResult(reader.plan.id, reader.plan.name, reader.warnings)
         if overwrite:
             session.expunge_all()
-            session.merge(reader.plan)
+            plan = session.merge(reader.plan)
         else:
             session.add(reader.plan)
+            plan = reader.plan
+        # flush so server/python-side defaults (e.g. uuid primary key) are assigned
+        # before capturing the id; otherwise plan.id may still be None here
+        session.flush()
+        result = ImportResult(str(plan.id), plan.name, reader.warnings)
 
     return result
 

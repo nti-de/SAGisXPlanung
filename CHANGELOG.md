@@ -14,7 +14,8 @@
 - Korrektur der Einheit für MeasureType `Sound` (3122befd)
 - Import-Fehler in `SO_Sonstiges` behoben; Undo/Redo-Schaltflächen in der Plan-Detailansicht wieder funktionsfähig (1ffc5eb1)
 - fehlende Ausprägungen für `BP_WegerechtTypen` hinzugefügt (dab2a161)
-- fehlende Objektklasse `BP_SchutzPflegeEntwicklungsMassnahme` hinzugefügt(748b340c)
+- fehlende Objektklasse `BP_SchutzPflegeEntwicklungsMassnahme` hinzugefügt (748b340c)
+- direkte Vor-Auswahl nach Import eines Plans korrigiert
 
 
 ### [2.14.3] - 06.10.2026
