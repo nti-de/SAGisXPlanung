@@ -7,6 +7,7 @@
 - Neuer Style für `SO_Grenze` vom Typ VorgeschlageneGrundstücksgrenze (f5d59558)
 - Style für `BP_Wegerecht` berücksichtigt auch interior rings (86f864d7)
 - Explorer-Ansicht klappt bei aktiver Filterung automatisch alle Einträge auf (0e35be05)
+- Funktion zum Auflösen von m:n-Beziehungen über Kontextmenü in Attributansicht
 
 #### Fehlerbehebungen
 

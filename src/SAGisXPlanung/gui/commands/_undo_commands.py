@@ -169,6 +169,60 @@ class ObjectsDeletedCommand(QUndoCommand):
                 session.add(obj)
 
 
+class RelationUnlinkedCommand(QUndoCommand):
+    """Removes the association between two objects without deleting either object.
+
+    Only suitable for many-to-many relationships (association table). Both the parent
+    and the related object remain in the database; only the link row is removed.
+    """
+    command_type = CommandType.RELATION_UNLINKED
+
+    def __init__(self, parent_item: XPlanungItem, child_item: XPlanungItem, orm_attribute: str,
+                 display_attribute_name: str, attribute_view_index: QModelIndex = None, parent=None):
+        super().__init__(f'Beziehung {display_attribute_name} zu {child_item.xtype.__name__} aufgelöst')
+        self.parent_item = parent_item
+        self.child_item = child_item
+        self.orm_attribute = orm_attribute
+        self.attribute_name = display_attribute_name
+        self.attribute_view_index = attribute_view_index
+        self.parent = parent
+
+    def _load_relation(self, session):
+        parent_obj = session.get(self.parent_item.xtype, self.parent_item.xid)
+        child_obj = session.get(self.child_item.xtype, self.child_item.xid)
+        if parent_obj is None or child_obj is None:
+            logger.warning(f'Unlink skipped, object not found in db: '
+                           f'{self.parent_item.xtype.__name__}({self.parent_item.xid}) -> '
+                           f'{self.child_item.xtype.__name__}({self.child_item.xid})')
+            return None, None, None
+        rel = sa_inspect(self.parent_item.xtype).relationships[self.orm_attribute]
+        return parent_obj, child_obj, rel
+
+    def redo(self):
+        with Session.begin() as session:
+            parent_obj, child_obj, rel = self._load_relation(session)
+            if parent_obj is None:
+                return
+            if rel.uselist:
+                collection = getattr(parent_obj, self.orm_attribute)
+                if child_obj in collection:
+                    collection.remove(child_obj)
+            else:
+                setattr(parent_obj, self.orm_attribute, None)
+
+    def undo(self):
+        with Session.begin() as session:
+            parent_obj, child_obj, rel = self._load_relation(session)
+            if parent_obj is None:
+                return
+            if rel.uselist:
+                collection = getattr(parent_obj, self.orm_attribute)
+                if child_obj not in collection:
+                    collection.append(child_obj)
+            else:
+                setattr(parent_obj, self.orm_attribute, child_obj)
+
+
 def snapshot_object(obj) -> dict:
     """Capture all column values of an ORM object as a plain dict."""
     insp = sa_inspect(obj.__class__)

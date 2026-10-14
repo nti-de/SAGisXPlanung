@@ -34,7 +34,7 @@ from SAGisXPlanung.core.mixins.enum_mixin import XPlanungEnumMixin
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.config import xplan_tooltip, export_version
 from SAGisXPlanung.gui.XPEditAttributeDialog import XPEditAttributeDialog
-from SAGisXPlanung.gui.commands import AttributeChangedCommand, ObjectsDeletedCommand, CommandType, StackChangeType
+from SAGisXPlanung.gui.commands import AttributeChangedCommand, ObjectsDeletedCommand, RelationUnlinkedCommand, CommandType, StackChangeType
 from SAGisXPlanung.gui.style import load_svg, ApplicationColor, SVGButtonEventFilter
 from SAGisXPlanung.gui.style.styles import HighlightRowProxyStyle, ModernToolButtonStyle, ModernLineEditStyle
 from SAGisXPlanung.gui.widgets.commons.tooltip import ToolTip
@@ -355,6 +355,8 @@ class QAttributeEdit(CLS, FORM_CLASS):
     def on_relation_clicked(self, index: QModelIndex, event: QEvent):
         attribute_name = index.siblingAtColumn(0).data()
         related_xplan_item = index.data(role=ObjectRole)
+        if not isinstance(related_xplan_item, XPlanungItem):
+            return
         display_name = related_xplan_item.xtype.__name__
 
         if event.button() == Qt.MouseButton.LeftButton:
@@ -366,12 +368,15 @@ class QAttributeEdit(CLS, FORM_CLASS):
 
             self.navigate_to(nav_item)
         else:
+            parent_item = self._xplanung_item
             # for relationship sections, get the attribute name from the parent row
             if index.parent().isValid():
-                attribute_name = index.parent().siblingAtColumn(0).data()
-                attribute_name = self._xplanung_item.xtype.attribute_by_version(attribute_name, export_version())
+                display_attribute_name = index.parent().siblingAtColumn(0).data()
+            else:
+                display_attribute_name = attribute_name
+            orm_attribute_name = parent_item.xtype.attribute_by_version(display_attribute_name, export_version())
 
-            rel = sa_inspect(self._xplanung_item.xtype).relationships[attribute_name]
+            rel = sa_inspect(parent_item.xtype).relationships[orm_attribute_name]
 
             menu = QMenu(self)
             if rel.direction is MANYTOONE:
@@ -386,13 +391,36 @@ class QAttributeEdit(CLS, FORM_CLASS):
             menu.addAction(delete_action)
             if rel.direction is MANYTOMANY:
                 unlink_action = QAction(load_svg(os.path.join(BASE_DIR, 'gui/resources/link-off.svg')), 'Beziehung auflösen')
-                # menu.addAction(unlink_action) TODO: make unlink functional
+                unlink_action.setToolTip('Entfernt nur die Verknüpfung. Das verknüpfte Objekt bleibt in der Datenbank erhalten.')
+                unlink_action.triggered.connect(functools.partial(
+                    self.on_unlink_action_triggered,
+                    parent_item,
+                    related_xplan_item,
+                    index,
+                    orm_attribute_name,
+                    display_attribute_name
+                ))
+                menu.addAction(unlink_action)
             menu.exec(self.treeView.viewport().mapToGlobal(event.pos()))
 
     def on_delete_action_triggered(self, item_to_delete: XPlanungItem, index: QModelIndex, state):
         source_index = self.proxyModel.mapToSource(index)
 
         command = ObjectsDeletedCommand([(item_to_delete, None, source_index)], self)
+        self.undo_stack.push(command)
+
+    def on_unlink_action_triggered(self, parent_item: XPlanungItem, item_to_unlink: XPlanungItem,
+                                   index: QModelIndex, orm_attribute: str, display_attribute_name: str, state):
+        source_index = self.proxyModel.mapToSource(index)
+
+        command = RelationUnlinkedCommand(
+            parent_item=parent_item,
+            child_item=item_to_unlink,
+            orm_attribute=orm_attribute,
+            display_attribute_name=display_attribute_name,
+            attribute_view_index=source_index,
+            parent=self
+        )
         self.undo_stack.push(command)
 
     @qasync.asyncSlot(int, StackChangeType)
@@ -408,28 +436,74 @@ class QAttributeEdit(CLS, FORM_CLASS):
                     self.model.remove_node(delete_item.attribute_view_index)
             else:
                 for delete_item in command.delete_items:
-                    attr_name = delete_item.attribute_name
-                    # find parent, to add object
-                    parent_index_list = self.model.match(
-                        self.model.index(0, 0),
-                        Qt.ItemDataRole.DisplayRole,
-                        attr_name,
-                        -1,
-                        Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive
-                    )
+                    self._restore_relation_node(delete_item.attribute_name, delete_item.xplan_item)
+        elif hasattr(command, 'command_type') and command.command_type == CommandType.RELATION_UNLINKED:
+            if not self._is_current_item(command.parent_item):
+                return
+            if change_type == StackChangeType.REDO:
+                child_index = self._find_relation_index(command.attribute_name, command.child_item.xid)
+                if child_index is not None:
+                    self.model.remove_node(child_index)
+                elif command.attribute_view_index is not None:
+                    self.model.remove_node(command.attribute_view_index)
+            else:
+                self._restore_relation_node(command.attribute_name, command.child_item)
 
-                    if not parent_index_list:
-                        continue
+    def _is_current_item(self, xplan_item: XPlanungItem) -> bool:
+        return (
+            self._xplanung_item is not None
+            and self._xplanung_item.xid == xplan_item.xid
+            and self._xplanung_item.xtype == xplan_item.xtype
+        )
 
-                    parent_node = parent_index_list[0].internalPointer()
+    def _find_relation_index(self, display_attribute_name: str, child_xid: str) -> Optional[QModelIndex]:
+        parent_matches = self.model.match(
+            self.model.index(0, 0),
+            Qt.ItemDataRole.DisplayRole,
+            display_attribute_name,
+            -1,
+            Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive
+        )
+        if not parent_matches:
+            return None
 
-                    if parent_node.node_type == 'section':
-                        insert_row = parent_node.child_count()
-                        self.model.beginInsertRows(parent_index_list[0], insert_row, insert_row)
-                        parent_node.add_child(TreeNode('', delete_item.xplan_item, node_type="relation"))
-                        self.model.endInsertRows()
-                    else:
-                        parent_node.value = delete_item.xplan_item
+        parent_index = parent_matches[0]
+        parent_node = parent_index.internalPointer()
+
+        if parent_node.node_type == 'section':
+            for row in range(parent_node.child_count()):
+                child_index = self.model.index(row, 1, parent_index)
+                child_item = self.model.data(child_index, ObjectRole)
+                if isinstance(child_item, XPlanungItem) and child_item.xid == child_xid:
+                    return child_index
+            return None
+
+        return parent_index.siblingAtColumn(1)
+
+    def _restore_relation_node(self, display_attribute_name: str, xplan_item: XPlanungItem):
+        # find parent, to add object
+        parent_index_list = self.model.match(
+            self.model.index(0, 0),
+            Qt.ItemDataRole.DisplayRole,
+            display_attribute_name,
+            -1,
+            Qt.MatchFlag.MatchWildcard | Qt.MatchFlag.MatchRecursive
+        )
+
+        if not parent_index_list:
+            return
+
+        parent_node = parent_index_list[0].internalPointer()
+
+        if parent_node.node_type == 'section':
+            insert_row = parent_node.child_count()
+            self.model.beginInsertRows(parent_index_list[0], insert_row, insert_row)
+            parent_node.add_child(TreeNode('', xplan_item, node_type="relation"))
+            self.model.endInsertRows()
+        else:
+            parent_node.value = xplan_item
+            value_index = parent_index_list[0].siblingAtColumn(1)
+            self.model.dataChanged.emit(value_index, value_index)
 
     @pyqtSlot(QModelIndex)
     def on_double_clicked(self, index: QModelIndex):
