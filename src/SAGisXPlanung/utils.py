@@ -487,14 +487,14 @@ def confirmObjectDeletion(obj) -> bool:
 
 def full_version_required_warning():
     msg = QMessageBox()
-    msg.setIcon(QMessageBox.Warning)
+    msg.setIcon(QMessageBox.Icon.Warning)
     msg.setText(f"Diese Funktion ist nur in der Vollversion verfügbar."
                 f"<br>"
-                f"Bei Interesse an der Vollversion, wenden Sie sich an <a href='"'mailto:info-de@nti.biz'"'>info-de@nti.biz</a>.")
+                f"Bei Interesse an der Vollversion, wenden Sie sich an <a href='"'mailto:info-de@nti-group.com'"'>info-de@nti-group.com</a>.")
     msg.setWindowTitle("Funktion nicht verfügbar.")
-    msg.setStandardButtons(QMessageBox.Ok)
-    msg.setDefaultButton(QMessageBox.Ok)
-    msg.exec_()
+    msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+    msg.setDefaultButton(QMessageBox.StandardButton.Ok)
+    msg.exec()
 
 
 def is_url(url):

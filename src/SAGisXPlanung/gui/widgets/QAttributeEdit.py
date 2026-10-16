@@ -738,7 +738,7 @@ class EntityTreeModel(QAbstractItemModel):
         if node is None or index.isValid() is False:
             return current_flags
         if not self._edit_allowed:
-            return current_flags & ~Qt.ItemIsEnabled
+            return current_flags & ~Qt.ItemFlag.ItemIsEnabled
 
         xtype = self._xplanung_item.xtype
         is_readonly = hasattr(xtype, '__readonly_columns__') and node.name in xtype.__readonly_columns__
