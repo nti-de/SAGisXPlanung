@@ -520,6 +520,8 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, PlanLi
         "polymorphic_on": type,
     }
 
+    __select_related_display__ = ('schluessel', 'gesetzlicheGrundlage', 'text')
+
     schluessel = Column(String)
     gesetzlicheGrundlage = Column(String)
     text = Column(LargeString)
@@ -605,55 +607,57 @@ class XP_TextAbschnitt(FeatureType, RelationshipMixin, ElementOrderMixin, PlanLi
     def renderer(cls, geom_type: GeometryType):
         return QgsSingleSymbolRenderer(QgsSymbol.defaultSymbol(geom_type))
 
+
     @classmethod
-    def get_plan_query(cls, object_id):
+    def get_object_ids_for_plan(cls, session, plan_id) -> set[str]:
+        """ Return IDs of all objects of this type linked to the given plan in a single query. """
         from ..utils import BEREICH_BASE_TYPES
         statements = [
-            select(XP_Plan.id)
+            select(cls.id)
                 .select_from(cls)
                 .join(cls.xp_plaene)
-                .where(cls.id == object_id)
+                .where(XP_Plan.id == plan_id)
         ]
 
         for bereich_cls in BEREICH_BASE_TYPES:
             stmt = (
-                select(XP_Plan.id)
+                select(cls.id)
                 .select_from(cls)
                 .join(cls.xp_bereich.of_type(bereich_cls))
                 .join(getattr(bereich_cls, "gehoertZuPlan"))
-                .where(cls.id == object_id)
+                .where(XP_Plan.id == plan_id)
             )
             statements.append(stmt)
 
         for bereich_cls in BEREICH_BASE_TYPES:
             statements.append(
-                select(XP_Plan.id)
+                select(cls.id)
                 .select_from(cls)
                 .join(cls.xp_objekte)
                 .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
                 .join(getattr(bereich_cls, "gehoertZuPlan"))
-                .where(cls.id == object_id)
+                .where(XP_Plan.id == plan_id)
             )
             statements.append(
-                select(XP_Plan.id)
+                select(cls.id)
                 .select_from(cls)
                 .join(cls.bp_objekte)
                 .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
                 .join(getattr(bereich_cls, "gehoertZuPlan"))
-                .where(cls.id == object_id)
+                .where(XP_Plan.id == plan_id)
             )
             statements.append(
-                select(XP_Plan.id)
+                select(cls.id)
                 .select_from(cls)
                 .join(cls.fp_objekte)
                 .join(XP_Objekt.gehoertZuBereich.of_type(bereich_cls))
                 .join(getattr(bereich_cls, "gehoertZuPlan"))
-                .where(cls.id == object_id)
+                .where(XP_Plan.id == plan_id)
             )
 
         union_subq = union_all(*statements).subquery()
-
-        return select(union_subq.c.id).distinct()
+        stmt = select(union_subq.c.id).distinct()
+        return {str(oid) for oid in session.execute(stmt).scalars().all()}
 
 
 @event.listens_for(Session, 'after_flush')

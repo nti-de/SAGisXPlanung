@@ -1,5 +1,4 @@
 import asyncio
-import logging
 import os
 from dataclasses import dataclass
 
@@ -8,17 +7,15 @@ from qgis.PyQt.QtGui import QIcon, QColor
 from qgis.PyQt.QtWidgets import (QWidget, QVBoxLayout, QTabWidget, QLineEdit, QStyleOptionButton, QStyle, QApplication,
                              QListView, QLabel, QStyledItemDelegate, QHBoxLayout, QStyleOptionViewItem, QCheckBox)
 from sqlalchemy import select, inspect
+from sqlalchemy.orm import load_only, with_parent
 
 from SAGisXPlanung import Session, BASE_DIR
 from SAGisXPlanung.XPlanungItem import XPlanungItem
 from SAGisXPlanung.core.helper import find_true_class
-from SAGisXPlanung.core.mixins.mixins import PlanLinkedMixin
 from SAGisXPlanung.ext.spinner import loading_animation
 from SAGisXPlanung.gui.style import ApplicationColor, load_svg, EmptyStateFilter
 from SAGisXPlanung.gui.style.styles import TabBarStyle, ModernLineEditStyle, ModernListViewStyle, ModernScrollBarStyle
 from SAGisXPlanung.gui.widgets.QXPlanTabWidget import QXPlanTabWidget
-
-logger = logging.getLogger(__name__)
 
 EMPTY_STATE_FILTER_HINT = "Suchbegriff oder Filter entfernen um alle Objekte zu finden..."
 
@@ -42,6 +39,35 @@ class RelatedObjectItem:
     title: str
     description: str
     xplan_item: XPlanungItem
+
+
+def resolve_display_attributes(create_type: type, display_attributes: tuple[str, str, str] | None = None) -> tuple[str, str, str]:
+    """Resolve the (code, title, description) column mapping for a create_type.
+
+    Explicitly passed attributes take precedence, otherwise the mapping is read
+    from the ``__select_related_display__`` class attribute of the type.
+    All three names must refer to mapped columns so they can be fetched with a
+    single column-only query. Anything else fails loudly.
+    """
+    if display_attributes is None:
+        display_attributes = getattr(create_type, '__select_related_display__', None)
+        if display_attributes is None:
+            raise AttributeError(
+                f"{create_type.__name__} defines no '__select_related_display__'. "
+                f"Either declare it on the class or pass display_attributes explicitly."
+            )
+    if len(display_attributes) != 3:
+        raise ValueError(
+            f"display_attributes must hold exactly 3 column names (code, title, description), "
+            f"got {display_attributes!r}."
+        )
+    column_names = inspect(create_type).columns.keys()
+    for name in display_attributes:
+        if name not in column_names:
+            raise ValueError(
+                f"{create_type.__name__}.{name} is not a mapped column and cannot be used as a display attribute."
+            )
+    return tuple(display_attributes)
 
 
 class RelatedObjectModel(QAbstractListModel):
@@ -269,12 +295,14 @@ class RelatedObjectDelegate(QStyledItemDelegate):
 
 
 class SelectRelatedWidget(QWidget):
-    def __init__(self, create_type: type, parent_item: XPlanungItem, orm_attribute: str, plan_xid: str = None, parent=None):
+    def __init__(self, create_type: type, parent_item: XPlanungItem, orm_attribute: str, plan_xid: str = None,
+                 parent=None, display_attributes: tuple[str, str, str] | None = None):
         super().__init__(parent)
         self.create_type = create_type
         self.parent_item = parent_item
         self.orm_attribute = orm_attribute
         self.plan_xid = plan_xid
+        self.display_attributes = resolve_display_attributes(create_type, display_attributes)
 
         main_layout = QVBoxLayout(self)
         main_layout.setContentsMargins(0, 0, 0, 0)
@@ -387,36 +415,54 @@ class SelectRelatedWidget(QWidget):
         asyncio.create_task(self.load_data())
 
     async def load_data(self):
+        create_type = self.create_type
+        parent_xtype = self.parent_item.xtype
+        orm_attribute = self.orm_attribute
+        parent_xid = self.parent_item.xid
+        plan_xid = self.plan_xid
+        code_attr, title_attr, description_attr = self.display_attributes
+
+        def _load_display_rows(session):
+            stmt = select(
+                create_type.id,
+                getattr(create_type, code_attr),
+                getattr(create_type, title_attr),
+                getattr(create_type, description_attr),
+            )
+            return session.execute(stmt).all()
+
+        def _load_selected_ids(session):
+            true_class = find_true_class(parent_xtype, orm_attribute)
+            parent_stub = session.execute(
+                select(true_class).filter_by(id=parent_xid).options(load_only(true_class.id))
+            ).scalar_one()
+            relationship = inspect(true_class).relationships[orm_attribute]
+            related_cls = relationship.entity.class_
+            stmt = select(related_cls.id).where(
+                with_parent(parent_stub, getattr(true_class, orm_attribute))
+            )
+            return {str(oid) for oid in session.execute(stmt).scalars().all()}
+
         def _load_data_worker():
-            all_items = []
-
             with Session() as session:
-                orm_objects = session.query(self.create_type).all()
-                true_class = find_true_class(self.parent_item.xtype, self.orm_attribute)
-                stmt = select(true_class).filter_by(id=self.parent_item.xid)
-                result = session.execute(stmt)
-                parent_obj = result.scalar_one()
-                selected_orm_objects = getattr(parent_obj, self.orm_attribute)
+                rows = _load_display_rows(session)
+                selected_ids = _load_selected_ids(session)
 
-                for o in orm_objects:
-                    item_plan_xids = self._get_plan_xids(o)
+                ids_in_current_plan = create_type.get_object_ids_for_plan(session, plan_xid)
+
+                all_items = []
+                for row_id, code, title, description in rows:
+                    oid_str = str(row_id)
+                    plan_xids = {plan_xid} if oid_str in ids_in_current_plan else set()
 
                     xplan_item = XPlanungItem(
-                        xid=str(o.id),
-                        xtype=self.create_type,
+                        xid=oid_str,
+                        xtype=create_type,
                     )
-                    xplan_item.plan_xids = set(str(pid) for pid in item_plan_xids) if item_plan_xids else set()
+                    xplan_item.plan_xids = plan_xids
+                    all_items.append(RelatedObjectItem(code, title, description, xplan_item))
 
-                    related_item = RelatedObjectItem(
-                        o.schluessel,
-                        o.gesetzlicheGrundlage,
-                        o.text,
-                        xplan_item,
-                    )
-
-                    all_items.append(related_item)
-
-            return all_items, {str(o.id) for o in selected_orm_objects}
+            return all_items, selected_ids
 
         self.list_empty_state.set_active(False)
 
@@ -428,30 +474,6 @@ class SelectRelatedWidget(QWidget):
         self.restore_view_selection()
         self.update_selected_count()
         self.list_empty_state.set_active(True)
-
-    def _get_plan_xids(self, orm_object) -> list[str | None] | None:
-        if orm_object is None:
-            return []
-
-        orm_cls = type(orm_object)
-
-        if not issubclass(orm_cls, PlanLinkedMixin):
-            logger.warning(f"{orm_cls.__name__} "f"does not implement PlanLinkedMixin")
-            return []
-
-        session = inspect(orm_object).session
-        if session is None:
-            raise ValueError("Object is not attached to a session.")
-
-        object_id = inspect(orm_object).identity[0]
-
-        try:
-            plan_ids = orm_cls.get_plan_xids(session, object_id)
-            return plan_ids
-
-        except Exception as e:
-            logger.error(f"{orm_cls.__name__} ({object_id}): {e}")
-            return []
 
     def on_filter_current_plan_changed(self, state):
         current_plan_filter_is_checked = self.select_filter_current_plan.isChecked()

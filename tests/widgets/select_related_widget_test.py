@@ -3,7 +3,38 @@ from qgis.PyQt.QtCore import QModelIndex, QItemSelectionModel
 from mock import Mock, patch, MagicMock, AsyncMock
 
 from SAGisXPlanung.XPlan.feature_types import XP_TextAbschnitt
-from SAGisXPlanung.gui.widgets.select_related_widget import SelectRelatedWidget, RelatedObjectModel, RelatedObjectItem
+from SAGisXPlanung.gui.widgets.select_related_widget import (
+    SelectRelatedWidget, RelatedObjectModel, RelatedObjectItem, resolve_display_attributes,
+)
+
+
+class TestResolveDisplayAttributes:
+
+    def test_default_from_class(self):
+        assert resolve_display_attributes(XP_TextAbschnitt) == ('schluessel', 'gesetzlicheGrundlage', 'text')
+
+    def test_explicit_override(self):
+        assert resolve_display_attributes(XP_TextAbschnitt, ('text', 'schluessel', 'gesetzlicheGrundlage')) == \
+            ('text', 'schluessel', 'gesetzlicheGrundlage')
+
+    def test_missing_declaration_raises(self):
+        class _NoMapping:
+            pass
+
+        with pytest.raises(AttributeError):
+            resolve_display_attributes(_NoMapping)
+
+    def test_wrong_arity_raises(self):
+        with pytest.raises(ValueError):
+            resolve_display_attributes(XP_TextAbschnitt, ('schluessel', 'text'))
+
+    def test_unknown_column_raises(self):
+        with pytest.raises(ValueError):
+            resolve_display_attributes(XP_TextAbschnitt, ('schluessel', 'text', 'no_such_column'))
+
+    def test_relationship_rejected(self):
+        with pytest.raises(ValueError):
+            resolve_display_attributes(XP_TextAbschnitt, ('schluessel', 'text', 'xp_bereich'))
 
 
 @pytest.fixture
@@ -94,6 +125,19 @@ class TestSelectRelatedWidget:
         assert widget.tab_widget.count() == 2
         assert widget.tab_widget.tabText(0) == "Neu erstellen"
         assert widget.tab_widget.tabText(1) == "Vorhandene durchsuchen"
+
+    def test_widget_default_display_attributes(self, widget):
+        assert widget.display_attributes == ('schluessel', 'gesetzlicheGrundlage', 'text')
+
+    def test_widget_explicit_display_attributes(self, mock_xplan_item):
+        with patch.object(SelectRelatedWidget, 'load_data', new_callable=AsyncMock), patch('asyncio.create_task'):
+            custom = SelectRelatedWidget(
+                create_type=XP_TextAbschnitt,
+                parent_item=mock_xplan_item,
+                orm_attribute='test_attr',
+                display_attributes=('text', 'schluessel', 'gesetzlicheGrundlage')
+            )
+        assert custom.display_attributes == ('text', 'schluessel', 'gesetzlicheGrundlage')
 
     def test_model_populated(self, widget, sample_items):
         assert widget.model.rowCount() == len(sample_items)

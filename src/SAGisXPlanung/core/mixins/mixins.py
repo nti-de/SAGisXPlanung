@@ -443,12 +443,8 @@ class PlanLinkedMixin:
     """
 
     @classmethod
-    def get_plan_query(cls, object_id):
+    def get_object_ids_for_plan(cls, session, plan_id) -> set[str]:
+        """ Batched reverse lookup: return IDs of objects linked to the given plan. """
         raise NotImplementedError(
-            f"{cls.__name__} must implement get_plan_query(object_id)"
+            f"{cls.__name__} must implement get_object_ids_for_plan(plan_id)"
         )
-
-    @classmethod
-    def get_plan_xids(cls, session, object_id) -> list[str]:
-        stmt = cls.get_plan_query(object_id)
-        return [str(pid) for pid in session.execute(stmt).scalars().unique().all()]
