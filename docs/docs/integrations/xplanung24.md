@@ -10,7 +10,7 @@ title: Integration mit XPlanung24
 
 XPlanung24 ist eine cloudbasierte Plattform zur zentralen Bereitstellung, Verwaltung und Vernetzung von XPlan-Daten für 
 Kommunen, Planungsbüros und weitere Projektbeteiligte. SAGis XPlanung integriert eine direkte Schnittstelle zum 
-Austausch von XPlan-Daten zwischen QGIS und der Webplatform. In dieser Kombination entsteht ein durchgängiger Workflow 
+Austausch von XPlan-Daten zwischen QGIS und der Webplattform. In dieser Kombination entsteht ein durchgängiger Workflow 
 für die digitale Bauleitplanung – von der Erfassung mit SAGis XPlanung bis zur Veröffentlichung und Bereitstellung mit XPlanung24.
 
 [:material-web: Mehr zu XPlanung24](https://xplanung24.de){ .md-button }
@@ -38,7 +38,7 @@ Durch die Integration von SAGis XPlanung und XPlanung24 können Planungsdaten ef
     ---
 
     Direkter Austausch von XPlanGML über die integrierte Schnittstelle. Nahtloser Upload von XPlan-Daten aus dem QGIS
-    in die Cloud-Platform und umgekehrt.
+    in die Cloud-Plattform und umgekehrt.
 
 
 -   :material-account-group-outline:{ .lg .middle }

@@ -6,7 +6,7 @@ title: Update von SAGis XPlanung
 
 !!! warning "Wichtiger Hinweis für Kunden der Vollversion"
     Updates der Vollversion dürfen **nicht** über das offizielle QGIS Plugin Repository installiert werden, da dabei 
-    die bestehende Lizenz durch die Community-Version überschireben wird. Die Installation/Update erfolgt 
+    die bestehende Lizenz durch die Community-Version überschrieben wird. Die Installation/Update erfolgt 
     ausschließlich über eine von NTI bereitgestellte Plugin-Datei.
     Sollten Sie dennoch versehentlich ein Update ausgeführt haben, [kontaktieren](../general/support.md) Sie uns.
 

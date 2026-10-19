@@ -85,7 +85,7 @@ Neue Objekte erscheinen im Anschluss im Objektbaum.
 
 ## Datenobjekte hinzufügen {id="datenobjekte"}
 
-Datenobjekte sind Objektarten, die zusätzliche Sachdaten enthalten. Sie sind besitzen grundsätzliche keinen Raumbezug (Geometrie).
+Datenobjekte sind Objektarten, die zusätzliche Sachdaten enthalten. Sie besitzen grundsätzlich keinen Raumbezug (Geometrie).
 !!! warning 
 
     Ausnahme: Bereiche hinzufügen!

@@ -54,7 +54,7 @@ zusätzlich ein georeferenziertes Rasterbild der Planzeichnung benötigt.
    
 !!! info "Geometrie des Geltungsbereich"
 
-      Die Geomtrie des Geltungsbereichs muss zwingend vom Typ (Multi-) Polygon sein.
+      Die Geometrie des Geltungsbereichs muss zwingend vom Typ (Multi-) Polygon sein.
       Es wird keine Umring-Geometrie (Linie) akzeptiert.
 
 

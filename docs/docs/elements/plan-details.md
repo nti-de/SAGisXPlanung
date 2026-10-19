@@ -74,12 +74,12 @@ Dies betrifft die folgenden Bedingungen:
     **Vorteile**
 
     - Sehr schnelle Ausführung direkt im QGIS/PostGIS
-    - Fehler werden an gleicher Objekten zusammengefasst und dadurch übersichtlicher dargestellt
+    - Fehler werden an gleichen Objekten zusammengefasst und dadurch übersichtlicher dargestellt
     - Gut geeignet für die laufende Bearbeitung eines Plans
 
     !!! warning "Hinweis"
 
-        Die Ergebnisse der internen Methode entstprechen den Vorgaben des Standards XPlanung, dennoch stimmen Ergebnisse 
+        Die Ergebnisse der internen Methode entsprechen den Vorgaben des Standards XPlanung, dennoch stimmen Ergebnisse 
         nicht zwangsläufig mit dem offiziellen Ergebnis des XPlanValidators überein, da ein anderer Prüfalgorithmus verwendet wird.
 
 - **XPlanValidator**
@@ -136,7 +136,7 @@ Dies betrifft die folgenden Bedingungen:
             <td>
                 Die Funktion <b>Flächenschluss erzwingen</b> ermöglicht es, Flächen, die mit keiner Festsetzung 
                 konfiguriert sind, mit einem Objekt des Typ <code>BP_FlaecheOhneFestsetzung</code> oder 
-                <code>FP_FlaecheOhneDarstellung</code>zu füllen. Dies ist hilfreich, um die Flächenschlussbedingung zu 
+                <code>FP_FlaecheOhneDarstellung</code> zu füllen. Dies ist hilfreich, um die Flächenschlussbedingung zu 
                 erfüllen, wenn nicht die komplette Fläche des Geltungsbereichs mit vektoriell erfassten Planinhalten 
                 gefüllt werden kann. 
             </td>
@@ -160,7 +160,7 @@ Dies betrifft die folgenden Bedingungen:
 
 Der Objektbaum spiegelt die baumartige Struktur eines XPlanGML-Dokuments wider.
 Jeder XPlan-Datensatz besteht zunächst aus dem Grundobjekt <code>BP_Plan</code>/<code>FP_Plan</code>/etc. Diesem sind dann weitere Planinhalte
-zugeordnet. Dabei können einzelne Planinhalte wiederum anderen Inhalte zugeordnet sein, wodurch eine die Baumstruktur entsteht.
+zugeordnet. Dabei können einzelne Planinhalte wiederum anderen Inhalte zugeordnet sein, wodurch eine Baumstruktur entsteht.
 
 Über den Objektbaum werden die folgenden Funktionen abgebildet:
 
@@ -225,7 +225,7 @@ _XPlanung-ID_ genutzt werden kann.
 
     1. Objekte zum Löschen im Objektbaum auswählen (++ctrl++ zur Mehrfachauswahl oder gesamten Bereich durch Ziehen 
      der Maus markieren)
-    2. Mit der rechten Masustaste das Kontextmenü aufrufen
+    2. Mit der rechten Maustaste das Kontextmenü aufrufen
     3. Mit **Planinhalt Löschen** werden gewählte Inhalte entfernt.
         <figure markdown="span">
             ![Planinhalt löschen](../assets/delete-plan-content.png)

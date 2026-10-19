@@ -66,7 +66,7 @@ Die Aktionsleiste unterhalb des Suchfelds bietet als Shortcuts den Zugriff auf e
     <tr>
         <th>Planwerk-Aktionen</th>
         <td>
-            Diese Gruppe an Aktionen betrefft die Auswahl in der Tabelle. Zum Wählen eines Eintrags an der entsprechenden
+            Diese Gruppe an Aktionen betrifft die Auswahl in der Tabelle. Zum Wählen eines Eintrags an der entsprechenden
             Stelle in die Tabelle klicken. Nach Auswahl stehen folgende Aktionen zur Verfügung:
             <ul>
                 <li><i>XPlanGML exportieren</i>: Gewählten Plan als XPlanGML-Datei exportieren</li>

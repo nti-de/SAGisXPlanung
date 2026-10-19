@@ -15,7 +15,7 @@ in den [Einstellungen](settings/symbology.md) möglich.
 
 Zur Erweiterung der Darstellungsinformationen realisiert der Standard XPlanung das Konzept der Präsentationsobjekte.
 Diese unterstützen oder ändern die Standard-Darstellung von Planinhalten, haben jedoch selbst keine fachliche Bedeutung.
-Präsentationobjekte können graphische Annotationen, wie textliche Beschriftungen oder zusätzliche Symbole repräsentieren.
+Präsentationsobjekte können graphische Annotationen, wie textliche Beschriftungen oder zusätzliche Symbole repräsentieren.
 
 ### Allgemein
 
@@ -30,7 +30,7 @@ Fachobjekt verknüpft und zeigen Attributwerte dieses Fachobjekts im Plan an
 Bei gebundenen Präsentationsobjekten bestimmt das Attribut <code>&lt;xplan:art&gt;</code> den angezeigten Inhalt. 
 In diesem Feld wird ein XPath-Ausdruck eingetragen, der auf ein oder mehrere Attribute des zugehörigen Fachobjekts referenziert. 
 Der Ausdruck ist relativ zum Fachobjekt und verwendet in der Regel den Namensraum-Präfix <code>&lt;xplan:&gt;</code> vor jedem Elementnamen.
-Praktisch wird also durch die Angabe <code>&lt;xplan:art&gt;xplan:text&lt;/xplan:art&gt;</code> angeben, den Inhalt des Attributs <i>text</i> zu visualisieren.
+Praktisch wird also durch die Angabe <code>&lt;xplan:art&gt;xplan:text&lt;/xplan:art&gt;</code> angegeben, den Inhalt des Attributs <i>text</i> zu visualisieren.
 
 **Beispiel 1**: Darstellung von Einzelattributen 
 
@@ -143,20 +143,20 @@ FP_Plan
       <th>Inhalt/Darstellung</th>
       <td>
          Der Inhalt des Präsentationsobjekts wird über die Konfiguration eines XPath-Ausdrucks definiert. Damit das 
-         Präsentationsobjekt auf der Karte dargestellt werden kann muss mindesteins ein XPath hinterlegt sein.
+         Präsentationsobjekt auf der Karte dargestellt werden kann muss mindestens ein XPath hinterlegt sein.
       </td>
    </tr>
 </table>
 
-### Nutzungschablone
+### Nutzungsschablone
 
-Ein typisches Präsentationsobjekt ist die Nutzungschablone.  Die Tabellenform der Nutzungschablone gibt einen 
+Ein typisches Präsentationsobjekt ist die Nutzungsschablone.  Die Tabellenform der Nutzungsschablone gibt einen 
 einfachen Überblick auf die wichtigsten Festsetzungen einer Baufläche. 
 Die Nutzungsschablone kann für alle Bauflächen innerhalb eines Bebauungsplans angelegt werden 
 (Objektklasse <code>BP_BaugebietsTeilFlaeche</code>). Die angezeigten Daten der Tabelle werden aus den Sachdaten des
 referenzierten XPlan-Fachobjekts verwendet.
 <figure markdown="span">
-    ![Beispiel Nutzungschablone](assets/template-example.png)
+    ![Beispiel Nutzungsschablone](assets/template-example.png)
 </figure>
 
 
@@ -176,7 +176,7 @@ referenzierten XPlan-Fachobjekts verwendet.
             Über den [Objektbaum](elements/plan-details.md#der-objektbaum) die Attribut-Ansicht eines Objekts vom Typ `XP_Nutzungsschablone` aufrufen.
         </li>
     </ul>
-    Im Sachdatendialog besteht die Möglichkeit die Form und Inhalte der Nutzungschablone anzupassen:
+    Im Sachdatendialog besteht die Möglichkeit die Form und Inhalte der Nutzungsschablone anzupassen:
     <table markdown="span">
         <tr>
             <th>Form</th>
@@ -184,14 +184,14 @@ referenzierten XPlan-Fachobjekts verwendet.
         </tr>
         <tr>
             <th>Zellwerte</th>
-            <td>Bestimmt die Inhalte der Nutzungschablone. Jede Auswahlliste bestimmt den Inhalt einer Zelle in der
+            <td>Bestimmt die Inhalte der Nutzungsschablone. Jede Auswahlliste bestimmt den Inhalt einer Zelle in der
                 Tabelle. Es kann aus den folgenden Optionen gewählt werden:
                 <ul>
                     <li><b>Art d. baulichen Nutzung</b> (Punkt 1 PlanZV)</li>
                     <li><b>Anzahl der Vollgeschosse</b> (Punkt 2.7 PlanZV)</li>
                     <li><b>Grundflächenzahl</b> (Punkt 2.5 PlanZV)</li>
                     <li><b>Geschossflächenzahl</b> (Punkt 2.1 PlanZV)</li>
-                    <li><b>Art der Bebbaung</b> (Punkt 3.1.1-3.1.4 PlanZV)</li>
+                    <li><b>Art der Bebauung</b> (Punkt 3.1.1-3.1.4 PlanZV)</li>
                     <li><b>Bauweise</b> (Punkt 3.1-3.3 PlanZV)</li>
                     <li><b>Dachneigung</b>: Angabe aus zugeordnetem Objekt vom Typ <code>BP_Dachgestaltung</code></li>
                     <li><b>Dachform</b>: Angabe aus zugeordnetem Objekt vom Typ <code>BP_Dachgestaltung</code></li>
@@ -203,6 +203,6 @@ referenzierten XPlan-Fachobjekts verwendet.
         </tr>
     </table>
     <figure>
-        <img src="assets/edit-template-dialog.png" alt="Nutzungschablone Kartenwerkzeug"/>
+        <img src="assets/edit-template-dialog.png" alt="Nutzungsschablone Kartenwerkzeug"/>
     </figure>
 </div>

@@ -110,9 +110,9 @@ Auf der Startseite der Einstellungen lassen sich die folgenden allgemeinen Einst
 
 <table markdown="span">
     <tr>
-        <th>Attributdualog durch SAGis XPlanung ersetzen</th>
+        <th>Attributdialog durch SAGis XPlanung ersetzen</th>
         <td markdown="span">Beim Öffnen des Objektformulars, nach Abfrage eines Einzelobjekts auf der Karte, wird statt 
-            dem nativen QGIS-Dialog die Attributansicht vom SAGis XPLanung automatisch geöffnet.
+            dem nativen QGIS-Dialog die Attributansicht vom SAGis XPlanung automatisch geöffnet.
         </td>
     </tr>
 </table>

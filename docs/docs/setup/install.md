@@ -21,7 +21,7 @@ hide:
 <div><span class="full-label">Vollversion</span></div>
 
 1. Erweiterungsmanager aufrufen: **Erweiterungen | Erweiterungen verwalten und installieren…**
-2. Option **Aus ZIP installieren** in der Seitenleiste wählen</step>
+2. Option **Aus ZIP installieren** in der Seitenleiste wählen
 3. Dateipfad zum Archiv der Anwendung auswählen (SAGis.XPlanung_&lt;version&gt;.zip)
 4. **Erweiterung installieren**
     <figure markdown="span">

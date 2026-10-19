@@ -66,7 +66,7 @@ Plannamen, die zugehörige Gemeinde sowie optional Rechtsstand und Anzahl der Pl
 1. Zielplan suchen und in der Liste wählen
 2. Mit **Weiter zur Vorschau** zum nächsten Schritt wechseln
 
-!!! requirements "Vorausetzungen für die erfolgreiche Zusammenzeichnung"
+!!! requirements "Voraussetzungen für die erfolgreiche Zusammenzeichnung"
 
     - Beide Pläne sollten über einen **gültigen Flächenschluss** verfügen, bevor der Plan integriert wird.
 

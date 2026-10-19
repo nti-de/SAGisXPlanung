@@ -6,7 +6,7 @@ Die Anwendung erzeugt dabei XPlanGML-Dateien in der Version 5.3 oder 6.0
 
 1. Planwerk im Dropdown-Menü im untersten Abschnitt des Hauptdialogs auswählen
     ![Plan als XPlanGML exportieren](assets/xplan-export.png)
-2. Ausgabeformat über die Auswahl der zwei Optionsfelder festgelegen:
+2. Ausgabeformat über die Auswahl der zwei Optionsfelder festlegen:
     <table>
         <tr>
             <th>XPlanGML</th>

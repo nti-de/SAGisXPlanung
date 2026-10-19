@@ -1,8 +1,8 @@
 # Codelisten
 
-Die Verwendung von sogennanten Codelisten erlaubt es Informationen im XPlan-Format zu erfassen, die nicht direkt Teil
+Die Verwendung von sogenannten Codelisten erlaubt es Informationen im XPlan-Format zu erfassen, die nicht direkt Teil
 des Standards sind. Ein Codelist-Attribut ähnelt den Schlüsselnummer-Attributen (Enumerationen), mit dem Unterschied, 
-dass die vorgebenen Auswahlwerte in einer externen Codeliste definiert sind. Codelisten werden in der
+dass die vorgegebenen Auswahlwerte in einer externen Codeliste definiert sind. Codelisten werden in der
 GDI-DE Registry verwaltet.
 
 Findet sich kein passender Eintrag in der Codeliste oder sind die vorhandenen Werte für den eigenen Datensatz nicht 
@@ -21,6 +21,6 @@ um passende Werte zu erweitern.
 
 !!! info
 
-    Nach einmaligem Abruf der Codelisten-Einträge werden diese in der XPlan-gespeichert. Falls Änderungen in der
+    Nach einmaligem Abruf der Codelisten-Einträge werden diese in der XPlan-Datenbank gespeichert. Falls Änderungen in der
     Registry veröffentlicht werden, müssen die Daten erneut abgerufen werden um auf entsprechende neue Werte zuzugreifen.
 </div>

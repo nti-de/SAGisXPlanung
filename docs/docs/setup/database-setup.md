@@ -22,7 +22,7 @@ hide:
                     <div class="admonition warning">
                         <p class="admonition-title">Benennung der Datenbank</p>
                         <p> 
-                            PostgresSQL erlaubt Namen, die mit kleinem Buchstaben (a-z) oder einem Unterstrich (_)
+                            PostgreSQL erlaubt Namen, die mit kleinem Buchstaben (a-z) oder einem Unterstrich (_)
                             beginnen. Die nachfolgenden Zeichen dürfen Buchstaben, Ziffern (0-9) oder Unterstriche 
                             enthalten.
                         </p>

@@ -1,7 +1,7 @@
 # Formulare
 
 Im Fenster **Formulare** kann die Anzeige der Attributformulare für alle verfügbaren XPlan-Objektarten angepasst werden.
-Durch Wählen/Abwählen können einzelne Attribute in allen Dialogen, die ein Attributübersicht zeigen, entferent werden.
+Durch Wählen/Abwählen können einzelne Attribute in allen Dialogen, die ein Attributübersicht zeigen, entfernt werden.
 XPlan-Attribute, die als Pflichtattribute gekennzeichnet sind, können nicht ausgeblendet werden.
 
 !!! tip

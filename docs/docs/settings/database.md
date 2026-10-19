@@ -13,7 +13,7 @@ Die Seite für Datenbank-Einstellungen ist in die folgenden zwei Fenster unterte
         </tr>
         <tr>
             <th>Nutzername</th>
-            <td>Name eines PostgreSQL Nutzers mit Zugriff auf die unter <i>PostGIS Verbindung<i> gewählte Datenbank</td>
+            <td>Name eines PostgreSQL Nutzers mit Zugriff auf die unter <i>PostGIS Verbindung</i> gewählte Datenbank</td>
         </tr>
         <tr>
             <th>Passwort</th>
@@ -27,7 +27,7 @@ Die Seite für Datenbank-Einstellungen ist in die folgenden zwei Fenster unterte
 
     ### Verbindungstest
 
-    Mit dem Button *Verbindung testen* wird die Verbindung zur konfigurierten Datenbank geprüft. Bei erflogreicher 
+    Mit dem Button *Verbindung testen* wird die Verbindung zur konfigurierten Datenbank geprüft. Bei erfolgreicher 
     Verbindung wird die Version der installierten XPlan-Datenbank angezeigt. Sollte die Verbindung
     fehlschlagen wird im Dialog stattdessen eine Fehlermeldung angezeigt. 
 

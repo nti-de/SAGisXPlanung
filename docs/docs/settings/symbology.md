@@ -16,14 +16,14 @@ Karte in den Hintergrund rücken.
 
 !!! note
 
-    Viele XPlan-Objektklassen können mit unterschiedlichem Geometetriebezug auftreten (Punkt, Linie oder Polygon).
+    Viele XPlan-Objektklassen können mit unterschiedlichem Geometriebezug auftreten (Punkt, Linie oder Polygon).
     Für entsprechende Klassen existiert ein Eintrag pro Geometrietyp in der Liste der Objektklassen.
 </div>
 
 <div class="procedure" markdown="1">
 <h4>Darstellungsreihenfolge anpassen</h4>
 - Nach Markieren eines Eintrags in der Liste der XPlan-Objektklassen kann der gewählte Eintrag mit den Pfeilsymbolen in
-  der Aktionsleiste nach oben oder unten versschoben werden. Alternativ kann jeder Eintrag auch per drag-and-drop in
+  der Aktionsleiste nach oben oder unten verschoben werden. Alternativ kann jeder Eintrag auch per drag-and-drop in
   der Liste verschoben werden.
 </div>
 

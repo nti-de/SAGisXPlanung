@@ -29,7 +29,7 @@ untergliedert in die folgenden vier Sektionen:
 
 ## Starten der Anwendung
 
-Beim Aufruf der Anwendung startet das SAGis XPlanung in der Anischt des Hauptdialogs.
+Beim Aufruf der Anwendung startet das SAGis XPlanung in der Ansicht des Hauptdialogs.
 
 1. In der **SAGis Menüleiste** auf das SAGis XPlanung-Icon klicken um die Anwendung
         zu starten
