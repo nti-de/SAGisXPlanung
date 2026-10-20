@@ -150,19 +150,18 @@ if DST.exists():
 with rich_task("Copying source tree"):
     shutil.copytree(SRC, DST)
 
-with progress_context() as progress:
-    py_files = list(DST.rglob("*.py"))
-    for py in progress_iter(progress, py_files, "Rewriting Python files"):
-        tree = ast.parse(py.read_text(encoding="utf-8"))
-        tree = PluginRewriter().visit(tree)
-        ast.fix_missing_locations(tree)
-        py.write_text(ast.unparse(tree), encoding="utf-8")
+RELEASE_PATTERN = re.compile(
+    r"(?m)^(\s*RELEASE\s*(?::[^=\n]+)?=\s*)False(\s*(?:#.*)?)$"
+)
 
-metadata = DST / "metadata.txt"
-text = metadata.read_text(encoding="utf-8")
-text = re.sub(r'(?m)^\s*name\s*=.*$', 'name=SAGis XPlanung', text)
-text = re.sub(r'(?m)^\s*icon\s*=.*$', 'icon=gui/resources/sagis_icon.png', text)
-metadata.write_text(text, encoding="utf-8")
+
+def set_release_flag(path: Path) -> bool:
+    text = path.read_text(encoding="utf-8")
+    new_text, count = RELEASE_PATTERN.subn(r"\1True\2", text)
+    if count:
+        path.write_text(new_text, encoding="utf-8")
+    return bool(count)
+
 
 def rewrite_ui_text(path, src, target):
     text = path.read_text(encoding="utf-8")
@@ -171,7 +170,26 @@ def rewrite_ui_text(path, src, target):
     path.write_text(text.replace(src, target), encoding="utf-8")
     return True
 
-with progress_context() as progress:
-    ui_files = list(DST.rglob("*.ui"))
-    for ui in progress_iter(progress, ui_files, "Rewriting UI files"):
-        rewrite_ui_text(ui, SRC_NAME, TARGET_NAME)
+
+if TARGET_NAME == SRC_NAME:
+    set_release_flag(DST / "__init__.py")
+else:
+    with progress_context() as progress:
+        py_files = list(DST.rglob("*.py"))
+        for py in progress_iter(progress, py_files, "Rewriting Python files"):
+            tree = ast.parse(py.read_text(encoding="utf-8"))
+            tree = PluginRewriter().visit(tree)
+            ast.fix_missing_locations(tree)
+            py.write_text(ast.unparse(tree), encoding="utf-8")
+
+metadata = DST / "metadata.txt"
+text = metadata.read_text(encoding="utf-8")
+text = re.sub(r'(?m)^\s*name\s*=.*$', 'name=SAGis XPlanung', text)
+text = re.sub(r'(?m)^\s*icon\s*=.*$', 'icon=gui/resources/sagis_icon.png', text)
+metadata.write_text(text, encoding="utf-8")
+
+if TARGET_NAME != SRC_NAME:
+    with progress_context() as progress:
+        ui_files = list(DST.rglob("*.ui"))
+        for ui in progress_iter(progress, ui_files, "Rewriting UI files"):
+            rewrite_ui_text(ui, SRC_NAME, TARGET_NAME)
