@@ -5,11 +5,11 @@ from qgis.core import QgsMessageLog, Qgis
 
 class QgisLogHandler(logging.Handler):
     LEVEL_MAP = {
-        logging.DEBUG: Qgis.Info,
-        logging.INFO: Qgis.Info,
-        logging.WARNING: Qgis.Warning,
-        logging.ERROR: Qgis.Critical,
-        logging.CRITICAL: Qgis.Critical,
+        logging.DEBUG: Qgis.MessageLevel.Info,
+        logging.INFO: Qgis.MessageLevel.Info,
+        logging.WARNING: Qgis.MessageLevel.Warning,
+        logging.ERROR: Qgis.MessageLevel.Critical,
+        logging.CRITICAL: Qgis.MessageLevel.Critical,
     }
 
     def __init__(self, tag="SAGisXPlanung", level=logging.ERROR):
@@ -19,7 +19,7 @@ class QgisLogHandler(logging.Handler):
     def emit(self, record):
         try:
             msg = self.format(record)
-            qgis_level = self.LEVEL_MAP.get(record.levelno, Qgis.Info)
+            qgis_level = self.LEVEL_MAP.get(record.levelno, Qgis.MessageLevel.Info)
             QgsMessageLog.logMessage(msg, self.tag, qgis_level)
         except Exception:
             self.handleError(record)

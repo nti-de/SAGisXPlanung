@@ -425,7 +425,7 @@ class MapCanvasMixin:
         try:
             form_config.setInitCodeSource(Qgis.AttributeFormPythonInitCodeSource.Dialog)
         except AttributeError:
-            form_config.setInitCodeSource(QgsEditFormConfig.CodeSourceDialog)
+            form_config.setInitCodeSource(QgsEditFormConfig.PythonInitCodeSource.CodeSourceDialog)
         form_config.setInitFunction("on_sagis_xplan_attribute_form_open")
         form_config.setInitCode("from SAGisXPlanung.core.attribute_form import on_sagis_xplan_attribute_form_open")
         layer.setEditFormConfig(form_config)

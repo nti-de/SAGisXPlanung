@@ -200,7 +200,7 @@ class FP_KeineZentrAbwasserBeseitigungFlaeche(PolygonGeometry, FP_Objekt):
         line_layer = QgsSimpleLineSymbolLayer()
         line_layer.setColor(QColor('black'))
         line_layer.setWidth(0.5)
-        line_layer.setOutputUnit(QgsUnitTypes.RenderMapUnits)
+        line_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMapUnits)
 
         if Qgis.versionInt() >= 32400:
             shape = Qgis.MarkerShape.Square

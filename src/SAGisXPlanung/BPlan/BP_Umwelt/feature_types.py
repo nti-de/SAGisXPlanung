@@ -55,7 +55,7 @@ class BP_Immissionsschutz(MixedGeometry, BP_Objekt):
         triangle_symbol_layer = QgsSimpleMarkerSymbolLayer(shape=shape, color=QColor('black'), size=2)
         triangle_symbol_layer.setOutputUnit(QgsUnitTypes.RenderUnit.RenderMetersInMapUnits)
         triangle_symbol_layer.setDataDefinedProperty(
-            QgsSimpleMarkerSymbolLayer.PropertyAngle,
+            QgsSimpleMarkerSymbolLayer.Property.PropertyAngle,
             QgsProperty.fromExpression('if(@geometry_ring_num > 0, 90, 270)')
         )
 
