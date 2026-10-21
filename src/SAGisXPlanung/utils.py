@@ -2,7 +2,7 @@ import asyncio
 import inspect
 import logging
 import os
-import subprocess
+import subprocess  # nosec B404 - used to open the OS file manager with local paths
 import sys
 from typing import Union, Type
 from urllib.parse import urlparse
@@ -541,8 +541,8 @@ def open_directory_explorer(dir_path: str, create_dir=False):
         os.makedirs(dir_path, exist_ok=True)
 
     if sys.platform == "win32":  # win
-        os.startfile(dir_path)
+        os.startfile(dir_path)  # nosec B606 - opens a directory in the file manager, not an arbitrary executable
     elif sys.platform == "darwin":  # mac
-        subprocess.Popen(["open", dir_path])
+        subprocess.Popen(["open", dir_path])  # nosec B603 B607 - fixed OS command, no shell
     else:  # linux
-        subprocess.Popen(["xdg-open", dir_path])
+        subprocess.Popen(["xdg-open", dir_path])  # nosec B603 B607 - fixed OS command, no shell

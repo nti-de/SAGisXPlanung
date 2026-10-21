@@ -159,7 +159,7 @@ class XP_Rechtscharakter_EnumType(types.TypeDecorator):
                 try:
                     char = cls[value]
                     return char.to_xp_rechtscharakter()
-                except Exception as e:
+                except Exception as e:  # nosec B110 - value may not be a member of this enum
                     pass
         return value
 
@@ -183,7 +183,7 @@ class XP_Rechtscharakter_EnumType(types.TypeDecorator):
                 try:
                     char = cls[value.name]
                     return char
-                except Exception as e:
+                except Exception as e:  # nosec B110 - value may not be a member of this enum
                     pass
 
         return value

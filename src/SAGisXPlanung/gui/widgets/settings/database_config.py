@@ -225,12 +225,12 @@ class DatabaseConfigPage(SettingsPage):
         )
 
         async with engine.begin() as conn:
-            await conn.execute(text(f"""
+            await conn.execute(text("""
                 SELECT pg_terminate_backend(pid)
                 FROM pg_stat_activity
-                WHERE datname = '{db}'
+                WHERE datname = :db
                 AND pid <> pg_backend_pid()
-            """))
+            """), {"db": db})
 
             await conn.execute(text(f'DROP DATABASE IF EXISTS "{db}"'))
 

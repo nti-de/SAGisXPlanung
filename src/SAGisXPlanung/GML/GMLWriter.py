@@ -192,7 +192,7 @@ class GMLWriter:
         """ Fügt einem XML-Knoten je nach Datentyp die passende XPlanGML-Einheit als Attribut hinzu"""
         try:
             node.attrib['uom'] = getattr(obj.__class__, attr).property.columns[0].type.UOM
-        except:
+        except Exception:  # nosec B110 - optional uom attribute is omitted when unavailable
             pass
 
     @staticmethod

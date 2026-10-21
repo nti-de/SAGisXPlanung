@@ -41,7 +41,7 @@ class MapLayerRegistry(QtCore.QObject, metaclass=Singleton):
     def unload(self):
         try:
             QgsProject.instance().layerStore().layerWillBeRemoved.disconnect(self.removeLayer)
-        except Exception:
+        except Exception:  # nosec B110 - disconnect may fail if signal was not connected
             pass
 
     @property

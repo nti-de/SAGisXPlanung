@@ -399,7 +399,7 @@ CREATE TABLE xp_externe_referenz (
     CONSTRAINT fk_xp_externe_referenz_bereich_id_xp_bereich FOREIGN KEY(bereich_id) REFERENCES xp_bereich (id) ON DELETE CASCADE
 );
 
-INSERT INTO alembic_version (version_num) VALUES ('cfbf4d3b2a9d') RETURNING alembic_version.version_num;
+INSERT INTO alembic_version (version_num) VALUES ('cfbf4d3b2a9d') RETURNING alembic_version.version_num; --- # pragma: allowlist secret;
 
 -- Running upgrade cfbf4d3b2a9d -> 20c50b38b0af
 

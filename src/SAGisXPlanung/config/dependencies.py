@@ -1,5 +1,7 @@
 import re
 import importlib
+import subprocess  # nosec B404 - used only to install declared packages via the QGIS Python interpreter
+import sys
 from importlib.metadata import version
 
 from qgis.core import Qgis
@@ -48,8 +50,7 @@ def check(required_packages):
     log = []
     for package in missing_packages:
         try:
-            import subprocess
-            ret = subprocess.call(['python3', '-m', 'pip', 'install', package, '--force-reinstall'])
+            ret = subprocess.call([sys.executable, '-m', 'pip', 'install', package, '--force-reinstall'])  # nosec B603 - arguments are a fixed list, no shell
             if ret == 0:
                 log.append(f'{package} ... installiert')
             else:
